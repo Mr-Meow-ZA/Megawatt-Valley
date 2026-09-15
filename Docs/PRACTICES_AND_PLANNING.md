@@ -298,3 +298,17 @@ Rapha / ChatGPT should explicitly accept or amend:
 5. Pitch tone: Two Point–style management humour in renewables vs serious tycoon with light humour (open from issue #2).
 
 Until then, Cursor continues: **no major art pass; no Phase 10 balloon; GitHub SoT; one session goal at a time.**
+
+---
+
+## 10. Cursor + Blender + Krita (summary)
+
+Full research: `Docs/CURSOR_BLENDER_KRITA.md`.
+
+| Tool | Cursor’s best role | When |
+| --- | --- | --- |
+| **Blender** | MCP or headless Python for blockout, naming, scale checks, FBX export; Unity camera QA remains the gate | After playtest; toward V0/V1 hero corner |
+| **Krita** | Write export plugins + layer templates first; optional typed MCP for doc/layer/export chores | When textures/decals start — not for unsupervised final illustration |
+| **Neither** | Do not block S6 on DCC tooling; cloud agents cannot drive home-PC Blender/Krita | Now |
+
+**Default recommendation:** scripts + checklists first; Blender MCP for interactive blockout when hero corner begins; Krita MCP only if export friction justifies it. Prefer FBX into URP; log licences; stage exports before Unity `Assets/`.

@@ -38,6 +38,35 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — Support — Cursor + Blender + Krita research
+
+**Agent:** Cursor
+**Status:** Recommendation
+
+**Changed / Produced**
+- Added `Docs/CURSOR_BLENDER_KRITA.md` — MCP vs scripts, Unity handoff checklists, Krita plugin-first vs typed MCP, security/scope guards, future A0 session ideas.
+- Linked from PRACTICES §10, VISUAL_DIRECTION production note, COLLABORATION_GUIDE shared docs.
+
+**Tested / Verified**
+- Research against current Blender MCP community stacks, Krita LibKis scripting, dcc-mcp-krita / PaintBridge-style bridges, Unity FBX/GLB handoff practice.
+- No DCC software installed or Unity art imported this session.
+
+**Known issues / limitations**
+- Cloud agents cannot drive home-PC Blender/Krita; recommendations are for local Cursor on the art/playtest machine.
+- MCP packages evolve quickly — pin versions and re-verify before first hero-corner session.
+
+**Decisions / assumptions / recommendations**
+- Defer Blender/Krita MCP until after grey-box playtest acceptance; scripts + export checklists are enough until then.
+- Prefer Blender MCP for interactive blockout/export; Krita scripts-first; typed Krita MCP if automation grows.
+- FBX default into URP; stage exports before `Assets/`.
+
+**Next recommended step**
+- Rapha playtest; later accept/amend CURSOR_BLENDER_KRITA §7 when art tooling starts.
+
+**Git / References**
+- Commit: pending
+- Branch / PR / Issue: `cursor/plan-research-enrichment-5b47` / #3
+
 ## 2026-09-15 — Support — Plan enrichment research (Cursor + Unity + agents + assets)
 
 **Agent:** Cursor
