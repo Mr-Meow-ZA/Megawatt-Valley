@@ -17,6 +17,9 @@ Before making significant changes, read:
 - `Docs/SESSION_GOALS.md`
 - `Docs/LEVEL_01_DESIGN.md`
 - `Docs/DEVELOPMENT_WORKFLOW.md`
+- `Docs/COLLABORATION_GUIDE.md`
+- `Docs/CURRENT_STATUS.md`
+- `Docs/CHATGPT_REVIEW.md`
 
 ## Core development rule
 
@@ -32,12 +35,38 @@ Megawatt Valley is developed in small, finishable sessions.
 - Prefer a visible, playable, testable result over invisible infrastructure where practical.
 - Once the primary session goal works, stop and report it before beginning unrelated stretch work.
 - A session goal is successful even when the larger roadmap phase remains incomplete.
-- When a tracked goal is genuinely complete, identify that it can be marked `[x]` and committed.
+- When a tracked goal is genuinely complete, mark it `[x]` and commit the change.
 - If a requested task is clearly too large for one focused session, split it into smaller finishable outcomes before implementation.
 
 The preferred rhythm is:
 
-**choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**
+**choose one small goal → build it → play/test it → commit it → log it → celebrate it → choose the next goal**
+
+## Mandatory GitHub handoff after meaningful sessions
+
+GitHub is the shared handoff layer between Cursor and ChatGPT.
+
+After meaningful implementation work, follow `Docs/COLLABORATION_GUIDE.md` and leave enough context that ChatGPT can reconstruct the session without having watched it.
+
+At minimum:
+
+1. Commit the work with a clear focused commit message.
+2. Append a concise entry to `Docs/ACTIVITY_LOG.md`.
+3. Update `Docs/SESSION_GOALS.md` if the active goal was completed.
+4. Update `Docs/CURRENT_STATUS.md` if phase, next goal, blocker, or locked decision changed.
+5. Update or explicitly flag any authoritative design / architecture document that no longer matches implementation.
+6. Read `Docs/CHATGPT_REVIEW.md` before the next meaningful session if it changed since the previous session.
+
+Do not skip the activity-log handoff because the code is self-explanatory. The log exists for cross-agent alignment.
+
+The activity log should stay concise and should include:
+
+- what changed;
+- what was tested;
+- known issues / limitations;
+- assumptions or decisions;
+- next recommended step;
+- relevant commit / branch / PR.
 
 ## Product boundaries
 
@@ -95,6 +124,7 @@ Important rules:
 - If a core architecture decision changes, update `Docs/TECHNICAL_ARCHITECTURE.md` or explicitly flag the proposed change for review.
 - If the behaviour of Level 1 changes materially, update `Docs/LEVEL_01_DESIGN.md` or flag it for review.
 - If an implementation choice materially changes the approved art / presentation direction, update or flag `Docs/VISUAL_DIRECTION.md` for review.
+- Follow escalation triggers in `Docs/COLLABORATION_GUIDE.md` when a change has long-term product or architecture consequences.
 
 ## Definition of done for implementation tasks
 
@@ -106,7 +136,8 @@ Unless the task says otherwise, a feature is not done until:
 - the feature can be exercised in the relevant test scene;
 - no unrelated feature was expanded;
 - key assumptions are reported;
-- any required documentation change is identified.
+- any required documentation change is identified;
+- the GitHub handoff has been completed for a meaningful session.
 
 ## Development philosophy
 
