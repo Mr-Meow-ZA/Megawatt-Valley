@@ -14,12 +14,30 @@ Before making significant changes, read:
 - `Docs/VISUAL_DIRECTION.md`
 - `Docs/TECHNICAL_ARCHITECTURE.md`
 - `Docs/ROADMAP.md`
+- `Docs/SESSION_GOALS.md`
 - `Docs/LEVEL_01_DESIGN.md`
 - `Docs/DEVELOPMENT_WORKFLOW.md`
 
 ## Core development rule
 
 **Build the smallest playable version of the current requirement. Do not build speculative frameworks for future systems.**
+
+## Session-goal discipline
+
+Megawatt Valley is developed in small, finishable sessions.
+
+- `Docs/SESSION_GOALS.md` is the active small-goal tracker.
+- Unless the user explicitly asks otherwise, work on **one primary session goal at a time**.
+- Do not silently expand a session goal into an entire subsystem.
+- Prefer a visible, playable, testable result over invisible infrastructure where practical.
+- Once the primary session goal works, stop and report it before beginning unrelated stretch work.
+- A session goal is successful even when the larger roadmap phase remains incomplete.
+- When a tracked goal is genuinely complete, identify that it can be marked `[x]` and committed.
+- If a requested task is clearly too large for one focused session, split it into smaller finishable outcomes before implementation.
+
+The preferred rhythm is:
+
+**choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**
 
 ## Product boundaries
 
