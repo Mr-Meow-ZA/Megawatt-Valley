@@ -81,3 +81,14 @@ GitHub is the shared source of truth between these roles.
 Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play. Next: Rapha playtest + ChatGPT review before art polish.
 
 See the `Docs/` folder for the current planning documents.
+
+## Playtest controls (grey-box)
+
+Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play.
+
+- **WASD / arrows** pan · **scroll** zoom · **Q/E or RMB drag** rotate · **Shift** fast pan
+- **Click plot** to select · **B** or **Build: Solar Array** button · **R** rotate ghost · **LMB** place · **Esc/RMB** cancel · **X** demolish
+- **F** repair selected faulted array · **M** preventive maintenance · **K** force fault (debug)
+- **Space** pause · **1/2/3** sim speed · Event choices **8/9** when shown
+- Objective: reach **0.50 MW** for Tiny Tycoon win
+
