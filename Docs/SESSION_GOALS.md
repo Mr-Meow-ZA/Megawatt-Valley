@@ -210,6 +210,66 @@ When S5-01 through S5-05 are complete: **⭐ Tiny Tycoon**
 
 ---
 
+## After Tiny Tycoon — "Harden the slice, then Level 1"
+
+These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes review. Prefer this order over a major art pass or Phase 10 balloon. Detail and rationale: `Docs/PRACTICES_AND_PLANNING.md`.
+
+### S6 — Harden & handoff
+
+- [ ] **S6-01 — Rapha playtest acceptance**  
+  Play `Prototype_Valley` on the home PC; capture fun / confusing / broken notes.  
+  **Victory moment:** the grey-box loop is accepted, rejected, or given a short fix list.
+
+- [ ] **S6-02 — ChatGPT overnight-slice review**  
+  Refresh `Docs/CHATGPT_REVIEW.md` against HEAD / ACTIVITY_LOG; nominate the next single goal.  
+  **Victory moment:** review docs match reality again.
+
+- [ ] **S6-03 — UI Toolkit HUD v1**  
+  Replace OnGUI cash / MW / speed / build affordances with a minimal UI Toolkit HUD.  
+  **Victory moment:** the management bar looks intentional without changing sim rules.
+
+- [ ] **S6-04 — First ScriptableObject content pack**  
+  Move solar definition, one event, and the MW objective into ScriptableObject (or equivalent data) assets.  
+  **Victory moment:** balance values change without rewriting gameplay code.
+
+- [ ] **S6-05 — EditMode tests for generation + revenue**  
+  Add a small test assembly covering core MW and cash math.  
+  **Victory moment:** Cursor can catch economy regressions without Play Mode.
+
+- [ ] **S6-06 — Save / load stub**  
+  Persist cash, placed buildings, and objective progress for one prototype session.  
+  **Victory moment:** quit and resume the miniature scenario.
+
+### L1 — Here Comes the Sun (thin slice)
+
+- [ ] **L1-01 — Scenario map blockout**  
+  One grey-box valley map with office presence and a coherent buildable area.  
+  **Victory moment:** it feels like a level, not a sandbox pad.
+
+- [ ] **L1-02 — Tunable start economy**  
+  Starting cash + tariff (and related knobs) driven from data.  
+  **Victory moment:** ChatGPT / Rapha can propose numbers Cursor can drop in.
+
+- [ ] **L1-03 — Bargain vs premium equipment**  
+  Two solar procurement options with different cost / yield / risk.  
+  **Victory moment:** buying gear is a meaningful choice.
+
+- [ ] **L1-04 — Five decision events**  
+  Data-driven events reusing the S5 choice pattern.  
+  **Victory moment:** personality without a novel-length deck.
+
+- [ ] **L1-05 — One-star scenario clear**  
+  Single primary objective with clear success / fail / restart.  
+  **Victory moment:** Level 1 is completable at 1★.
+
+- [ ] **L1-06 — Climax beat**  
+  One scripted late-scenario pressure event.  
+  **Victory moment:** the ending is memorable.
+
+Stretch after L1-05 is fun: second/third site modifiers, 2★/3★, larger event deck.
+
+---
+
 # Major Celebration Markers
 
 These are deliberately spaced between the larger roadmap phases.

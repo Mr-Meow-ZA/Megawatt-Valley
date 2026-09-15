@@ -38,6 +38,37 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — Support — Plan enrichment research (Cursor + Unity + agents + assets)
+
+**Agent:** Cursor
+**Status:** Complete (recommendations; awaiting Rapha/ChatGPT acceptance)
+
+**Changed / Produced**
+- Added `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity loop, optional Unity MCP rules, hybrid asset policy, ChatGPT/Grok high-leverage patterns, Unity tips, playtest checklist, open decisions.
+- ROADMAP v0.4: phase↔session crosswalk; Level 1 thin-slice build order.
+- SESSION_GOALS: proposed S6 harden track + L1-01…L1-06 thin slice.
+- COLLABORATION_GUIDE / DEVELOPMENT_WORKFLOW / TECHNICAL_ARCHITECTURE / LEVEL_01_DESIGN / CURRENT_STATUS updated to reference practices and next goals.
+
+**Tested / Verified**
+- Doc consistency pass against ACTIVITY_LOG (S0–S5 complete) and GitHub issue #2 proposals.
+- No Unity code changes this session.
+
+**Known issues / limitations**
+- `CHATGPT_REVIEW.md` remains stale (still pre-Unity / S0-01) — owned by ChatGPT refresh (`S6-02`).
+- Asset policy / S6 order / L1 IDs / MCP enablement / pitch tone still need Rapha or ChatGPT acceptance.
+
+**Decisions / assumptions / recommendations**
+- Hybrid assets (grey-box → curated kits for experiments → custom after hero corner).
+- Do not buy tycoon/RTS system templates; do not treat Unity Cloud as remote Play Mode.
+- Extend existing S3 economy/energy loop rather than restarting ROADMAP Phase 3/4 frameworks.
+
+**Next recommended step**
+- Rapha playtest (`S6-01`), then ChatGPT review + accept/amend S6/L1 proposals.
+
+**Git / References**
+- Commit: pending on branch `cursor/plan-research-enrichment-5b47`
+- Branch / PR / Issue: relates to #2
+
 ## 2026-09-15 — Overnight — Living plant + Tiny Tycoon (S4-01 → S5-05)
 
 **Agent:** Cursor

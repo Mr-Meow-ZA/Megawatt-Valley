@@ -147,6 +147,7 @@ Cursor, ChatGPT and Grok Bot should treat these as the core shared context:
 - `Docs/CHATGPT_REVIEW.md`
 - `Docs/DEVELOPMENT_WORKFLOW.md`
 - `Docs/COLLABORATION_GUIDE.md`
+- `Docs/PRACTICES_AND_PLANNING.md` (research / recommendations until accepted)
 
 ### Before Cursor begins meaningful implementation
 
@@ -569,7 +570,37 @@ The objective is not process for its own sake. The objective is that no matter w
 
 ---
 
-# 15. Local Cursor sync automation
+# 15. High-leverage assist patterns
+
+Concrete task patterns (asset policy, Unity MCP, S6/L1 sequencing) live in `Docs/PRACTICES_AND_PLANNING.md`. Summary:
+
+### ChatGPT — best asks
+
+- Refresh `CHATGPT_REVIEW.md` after meaningful Cursor commits.
+- Write the **next one** session goal with purpose / acceptance / out-of-scope.
+- Propose balance tables and Level 1 thin-slice content.
+- Scope-control reviews (“is this Phase 10 ballooning?”).
+- Pitch card / tone checks against Two Point accessibility + renewable humour.
+
+### Grok Bot — best asks
+
+- Weekday doc-drift and issue watch (as in GitHub issue #2).
+- Industry research distilled to flavour / tooltips, not mandatory systems.
+- Playtest QA checklists and edge cases.
+- Alternative event / humour / vendor ideation with trade-offs.
+- Second-opinion critiques on ChatGPT proposals before Cursor builds.
+
+### Cursor — best Unity pairing habits
+
+- One session goal; Editor bootstrap scripts when scene YAML is hostile.
+- Optional Unity MCP for console / hierarchy verification once AI beta access exists — never a hard dependency.
+- Prefer ScriptableObjects + EditMode tests over new frameworks.
+- Hybrid assets: grey-box first; commercial-safe kits only for experiments; custom identity after hero corner.
+- Home PC remains the playtest machine; Unity Cloud link ≠ remote Play Mode.
+
+---
+
+# 16. Local Cursor sync automation
 
 Cursor sessions in this repository run project hooks so GitHub and Rapha's Polaris vault stay aligned without depending on chat memory.
 

@@ -13,14 +13,25 @@ Planned baseline:
 - C#
 - GameObject / MonoBehaviour-based implementation initially
 - ScriptableObjects for configurable game definitions where appropriate
-- UI Toolkit for management UI (built-in `modules.uielements` + `com.unity.ugui`)
+- UI Toolkit for management UI (built-in `modules.uielements` + `com.unity.ugui`) — OnGUI is acceptable only as a temporary prototype HUD
 - Cinemachine **6.6.0** (Unity 6.6 builtin) for tycoon camera behaviour
 - Unity Input System **1.20.0** (project Active Input Handling = Input System Package)
 - ProBuilder **6.1.2** for grey-box / level-blockout modelling
 - NavMesh for staff movement where appropriate
 - Git + GitHub + Git LFS
 - Cursor as the primary implementation assistant / IDE
-- Unity MCP integration may be used if stable and useful, but the project must not depend on it to function
+- Unity MCP integration may be used if stable and useful (Unity 6 AI open beta; project already Cloud-linked), but the project must not depend on it to function
+- EditMode tests (Unity Test Framework) for generation / revenue / degradation math once S6-05 is active
+- Optional small runtime assembly definition when introducing those tests — not a full Clean Architecture / DI stack
+
+## Asset pipeline stance
+
+Hybrid (see `Docs/PRACTICES_AND_PLANNING.md` §4 until formally locked):
+
+- grey-box / ProBuilder first;
+- commercial-safe free or paid kits only for readability / hero experiments, logged and replaceable;
+- custom modular kits after V1 hero corner;
+- no proprietary reference-game art; no competing tycoon/RTS system templates.
 
 ## Architectural principles
 

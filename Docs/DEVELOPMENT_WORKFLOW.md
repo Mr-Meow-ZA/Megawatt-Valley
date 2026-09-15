@@ -1,4 +1,4 @@
-# Megawatt Valley — Development Workflow v0.2
+# Megawatt Valley — Development Workflow v0.3
 
 ## Purpose
 
@@ -6,7 +6,7 @@ This project is intentionally being developed with a collaborative AI-assisted w
 
 The goal is not to let one tool generate the entire game autonomously. The goal is to combine clear human direction, fast implementation, continuous review, and documented decisions.
 
-The detailed cross-agent handoff protocol is defined in `Docs/COLLABORATION_GUIDE.md`.
+The detailed cross-agent handoff protocol is defined in `Docs/COLLABORATION_GUIDE.md`. Research-backed practices (Cursor↔Unity, assets, agent assist patterns, S6/L1 sequencing) live in `Docs/PRACTICES_AND_PLANNING.md`.
 
 ## Roles
 
@@ -88,9 +88,24 @@ Key documents include:
 - `Docs/ACTIVITY_LOG.md`
 - `Docs/CHATGPT_REVIEW.md`
 - `Docs/COLLABORATION_GUIDE.md`
+- `Docs/PRACTICES_AND_PLANNING.md`
 - this workflow document
 
 These documents are living documents and should evolve with the project.
+
+## Cursor ↔ Unity working loop
+
+Default (no MCP required):
+
+1. Cursor implements one session goal in C# / data / Editor tooling.
+2. Prefer Editor menu / bootstrap scripts when `.unity` YAML is a poor fit for agents.
+3. Compile and fix console errors (batchmode or Rapha’s Editor on the home PC).
+4. Rapha playtests on the home PC — Unity Cloud project linking does not replace local Play Mode.
+5. Cursor commits, updates ACTIVITY_LOG / SESSION_GOALS / CURRENT_STATUS as needed, and pushes.
+
+Optional Unity MCP (Unity 6 AI open beta): once AI Assistant + beta access are available on the PC, Cursor may use MCP to read console / hierarchy and verify fixes. MCP is an accelerator, not a dependency. Start read-only; use write tools only on a feature branch with Rapha reviewing Play Mode.
+
+Do **not** adopt DI containers, global event-bus packages, or full tycoon/RTS templates unless Rapha explicitly accepts an architecture change in `TECHNICAL_ARCHITECTURE.md`.
 
 ## Recommended feature workflow
 
@@ -178,7 +193,7 @@ If meaningful changes occurred, ChatGPT should summarize the changes, identify a
 
 This does not replace immediate review after important milestones.
 
-Cursor also runs local session hooks (see `Docs/COLLABORATION_GUIDE.md` §11) to fetch GitHub at session start, remind the agent to commit/push/log if work is still unhanded-off, and stamp the Polaris project note. Hooks never auto-commit.
+Cursor also runs local session hooks (see `Docs/COLLABORATION_GUIDE.md` §16) to fetch GitHub at session start, remind the agent to commit/push/log if work is still unhanded-off, and stamp the Polaris project note. Hooks never auto-commit.
 
 ## Branch and review strategy
 

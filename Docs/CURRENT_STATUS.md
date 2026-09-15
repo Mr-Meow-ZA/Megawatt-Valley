@@ -34,15 +34,18 @@ Badges earned: Foundation Online, Valley Explorer, First Foundations, First Mega
 - The normal work rhythm is: **choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**.
 - Cross-agent handoff lives in `Docs/COLLABORATION_GUIDE.md`. Cursor records meaningful sessions in `Docs/ACTIVITY_LOG.md` and keeps GitHub plus the Polaris project note current via local session hooks.
 
-## Session-sized progress strategy
+## Current Session-sized progress strategy
 
 The project should never depend only on distant phase completion for a sense of progress.
 
 Current first goals:
 
-1. Rapha playtest / accept the grey-box miniature slice
-2. ChatGPT review of overnight commits vs vision / architecture
-3. Next build track after review (likely UI Toolkit HUD replacement, save data, or Level 1 content)
+1. **Rapha playtest / accept** the grey-box miniature slice (`S6-01`)
+2. **ChatGPT review** of overnight commits vs vision / architecture (`S6-02`) — `CHATGPT_REVIEW.md` is currently stale vs ACTIVITY_LOG
+3. Then harden: UI Toolkit HUD → ScriptableObject content → EditMode tests → save stub (`S6-03…S6-06`)
+4. Then Level 1 thin-slice (`L1-01…`) — not a major art pass
+
+Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
 ## Visual quality strategy
 
@@ -77,9 +80,9 @@ The planned sequence is:
 
 ## Next action
 
-**Rapha playtest** `Prototype_Valley` in the Unity Editor.
+**Rapha playtest** `Prototype_Valley` in the Unity Editor (home PC).
 
-Then ask ChatGPT to review the overnight vertical slice against `GAME_VISION`, `LEVEL_01_DESIGN`, and `TECHNICAL_ARCHITECTURE`.
+Then ask ChatGPT to refresh `CHATGPT_REVIEW.md` and ratify or amend the proposed **S6 / L1** session track in `SESSION_GOALS.md` and `PRACTICES_AND_PLANNING.md`.
 
 Do not start a major art pass until the grey-box loop feels fun.
 
