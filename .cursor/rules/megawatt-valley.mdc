@@ -1,0 +1,79 @@
+---
+description: Core engineering and project rules for Megawatt Valley
+alwaysApply: true
+---
+
+# Megawatt Valley — Cursor Project Rules
+
+You are working on **Megawatt Valley**, a Unity renewable-energy management / tycoon game.
+
+Before making significant changes, read:
+
+- `README.md`
+- `Docs/GAME_VISION.md`
+- `Docs/TECHNICAL_ARCHITECTURE.md`
+- `Docs/ROADMAP.md`
+- `Docs/LEVEL_01_DESIGN.md`
+- `Docs/DEVELOPMENT_WORKFLOW.md`
+
+## Core development rule
+
+**Build the smallest playable version of the current requirement. Do not build speculative frameworks for future systems.**
+
+## Product boundaries
+
+- This is a character-driven renewable-energy tycoon / management game.
+- The strongest design reference is the Two Point series for accessibility, humour, readable management, character-driven systems, and campaign progression.
+- References are inspiration only. Do not copy proprietary art, text, character designs, UI, names, assets, or code.
+- The first major gameplay target is a **solar-only vertical slice**.
+- Do not introduce wind, BESS, advanced corporate finance, multiplayer, procedural world systems, or other deferred features unless the active task explicitly requests them.
+
+## Architecture rules
+
+1. Prefer clear, conventional Unity / C# solutions over clever architecture.
+2. Use GameObjects / MonoBehaviours initially unless there is a demonstrated need for something else.
+3. Do **not** introduce DOTS / ECS unless profiling and an explicit architecture decision justify it.
+4. Keep simulation logic separate from visual presentation where practical.
+5. Prefer data-driven definitions for content such as equipment, events, staff roles, traits, research, scenarios, and objectives.
+6. ScriptableObjects are encouraged where they fit, but do not force every data type into ScriptableObjects.
+7. Avoid giant manager classes with unrelated responsibilities.
+8. Do not add third-party frameworks, dependency-injection systems, service locators, global event buses, or major packages without an explicit project need.
+9. Important calculations should be testable independently of scene presentation where practical.
+10. Do not hard-code configurable balancing values throughout gameplay code.
+
+## Unity rules
+
+- Keep the Unity project compiling after each coherent task.
+- Check for console errors after implementation when tooling allows it.
+- Preserve Unity `.meta` files.
+- Do not commit Unity-generated folders such as `Library`, `Temp`, `Logs`, `obj`, or build outputs.
+- Do not rename or move large groups of assets without a reason tied to the task.
+- Prefer prefabs and reusable components for repeated scene content.
+- Avoid expensive per-frame work when a tick, event, cached value, or lower-frequency update would work.
+
+## Change discipline
+
+- Keep each task focused.
+- Do not make unrelated refactors while implementing a feature.
+- Do not silently change game-design decisions.
+- If a requirement is ambiguous and the choice would materially affect gameplay or architecture, flag the assumption.
+- If a core architecture decision changes, update `Docs/TECHNICAL_ARCHITECTURE.md` or explicitly flag the proposed change for review.
+- If the behaviour of Level 1 changes materially, update `Docs/LEVEL_01_DESIGN.md` or flag it for review.
+
+## Definition of done for implementation tasks
+
+Unless the task says otherwise, a feature is not done until:
+
+- the project compiles;
+- the requested player-facing behaviour exists;
+- obvious error states are handled;
+- the feature can be exercised in the relevant test scene;
+- no unrelated feature was expanded;
+- key assumptions are reported;
+- any required documentation change is identified.
+
+## Development philosophy
+
+**Build small → playtest → review → refine → expand.**
+
+A simple working feature that can be tested is more valuable than a large speculative framework.
