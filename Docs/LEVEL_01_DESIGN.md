@@ -37,6 +37,19 @@ The level should communicate:
 
 The player is not yet a giant energy company. They are trying to prove they can successfully deliver and operate their first meaningful solar project.
 
+## Thin-slice build order
+
+Level 1’s full destination (three sites, star tiers, climax, larger event deck) remains valid. **Implementation order** should follow the thin-slice track in `Docs/SESSION_GOALS.md` (`L1-01…L1-06`) and `Docs/PRACTICES_AND_PLANNING.md`:
+
+1. one scenario map + office;
+2. tunable start economy;
+3. two equipment options;
+4. five events;
+5. one-star clear;
+6. one climax beat;
+
+then stretch into multi-site choice and 2★/3★.
+
 ## Candidate sites
 
 The player should eventually choose between approximately three candidate sites.

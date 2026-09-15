@@ -1,4 +1,4 @@
-# Megawatt Valley — Development Roadmap v0.3
+# Megawatt Valley — Development Roadmap v0.4
 
 ## Roadmap philosophy
 
@@ -29,6 +29,28 @@ Progress rhythm:
 **choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**
 
 Do not let a small session goal silently expand into an entire subsystem. Optional stretch work comes after the primary goal is complete.
+
+### Phase ↔ session-goal crosswalk
+
+Session badges prove a *miniature* version of a phase. They do **not** automatically close the full roadmap phase.
+
+| ROADMAP phase | First miniature proof | Still open after miniature |
+| --- | --- | --- |
+| 0 Foundation | S0-01…S0-05 ✅ | Package / tooling polish as needed |
+| 1 World & Camera | S1-01…S1-05 ✅ | Edge scroll, camera presets, bounds polish |
+| 2 Building Placement | S2-01…S2-08 ✅ | Snapping rules, multi-tile footprints, construction staging |
+| 3 Energy Loop | S3-02…S3-03 (partial) ✅ | Irradiance curves, conversion topology, stats |
+| 4 Economy | S3-01…S3-04 (partial) ✅ | OpEx, salaries, bankruptcy boundary, deeper finance |
+| 5 Time & Weather | S3-05 + day-factor stub | Full clock, weather variation, visual weather |
+| 6 Maintenance | S4-01…S4-05 ✅ | Richer reliability, schedules, costs |
+| 7 Staff | S4-04 + S5-02 ✅ | Hire/fire, multi-role, salary, traits depth |
+| 8 Events | S5-01 ✅ | Reusable framework + ~5 then ~10–20 events |
+| 9 Objectives | S5-04…S5-05 ✅ | Star tiers, unlocks, research |
+| 10 Level 1 | Not started | Thin-slice track `L1-01…` in `SESSION_GOALS.md` |
+
+**Anti-duplication rule:** Do not restart Phase 3/4 as a new framework after S3. Extend the existing loop with the next smallest session goal instead.
+
+Practical Cursor / ChatGPT / Grok working practices, asset policy, and post–Tiny Tycoon sequencing live in `Docs/PRACTICES_AND_PLANNING.md` until accepted into this roadmap.
 
 ### Cross-cutting visual checkpoints
 
@@ -281,9 +303,22 @@ Working level title:
 
 **Level 1 — Here Comes the Sun**
 
-Expected ingredients:
+### Build order (thin slice first)
+
+Do **not** attempt the full Level 1 ingredient list in one pass. Use the `L1-01…` session track in `Docs/SESSION_GOALS.md`:
+
+1. One grey-box scenario map + office presence.
+2. Tunable starting cash / tariff data.
+3. Two equipment choices.
+4. Five decision events (not 10–20).
+5. One-star objective + restart clarity.
+6. One scripted climax beat.
+
+Only then stretch into multi-site choice, 2★/3★, and a larger event deck.
+
+### Full Level 1 destination ingredients
 - one coherent grey-box / early-art test map;
-- multiple candidate project sites or site choices;
+- multiple candidate project sites or site choices (stretch after thin slice);
 - small company / office presence;
 - starting cash constraint;
 - basic staff;
@@ -294,7 +329,7 @@ Expected ingredients:
 - failures and maintenance;
 - decision events;
 - objectives;
-- 1–3 star completion;
+- 1–3 star completion (1★ first);
 - one memorable scripted climax / final challenge.
 
 ### Exit criteria

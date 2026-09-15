@@ -333,6 +333,8 @@ Potential sources include:
 - AI-assisted concept generation for ideation, not as an uncontrolled source of inconsistent production assets;
 - internally modified / kitbashed assets with appropriate licences.
 
+**Tooling note (recommendation):** Cursor can assist Blender (MCP or export scripts) and Krita (Python export plugins; optional typed MCP) on the home PC. See `Docs/CURSOR_BLENDER_KRITA.md`. This does not change the prove-game → hero corner → kits sequence.
+
 A later art-pipeline decision should evaluate time, budget, consistency, licensing, and maintainability before mass production.
 
 ## Quality rule

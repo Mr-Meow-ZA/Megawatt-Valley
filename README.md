@@ -66,19 +66,20 @@ The simulation layer should remain separate from the visual representation where
 
 ## Development partnership
 
-The project will use three complementary roles:
+The project will use complementary roles:
 
 - **Rapha** — product owner / creative director. Sets the vision, makes design decisions, tests builds, and decides priorities.
 - **Cursor** — primary Unity implementation environment. Builds code, scenes, tools, editor utilities, tests, and game systems from defined tasks.
-- **ChatGPT** — ongoing game-design, planning, review, architecture, balancing, research, and quality partner. ChatGPT will help design systems and content, review Cursor's work and repository changes, identify problems, refine milestones, and prepare the next implementation tasks.
+- **ChatGPT** — ongoing game-design, planning, review, architecture, balancing, research, and quality partner.
+- **Grok Bot** — supporting research, critique, QA, ideation, and doc-drift watch (recommendations, not automatic design authority).
 
-GitHub is the shared source of truth between these roles.
+GitHub is the shared source of truth between these roles. Collaboration protocol: `Docs/COLLABORATION_GUIDE.md`. Practical Cursor↔Unity / asset / assist recommendations: `Docs/PRACTICES_AND_PLANNING.md`.
 
 ## Current status
 
 **Grey-box miniature vertical slice playable (S0–S5).**
 
-Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play. Next: Rapha playtest + ChatGPT review before art polish.
+Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play on the home PC. Next: Rapha playtest (`S6-01`) + ChatGPT review (`S6-02`), then harden HUD/data before Level 1 thin-slice — not a major art pass yet.
 
 See the `Docs/` folder for the current planning documents.
 
