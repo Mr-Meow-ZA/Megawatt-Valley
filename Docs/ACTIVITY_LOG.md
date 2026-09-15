@@ -64,7 +64,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha playtest S6-01; advance timeline marker when accepted.
 
 **Git / References**
-- Commit: pending
+- Commit: `a0b81ee`
 - Branch / PR / Issue: `cursor/dev-timeline-visual-5b47`
 
 ## 2026-09-15 — Support — Cursor + Blender + Krita research
