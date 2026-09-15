@@ -4,7 +4,7 @@
 
 **Phase 0: Pre-production / Foundation**
 
-The GitHub repository has been created and seeded with the initial game vision, architecture, development roadmap, Level 1 vertical-slice concept, AI-assisted development workflow, and approved long-term visual direction.
+The GitHub repository has been created and seeded with the initial game vision, architecture, development roadmap, Level 1 vertical-slice concept, AI-assisted development workflow, approved long-term visual direction, and a session-sized progress system.
 
 ## Locked decisions so far
 
@@ -24,6 +24,24 @@ The GitHub repository has been created and seeded with the initial game vision, 
 - `Docs/VISUAL_DIRECTION.md` is the authoritative visual-direction document.
 - The approved concept-art direction is a **long-term quality target**, not the required quality of the first playable prototypes.
 - Development should follow: **prove the game → prove the visual language → build reusable art systems → scale content → polish**.
+- Session-sized development goals are tracked in `Docs/SESSION_GOALS.md`.
+- The normal work rhythm is: **choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**.
+
+## Session-sized progress strategy
+
+The project should never depend only on distant phase completion for a sense of progress.
+
+A focused session should normally have one primary goal with a visible, playable, testable, or clearly documented finish line.
+
+Current first goals:
+
+1. **S0-01 — Unity lives in GitHub**
+2. **S0-02 — Clean project skeleton**
+3. **S0-03 — Core packages ready**
+4. **S0-04 — Cursor can safely build**
+5. **S0-05 — First Megawatt Valley scene**
+
+Completing these earns the first project badge: **🏁 Foundation Online**.
 
 ## Visual quality strategy
 
@@ -60,22 +78,21 @@ The planned sequence is:
 
 Create the Unity project locally and connect it to this repository.
 
-Then complete **Phase 0 — Foundation** from `Docs/ROADMAP.md` before beginning the first playable world / camera work.
+The next concrete session goal is:
 
-The first implementation milestone after setup should remain extremely small:
+> **S0-01 — Unity lives in GitHub**
 
-> Open a grey-box Unity scene and establish a clean, comfortable tycoon-style camera and selectable test site.
+Success means the Unity project is committed cleanly to this repository and can be reopened from the repo without errors.
 
-The grey-box should already test proportions and camera composition against the eventual visual target, but should not attempt final art quality.
-
-Do not begin building the full solar simulation until the project foundation and basic world interaction are stable.
+After that, move to S0-02 rather than jumping ahead to gameplay systems.
 
 ## Review habit
 
-After each meaningful milestone:
+After each meaningful session goal:
 
-1. Rapha playtests the Unity build.
+1. Rapha playtests / verifies the result.
 2. Cursor records / commits what changed.
-3. ChatGPT reviews the implementation or diff where useful.
-4. Game-design, architecture, and visual-direction documents are updated if decisions changed.
-5. The next smallest useful milestone is defined.
+3. The completed session goal is marked `[x]` in `Docs/SESSION_GOALS.md`.
+4. ChatGPT reviews the implementation or diff where useful.
+5. Game-design, architecture, and visual-direction documents are updated if decisions changed.
+6. The next smallest useful session goal is nominated.
