@@ -2,9 +2,17 @@
 
 ## Status
 
-**Phase 0: Foundation**
+**Phase 0 complete → early vertical-slice prototype playable.**
 
-The GitHub repository contains the living design docs and a clean Unity 6 / URP project (`6000.6.0f1`). The Unity project opens from this repository. The agreed `Assets/_MegawattValley/` folder skeleton is in place. Core packages (Input System, Cinemachine, UI Toolkit, ProBuilder) are configured. Gameplay systems have not started.
+Unity **6000.6.0f1** / URP project is in GitHub. Overnight Cursor session completed session goals **S0-01 through S3-05**.
+
+Playable grey-box loop in `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`:
+
+- tycoon camera pan / zoom / rotate
+- plot select, click marker, solar build / ghost / rotate / validate / demolish
+- cash, MW output, grid-range export, day-factor sun, sim speed controls
+
+Badges earned (session-goal tracker): **Foundation Online**, **Valley Explorer**, **First Foundations**, **First Megawatt Earned**.
 
 ## Locked decisions so far
 
@@ -36,10 +44,9 @@ A focused session should normally have one primary goal with a visible, playable
 
 Current first goals:
 
-1. **S0-04 — Cursor can safely build**
-2. **S0-05 — First Megawatt Valley scene**
-
-Completing these earns the first project badge: **🏁 Foundation Online**.
+1. **S4-01 — Equipment has condition**
+2. **S4-02 — Something breaks**
+3. **S4-03 — Repair button**
 
 ## Visual quality strategy
 
@@ -74,15 +81,15 @@ The planned sequence is:
 
 ## Next action
 
-Prove the Cursor → Unity → GitHub loop with one harmless code change that compiles.
+Start the Living Plant track: give solar assets a visible condition percentage.
 
 The next concrete session goal is:
 
-> **S0-04 — Cursor can safely build**
+> **S4-01 — Equipment has condition**
 
-Success means Cursor edits code, Unity compiles successfully, and the change is committed.
+Success means a placed solar array shows a readable condition value.
 
-After that, move to S0-05 rather than jumping ahead to gameplay systems.
+Rapha should open `Prototype_Valley` in the Unity Editor, press Play, and feel the grey-box loop (camera, build, earn).
 
 ## Review habit
 

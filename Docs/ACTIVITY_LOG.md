@@ -38,6 +38,43 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — Overnight — Grey-box solar tycoon loop (S0-04 → S3-05)
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Proved Cursor → Unity compile loop (`BuildLoopMarker`, package smoke check).
+- Created playable scene `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` (startup scene).
+- Tycoon camera: WASD/arrow pan, scroll zoom, Q/E + RMB rotate, Shift fast pan, bounds.
+- Scale reference blocks (human / vehicle / road / solar / fence / building).
+- Interaction: ground click marker, selectable plot, Build Solar button + B key, ghost, R rotate, validation, X demolish.
+- Economy/energy: cash HUD, solar MW with day factor, grid export radius node, revenue over time, sim speeds 0/1/2/3.
+- Marked session goals **S0-04 through S3-05** complete.
+
+**Tested / Verified**
+- Unity batchmode compiled scripts and ran `PrototypeSceneBootstrap.CreatePrototypeScene` successfully (return code 0).
+- Scene contains TycoonCamera, OwnedPlot, GridExportNode, MegawattValleySign, GameSystems.
+
+**Known issues / limitations**
+- Grey-box primitives only; OnGUI HUD instead of UI Toolkit screens.
+- Grid connection is proximity to a single export node, not cabling UX.
+- No Rapha playtest yet — overnight unattended build.
+- Materials created at runtime (not saved assets).
+- Placement validation is intentionally simple.
+
+**Decisions / assumptions / recommendations**
+- Namespace `MegawattValley.Cameras` (not `.Camera`) to avoid clashing with `UnityEngine.Camera`.
+- Simulation speed uses unscaled delta multipliers so pause does not freeze input.
+- Next: Living Plant track starting at **S4-01**.
+
+**Next recommended step**
+- Rapha presses Play on `Prototype_Valley`, then **S4-01 — Equipment has condition**.
+
+**Git / References**
+- Commit: `feat: grey-box solar tycoon loop through first revenue (S0-04..S3-05)` on `main`
+- Branch / PR / Issue: `main`
+
 ## 2026-09-15 — S0-03 — Core packages ready
 
 **Agent:** Cursor

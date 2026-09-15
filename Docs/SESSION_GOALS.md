@@ -50,11 +50,11 @@ Avoid sessions whose only outcome is invisible infrastructure unless that infras
   Configure Input System, Cinemachine, UI Toolkit baseline and ProBuilder as appropriate.  
   **Victory moment:** project compiles cleanly with the core toolset ready.
 
-- [ ] **S0-04 — Cursor can safely build**  
+- [x] **S0-04 — Cursor can safely build**  
   Open the repo in Cursor, confirm project rules are loaded, make one harmless code change, compile successfully in Unity, and commit it.  
   **Victory moment:** Cursor → Unity → GitHub loop is proven.
 
-- [ ] **S0-05 — First Megawatt Valley scene**  
+- [x] **S0-05 — First Megawatt Valley scene**  
   Create and save a dedicated prototype scene with a ground plane / simple terrain, basic light, camera, and one obvious Megawatt Valley placeholder object or sign.  
   **Victory moment:** press Play and see the first recognisable project scene rather than Unity's default sample.
 
@@ -66,23 +66,23 @@ When S0-01 through S0-05 are complete: **🏁 Foundation Online**
 
 ## World & Camera — "I can move around Megawatt Valley"
 
-- [ ] **S1-01 — Pan around the valley**  
+- [x] **S1-01 — Pan around the valley**  
   Implement smooth WASD / keyboard or mouse-driven pan.  
   **Victory moment:** moving around the map feels like a management game.
 
-- [ ] **S1-02 — Zoom feels good**  
+- [x] **S1-02 — Zoom feels good**  
   Add bounded smooth zoom with sensible near/far limits.  
   **Victory moment:** zoom from site overview to close inspection without losing control.
 
-- [ ] **S1-03 — Rotate the world view**  
+- [x] **S1-03 — Rotate the world view**  
   Add camera rotation around the viewed area / pivot.  
   **Victory moment:** inspect the same prototype site from multiple useful angles.
 
-- [ ] **S1-04 — Camera polish pass 1**  
+- [x] **S1-04 — Camera polish pass 1**  
   Tune movement speed, acceleration, zoom scaling, rotation speed and bounds.  
   **Victory moment:** navigating the empty grey-box scene is already satisfying.
 
-- [ ] **S1-05 — First scale test**  
+- [x] **S1-05 — First scale test**  
   Place human, vehicle, road, solar-table, fence and building placeholder blocks at a coherent stylised scale.  
   **Victory moment:** zooming in starts to resemble the proportions of the approved visual target.
 
@@ -94,35 +94,35 @@ When S1-01 through S1-05 are complete: **🗺️ Valley Explorer**
 
 ## Interaction — "The world reacts to me"
 
-- [ ] **S2-01 — Click the ground**  
+- [x] **S2-01 — Click the ground**  
   Raycast from cursor to world and show a clear test marker where the player clicks.  
   **Victory moment:** the game understands where you are pointing.
 
-- [ ] **S2-02 — Select a plot**  
+- [x] **S2-02 — Select a plot**  
   Create one selectable test plot with visible selected / unselected states.  
   **Victory moment:** click land and see it respond clearly.
 
-- [ ] **S2-03 — First build button**  
+- [x] **S2-03 — First build button**  
   Add a tiny prototype Build UI with one item: Solar Array.  
   **Victory moment:** clicking Build → Solar changes the player's mode.
 
-- [ ] **S2-04 — Ghost solar array**  
+- [x] **S2-04 — Ghost solar array**  
   Show a placement preview that follows the cursor over valid ground.  
   **Victory moment:** a future solar array visibly follows the mouse before placement.
 
-- [ ] **S2-05 — Place the first solar array**  
+- [x] **S2-05 — Place the first solar array**  
   Click to place a permanent placeholder solar array.  
   **Victory moment:** **the player builds the first object in Megawatt Valley.**
 
-- [ ] **S2-06 — Rotate before placement**  
+- [x] **S2-06 — Rotate before placement**  
   Add a simple rotation control for the placement ghost.  
   **Victory moment:** orient the solar array before placing it.
 
-- [ ] **S2-07 — Valid vs invalid placement**  
+- [x] **S2-07 — Valid vs invalid placement**  
   Prevent overlap / out-of-bounds placement and provide clear feedback.  
   **Victory moment:** the build system starts feeling like a real tycoon game rather than an object spawner.
 
-- [ ] **S2-08 — Demolish something**  
+- [x] **S2-08 — Demolish something**  
   Add a simple remove / demolish interaction.  
   **Victory moment:** build something, change your mind, remove it cleanly.
 
@@ -134,23 +134,23 @@ When S2-01 through S2-08 are complete: **🔨 First Foundations**
 
 ## First Tycoon Loop — "I built something and it earns money"
 
-- [ ] **S3-01 — Money exists**  
+- [x] **S3-01 — Money exists**  
   Display a cash balance and make construction deduct a cost.  
   **Victory moment:** placing a solar array visibly changes your bank balance.
 
-- [ ] **S3-02 — The sun makes power**  
+- [x] **S3-02 — The sun makes power**  
   Give placed solar arrays a simple logical generation value.  
   **Victory moment:** a live MW / kW output number responds to what you've built.
 
-- [ ] **S3-03 — Connect to the grid**  
+- [x] **S3-03 — Connect to the grid**  
   Add a minimal grid / export condition so unconnected generation cannot earn revenue.  
   **Victory moment:** the player understands `build → connect → export`.
 
-- [ ] **S3-04 — First revenue**  
+- [x] **S3-04 — First revenue**  
   Exported energy increases cash over time.  
   **Victory moment:** **Megawatt Valley has its first functioning tycoon loop.**
 
-- [ ] **S3-05 — Speed controls**  
+- [x] **S3-05 — Speed controls**  
   Add pause and basic simulation speed controls.  
   **Victory moment:** watch income change at different game speeds.
 
@@ -214,12 +214,12 @@ When S5-01 through S5-05 are complete: **⭐ Tiny Tycoon**
 
 These are deliberately spaced between the larger roadmap phases.
 
-- [ ] **🏁 Foundation Online** — Unity, Cursor and GitHub work together.
-- [ ] **🗺️ Valley Explorer** — moving around the world feels good.
-- [ ] **🔨 First Foundations** — player can place real infrastructure.
+- [x] **🏁 Foundation Online** — Unity, Cursor and GitHub work together.
+- [x] **🗺️ Valley Explorer** — moving around the world feels good.
+- [x] **🔨 First Foundations** — player can place real infrastructure.
 - [ ] **☀️ First Solar Farm** — a recognisable small solar site exists.
 - [ ] **⚡ First Megawatt** — the plant generates power.
-- [ ] **💰 First Megawatt Earned** — generation produces revenue.
+- [x] **💰 First Megawatt Earned** — generation produces revenue.
 - [ ] **🔧 Keeping the Lights On** — faults and maintenance create operational gameplay.
 - [ ] **👷 Somebody Works Here** — staff visibly perform meaningful tasks.
 - [ ] **😂 That's Megawatt Valley** — humour appears in gameplay and the world.
