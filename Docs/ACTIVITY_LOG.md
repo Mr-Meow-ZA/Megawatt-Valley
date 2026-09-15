@@ -64,8 +64,8 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha playtest; later accept/amend CURSOR_BLENDER_KRITA §7 when art tooling starts.
 
 **Git / References**
-- Commit: pending
-- Branch / PR / Issue: `cursor/plan-research-enrichment-5b47` / #3
+- Commit: `617a171`
+- Branch / PR / Issue: `cursor/plan-research-enrichment-5b47` / [#3](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/3)
 
 ## 2026-09-15 — Support — Plan enrichment research (Cursor + Unity + agents + assets)
 
