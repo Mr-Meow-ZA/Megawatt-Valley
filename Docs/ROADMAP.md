@@ -1,4 +1,4 @@
-# Megawatt Valley — Development Roadmap v0.2
+# Megawatt Valley — Development Roadmap v0.3
 
 ## Roadmap philosophy
 
@@ -15,6 +15,20 @@ The game will not attempt final art quality during early prototypes, but early d
 The visual-production strategy is:
 
 **prove the game → prove the visual language → build reusable art systems → scale content → polish**
+
+## Session-sized progress rule
+
+The larger phases in this roadmap are direction, not the unit of daily work.
+
+Actual development should be driven by the smaller goals in `Docs/SESSION_GOALS.md`.
+
+Each focused work session should normally have **one primary session goal** with a clear finish line and, whenever practical, a visible or playable result. Completing a session goal is a valid success even when the larger phase remains incomplete.
+
+Progress rhythm:
+
+**choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**
+
+Do not let a small session goal silently expand into an entire subsystem. Optional stretch work comes after the primary goal is complete.
 
 ### Cross-cutting visual checkpoints
 
@@ -46,6 +60,9 @@ Create a stable Unity + Cursor + Git workflow.
 - Explore Unity MCP integration if useful.
 - Confirm the rendering baseline can support the approved stylised 3D target without introducing premature custom-rendering complexity.
 
+### Session-goal sequence
+See `S0-01` through `S0-05` in `Docs/SESSION_GOALS.md`.
+
 ### Exit criteria
 - Unity project opens cleanly.
 - Project is committed to GitHub.
@@ -67,6 +84,9 @@ Create a basic tycoon-game world that feels good to navigate.
 - Simple world-space selection indicator.
 - Establish an initial scale reference for a person, vehicle, road, solar table, fence, and representative building.
 - Test camera angle and zoom range against the long-term visual target.
+
+### Session-goal sequence
+See `S1-01` through `S1-05` in `Docs/SESSION_GOALS.md`.
 
 ### Exit criteria
 - Player can comfortably inspect and navigate the test site.
@@ -91,6 +111,9 @@ Make construction interaction satisfying before adding detailed energy logic.
 - Initial placeholder solar-array object.
 - Confirm placement footprints and spacing are visually compatible with the intended stylised scale rather than blindly using real-world dimensions.
 
+### Session-goal sequence
+See `S2-01` through `S2-08` in `Docs/SESSION_GOALS.md`.
+
 ### Exit criteria
 - Player can spend money to place and remove solar infrastructure reliably.
 
@@ -113,6 +136,9 @@ Make the first renewable-energy system actually work.
 - Current output display.
 - Generation statistics.
 - Preserve separation between logical plant simulation and visual representation so richer future scenes do not require thousands of individual simulation objects.
+
+### Session-goal sequence
+The first end-to-end energy/economy loop is split across `S3-01` through `S3-05` in `Docs/SESSION_GOALS.md`.
 
 ### Exit criteria
 - A correctly connected solar asset visibly produces power.
@@ -169,6 +195,9 @@ Create operational gameplay.
 - Failed state affects generation.
 - Repair action.
 - Maintenance cost.
+
+### Session-goal sequence
+Initial operations goals are `S4-01` through `S4-05` in `Docs/SESSION_GOALS.md`.
 
 ### Exit criteria
 - An operating asset can degrade, fail, lose revenue, and be restored.
@@ -234,6 +263,9 @@ Turn the sandbox loop into a scenario.
 - Three-star optional mastery objectives.
 - Unlock / reward framework.
 - Basic research / capability unlocks.
+
+### Session-goal sequence
+Early identity and objective goals appear as `S5-01` through `S5-05` in `Docs/SESSION_GOALS.md`; the sequence will be extended as these phases approach.
 
 ### Exit criteria
 - The player can complete a defined scenario and understand what they achieved and unlocked.
@@ -412,3 +444,5 @@ These are not first-prototype requirements:
 If a new feature does not improve or validate the current playable loop, it should normally wait.
 
 If visual polish does not validate a reusable art direction or materially improve the current vertical slice, it should also normally wait.
+
+If a task cannot produce a clear finish line for one working session, split it into smaller entries in `Docs/SESSION_GOALS.md` before implementation.
