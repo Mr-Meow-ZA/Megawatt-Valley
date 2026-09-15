@@ -37,6 +37,35 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — Pre-production — Cursor GitHub + Polaris sync automation
+
+**Status:** Complete
+
+**Changed**
+- Added Cursor project hooks that fetch GitHub at session start, fast-forward a clean `main`, and stamp the Polaris Megawatt Valley note.
+- Added a stop-hook follow-up when the working tree is dirty or `main` has unpushed commits, so the collaboration handoff is not skipped.
+- Added `Tools/Sync-PolarisMegawattValley.ps1` to update the vault note from current HEAD without copying design docs.
+
+**Tested**
+- Ran the Polaris sync script against the vault note.
+- Validated hook scripts emit JSON on stdout.
+
+**Known issues / limitations**
+- Unity project still not created; wait for Rapha before S0-01.
+- Hooks cannot write GitHub themselves; Cursor must still commit and push.
+- Polaris sync no-ops if `E:\Obsidian Vaults\Polaris_Vault` is unavailable.
+
+**Decisions / assumptions**
+- Rapha's standing instruction to keep GitHub and Polaris updated applies to meaningful Megawatt Valley sessions (commit + push, then vault stamp).
+- Automation is local Cursor hooks + a vault stamp script, not a GitHub Action, because the vault lives on disk.
+
+**Next recommended step**
+- Complete S0-01 when Rapha says Unity is ready.
+
+**Git**
+- Commit: `chore: add GitHub and Polaris session sync automation` on `main`
+- Branch / PR: `main`
+
 ## 2026-09-15 — Pre-production — Collaboration system established
 
 **Status:** Complete

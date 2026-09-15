@@ -305,3 +305,29 @@ The default rhythm is:
 For very small goals, several steps can happen rapidly in one evening.
 
 The objective is not process for its own sake. The objective is that no matter whether Rapha opens Cursor or ChatGPT, both assistants can reconstruct the current project state from GitHub and continue in the same direction.
+
+---
+
+# 11. Local Cursor sync automation
+
+Cursor sessions in this repository run project hooks so GitHub and Rapha's Polaris vault stay aligned without depending on chat memory.
+
+| Event | What happens |
+| --- | --- |
+| `sessionStart` | `git fetch`; fast-forward `main` when the working tree has no tracked changes; stamp the Polaris project note; inject HEAD / status / ChatGPT next-goal into the session. |
+| `stop` | If there are uncommitted changes or unpushed commits, request one follow-up turn to complete this handoff and push. |
+| `sessionEnd` | Re-stamp the Polaris Megawatt Valley note from current HEAD. |
+
+Scripts:
+
+- `.cursor/hooks.json`
+- `.cursor/hooks/session-start.ps1`
+- `.cursor/hooks/session-stop.ps1`
+- `.cursor/hooks/session-end.ps1`
+- `Tools/Sync-PolarisMegawattValley.ps1`
+
+Rules:
+
+- Hooks **never** auto-commit or auto-push.
+- Polaris is a personal index. GitHub remains the shared source of truth for ChatGPT.
+- The vault path is `E:\Obsidian Vaults\Polaris_Vault\02 Projects\Technical\Megawatt Valley.md`. If that drive is unavailable, hooks fail open.

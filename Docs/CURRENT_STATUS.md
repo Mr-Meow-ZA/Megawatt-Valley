@@ -26,6 +26,7 @@ The GitHub repository has been created and seeded with the initial game vision, 
 - Development should follow: **prove the game → prove the visual language → build reusable art systems → scale content → polish**.
 - Session-sized development goals are tracked in `Docs/SESSION_GOALS.md`.
 - The normal work rhythm is: **choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**.
+- Cross-agent handoff lives in `Docs/COLLABORATION_GUIDE.md`. Cursor records meaningful sessions in `Docs/ACTIVITY_LOG.md` and keeps GitHub plus the Polaris project note current via local session hooks.
 
 ## Session-sized progress strategy
 

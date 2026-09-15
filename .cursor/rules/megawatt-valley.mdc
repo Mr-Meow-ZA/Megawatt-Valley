@@ -59,6 +59,8 @@ At minimum:
 
 Do not skip the activity-log handoff because the code is self-explanatory. The log exists for cross-agent alignment.
 
+Rapha's standing instruction for this repo: after a meaningful session, **commit, push to origin, and sync Polaris** without waiting to be asked. Project hooks in `.cursor/hooks.json` fetch GitHub at session start and remind you at stop if the working tree is dirty or `main` is unpushed. Hooks do not auto-commit.
+
 The activity log should stay concise and should include:
 
 - what changed;

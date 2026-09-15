@@ -178,6 +178,8 @@ If meaningful changes occurred, ChatGPT should summarize the changes, identify a
 
 This does not replace immediate review after important milestones.
 
+Cursor also runs local session hooks (see `Docs/COLLABORATION_GUIDE.md` §11) to fetch GitHub at session start, remind the agent to commit/push/log if work is still unhanded-off, and stamp the Polaris project note. Hooks never auto-commit.
+
 ## Branch and review strategy
 
 During the earliest prototype, small low-risk changes may be committed directly while the project structure is being established.

@@ -54,7 +54,13 @@ crashlytics-build.properties
 *.app
 *.exe
 
-# Keep Cursor project rules tracked
+# Keep Cursor project rules and hooks tracked
 !.cursor/
 !.cursor/rules/
 !.cursor/rules/**
+!.cursor/hooks.json
+!.cursor/hooks/
+!.cursor/hooks/**
+
+# Cursor hook run logs (must stay ignored after the un-ignores above)
+.cursor/hooks/*.log
