@@ -66,8 +66,8 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha playtest (`S6-01`), then ChatGPT review + accept/amend S6/L1 proposals.
 
 **Git / References**
-- Commit: pending on branch `cursor/plan-research-enrichment-5b47`
-- Branch / PR / Issue: relates to #2
+- Commit: `890e658`
+- Branch / PR / Issue: `cursor/plan-research-enrichment-5b47` / [#3](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/3) / relates to #2
 
 ## 2026-09-15 — Overnight — Living plant + Tiny Tycoon (S4-01 → S5-05)
 
