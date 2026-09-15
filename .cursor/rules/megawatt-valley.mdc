@@ -11,6 +11,7 @@ Before making significant changes, read:
 
 - `README.md`
 - `Docs/GAME_VISION.md`
+- `Docs/VISUAL_DIRECTION.md`
 - `Docs/TECHNICAL_ARCHITECTURE.md`
 - `Docs/ROADMAP.md`
 - `Docs/LEVEL_01_DESIGN.md`
@@ -27,6 +28,22 @@ Before making significant changes, read:
 - References are inspiration only. Do not copy proprietary art, text, character designs, UI, names, assets, or code.
 - The first major gameplay target is a **solar-only vertical slice**.
 - Do not introduce wind, BESS, advanced corporate finance, multiplayer, procedural world systems, or other deferred features unless the active task explicitly requests them.
+
+## Approved visual north star
+
+`Docs/VISUAL_DIRECTION.md` is the authoritative visual-direction document.
+
+The long-term quality target is a premium, colourful, stylised 3D isometric management-game presentation with warm scenic environments, highly readable renewable infrastructure, expressive staff, visible world activity, polished management UI, and humorous environmental detail.
+
+Important rules:
+
+- Grey-box visuals are temporary implementation stages, not the intended final look.
+- Do not mistake placeholder quality for the product target.
+- Do **not** prematurely polish art before gameplay is proven.
+- Conversely, do not make technical decisions that unnecessarily block the approved visual target.
+- Camera, world scale, asset scale, building footprints, roads, UI composition, and simulation/presentation separation should be designed with the eventual visual target in mind.
+- Before mass-producing final assets, the project should build and approve a small style-prototype / hero scene as defined in `Docs/VISUAL_DIRECTION.md`.
+- Keep Megawatt Valley visually original. Inspiration is not permission to clone another game's assets or art language.
 
 ## Architecture rules
 
@@ -59,6 +76,7 @@ Before making significant changes, read:
 - If a requirement is ambiguous and the choice would materially affect gameplay or architecture, flag the assumption.
 - If a core architecture decision changes, update `Docs/TECHNICAL_ARCHITECTURE.md` or explicitly flag the proposed change for review.
 - If the behaviour of Level 1 changes materially, update `Docs/LEVEL_01_DESIGN.md` or flag it for review.
+- If an implementation choice materially changes the approved art / presentation direction, update or flag `Docs/VISUAL_DIRECTION.md` for review.
 
 ## Definition of done for implementation tasks
 
