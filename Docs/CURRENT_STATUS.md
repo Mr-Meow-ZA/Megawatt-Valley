@@ -2,17 +2,15 @@
 
 ## Status
 
-**Phase 0 complete → early vertical-slice prototype playable.**
+**Grey-box miniature vertical slice is playable.**
 
-Unity **6000.6.0f1** / URP project is in GitHub. Overnight Cursor session completed session goals **S0-01 through S3-05**.
+Unity **6000.6.0f1** / URP. Overnight Cursor run completed session goals **S0-01 through S5-05**.
 
-Playable grey-box loop in `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`:
+Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
-- tycoon camera pan / zoom / rotate
-- plot select, click marker, solar build / ghost / rotate / validate / demolish
-- cash, MW output, grid-range export, day-factor sun, sim speed controls
+Includes: tycoon camera, plot select, solar build/place/demolish, cash + MW + grid radius, day factor, sim speeds, equipment condition/faults/repair/preventive maintenance, named technician, humorous event, zoom-in joke sign, MW objective + win banner.
 
-Badges earned (session-goal tracker): **Foundation Online**, **Valley Explorer**, **First Foundations**, **First Megawatt Earned**.
+Badges earned: Foundation Online, Valley Explorer, First Foundations, First Megawatt Earned, Keeping the Lights On, Tiny Tycoon (and related celebration markers in `SESSION_GOALS.md`).
 
 ## Locked decisions so far
 
@@ -40,13 +38,11 @@ Badges earned (session-goal tracker): **Foundation Online**, **Valley Explorer**
 
 The project should never depend only on distant phase completion for a sense of progress.
 
-A focused session should normally have one primary goal with a visible, playable, testable, or clearly documented finish line.
-
 Current first goals:
 
-1. **S4-01 — Equipment has condition**
-2. **S4-02 — Something breaks**
-3. **S4-03 — Repair button**
+1. Rapha playtest / accept the grey-box miniature slice
+2. ChatGPT review of overnight commits vs vision / architecture
+3. Next build track after review (likely UI Toolkit HUD replacement, save data, or Level 1 content)
 
 ## Visual quality strategy
 
@@ -81,15 +77,11 @@ The planned sequence is:
 
 ## Next action
 
-Start the Living Plant track: give solar assets a visible condition percentage.
+**Rapha playtest** `Prototype_Valley` in the Unity Editor.
 
-The next concrete session goal is:
+Then ask ChatGPT to review the overnight vertical slice against `GAME_VISION`, `LEVEL_01_DESIGN`, and `TECHNICAL_ARCHITECTURE`.
 
-> **S4-01 — Equipment has condition**
-
-Success means a placed solar array shows a readable condition value.
-
-Rapha should open `Prototype_Valley` in the Unity Editor, press Play, and feel the grey-box loop (camera, build, earn).
+Do not start a major art pass until the grey-box loop feels fun.
 
 ## Review habit
 

@@ -155,6 +155,7 @@ namespace MegawattValley.Core
             placed.transform.position = Snap(point);
             placed.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
             placed.AddComponent<SolarArrayUnit>();
+            placed.AddComponent<EquipmentCondition>();
 
             Debug.Log($"[MegawattValley] Placed solar array for ${solarCost:0}.");
             CancelPlacement();

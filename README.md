@@ -76,8 +76,8 @@ GitHub is the shared source of truth between these roles.
 
 ## Current status
 
-**Phase 0 complete → grey-box solar tycoon loop playable.**
+**Grey-box miniature vertical slice playable (S0–S5).**
 
-Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`, press Play, and try camera / build / earn. Next: Living Plant track (**S4-01**).
+Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play. Next: Rapha playtest + ChatGPT review before art polish.
 
 See the `Docs/` folder for the current planning documents.

@@ -108,6 +108,48 @@ namespace MegawattValley.EditorTools
             systems.AddComponent<BuildModeController>();
             systems.AddComponent<GroundClickMarker>();
 
+            // Technician home near the building
+            var tech = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            tech.name = "Technician";
+            tech.transform.position = new Vector3(10f, 1f, -4f);
+            tech.transform.localScale = new Vector3(0.5f, 0.9f, 0.5f);
+            Object.DestroyImmediate(tech.GetComponent<Collider>());
+            var techRenderer = tech.GetComponent<MeshRenderer>();
+            if (techRenderer != null)
+            {
+                techRenderer.sharedMaterial = CreateLit(new Color(0.95f, 0.85f, 0.35f));
+            }
+
+            tech.AddComponent<TechnicianActor>();
+            tech.AddComponent<StaffIdentity>();
+
+            // Visual joke sign (S5-03) — reward for zooming in
+            var joke = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            joke.name = "SafetySign_DoNotLickInverters";
+            joke.transform.position = new Vector3(-6f, 1.2f, 7.2f);
+            joke.transform.localScale = new Vector3(2.4f, 1.2f, 0.15f);
+            Object.DestroyImmediate(joke.GetComponent<Collider>());
+            var jokeRenderer = joke.GetComponent<MeshRenderer>();
+            if (jokeRenderer != null)
+            {
+                jokeRenderer.sharedMaterial = CreateLit(new Color(1f, 0.92f, 0.2f));
+            }
+
+            var jokeLabelGo = new GameObject("JokeText");
+            jokeLabelGo.transform.SetParent(joke.transform, false);
+            jokeLabelGo.transform.localPosition = new Vector3(0f, 0f, -0.6f);
+            jokeLabelGo.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            var jokeText = jokeLabelGo.AddComponent<TextMesh>();
+            jokeText.text = "DO NOT LICK\nTHE INVERTERS";
+            jokeText.fontSize = 40;
+            jokeText.characterSize = 0.25f;
+            jokeText.anchor = TextAnchor.MiddleCenter;
+            jokeText.alignment = TextAlignment.Center;
+            jokeText.color = Color.black;
+
+            systems.AddComponent<HumorousEventController>();
+            systems.AddComponent<ScenarioObjective>();
+
             // Ambient
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
             RenderSettings.sun = sun;

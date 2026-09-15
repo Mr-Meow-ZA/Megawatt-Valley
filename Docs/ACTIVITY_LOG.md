@@ -38,6 +38,40 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — Overnight — Living plant + Tiny Tycoon (S4-01 → S5-05)
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Equipment condition %, wear, faults, repair (F), preventive maintenance (M), force-fault (K).
+- Named technician **Jordan Watts** with SpeedyBoots trait; walks to repair targets.
+- Humorous supplier event with two choices (keys 8/9).
+- Zoom-in joke sign: "DO NOT LICK THE INVERTERS".
+- Objective `0.50 MW` + on-screen Tiny Tycoon win state.
+- Rebuilt `Prototype_Valley` scene via editor bootstrap.
+
+**Tested / Verified**
+- Unity batchmode compiled and recreated the prototype scene successfully (return code 0).
+- Scene contains Technician/StaffIdentity, HumorousEventController, ScenarioObjective, joke sign.
+
+**Known issues / limitations**
+- Still grey-box / OnGUI; not UI Toolkit.
+- Event/objective balancing is prototype-only.
+- No Rapha playtest yet.
+- Bargain-panel event path spawns a primitive array without full build validation.
+
+**Decisions / assumptions / recommendations**
+- Overnight mandate was to advance as far as possible; S0–S5 grey-box miniature scenario is now the playtest target.
+- Next should be human playtest + ChatGPT design review before expanding systems.
+
+**Next recommended step**
+- Rapha Play mode on `Prototype_Valley`, then ChatGPT review.
+
+**Git / References**
+- Commit: `feat: add faults, staff, events and tiny win state (S4-S5)` on `main`
+- Branch / PR / Issue: `main`
+
 ## 2026-09-15 — Overnight — Grey-box solar tycoon loop (S0-04 → S3-05)
 
 **Agent:** Cursor

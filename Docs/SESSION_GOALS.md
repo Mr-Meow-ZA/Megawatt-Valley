@@ -162,22 +162,22 @@ When S3-01 through S3-05 are complete: **💰 First Megawatt Earned**
 
 ## Living Plant — "Things can go wrong"
 
-- [ ] **S4-01 — Equipment has condition**  
+- [x] **S4-01 — Equipment has condition**  
   Give a solar asset a visible condition percentage.
 
-- [ ] **S4-02 — Something breaks**  
+- [x] **S4-02 — Something breaks**  
   Trigger a simple fault that stops or reduces generation.  
   **Victory moment:** first genuine operational problem.
 
-- [ ] **S4-03 — Repair button**  
+- [x] **S4-03 — Repair button**  
   Allow the fault to be repaired at a cost / delay.  
   **Victory moment:** output returns after intervention.
 
-- [ ] **S4-04 — First technician**  
+- [x] **S4-04 — First technician**  
   Add a placeholder staff character who can be assigned to the repair.  
   **Victory moment:** a little person visibly moves through the site to fix something.
 
-- [ ] **S4-05 — Maintenance becomes a decision**  
+- [x] **S4-05 — Maintenance becomes a decision**  
   Introduce one simple preventive-maintenance choice versus waiting for failure.
 
 ### Operations badge
@@ -188,19 +188,19 @@ When S4-01 through S4-05 are complete: **🔧 Keeping the Lights On**
 
 ## First Personality — "This is becoming Megawatt Valley"
 
-- [ ] **S5-01 — First humorous event**  
+- [x] **S5-01 — First humorous event**  
   Create one decision event with two meaningful choices and a funny renewable-energy-industry setup.
 
-- [ ] **S5-02 — First staff name and trait**  
+- [x] **S5-02 — First staff name and trait**  
   Give the technician a name, role and one gameplay trait.
 
-- [ ] **S5-03 — First visual joke**  
+- [x] **S5-03 — First visual joke**  
   Add one environmental sign / prop / interaction that rewards zooming in.
 
-- [ ] **S5-04 — First objective**  
+- [x] **S5-04 — First objective**  
   Add a simple target such as `Reach 100 kW installed` or its balanced equivalent.
 
-- [ ] **S5-05 — First win screen**  
+- [x] **S5-05 — First win screen**  
   Complete the objective and show a simple success state.  
   **Victory moment:** **Megawatt Valley can now be "won" in miniature.**
 
@@ -217,14 +217,14 @@ These are deliberately spaced between the larger roadmap phases.
 - [x] **🏁 Foundation Online** — Unity, Cursor and GitHub work together.
 - [x] **🗺️ Valley Explorer** — moving around the world feels good.
 - [x] **🔨 First Foundations** — player can place real infrastructure.
-- [ ] **☀️ First Solar Farm** — a recognisable small solar site exists.
-- [ ] **⚡ First Megawatt** — the plant generates power.
+- [x] **☀️ First Solar Farm** — a recognisable small solar site exists.
+- [x] **⚡ First Megawatt** — the plant generates power.
 - [x] **💰 First Megawatt Earned** — generation produces revenue.
-- [ ] **🔧 Keeping the Lights On** — faults and maintenance create operational gameplay.
-- [ ] **👷 Somebody Works Here** — staff visibly perform meaningful tasks.
-- [ ] **😂 That's Megawatt Valley** — humour appears in gameplay and the world.
-- [ ] **⭐ Tiny Tycoon** — the first miniature scenario can actually be completed.
-- [ ] **🎮 First Playable** — a coherent functional vertical slice exists.
+- [x] **🔧 Keeping the Lights On** — faults and maintenance create operational gameplay.
+- [x] **👷 Somebody Works Here** — staff visibly perform meaningful tasks.
+- [x] **😂 That's Megawatt Valley** — humour appears in gameplay and the world.
+- [x] **⭐ Tiny Tycoon** — the first miniature scenario can actually be completed.
+- [x] **🎮 First Playable** — a coherent functional vertical slice exists.
 - [ ] **🎨 Hero Corner** — the approved long-term visual direction works in real Unity gameplay.
 - [ ] **🌄 Here Comes the Sun** — Level 1 reaches its first polished completion.
 

@@ -52,6 +52,7 @@ namespace MegawattValley.Core
         [SerializeField] private float nameplateMw = 0.25f;
         [SerializeField] private float revenuePerMwPerSecond = 4f;
         [SerializeField] private bool connectedToGrid = true;
+        [SerializeField] private float outputMultiplier = 1f;
 
         public float CurrentMegawatts
         {
@@ -64,8 +65,13 @@ namespace MegawattValley.Core
                     connectedToGrid = connected;
                 }
 
-                return connected ? nameplateMw * DayNightSun.SolarFactor : 0f;
+                return connected ? nameplateMw * DayNightSun.SolarFactor * outputMultiplier : 0f;
             }
+        }
+
+        public void SetOutputMultiplier(float multiplier)
+        {
+            outputMultiplier = Mathf.Clamp01(multiplier);
         }
 
         private void OnEnable()
