@@ -149,6 +149,7 @@ Cursor, ChatGPT and Grok Bot should treat these as the core shared context:
 - `Docs/COLLABORATION_GUIDE.md`
 - `Docs/PRACTICES_AND_PLANNING.md` (research / recommendations until accepted)
 - `Docs/CURSOR_BLENDER_KRITA.md` (Cursor ↔ Blender / Krita recommendations)
+- `Docs/DEVELOPMENT_TIMELINE.md` + `Docs/visuals/development-timeline.html` (milestone timeline)
 
 ### Before Cursor begins meaningful implementation
 

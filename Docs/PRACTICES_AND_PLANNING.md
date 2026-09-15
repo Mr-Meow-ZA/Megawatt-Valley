@@ -296,6 +296,7 @@ Rapha / ChatGPT should explicitly accept or amend:
 3. Level 1 thin-slice IDs L1-01…L1-06 (§2.3).
 4. Whether Unity MCP is in-scope for the next local tooling session (§3.2).
 5. Pitch tone: Two Point–style management humour in renewables vs serious tycoon with light humour (open from issue #2).
+6. Blender/Krita tooling choices in `Docs/CURSOR_BLENDER_KRITA.md` §7 (MCP timing, FBX vs glTF, `.blend`/`.kra` storage).
 
 Until then, Cursor continues: **no major art pass; no Phase 10 balloon; GitHub SoT; one session goal at a time.**
 

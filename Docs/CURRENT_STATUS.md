@@ -47,6 +47,8 @@ Current first goals:
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
+**Visual timeline:** [`Docs/visuals/development-timeline.html`](visuals/development-timeline.html) (browser) · [`Docs/DEVELOPMENT_TIMELINE.md`](DEVELOPMENT_TIMELINE.md) (Mermaid + tables).
+
 ## Visual quality strategy
 
 The project should not postpone every visual decision until late development, but it also must not spend months polishing art before the core game loop works.
