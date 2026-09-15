@@ -1,10 +1,12 @@
-# Megawatt Valley — Development Workflow v0.1
+# Megawatt Valley — Development Workflow v0.2
 
 ## Purpose
 
 This project is intentionally being developed with a collaborative AI-assisted workflow.
 
 The goal is not to let one tool generate the entire game autonomously. The goal is to combine clear human direction, fast implementation, continuous review, and documented decisions.
+
+The detailed cross-agent handoff protocol is defined in `Docs/COLLABORATION_GUIDE.md`.
 
 ## Roles
 
@@ -36,7 +38,9 @@ Cursor is expected to:
 - follow the current architecture and game-design documents;
 - keep changes focused on the active task;
 - flag assumptions rather than silently inventing major design decisions;
-- update documentation when a core technical decision changes.
+- update documentation when a core technical decision changes;
+- commit meaningful work clearly;
+- maintain the shared activity log and session-goal state after meaningful sessions.
 
 Cursor should not independently redesign the game or introduce large frameworks simply because they might be useful later.
 
@@ -60,13 +64,14 @@ Expected responsibilities include:
 - turning gameplay ideas into scoped Cursor implementation tasks;
 - reviewing completed work against the intended design;
 - maintaining and refining the roadmap;
-- helping diagnose bugs using repository changes, logs, screenshots, and build feedback.
+- helping diagnose bugs using repository changes, logs, screenshots, and build feedback;
+- performing periodic repository alignment reviews and recording the latest review state.
 
 ChatGPT should not compete with Cursor for implementation ownership. Cursor builds in Unity; ChatGPT helps determine what should be built, how it should behave, and whether the result still serves the game.
 
 ## Source of truth
 
-GitHub is the shared project record.
+GitHub is the shared project record and the handoff layer between Cursor and ChatGPT.
 
 Important decisions should exist in the repository rather than only inside an AI chat.
 
@@ -74,9 +79,15 @@ Key documents include:
 
 - `README.md`
 - `Docs/GAME_VISION.md`
+- `Docs/VISUAL_DIRECTION.md`
 - `Docs/TECHNICAL_ARCHITECTURE.md`
 - `Docs/ROADMAP.md`
 - `Docs/LEVEL_01_DESIGN.md`
+- `Docs/SESSION_GOALS.md`
+- `Docs/CURRENT_STATUS.md`
+- `Docs/ACTIVITY_LOG.md`
+- `Docs/CHATGPT_REVIEW.md`
+- `Docs/COLLABORATION_GUIDE.md`
 - this workflow document
 
 These documents are living documents and should evolve with the project.
@@ -109,17 +120,30 @@ Cursor should:
 - inspect obvious Unity console errors;
 - confirm the feature works in the intended test scene.
 
-### 4. Playtest
+### 4. Commit and hand off
+
+After meaningful work, Cursor should:
+
+- commit the work clearly;
+- append a concise entry to `Docs/ACTIVITY_LOG.md`;
+- mark the relevant session goal complete if appropriate;
+- update current status if the project state materially changed;
+- update or flag any design / architecture document that no longer matches implementation.
+
+The exact handoff format is defined in `Docs/COLLABORATION_GUIDE.md`.
+
+### 5. Playtest
 
 Rapha tests the feature in Unity and reports what actually feels right or wrong.
 
-### 5. Review
+### 6. Review
 
 ChatGPT can review:
 
 - commits;
 - diffs;
 - pull requests;
+- activity-log entries;
 - architecture;
 - screenshots;
 - gameplay recordings;
@@ -128,17 +152,31 @@ ChatGPT can review:
 
 The review should focus on both technical quality and whether the implementation matches the game design.
 
-### 6. Refine
+When practical, ChatGPT updates `Docs/CHATGPT_REVIEW.md` with the latest reviewed state and next recommendation.
+
+### 7. Refine
 
 Cursor makes targeted revisions.
 
-### 7. Accept and document
+### 8. Accept and document
 
 Once accepted:
 
 - merge / commit the stable version;
 - update relevant docs if behaviour or architecture changed;
 - identify the next smallest useful milestone.
+
+## Daily alignment
+
+A daily ChatGPT repository check acts as a safety net for cross-agent alignment.
+
+The check should inspect recent commits, activity-log entries, session-goal changes, current-status changes, and meaningful PR / issue activity.
+
+If no meaningful development occurred, no detailed intervention is required.
+
+If meaningful changes occurred, ChatGPT should summarize the changes, identify any design / architecture drift, and recommend the next smallest useful goal.
+
+This does not replace immediate review after important milestones.
 
 ## Branch and review strategy
 
