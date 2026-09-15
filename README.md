@@ -76,8 +76,8 @@ GitHub is the shared source of truth between these roles.
 
 ## Current status
 
-**Phase 0: Foundation.** The Unity project and `Assets/_MegawattValley/` skeleton are in this repository.
+**Phase 0: Foundation.** The Unity project, folder skeleton, and core packages are in this repository.
 
-The concept, initial design direction, architecture principles, development workflow, staged roadmap, a clean Unity 6 / URP project, and the agreed project folder structure are in place. Next: core packages (S0-03), not gameplay systems.
+The concept, initial design direction, architecture principles, development workflow, staged roadmap, a clean Unity 6 / URP project, the agreed project folder structure, and core packages (Input System, Cinemachine, UI Toolkit, ProBuilder) are in place. Next: prove Cursor can safely build (S0-04).
 
 See the `Docs/` folder for the current planning documents.

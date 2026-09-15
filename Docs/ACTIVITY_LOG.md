@@ -38,6 +38,38 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — S0-03 — Core packages ready
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Added `com.unity.cinemachine` (resolved to Unity 6.6 builtin **6.6.0**) and `com.unity.probuilder` **6.1.2**.
+- Confirmed Input System **1.20.0** already present with Active Input Handling = Input System Package.
+- Confirmed UI Toolkit baseline via built-in `modules.uielements` + `com.unity.ugui` **2.6.0**.
+- Added `CorePackagesSmokeCheck.cs` so Input System, UI Toolkit, and Cinemachine types must resolve at compile time.
+
+**Tested / Verified**
+- Unity batchmode opened the project, resolved packages, and exited with return code 0.
+- No `error CS` / script compilation failures in the editor log.
+- `packages-lock.json` lists cinemachine 6.6.0 (builtin) and probuilder 6.1.2.
+
+**Known issues / limitations**
+- Requesting Cinemachine 3.1.7 is remapped by Unity 6.6 to the builtin 6.6.0 package; manifest now pins `6.6.0`.
+- No gameplay camera or UI screens yet — that comes with later session goals.
+- ProBuilder is available as a package; no grey-box meshes authored yet.
+
+**Decisions / assumptions / recommendations**
+- Use the Unity 6.6 builtin Cinemachine rather than fighting the remap to registry 3.x.
+- Keep the smoke-check script until real camera/UI systems replace it (or delete in a later cleanup).
+
+**Next recommended step**
+- **S0-04 — Cursor can safely build**
+
+**Git / References**
+- Commit: `chore: add Cinemachine and ProBuilder core packages (S0-03)` on `main`
+- Branch / PR / Issue: `main`
+
 ## 2026-09-15 — S0-02 — Clean project skeleton
 
 **Agent:** Cursor

@@ -4,7 +4,7 @@
 
 **Phase 0: Foundation**
 
-The GitHub repository contains the living design docs and a clean Unity 6 / URP project (`6000.6.0f1`). The Unity project opens from this repository. The agreed `Assets/_MegawattValley/` folder skeleton is in place. Gameplay systems have not started.
+The GitHub repository contains the living design docs and a clean Unity 6 / URP project (`6000.6.0f1`). The Unity project opens from this repository. The agreed `Assets/_MegawattValley/` folder skeleton is in place. Core packages (Input System, Cinemachine, UI Toolkit, ProBuilder) are configured. Gameplay systems have not started.
 
 ## Locked decisions so far
 
@@ -36,9 +36,8 @@ A focused session should normally have one primary goal with a visible, playable
 
 Current first goals:
 
-1. **S0-03 — Core packages ready**
-2. **S0-04 — Cursor can safely build**
-3. **S0-05 — First Megawatt Valley scene**
+1. **S0-04 — Cursor can safely build**
+2. **S0-05 — First Megawatt Valley scene**
 
 Completing these earns the first project badge: **🏁 Foundation Online**.
 
@@ -75,15 +74,15 @@ The planned sequence is:
 
 ## Next action
 
-Configure the agreed core packages (Input System is already present from the URP template; add Cinemachine, UI Toolkit baseline, and ProBuilder as appropriate).
+Prove the Cursor → Unity → GitHub loop with one harmless code change that compiles.
 
 The next concrete session goal is:
 
-> **S0-03 — Core packages ready**
+> **S0-04 — Cursor can safely build**
 
-Success means the project compiles cleanly with the core toolset ready.
+Success means Cursor edits code, Unity compiles successfully, and the change is committed.
 
-After that, move to S0-04 rather than jumping ahead to gameplay systems.
+After that, move to S0-05 rather than jumping ahead to gameplay systems.
 
 ## Review habit
 

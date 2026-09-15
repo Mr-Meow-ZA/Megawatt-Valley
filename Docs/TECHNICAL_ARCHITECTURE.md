@@ -13,9 +13,10 @@ Planned baseline:
 - C#
 - GameObject / MonoBehaviour-based implementation initially
 - ScriptableObjects for configurable game definitions where appropriate
-- UI Toolkit for management UI
-- Cinemachine for tycoon camera behaviour
-- Unity Input System
+- UI Toolkit for management UI (built-in `modules.uielements` + `com.unity.ugui`)
+- Cinemachine **6.6.0** (Unity 6.6 builtin) for tycoon camera behaviour
+- Unity Input System **1.20.0** (project Active Input Handling = Input System Package)
+- ProBuilder **6.1.2** for grey-box / level-blockout modelling
 - NavMesh for staff movement where appropriate
 - Git + GitHub + Git LFS
 - Cursor as the primary implementation assistant / IDE

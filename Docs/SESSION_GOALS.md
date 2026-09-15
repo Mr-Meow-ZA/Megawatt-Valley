@@ -46,7 +46,7 @@ Avoid sessions whose only outcome is invisible infrastructure unless that infras
   Create the agreed `Assets/_MegawattValley/` folder structure and confirm scenes, scripts, prefabs, art, UI and data have clear homes.  
   **Victory moment:** Project window already looks intentional rather than like a blank Unity dump.
 
-- [ ] **S0-03 — Core packages ready**  
+- [x] **S0-03 — Core packages ready**  
   Configure Input System, Cinemachine, UI Toolkit baseline and ProBuilder as appropriate.  
   **Victory moment:** project compiles cleanly with the core toolset ready.
 
