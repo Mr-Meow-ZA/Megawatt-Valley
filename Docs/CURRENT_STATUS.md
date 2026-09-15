@@ -2,14 +2,14 @@
 
 ## Status
 
-**Phase 0: Pre-production / Foundation**
+**Phase 0: Foundation**
 
-The GitHub repository has been created and seeded with the initial game vision, architecture, development roadmap, Level 1 vertical-slice concept, AI-assisted development workflow, approved long-term visual direction, and a session-sized progress system.
+The GitHub repository contains the living design docs and a clean Unity 6 / URP project (`6000.6.0f1`). The Unity project opens from this repository. Gameplay systems have not started.
 
 ## Locked decisions so far
 
 - Working game title: **Megawatt Valley**.
-- Engine: **Unity**.
+- Engine: **Unity 6000.6.0f1** (Unity 6.6) with **URP**.
 - Primary implementation environment: **Cursor**.
 - GitHub is the source of truth for project code and living project documents.
 - ChatGPT remains actively involved in design, planning, review, balancing, research, architecture review, visual-direction review, and milestone definition.
@@ -36,11 +36,10 @@ A focused session should normally have one primary goal with a visible, playable
 
 Current first goals:
 
-1. **S0-01 — Unity lives in GitHub**
-2. **S0-02 — Clean project skeleton**
-3. **S0-03 — Core packages ready**
-4. **S0-04 — Cursor can safely build**
-5. **S0-05 — First Megawatt Valley scene**
+1. **S0-02 — Clean project skeleton**
+2. **S0-03 — Core packages ready**
+3. **S0-04 — Cursor can safely build**
+4. **S0-05 — First Megawatt Valley scene**
 
 Completing these earns the first project badge: **🏁 Foundation Online**.
 
@@ -60,7 +59,7 @@ The planned sequence is:
 
 ## Not yet locked
 
-- Exact Unity 6 LTS minor version.
+- Whether to stay on Unity 6.6 or move to a Unity 6 LTS label later.
 - Final character design and exact character proportions.
 - Exact colour palette and material specifications.
 - Final asset-production pipeline and whether final assets are mainly custom, commissioned, purchased, kitbashed, or a mix.
@@ -77,15 +76,15 @@ The planned sequence is:
 
 ## Next action
 
-Create the Unity project locally and connect it to this repository.
+Create the agreed `Assets/_MegawattValley/` folder structure.
 
 The next concrete session goal is:
 
-> **S0-01 — Unity lives in GitHub**
+> **S0-02 — Clean project skeleton**
 
-Success means the Unity project is committed cleanly to this repository and can be reopened from the repo without errors.
+Success means the Project window already looks intentional rather than like a blank Unity dump.
 
-After that, move to S0-02 rather than jumping ahead to gameplay systems.
+After that, move to S0-03 rather than jumping ahead to gameplay systems.
 
 ## Review habit
 

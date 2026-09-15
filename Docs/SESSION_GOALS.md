@@ -38,7 +38,7 @@ Avoid sessions whose only outcome is invisible infrastructure unless that infras
 
 ## Foundation — "The project exists"
 
-- [ ] **S0-01 — Unity lives in GitHub**  
+- [x] **S0-01 — Unity lives in GitHub**  
   Create the Unity project locally, connect it to this repository, verify the correct Unity `.gitignore`, and make the first clean Unity project commit.  
   **Victory moment:** clone/open the repo and Unity launches the project successfully.
 

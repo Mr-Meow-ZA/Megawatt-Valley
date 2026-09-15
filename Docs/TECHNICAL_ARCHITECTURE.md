@@ -8,7 +8,7 @@ This document records the initial technical direction for Megawatt Valley. It is
 
 Planned baseline:
 
-- Unity 6 LTS family — exact version to be confirmed at project creation
+- Unity **6000.6.0f1** (Unity 6.6) — locked at project creation from the locally installed editor
 - Universal Render Pipeline (URP)
 - C#
 - GameObject / MonoBehaviour-based implementation initially

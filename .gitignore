@@ -27,6 +27,8 @@
 *.mdb
 *.opendb
 *.VC.db
+*.unityproj
+InitTestScene*.unity*
 
 # Rider
 *.sln.iml
@@ -42,6 +44,7 @@ Desktop.ini
 # Crash / diagnostic files
 sysinfo.txt
 crashlytics-build.properties
+CrashReports/
 
 # Unity temporary / generated packages
 /[Aa]ssets/[Ss]treamingAssets/aa.meta

@@ -38,6 +38,38 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — S0-01 — Unity lives in GitHub
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Created a Unity **6000.6.0f1** (Unity 6.6) **URP blank** project and connected it to this repository.
+- Added `Assets/`, `Packages/`, `ProjectSettings/`, `.vsconfig`, Unity-aware `.gitignore`, and `.gitattributes` with Git LFS for binary assets.
+- Locked engine version in `README.md`, `Docs/TECHNICAL_ARCHITECTURE.md`, and `Docs/CURRENT_STATUS.md`.
+- Marked **S0-01** complete; next goal is **S0-02 — Clean project skeleton**.
+
+**Tested / Verified**
+- Unity batchmode created the URP project from the bundled template.
+- Unity batchmode opened `C:\Users\rapha\Documents\Megawatt-Valley` and exited successfully (return code 0).
+- Product name set to **Megawatt Valley** in `ProjectSettings`.
+
+**Known issues / limitations**
+- Project still uses the default URP blank template scene and tutorial assets; S0-02 will replace that with the agreed folder skeleton.
+- Cinemachine, UI Toolkit baseline, and ProBuilder are deferred to S0-03.
+- Rapha should open the project once in the Unity Editor GUI to confirm licensing and first-run experience on this machine.
+
+**Decisions / assumptions / recommendations**
+- Unity **6000.6.0f1** is the locked editor for now (matches the locally installed Hub editor).
+- S0-01 stays deliberately small: no gameplay systems, no `_MegawattValley/` skeleton yet.
+
+**Next recommended step**
+- **S0-02 — Clean project skeleton**
+
+**Git / References**
+- Commit: `feat: add Unity 6 URP project (S0-01)` on `main`
+- Branch / PR / Issue: `main`
+
 ## 2026-09-15 — Support Task — Grok Bot added to collaboration model
 
 **Agent:** ChatGPT

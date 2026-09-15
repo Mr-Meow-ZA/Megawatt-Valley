@@ -51,8 +51,7 @@ Wind, BESS, advanced financing, multi-region portfolios, and other major systems
 
 Current planned stack:
 
-- Unity 6 LTS family — exact production version to be confirmed when the project environment is created
-- Universal Render Pipeline (URP)
+- Unity **6000.6.0f1** (Unity 6.6) with Universal Render Pipeline (URP)
 - C# / GameObject-based architecture initially
 - ScriptableObjects and other data-driven definitions for game content
 - UI Toolkit
@@ -77,8 +76,8 @@ GitHub is the shared source of truth between these roles.
 
 ## Current status
 
-**Pre-production / foundation.**
+**Phase 0: Foundation.** The Unity project is in this repository and can be opened from GitHub.
 
-The concept, initial design direction, architecture principles, development workflow, and staged roadmap are being documented before the first Unity implementation sprint.
+The concept, initial design direction, architecture principles, development workflow, staged roadmap, and a clean Unity 6 / URP project are in place. Next: project skeleton (S0-02), not gameplay systems.
 
 See the `Docs/` folder for the current planning documents.
