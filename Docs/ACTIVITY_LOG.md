@@ -38,6 +38,34 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — S0-02 — Clean project skeleton
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Created `Assets/_MegawattValley/` with the agreed Art, Audio, Materials, Prefabs, Scenes, UI, Data/*, and Scripts/* folders.
+- Added Unity folder `.meta` files and leaf `.gitkeep` placeholders so Git tracks empty folders with stable GUIDs.
+
+**Tested / Verified**
+- Folder tree matches `Docs/TECHNICAL_ARCHITECTURE.md` suggested structure.
+- Confirmed expected `.meta` files exist for root, nested folders, and placeholders.
+
+**Known issues / limitations**
+- URP template assets (`Assets/Scenes/SampleScene`, `TutorialInfo`, root `Settings`) remain; dedicated Megawatt Valley scene is S0-05.
+- Folders are empty placeholders only — no scripts, prefabs, or data assets yet.
+
+**Decisions / assumptions / recommendations**
+- Keep game content under `Assets/_MegawattValley/`; leave template/settings assets at the Assets root for now.
+- Do not expand into packages (S0-03) or a prototype scene (S0-05) in this session.
+
+**Next recommended step**
+- **S0-03 — Core packages ready**
+
+**Git / References**
+- Commit: `feat: add Megawatt Valley Assets folder skeleton (S0-02)` on `main`
+- Branch / PR / Issue: `main`
+
 ## 2026-09-15 — S0-01 — Unity lives in GitHub
 
 **Agent:** Cursor

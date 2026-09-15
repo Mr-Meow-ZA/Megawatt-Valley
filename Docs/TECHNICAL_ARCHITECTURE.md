@@ -142,7 +142,7 @@ ProjectSettings/
 Packages/
 ```
 
-The exact structure may evolve once Unity creates its native project files.
+The exact structure may evolve as packages and first scenes are added. As of S0-02, this tree exists under `Assets/_MegawattValley/` with tracked placeholders so Git and the Project window share the same layout.
 
 ## Early domain model
 

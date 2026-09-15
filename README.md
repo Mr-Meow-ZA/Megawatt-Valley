@@ -76,8 +76,8 @@ GitHub is the shared source of truth between these roles.
 
 ## Current status
 
-**Phase 0: Foundation.** The Unity project is in this repository and can be opened from GitHub.
+**Phase 0: Foundation.** The Unity project and `Assets/_MegawattValley/` skeleton are in this repository.
 
-The concept, initial design direction, architecture principles, development workflow, staged roadmap, and a clean Unity 6 / URP project are in place. Next: project skeleton (S0-02), not gameplay systems.
+The concept, initial design direction, architecture principles, development workflow, staged roadmap, a clean Unity 6 / URP project, and the agreed project folder structure are in place. Next: core packages (S0-03), not gameplay systems.
 
 See the `Docs/` folder for the current planning documents.

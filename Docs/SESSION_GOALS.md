@@ -42,7 +42,7 @@ Avoid sessions whose only outcome is invisible infrastructure unless that infras
   Create the Unity project locally, connect it to this repository, verify the correct Unity `.gitignore`, and make the first clean Unity project commit.  
   **Victory moment:** clone/open the repo and Unity launches the project successfully.
 
-- [ ] **S0-02 — Clean project skeleton**  
+- [x] **S0-02 — Clean project skeleton**  
   Create the agreed `Assets/_MegawattValley/` folder structure and confirm scenes, scripts, prefabs, art, UI and data have clear homes.  
   **Victory moment:** Project window already looks intentional rather than like a blank Unity dump.
 
