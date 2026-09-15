@@ -1,4 +1,4 @@
-# Megawatt Valley — Development Roadmap v0.1
+# Megawatt Valley — Development Roadmap v0.2
 
 ## Roadmap philosophy
 
@@ -7,6 +7,28 @@ Megawatt Valley will be built in playable layers. Each phase must produce someth
 The first strategic goal is not “build the full renewable-energy tycoon.” It is:
 
 > **Prove that placing, operating, maintaining, and growing a small solar project is fun.**
+
+The approved long-term visual target is defined in `Docs/VISUAL_DIRECTION.md`.
+
+The game will not attempt final art quality during early prototypes, but early decisions about camera, scale, world layout, UI composition, simulation / presentation separation, and asset structure must support the eventual visual target.
+
+The visual-production strategy is:
+
+**prove the game → prove the visual language → build reusable art systems → scale content → polish**
+
+### Cross-cutting visual checkpoints
+
+These checkpoints run alongside gameplay development rather than replacing it:
+
+- **V0 — Grey-box readability:** camera, zoom, scale, silhouettes, building footprints, roads, solar-array readability, and UI composition.
+- **V1 — Style prototype / hero corner:** after the core loop is proven, build one small scene at roughly 60–70% of final intended style to validate materials, lighting, proportions, character scale, vegetation, and performance.
+- **V2 — Art bible + modular kits:** document and standardise asset scale, material language, colour ranges, bevel / geometry rules, character direction, vegetation, signage, UI language, and optimisation rules before mass production.
+- **V3 — Level 1 environment pass:** replace grey-box terrain, roads, buildings, solar assets, substations, props, vehicles, and vegetation progressively.
+- **V4 — Characters + world activity:** staff roles, animations, maintenance actions, construction activity, vehicles, idle behaviour, and environmental humour.
+- **V5 — UI + weather + VFX + audio integration:** presentation systems come together.
+- **V6 — Final polish benchmark:** Level 1 should eventually reach the warmth, readability, density, charm, and screenshot quality of the approved concept direction without copying it literally.
+
+---
 
 ## Phase 0 — Foundation
 
@@ -22,6 +44,7 @@ Create a stable Unity + Cursor + Git workflow.
 - Configure Input System, Cinemachine, UI Toolkit, and other agreed packages.
 - Test Cursor editing and Unity compilation workflow.
 - Explore Unity MCP integration if useful.
+- Confirm the rendering baseline can support the approved stylised 3D target without introducing premature custom-rendering complexity.
 
 ### Exit criteria
 - Unity project opens cleanly.
@@ -42,9 +65,12 @@ Create a basic tycoon-game world that feels good to navigate.
 - Selectable ground / plots.
 - Basic cursor feedback.
 - Simple world-space selection indicator.
+- Establish an initial scale reference for a person, vehicle, road, solar table, fence, and representative building.
+- Test camera angle and zoom range against the long-term visual target.
 
 ### Exit criteria
 - Player can comfortably inspect and navigate the test site.
+- Normal gameplay zoom can clearly distinguish roads, buildings, solar infrastructure, and people-scale placeholders.
 
 ---
 
@@ -63,6 +89,7 @@ Make construction interaction satisfying before adding detailed energy logic.
 - Cancel placement.
 - Demolish / remove.
 - Initial placeholder solar-array object.
+- Confirm placement footprints and spacing are visually compatible with the intended stylised scale rather than blindly using real-world dimensions.
 
 ### Exit criteria
 - Player can spend money to place and remove solar infrastructure reliably.
@@ -85,6 +112,7 @@ Make the first renewable-energy system actually work.
 - Grid export.
 - Current output display.
 - Generation statistics.
+- Preserve separation between logical plant simulation and visual representation so richer future scenes do not require thousands of individual simulation objects.
 
 ### Exit criteria
 - A correctly connected solar asset visibly produces power.
@@ -121,6 +149,7 @@ Make generation dynamic rather than constant.
 - Solar resource curve.
 - Basic cloud / weather variation.
 - Visual relationship between weather and production.
+- Keep weather architecture compatible with later atmospheric polish, but use simple prototype visuals first.
 
 ### Exit criteria
 - Output changes predictably with time and weather, and the player can understand why.
@@ -167,6 +196,7 @@ Introduce character-driven management.
 - Basic staff navigation.
 - Staff performs at least one meaningful task in-world.
 - Initial traits system or placeholder for it.
+- Establish staff scale and navigation assumptions that can later support expressive final characters without rewriting core staff logic.
 
 ### Exit criteria
 - Staff are visibly involved in keeping the project running and materially affect gameplay.
@@ -210,17 +240,17 @@ Turn the sandbox loop into a scenario.
 
 ---
 
-## Phase 10 — Level 1 Vertical Slice
+## Phase 10 — Level 1 Functional Vertical Slice
 
 ### Goal
-Combine the systems into the first coherent 30–60 minute scenario.
+Combine the systems into the first coherent 30–60 minute scenario before expensive final-art production.
 
 Working level title:
 
 **Level 1 — Here Comes the Sun**
 
 Expected ingredients:
-- one polished-ish test map;
+- one coherent grey-box / early-art test map;
 - multiple candidate project sites or site choices;
 - small company / office presence;
 - starting cash constraint;
@@ -240,35 +270,110 @@ Expected ingredients:
 
 This is the first major **go / change / rethink** point for the project.
 
+If the gameplay loop passes this checkpoint, begin **V1 — Style Prototype / Hero Corner** before large-scale art production.
+
 ---
 
-## Phase 11 — Personality and Presentation
+## Phase 11 — Visual Identity and Production Pipeline
 
 ### Goal
-Turn the functional vertical slice into something recognisably Megawatt Valley.
+Prove that the approved visual target is achievable, then create the reusable art systems needed to scale it.
+
+### Stage A — Style prototype / hero corner
+
+Build one small representative scene at roughly 60–70% of final intended quality containing:
+
+- one small office;
+- one O&M workshop;
+- one solar-array section;
+- one simplified substation;
+- one service road;
+- one utility vehicle;
+- one technician character;
+- representative vegetation / landscaping;
+- representative UI;
+- target lighting and post-processing.
+
+Validate:
+
+- visual identity;
+- proportions and scale;
+- material style;
+- lighting;
+- camera composition;
+- readability;
+- performance;
+- whether the art direction remains practical for a small development effort.
+
+### Stage B — Art bible
+
+Document:
+
+- colour language;
+- material rules;
+- geometry / bevel standards;
+- texture approach;
+- scale guide;
+- character proportion language;
+- vegetation language;
+- signage / fictional-brand language;
+- UI design language;
+- LOD and optimisation expectations.
+
+### Stage C — Modular production kits
+
+Develop reusable kits for:
+
+- offices;
+- O&M / industrial buildings;
+- roads / paths;
+- fencing / gates;
+- solar components;
+- substation components;
+- landscaping / vegetation;
+- site props;
+- vehicles;
+- signage / decals.
+
+### Exit criteria
+- The hero scene convincingly demonstrates the intended Megawatt Valley visual identity.
+- The style is achievable in Unity at acceptable performance.
+- Future assets can be produced consistently using a documented pipeline.
+
+---
+
+## Phase 12 — Level 1 Presentation Pass
+
+### Goal
+Turn the proven functional vertical slice into a polished Megawatt Valley experience.
 
 ### Tasks
-- Original stylised art direction.
-- Character silhouettes and animation.
-- Better solar equipment models.
+- Replace grey-box terrain and environment progressively.
+- Production-quality solar / electrical infrastructure.
+- Buildings and site facilities.
+- Vehicles and props.
+- Landscaping / vegetation.
+- Character visual pass.
+- Task and idle animations.
 - Construction animation / staging.
 - Weather effects.
-- Humorous writing.
-- Staff quirks.
+- Humorous environmental storytelling.
 - Audio feedback.
 - Music direction.
 - Radio / announcement experiments.
 - UI polish.
-- Environmental storytelling and visual jokes.
+- Camera polish.
+- VFX and feedback.
 
 ### Exit criteria
 - Screenshots and short clips clearly communicate the intended identity of the game.
+- Level 1 can eventually approach the approved concept benchmark in warmth, readability, density, charm, and polish.
 
 ---
 
-## Phase 12 — Expansion Systems
+## Phase 13 — Expansion Systems
 
-Only after the solar vertical slice is proven.
+Only after the solar vertical slice is proven and its production pipeline is understood.
 
 Potential additions:
 - BESS.
@@ -305,3 +410,5 @@ These are not first-prototype requirements:
 ## Development rule
 
 If a new feature does not improve or validate the current playable loop, it should normally wait.
+
+If visual polish does not validate a reusable art direction or materially improve the current vertical slice, it should also normally wait.
