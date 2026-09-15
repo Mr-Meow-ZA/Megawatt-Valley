@@ -52,6 +52,8 @@ Session badges prove a *miniature* version of a phase. They do **not** automatic
 
 Practical Cursor / ChatGPT / Grok working practices, asset policy, and post–Tiny Tycoon sequencing live in `Docs/PRACTICES_AND_PLANNING.md` until accepted into this roadmap.
 
+Milestone sequence (eras, not calendar dates): `Docs/DEVELOPMENT_TIMELINE.md` and the browser visual at `Docs/visuals/development-timeline.html`.
+
 ### Cross-cutting visual checkpoints
 
 These checkpoints run alongside gameplay development rather than replacing it:

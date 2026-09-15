@@ -38,6 +38,35 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-15 — Support — Visual development timeline
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Added browser visual `Docs/visuals/development-timeline.html` (era rail, you-are-here at S6-01).
+- Added `Docs/DEVELOPMENT_TIMELINE.md` with Mermaid timeline/flowchart + celebration marker table.
+- Linked from README, CURRENT_STATUS, ROADMAP, COLLABORATION_GUIDE; restored PRACTICES §9 item 6 (Blender/Krita decisions).
+
+**Tested / Verified**
+- HTML opens as self-contained page; Mermaid blocks valid for GitHub rendering.
+- Timeline matches SESSION_GOALS S0–S5 done and S6/L1 queued.
+
+**Known issues / limitations**
+- No calendar dates by design — eras only.
+- HTML is local-file / GitHub raw viewing; not a hosted site.
+
+**Decisions / assumptions / recommendations**
+- Milestone sequencing over week estimates.
+- Update HTML “you are here” whenever CURRENT_STATUS next action changes.
+
+**Next recommended step**
+- Rapha playtest S6-01; advance timeline marker when accepted.
+
+**Git / References**
+- Commit: pending
+- Branch / PR / Issue: `cursor/dev-timeline-visual-5b47`
+
 ## 2026-09-15 — Support — Cursor + Blender + Krita research
 
 **Agent:** Cursor

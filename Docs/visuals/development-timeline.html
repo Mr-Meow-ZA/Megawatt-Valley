@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Megawatt Valley — Development Timeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --sun: #f0b429;
+      --sun-hot: #ffd56a;
+      --valley: #1f6b4a;
+      --valley-deep: #0f3d2c;
+      --sky: #7ec8e3;
+      --sky-deep: #3a8fb5;
+      --soil: #2a2118;
+      --cream: #fff8e7;
+      --panel: rgba(15, 40, 32, 0.72);
+      --done: #3dba7a;
+      --now: #f0b429;
+      --next: #6ec6e8;
+      --later: #9aa8b5;
+      --ink: #f7f1e4;
+      --muted: #b7c9bc;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Outfit", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(240, 180, 41, 0.35), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(126, 200, 227, 0.28), transparent 50%),
+        linear-gradient(165deg, #0b1f18 0%, #163528 38%, #1a2e38 72%, #0e1a22 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        repeating-linear-gradient(
+          -18deg,
+          transparent 0,
+          transparent 46px,
+          rgba(255, 255, 255, 0.015) 46px,
+          rgba(255, 255, 255, 0.015) 47px
+        );
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0 4rem;
+    }
+
+    header.hero {
+      display: grid;
+      gap: 0.85rem;
+      margin-bottom: 2.25rem;
+      animation: rise 0.8s ease-out both;
+    }
+
+    .brand {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      background: linear-gradient(105deg, var(--sun-hot) 0%, var(--sun) 35%, #ffe8a8 55%, var(--sky) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 2px 12px rgba(240, 180, 41, 0.25));
+    }
+
+    .tagline {
+      max-width: 36rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.45;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--done);
+      box-shadow: 0 0 10px rgba(61, 186, 122, 0.7);
+    }
+    .dot.now { background: var(--now); box-shadow: 0 0 10px rgba(240, 180, 41, 0.8); animation: pulse 2s ease-in-out infinite; }
+    .dot.next { background: var(--next); box-shadow: 0 0 8px rgba(110, 198, 232, 0.6); }
+    .dot.later { background: var(--later); box-shadow: none; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin: 1.5rem 0 2rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 1rem;
+      background: rgba(8, 22, 18, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      animation: rise 0.9s 0.1s ease-out both;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .note {
+      margin: 0 0 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      animation: rise 0.9s 0.15s ease-out both;
+    }
+
+    .rail {
+      position: relative;
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .rail::before {
+      content: "";
+      position: absolute;
+      left: 1.15rem;
+      top: 0.5rem;
+      bottom: 0.5rem;
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(
+        180deg,
+        var(--done) 0%,
+        var(--done) 28%,
+        var(--now) 32%,
+        var(--next) 55%,
+        var(--later) 100%
+      );
+      opacity: 0.85;
+    }
+
+    @media (min-width: 820px) {
+      .rail::before {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+
+    .era {
+      position: relative;
+      display: grid;
+      gap: 0.75rem;
+      padding-left: 3rem;
+      animation: rise 0.7s ease-out both;
+    }
+
+    .era:nth-child(1) { animation-delay: 0.15s; }
+    .era:nth-child(2) { animation-delay: 0.25s; }
+    .era:nth-child(3) { animation-delay: 0.35s; }
+    .era:nth-child(4) { animation-delay: 0.45s; }
+    .era:nth-child(5) { animation-delay: 0.55s; }
+    .era:nth-child(6) { animation-delay: 0.65s; }
+
+    @media (min-width: 820px) {
+      .era {
+        grid-template-columns: 1fr 1fr;
+        padding-left: 0;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .era:nth-child(odd) .card { grid-column: 1; justify-self: end; text-align: right; }
+      .era:nth-child(odd) .marker { grid-column: 2; justify-self: start; }
+      .era:nth-child(even) .marker { grid-column: 1; justify-self: end; }
+      .era:nth-child(even) .card { grid-column: 2; justify-self: start; }
+      .era:nth-child(odd) .card { order: 1; }
+      .era:nth-child(odd) .marker { order: 2; }
+    }
+
+    .marker {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-height: 2.4rem;
+    }
+
+    .node {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      border: 3px solid #0b1f18;
+      flex-shrink: 0;
+      position: absolute;
+      left: 0.55rem;
+      top: 1.1rem;
+      z-index: 2;
+    }
+
+    @media (min-width: 820px) {
+      .node {
+        position: static;
+      }
+      .era:nth-child(odd) .marker { padding-left: 1.75rem; }
+      .era:nth-child(even) .marker { padding-right: 1.75rem; flex-direction: row-reverse; }
+    }
+
+    .node.done { background: var(--done); box-shadow: 0 0 0 4px rgba(61, 186, 122, 0.25); }
+    .node.now {
+      background: var(--now);
+      box-shadow: 0 0 0 4px rgba(240, 180, 41, 0.3), 0 0 22px rgba(240, 180, 41, 0.55);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .node.next { background: var(--next); box-shadow: 0 0 0 4px rgba(110, 198, 232, 0.22); }
+    .node.later { background: #5c6b76; box-shadow: 0 0 0 4px rgba(154, 168, 181, 0.15); }
+
+    .marker-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card {
+      width: min(100%, 460px);
+      padding: 1.15rem 1.25rem 1.25rem;
+      border-radius: 1.15rem;
+      background: linear-gradient(160deg, rgba(22, 52, 42, 0.92), rgba(12, 28, 34, 0.88));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(240, 180, 41, 0.35);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    }
+
+    .card.you-are-here {
+      border-color: rgba(240, 180, 41, 0.55);
+      box-shadow: 0 0 0 1px rgba(240, 180, 41, 0.2), 0 18px 44px rgba(0, 0, 0, 0.35);
+    }
+
+    .era-kicker {
+      display: inline-block;
+      margin-bottom: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sun);
+    }
+
+    .era h2 {
+      margin: 0 0 0.45rem;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .era p.desc {
+      margin: 0 0 0.9rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    ul.milestones {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    ul.milestones li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.55rem;
+      align-items: start;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    @media (min-width: 820px) {
+      .era:nth-child(odd) ul.milestones li {
+        grid-template-columns: 1fr auto;
+      }
+      .era:nth-child(odd) ul.milestones li .badge { order: 2; }
+      .era:nth-child(odd) ul.milestones li .text { order: 1; text-align: right; }
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.45rem;
+      border-radius: 0.4rem;
+      white-space: nowrap;
+      margin-top: 0.1rem;
+    }
+
+    .badge.done { background: rgba(61, 186, 122, 0.2); color: #7dffb4; }
+    .badge.now { background: rgba(240, 180, 41, 0.22); color: #ffd978; }
+    .badge.next { background: rgba(110, 198, 232, 0.2); color: #b7e9ff; }
+    .badge.later { background: rgba(154, 168, 181, 0.18); color: #c5d0d8; }
+
+    .text strong { font-weight: 600; color: #fff; }
+    .text em { font-style: normal; color: var(--muted); font-size: 0.85em; }
+
+    footer {
+      margin-top: 2.75rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      animation: rise 0.8s 0.7s ease-out both;
+    }
+
+    footer a { color: var(--sun-hot); text-underline-offset: 3px; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand">Megawatt Valley</div>
+      <p class="tagline">Development timeline — milestone eras, not calendar guesses. Prove the game, then prove the look, then scale.</p>
+      <div class="meta">
+        <span class="chip"><span class="dot done"></span> Grey-box slice playable</span>
+        <span class="chip"><span class="dot now"></span> You are here: playtest</span>
+        <span class="chip"><span class="dot next"></span> Next: harden → Level 1</span>
+      </div>
+    </header>
+
+    <div class="legend">
+      <span><span class="dot done"></span> Done</span>
+      <span><span class="dot now"></span> Current focus</span>
+      <span><span class="dot next"></span> Near-term</span>
+      <span><span class="dot later"></span> Later / gated</span>
+    </div>
+
+    <p class="note">Sequenced by celebration markers and session tracks (<code>SESSION_GOALS</code> / <code>ROADMAP</code>). Durations stay flexible on purpose.</p>
+
+    <div class="rail" aria-label="Development milestone timeline">
+
+      <section class="era">
+        <div class="card">
+          <span class="era-kicker">Era 0 · Complete</span>
+          <h2>Foundation &amp; Tiny Tycoon</h2>
+          <p class="desc">Unity lives in GitHub. Camera, build, cash, MW, faults, staff humour, and a miniature win state.</p>
+          <ul class="milestones">
+            <li><span class="badge done">Done</span><span class="text"><strong>🏁 Foundation Online</strong> <em>S0 — Unity + Cursor + Git</em></span></li>
+            <li><span class="badge done">Done</span><span class="text"><strong>🗺️ Valley Explorer</strong> <em>S1 — pan / zoom / rotate</em></span></li>
+            <li><span class="badge done">Done</span><span class="text"><strong>🔨 First Foundations</strong> <em>S2 — place &amp; demolish solar</em></span></li>
+            <li><span class="badge done">Done</span><span class="text"><strong>💰 First Megawatt Earned</strong> <em>S3 — generate → export → cash</em></span></li>
+            <li><span class="badge done">Done</span><span class="text"><strong>🔧 Keeping the Lights On</strong> <em>S4 — faults &amp; repair</em></span></li>
+            <li><span class="badge done">Done</span><span class="text"><strong>⭐ Tiny Tycoon / 🎮 First Playable</strong> <em>S5 — event, objective, win</em></span></li>
+          </ul>
+        </div>
+        <div class="marker"><span class="node done" aria-hidden="true"></span><span class="marker-label">Proven</span></div>
+      </section>
+
+      <section class="era">
+        <div class="card you-are-here">
+          <span class="era-kicker">Era 1 · Now</span>
+          <h2>Accept &amp; Harden</h2>
+          <p class="desc">Human playtest, ChatGPT alignment, then HUD / data / tests / save — no art pass yet.</p>
+          <ul class="milestones">
+            <li><span class="badge now">Now</span><span class="text"><strong>S6-01 Playtest acceptance</strong> <em>Prototype_Valley on home PC</em></span></li>
+            <li><span class="badge next">Next</span><span class="text"><strong>S6-02 ChatGPT review</strong> <em>refresh CHATGPT_REVIEW.md</em></span></li>
+            <li><span class="badge next">Next</span><span class="text"><strong>S6-03 UI Toolkit HUD v1</strong></span></li>
+            <li><span class="badge next">Next</span><span class="text"><strong>S6-04 ScriptableObject content</strong></span></li>
+            <li><span class="badge next">Next</span><span class="text"><strong>S6-05 EditMode economy tests</strong></span></li>
+            <li><span class="badge next">Next</span><span class="text"><strong>S6-06 Save / load stub</strong></span></li>
+          </ul>
+        </div>
+        <div class="marker"><span class="node now" aria-hidden="true"></span><span class="marker-label">You are here</span></div>
+      </section>
+
+      <section class="era">
+        <div class="card">
+          <span class="era-kicker">Era 2 · Near-term</span>
+          <h2>Level 1 Thin Slice</h2>
+          <p class="desc">Here Comes the Sun — one map, tunable economy, two equipment choices, five events, 1★, one climax.</p>
+          <ul class="milestones">
+            <li><span class="badge next">Queued</span><span class="text"><strong>L1-01 Scenario map blockout</strong></span></li>
+            <li><span class="badge next">Queued</span><span class="text"><strong>L1-02 Tunable start economy</strong></span></li>
+            <li><span class="badge next">Queued</span><span class="text"><strong>L1-03 Bargain vs premium gear</strong></span></li>
+            <li><span class="badge next">Queued</span><span class="text"><strong>L1-04 Five decision events</strong></span></li>
+            <li><span class="badge next">Queued</span><span class="text"><strong>L1-05 One-star clear</strong></span></li>
+            <li><span class="badge next">Queued</span><span class="text"><strong>L1-06 Climax beat</strong></span></li>
+            <li><span class="badge later">Stretch</span><span class="text"><strong>Multi-site · 2★/3★ · bigger event deck</strong></span></li>
+          </ul>
+        </div>
+        <div class="marker"><span class="node next" aria-hidden="true"></span><span class="marker-label">Scenario</span></div>
+      </section>
+
+      <section class="era">
+        <div class="card">
+          <span class="era-kicker">Era 3 · Kill gate</span>
+          <h2>Go / Change / Rethink</h2>
+          <p class="desc">If Level 1 thin-slice is fun, unlock visual production. If not, fix the loop before art spend.</p>
+          <ul class="milestones">
+            <li><span class="badge later">Gate</span><span class="text"><strong>Playtest verdict</strong> <em>fun enough to invest in look?</em></span></li>
+            <li><span class="badge later">Gate</span><span class="text"><strong>Scope lock</strong> <em>solar-only still; no wind/BESS yet</em></span></li>
+          </ul>
+        </div>
+        <div class="marker"><span class="node later" aria-hidden="true"></span><span class="marker-label">Decision</span></div>
+      </section>
+
+      <section class="era">
+        <div class="card">
+          <span class="era-kicker">Era 4 · Visual</span>
+          <h2>Hero Corner → Art Kits</h2>
+          <p class="desc">Prove the visual language once, then build modular kits. Blender/Krita tooling only when this era opens.</p>
+          <ul class="milestones">
+            <li><span class="badge later">Later</span><span class="text"><strong>🎨 Hero Corner (V1)</strong> <em>~60–70% final style corner</em></span></li>
+            <li><span class="badge later">Later</span><span class="text"><strong>V2 Art bible + modular kits</strong></span></li>
+            <li><span class="badge later">Later</span><span class="text"><strong>V3–V5</strong> <em>L1 environment, characters, UI/VFX/audio</em></span></li>
+            <li><span class="badge later">Later</span><span class="text"><strong>🌄 Here Comes the Sun</strong> <em>polished Level 1 completion</em></span></li>
+            <li><span class="badge later">Later</span><span class="text"><strong>V6 Polish benchmark</strong> <em>screenshot-quality warmth</em></span></li>
+          </ul>
+        </div>
+        <div class="marker"><span class="node later" aria-hidden="true"></span><span class="marker-label">Look</span></div>
+      </section>
+
+      <section class="era">
+        <div class="card">
+          <span class="era-kicker">Era 5 · Expansion</span>
+          <h2>Beyond the Solar Slice</h2>
+          <p class="desc">Only after the solar vertical slice and production pipeline are proven.</p>
+          <ul class="milestones">
+            <li><span class="badge later">Deferred</span><span class="text"><strong>BESS · Wind · Hybrid</strong></span></li>
+            <li><span class="badge later">Deferred</span><span class="text"><strong>Multi-site portfolio · HQ · deeper finance</strong></span></li>
+            <li><span class="badge later">Deferred</span><span class="text"><strong>Campaign regions · research tree expansion</strong></span></li>
+          </ul>
+        </div>
+        <div class="marker"><span class="node later" aria-hidden="true"></span><span class="marker-label">Expand</span></div>
+      </section>
+
+    </div>
+
+    <footer>
+      Living timeline for <strong>Megawatt Valley</strong>. Source: <a href="../SESSION_GOALS.md">SESSION_GOALS.md</a>,
+      <a href="../ROADMAP.md">ROADMAP.md</a>, <a href="../CURRENT_STATUS.md">CURRENT_STATUS.md</a>.
+      Open this file in a browser for the visual view; Mermaid twin lives in <a href="../DEVELOPMENT_TIMELINE.md">DEVELOPMENT_TIMELINE.md</a>.
+      Updated 2026-09-15 — progress marker at S6-01.
+    </footer>
+  </div>
+</body>
+</html>

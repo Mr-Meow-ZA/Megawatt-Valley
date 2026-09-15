@@ -81,7 +81,7 @@ GitHub is the shared source of truth between these roles. Collaboration protocol
 
 Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play on the home PC. Next: Rapha playtest (`S6-01`) + ChatGPT review (`S6-02`), then harden HUD/data before Level 1 thin-slice — not a major art pass yet.
 
-See the `Docs/` folder for the current planning documents.
+See the `Docs/` folder for the current planning documents. **Visual development timeline:** open [`Docs/visuals/development-timeline.html`](Docs/visuals/development-timeline.html) or read [`Docs/DEVELOPMENT_TIMELINE.md`](Docs/DEVELOPMENT_TIMELINE.md).
 
 ## Playtest controls (grey-box)
 
