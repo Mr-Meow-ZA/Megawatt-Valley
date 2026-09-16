@@ -38,6 +38,47 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-16 — S6-01 → S6-06 — Playtest fixes, HUD, content pack, tests, save stub
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Playtest fix batch from Rapha's `S6-01` notes:
+  - technician keeps a collider and is selectable with a details panel;
+  - wear dropped from 1.2 to 0.1 per generating second, worn output floor raised from 0.2× to 0.55×, fault chance reduced — arrays no longer die within a minute;
+  - day starts at solar noon, daylight is 80% of the cycle and night fast-forwards, so a new site earns immediately;
+  - grid radius 18 m → 26 m with a visible ring of posts, and `SolarArrayUnit` re-checks its grid connection each tick instead of once at spawn;
+  - revenue per MW-second 4 → 8, and the objective now tracks installed MW (target 0.75) rather than instantaneous output.
+- `S6-03` UI Toolkit HUD replaces every `OnGUI` block: cash + income rate, export/installed MW, day + clock + sun factor, objective, build bar with prices, selection panel, alert banner, event modal, save bar. `UiInputGuard` stops HUD clicks reaching the world.
+- `S6-04` balance moved into ScriptableObjects (`SolarArrayDefinition`, `DecisionEventDefinition`, `ScenarioDefinition`) created idempotently by `ContentBootstrap`; `SolarArrayFactory` is now the single way an array is assembled.
+- `S6-05` `SolarMath` extracted as pure maths with EditMode tests, plus content-pack and save-file tests (26 total).
+- `S6-06` `SaveGameService` persists cash, clock, objective and placed arrays with condition (F5 / F9 or HUD buttons).
+- `Tools/Verify-UnityBuild.ps1` runs compile checks, scene generation and the test suite in a shadow project, so verification works while Rapha's editor is open.
+- Self-review fixes: no ground marker when clicking an array or staff; scale blocks moved off the buildable plot and the fake solar table recoloured grey; `Scale_Building` renamed `SiteOffice`; staff traits now actually affect walk speed, repair condition and repair cost, and repair/service buttons disable when cash is short.
+
+**Tested / Verified**
+- 26 EditMode tests pass in batchmode; `Prototype_Valley` regenerates with zero compile errors.
+- Not yet re-playtested by Rapha — the fixes above are unconfirmed in the editor.
+
+**Known issues / limitations**
+- Selection still raycasts per-object per-click; fine at prototype scale, worth centralising later.
+- Scene regeneration rewrites Unity's internal file IDs, so `Prototype_Valley.unity` diffs look far larger than the semantic change.
+- Camera zoom is not blocked while the pointer is over the HUD.
+
+**Decisions / assumptions / recommendations**
+- Balance values live in ScriptableObjects from now on; gameplay code reads definitions with serialized fallbacks.
+- `ScenarioObjective` intentionally measures installed capacity so the win state is not hostage to weather or condition.
+
+**Next recommended step**
+- Rapha re-playtests the fix batch, then `S6-02` ChatGPT design review before starting the `L1` thin slice.
+
+**Git / References**
+- Commits: `6fb7b7d` (HUD), `2a22248` (content pack), `0b52a91` (tests), `e4291cb` (save stub), `2571ef3` (self-review)
+- Branch: `main`
+
+---
+
 ## 2026-09-15 — Support — Cursor + Blender + Krita research
 
 **Agent:** Cursor

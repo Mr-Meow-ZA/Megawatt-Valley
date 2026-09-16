@@ -4,11 +4,13 @@
 
 **Grey-box miniature vertical slice is playable.**
 
-Unity **6000.6.0f1** / URP. Overnight Cursor run completed session goals **S0-01 through S5-05**.
+Unity **6000.6.0f1** / URP. Session goals **S0-01 through S5-05** plus **S6-01, S6-03…S6-06** are done.
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
-Includes: tycoon camera, plot select, solar build/place/demolish, cash + MW + grid radius, day factor, sim speeds, equipment condition/faults/repair/preventive maintenance, named technician, humorous event, zoom-in joke sign, MW objective + win banner.
+Includes: tycoon camera, plot select, solar build/place/demolish, cash + MW + grid radius, day/night clock, sim speeds, equipment condition/faults/repair/preventive maintenance, named technician with working traits, humorous event, zoom-in joke sign, MW objective + win banner, UI Toolkit HUD, ScriptableObject balance data, save/load stub, and 26 EditMode tests.
+
+Rapha accepted the grey-box loop on 2026-09-16 with a fix list (dead arrays off-grid, runaway wear, no visible clock, unreadable HUD, hidden prices, un-clickable technician). All listed fixes are implemented but **not yet re-playtested**.
 
 Badges earned: Foundation Online, Valley Explorer, First Foundations, First Megawatt Earned, Keeping the Lights On, Tiny Tycoon (and related celebration markers in `SESSION_GOALS.md`).
 
@@ -40,9 +42,9 @@ The project should never depend only on distant phase completion for a sense of 
 
 Current first goals:
 
-1. **Rapha playtest / accept** the grey-box miniature slice (`S6-01`)
-2. **ChatGPT review** of overnight commits vs vision / architecture (`S6-02`) — `CHATGPT_REVIEW.md` is currently stale vs ACTIVITY_LOG
-3. Then harden: UI Toolkit HUD → ScriptableObject content → EditMode tests → save stub (`S6-03…S6-06`)
+1. **Rapha re-playtest** of the `S6-01` fix batch
+2. **ChatGPT review** of the S6 commits vs vision / architecture (`S6-02`) — `CHATGPT_REVIEW.md` is currently stale vs ACTIVITY_LOG
+3. `S6-07` technician pathing that seeks out faults on its own
 4. Then Level 1 thin-slice (`L1-01…`) — not a major art pass
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
@@ -80,7 +82,7 @@ The planned sequence is:
 
 ## Next action
 
-**Rapha playtest** `Prototype_Valley` in the Unity Editor (home PC).
+**Rapha re-playtests** `Prototype_Valley` in the Unity Editor (home PC) to confirm the `S6-01` fix batch: prices and income visible, clock readable, arrays earning, technician clickable, wear sane.
 
 Then ask ChatGPT to refresh `CHATGPT_REVIEW.md` and ratify or amend the proposed **S6 / L1** session track in `SESSION_GOALS.md` and `PRACTICES_AND_PLANNING.md`.
 
