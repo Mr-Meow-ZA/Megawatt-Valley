@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using MegawattValley.Cameras;
 using MegawattValley.Core;
+using MegawattValley.Persistence;
 using MegawattValley.UI;
 
 namespace MegawattValley.EditorTools
@@ -151,14 +152,18 @@ namespace MegawattValley.EditorTools
             var events = systems.AddComponent<HumorousEventController>();
             var objective = systems.AddComponent<ScenarioObjective>();
 
+            var saveService = systems.AddComponent<SaveGameService>();
+
             // Content pack (S6-04): balance values live in data, not in these components.
             var scenario = ContentBootstrap.EnsureScenario();
             var standardArray = ContentBootstrap.EnsureStandardArray();
+            var bargainArray = ContentBootstrap.EnsureBargainArray();
             var supplierEvent = ContentBootstrap.EnsureSupplierEvent();
             AssignReference(economy, "scenario", scenario);
             AssignReference(objective, "scenario", scenario);
             AssignReference(buildMode, "solarDefinition", standardArray);
             AssignReference(events, "eventDefinition", supplierEvent);
+            AssignReferenceArray(saveService, "knownArrays", new Object[] { standardArray, bargainArray });
 
             // HUD (S6-03). UIDocument is added before HudController so the tree exists first.
             var hud = new GameObject("HUD");
@@ -208,6 +213,25 @@ namespace MegawattValley.EditorTools
             }
 
             property.objectReferenceValue = value;
+            editable.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void AssignReferenceArray(Component component, string fieldName, Object[] values)
+        {
+            var editable = new SerializedObject(component);
+            var property = editable.FindProperty(fieldName);
+            if (property == null || !property.isArray)
+            {
+                Debug.LogError($"[MegawattValley] {component.GetType().Name} has no serialized array '{fieldName}'.");
+                return;
+            }
+
+            property.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+            {
+                property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+            }
+
             editable.ApplyModifiedPropertiesWithoutUndo();
         }
 

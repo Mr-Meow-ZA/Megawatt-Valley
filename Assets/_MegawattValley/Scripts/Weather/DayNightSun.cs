@@ -10,6 +10,10 @@ namespace MegawattValley.Core
         public static float SolarFactor { get; private set; } = 1f;
         public static bool IsDaylight => SolarFactor > 0.01f;
         public static string ClockText { get; private set; } = "Day 1 · 12:00";
+        public static DayNightSun Instance { get; private set; }
+
+        public int DayNumber => _dayNumber;
+        public float TimeOfDay => _timeOfDay;
 
         [SerializeField] private Light sunLight;
         [SerializeField] private float dayLengthSeconds = 180f;
@@ -28,12 +32,28 @@ namespace MegawattValley.Core
 
         private void Awake()
         {
+            Instance = this;
             if (sunLight == null)
             {
                 sunLight = GetComponent<Light>();
             }
 
             _timeOfDay = Mathf.Repeat(startTimeOfDay, 1f);
+            Recalculate();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
+        public void SetClock(int dayNumber, float timeOfDay)
+        {
+            _dayNumber = Mathf.Max(1, dayNumber);
+            _timeOfDay = Mathf.Repeat(timeOfDay, 1f);
             Recalculate();
         }
 

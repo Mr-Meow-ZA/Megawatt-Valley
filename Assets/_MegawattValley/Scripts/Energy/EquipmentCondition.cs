@@ -306,6 +306,26 @@ namespace MegawattValley.Core
             Debug.Log($"[MegawattValley] Repair started (${repairCost:0}).");
         }
 
+        /// <summary>
+        /// Restores saved wear. Called after the array is built, so it overrides the healthy
+        /// starting state that OnEnable applies to newly placed arrays.
+        /// </summary>
+        public void RestoreState(float conditionPercent, bool faulted)
+        {
+            condition = Mathf.Clamp(conditionPercent, 0f, 100f);
+            isRepairing = false;
+            repairTimer = 0f;
+            isFaulted = false;
+
+            if (faulted)
+            {
+                TriggerFault();
+            }
+
+            ApplyGenerationMultiplier();
+            RefreshLabel();
+        }
+
         /// <summary>Free condition recovery from an event or perk, with no cash cost.</summary>
         public void ApplyServiceBonus(float amount)
         {

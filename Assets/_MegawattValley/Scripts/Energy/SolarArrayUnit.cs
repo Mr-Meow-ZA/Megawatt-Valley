@@ -11,6 +11,15 @@ namespace MegawattValley.Core
     {
         private static readonly List<SolarArrayUnit> Units = new List<SolarArrayUnit>();
 
+        public static IReadOnlyList<SolarArrayUnit> All
+        {
+            get
+            {
+                Prune();
+                return Units;
+            }
+        }
+
         /// <summary>Power actually being exported right now.</summary>
         public static float TotalMegawatts
         {

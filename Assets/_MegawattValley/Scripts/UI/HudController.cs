@@ -1,4 +1,5 @@
 using MegawattValley.Core;
+using MegawattValley.Persistence;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -44,6 +45,10 @@ namespace MegawattValley.UI
         private Label _buildSolarCost;
         private Label _buildSolarNote;
 
+        private Button _saveButton;
+        private Button _loadButton;
+        private Label _saveStatus;
+
         private VisualElement _eventModal;
         private Label _eventTitle;
         private Label _eventBody;
@@ -70,6 +75,7 @@ namespace MegawattValley.UI
             "selection-line-1", "selection-line-2", "selection-line-3",
             "repair-button", "maintain-button", "demolish-button",
             "build-solar-button", "build-solar-title", "build-solar-cost", "build-solar-note",
+            "save-button", "load-button", "save-status",
             "event-modal", "event-title", "event-body", "event-choice-a", "event-choice-b"
         };
 
@@ -116,6 +122,10 @@ namespace MegawattValley.UI
             _buildSolarCost = _root.Q<Label>("build-solar-cost");
             _buildSolarNote = _root.Q<Label>("build-solar-note");
 
+            _saveButton = _root.Q<Button>("save-button");
+            _loadButton = _root.Q<Button>("load-button");
+            _saveStatus = _root.Q<Label>("save-status");
+
             _eventModal = _root.Q<VisualElement>("event-modal");
             _eventTitle = _root.Q<Label>("event-title");
             _eventBody = _root.Q<Label>("event-body");
@@ -154,6 +164,16 @@ namespace MegawattValley.UI
             if (_demolishButton != null)
             {
                 _demolishButton.clicked += () => BuildModeController.Instance?.DemolishSelected();
+            }
+
+            if (_saveButton != null)
+            {
+                _saveButton.clicked += () => SaveGameService.Instance?.Save();
+            }
+
+            if (_loadButton != null)
+            {
+                _loadButton.clicked += () => SaveGameService.Instance?.Load();
             }
 
             if (_eventChoiceA != null)
@@ -228,6 +248,19 @@ namespace MegawattValley.UI
             RefreshBuildBar();
             RefreshSelection();
             RefreshAlert();
+            RefreshSaveBar();
+        }
+
+        private void RefreshSaveBar()
+        {
+            var save = SaveGameService.Instance;
+            if (save == null)
+            {
+                return;
+            }
+
+            SetText(_saveStatus, save.LastMessage);
+            _loadButton?.SetEnabled(save.SaveExists);
         }
 
         private void RefreshCompany()

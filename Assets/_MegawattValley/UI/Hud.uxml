@@ -61,8 +61,14 @@
             </ui:Button>
             <ui:VisualElement class="hint-stack" picking-mode="Ignore">
                 <ui:Label name="hint-primary" class="hint" text="B build - R rotate ghost - Esc cancel - X demolish under cursor" />
-                <ui:Label name="hint-secondary" class="hint" text="Click an array or the technician to inspect it" />
+                <ui:Label name="hint-secondary" class="hint" text="Click an array or the technician to inspect it - F5 save - F9 load" />
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="system-bar" class="system-bar" picking-mode="Ignore">
+            <ui:Label name="save-status" class="hint" text="" />
+            <ui:Button name="save-button" class="action-button" text="Save (F5)" />
+            <ui:Button name="load-button" class="action-button" text="Load (F9)" />
         </ui:VisualElement>
 
         <ui:VisualElement name="event-modal" class="modal-backdrop hidden">

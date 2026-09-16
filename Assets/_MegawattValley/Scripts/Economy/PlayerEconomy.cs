@@ -55,5 +55,11 @@ namespace MegawattValley.Core
         {
             return cash >= amount;
         }
+
+        /// <summary>Used when restoring a saved game.</summary>
+        public void SetCash(float amount)
+        {
+            cash = Mathf.Max(0f, amount);
+        }
     }
 }

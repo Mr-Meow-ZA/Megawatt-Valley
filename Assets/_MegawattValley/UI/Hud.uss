@@ -294,6 +294,21 @@
     margin-top: 2px;
 }
 
+/* ---------- system bar ---------- */
+
+.system-bar {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.system-bar .hint {
+    margin-right: 10px;
+    margin-top: 0;
+}
+
 /* ---------- event modal ---------- */
 
 .modal-backdrop {

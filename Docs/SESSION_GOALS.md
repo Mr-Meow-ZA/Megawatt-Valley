@@ -237,7 +237,7 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   Add a small test assembly covering core MW and cash math.  
   **Victory moment:** Cursor can catch economy regressions without Play Mode.
 
-- [ ] **S6-06 — Save / load stub**  
+- [x] **S6-06 — Save / load stub**  
   Persist cash, placed buildings, and objective progress for one prototype session.  
   **Victory moment:** quit and resume the miniature scenario.
 

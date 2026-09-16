@@ -42,6 +42,12 @@ namespace MegawattValley.Core
             }
         }
 
+        /// <summary>Used when restoring a saved game.</summary>
+        public void SetCompleted(bool value)
+        {
+            completed = value;
+        }
+
         private void Update()
         {
             if (completed)
