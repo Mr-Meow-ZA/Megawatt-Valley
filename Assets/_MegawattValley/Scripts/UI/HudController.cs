@@ -372,18 +372,22 @@ namespace MegawattValley.UI
             bool offGrid = solar != null && !solar.IsConnectedToGrid;
             SetText(_selectionLine3, offGrid
                 ? "Outside the grid ring — earns nothing here"
-                : $"Repair ${equipment.RepairCost:0} (F)  ·  Service ${equipment.PreventiveCost:0} (M)");
+                : $"Repair ${equipment.EffectiveRepairCost:0} (F)  ·  Service ${equipment.PreventiveCost:0} (M)");
             SetStateClass(_selectionLine3, offGrid ? "metric-bad" : null);
 
             Show(_repairButton, true);
             Show(_maintainButton, true);
             Show(_demolishButton, true);
-            _repairButton?.SetEnabled(equipment.IsFaulted && !equipment.IsRepairing);
-            _maintainButton?.SetEnabled(!equipment.IsFaulted && !equipment.IsRepairing);
+            var economy = PlayerEconomy.Instance;
+            bool canPayRepair = economy == null || economy.CanAfford(equipment.EffectiveRepairCost);
+            bool canPayService = economy == null || economy.CanAfford(equipment.PreventiveCost);
+
+            _repairButton?.SetEnabled(equipment.IsFaulted && !equipment.IsRepairing && canPayRepair);
+            _maintainButton?.SetEnabled(!equipment.IsFaulted && !equipment.IsRepairing && canPayService);
 
             if (_repairButton != null)
             {
-                _repairButton.text = $"Repair ${equipment.RepairCost:0}";
+                _repairButton.text = $"Repair ${equipment.EffectiveRepairCost:0}";
             }
 
             if (_maintainButton != null)

@@ -30,6 +30,12 @@ namespace MegawattValley.Core
 
         public static StaffIdentity Selected { get; private set; }
 
+        /// <summary>The staff member currently working the site, whose traits apply to site work.</summary>
+        public static StaffIdentity OnSite { get; private set; }
+
+        public float RepairCostMultiplier => trait == Trait.BargainHunter ? 0.7f : 1f;
+        public float RepairConditionBonus => trait == Trait.CarefulHands ? 20f : 0f;
+
         public string TraitDescription
         {
             get
@@ -39,9 +45,9 @@ namespace MegawattValley.Core
                     case Trait.SpeedyBoots:
                         return "Speedy Boots — walks to callouts 45% faster.";
                     case Trait.CarefulHands:
-                        return "Careful Hands — repairs restore more condition.";
+                        return "Careful Hands — repairs restore 20 more condition.";
                     case Trait.BargainHunter:
-                        return "Bargain Hunter — cheaper parts on repairs.";
+                        return "Bargain Hunter — repairs cost 30% less.";
                     default:
                         return "No trait.";
                 }
@@ -55,6 +61,7 @@ namespace MegawattValley.Core
 
         private void Awake()
         {
+            OnSite = this;
             _technician = GetComponent<TechnicianActor>();
 
             if (showNameTag)
@@ -123,5 +130,18 @@ namespace MegawattValley.Core
         }
 
         public TechnicianActor Technician => _technician;
+
+        private void OnDestroy()
+        {
+            if (OnSite == this)
+            {
+                OnSite = null;
+            }
+
+            if (Selected == this)
+            {
+                Selected = null;
+            }
+        }
     }
 }

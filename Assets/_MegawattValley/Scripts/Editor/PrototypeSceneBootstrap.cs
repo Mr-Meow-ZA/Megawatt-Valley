@@ -65,13 +65,16 @@ namespace MegawattValley.EditorTools
 
             grid.AddComponent<GridExportNode>();
 
-            // Scale reference blocks (S1-05)
-            CreateScaleBlock("Scale_Human", new Vector3(-10f, 0.9f, -6f), new Vector3(0.5f, 1.8f, 0.5f), new Color(0.9f, 0.75f, 0.55f));
-            CreateScaleBlock("Scale_Vehicle", new Vector3(-8f, 0.6f, -6f), new Vector3(2.2f, 1.2f, 1.2f), new Color(0.8f, 0.2f, 0.2f));
+            // Scale reference blocks (S1-05). Kept west of the buildable plot: inside it they both
+            // blocked placement and read as site content, and the blue reference table in
+            // particular was mistaken for a real array that earned nothing.
+            CreateScaleBlock("Scale_Human", new Vector3(-18f, 0.9f, -6f), new Vector3(0.5f, 1.8f, 0.5f), new Color(0.9f, 0.75f, 0.55f));
+            CreateScaleBlock("Scale_Vehicle", new Vector3(-16f, 0.6f, -6f), new Vector3(2.2f, 1.2f, 1.2f), new Color(0.8f, 0.2f, 0.2f));
             CreateScaleBlock("Scale_Road", new Vector3(0f, 0.02f, -9f), new Vector3(20f, 0.05f, 2f), new Color(0.25f, 0.25f, 0.28f));
-            CreateScaleBlock("Scale_SolarTable", new Vector3(-10f, 0.35f, -3f), new Vector3(4f, 0.4f, 2f), new Color(0.15f, 0.35f, 0.7f));
-            CreateScaleBlock("Scale_Fence", new Vector3(-12f, 0.6f, 0f), new Vector3(0.15f, 1.2f, 4f), new Color(0.7f, 0.7f, 0.7f));
-            CreateScaleBlock("Scale_Building", new Vector3(10f, 2f, -4f), new Vector3(4f, 4f, 4f), new Color(0.75f, 0.7f, 0.6f));
+            CreateScaleBlock("Scale_SolarTable", new Vector3(-18f, 0.35f, -2f), new Vector3(4f, 0.4f, 2f), new Color(0.45f, 0.47f, 0.5f));
+            CreateScaleBlock("Scale_Fence", new Vector3(-14f, 0.6f, 0f), new Vector3(0.15f, 1.2f, 4f), new Color(0.7f, 0.7f, 0.7f));
+            // Site office: a real obstacle on the plot, not a scale reference.
+            CreateScaleBlock("SiteOffice", new Vector3(10f, 2f, -4f), new Vector3(4f, 4f, 4f), new Color(0.75f, 0.7f, 0.6f));
 
             // Sign / landmark
             var sign = GameObject.CreatePrimitive(PrimitiveType.Cube);

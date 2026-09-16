@@ -53,11 +53,20 @@ namespace MegawattValley.Core
             }
 
             Ray ray = worldCamera.ScreenPointToRay(mouse.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit, 500f, groundMask, QueryTriggerInteraction.Ignore))
+            if (!Physics.Raycast(ray, out RaycastHit hit, 500f, groundMask, QueryTriggerInteraction.Ignore))
             {
-                marker.gameObject.SetActive(true);
-                marker.position = hit.point + Vector3.up * markerHeight;
+                return;
             }
+
+            // Clicking an array or a member of staff is a selection, not a click on the ground.
+            if (hit.collider.GetComponentInParent<SolarArrayUnit>() != null ||
+                hit.collider.GetComponentInParent<StaffIdentity>() != null)
+            {
+                return;
+            }
+
+            marker.gameObject.SetActive(true);
+            marker.position = hit.point + Vector3.up * markerHeight;
         }
 
         internal static Material CreateColorMaterial(Color color)

@@ -103,6 +103,11 @@ namespace MegawattValley.Core
         public SolarArrayUnit Solar => _solar;
 
         public float RepairCost => definition != null ? definition.RepairCost : repairCost;
+
+        /// <summary>Repair price after the on-site technician's trait is applied.</summary>
+        public float EffectiveRepairCost => RepairCost *
+            (StaffIdentity.OnSite != null ? StaffIdentity.OnSite.RepairCostMultiplier : 1f);
+
         public float PreventiveCost => definition != null ? definition.PreventiveCost : preventiveCost;
         private float RepairSeconds => definition != null ? definition.RepairSeconds : repairSeconds;
         private float WearPerSecond => definition != null ? definition.WearPerSecond : naturalWearPerSecond;
@@ -257,7 +262,10 @@ namespace MegawattValley.Core
 
             isRepairing = false;
             isFaulted = false;
-            condition = Mathf.Max(condition, repairConditionFloor);
+
+            float floor = repairConditionFloor +
+                          (StaffIdentity.OnSite != null ? StaffIdentity.OnSite.RepairConditionBonus : 0f);
+            condition = Mathf.Min(100f, Mathf.Max(condition, floor));
             if (_bodyRenderer != null && _healthyMaterial != null)
             {
                 _bodyRenderer.sharedMaterial = _healthyMaterial;
@@ -290,7 +298,7 @@ namespace MegawattValley.Core
                 return;
             }
 
-            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(RepairCost))
+            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(EffectiveRepairCost))
             {
                 Debug.LogWarning("[MegawattValley] Not enough cash to repair.");
                 return;
