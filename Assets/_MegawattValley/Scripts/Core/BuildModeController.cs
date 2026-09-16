@@ -21,6 +21,7 @@ namespace MegawattValley.Core
         private bool _placing;
         private Material _validMaterial;
         private Material _invalidMaterial;
+        private SelectablePlot _buildablePlot;
 
         public bool IsPlacing => _placing;
 
@@ -34,6 +35,7 @@ namespace MegawattValley.Core
 
             _validMaterial = GroundClickMarker.CreateColorMaterial(new Color(0.2f, 0.75f, 1f, 0.65f));
             _invalidMaterial = GroundClickMarker.CreateColorMaterial(new Color(1f, 0.25f, 0.2f, 0.65f));
+            _buildablePlot = FindAnyObjectByType<SelectablePlot>();
         }
 
         private void OnDestroy()
@@ -46,7 +48,7 @@ namespace MegawattValley.Core
 
         private void OnGUI()
         {
-            if (GUI.Button(new Rect(12f, 160f, 160f, 32f), _placing ? "Cancel Build" : "Build: Solar Array"))
+            if (GUI.Button(new Rect(12f, 222f, 160f, 32f), _placing ? "Cancel Build" : "Build: Solar Array"))
             {
                 if (_placing)
                 {
@@ -203,11 +205,6 @@ namespace MegawattValley.Core
                     continue;
                 }
 
-                if (col.GetComponentInParent<SolarArrayUnit>() != null)
-                {
-                    return false;
-                }
-
                 if (col.GetComponentInParent<SelectablePlot>() != null)
                 {
                     // Allow placement on the plot surface itself.
@@ -219,16 +216,19 @@ namespace MegawattValley.Core
                 {
                     continue;
                 }
+
+                // Any other solid thing here — existing array, building, staff, signage — blocks the footprint.
+                return false;
             }
 
-            // Must be roughly over the owned plot if one exists.
-            if (SelectablePlot.Current == null)
+            var plot = SelectablePlot.Current != null ? SelectablePlot.Current : _buildablePlot;
+            if (plot == null)
             {
-                // Still allow placement in early prototype if nothing selected.
+                // Still allow placement in early prototype if the scene has no plot at all.
                 return true;
             }
 
-            var plotCollider = SelectablePlot.Current.GetComponent<Collider>();
+            var plotCollider = plot.GetComponent<Collider>();
             if (plotCollider != null && !plotCollider.bounds.Contains(Snap(point)))
             {
                 return false;

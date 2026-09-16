@@ -54,8 +54,8 @@ namespace MegawattValley.Core
 
         private void OnGUI()
         {
-            GUI.Label(new Rect(12f, 84f, 220f, 24f), $"Speed: {CurrentSpeed:0}x  (Space pause, 1/2/3)");
-            GUI.Label(new Rect(12f, 108f, 460f, 40f), "B build · R rotate · Esc cancel · X demolish · F repair · M maintain");
+            GUI.Label(new Rect(12f, 172f, 300f, 22f), $"Speed: {CurrentSpeed:0}x  (Space pause, 1/2/3)");
+            GUI.Label(new Rect(12f, 194f, 520f, 22f), "B build · R rotate · Esc cancel · X demolish · click asset or staff to inspect");
         }
     }
 }

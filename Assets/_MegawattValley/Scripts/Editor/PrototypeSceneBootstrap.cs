@@ -108,12 +108,11 @@ namespace MegawattValley.EditorTools
             systems.AddComponent<BuildModeController>();
             systems.AddComponent<GroundClickMarker>();
 
-            // Technician home near the building
+            // Technician waits by the access road. Keeps its collider so the player can click it.
             var tech = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             tech.name = "Technician";
-            tech.transform.position = new Vector3(10f, 1f, -4f);
+            tech.transform.position = new Vector3(6f, 0.9f, -9f);
             tech.transform.localScale = new Vector3(0.5f, 0.9f, 0.5f);
-            Object.DestroyImmediate(tech.GetComponent<Collider>());
             var techRenderer = tech.GetComponent<MeshRenderer>();
             if (techRenderer != null)
             {

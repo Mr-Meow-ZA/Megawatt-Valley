@@ -64,13 +64,7 @@ namespace MegawattValley.Core
                     PlayerEconomy.Instance.TrySpend(120f);
                 }
 
-                // Spawn a slightly worse "bargain" array near the grid.
-                var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                go.name = "BargainSolarArray";
-                go.transform.position = new Vector3(4f, 0.2f, 2f);
-                go.transform.localScale = new Vector3(4f, 0.4f, 2f);
-                go.AddComponent<SolarArrayUnit>();
-                go.AddComponent<EquipmentCondition>();
+                SpawnBargainArray();
                 Debug.Log("[MegawattValley] You bought the sticker-premium panels. The spreadsheet is optimistic.");
             }
             else
@@ -85,6 +79,38 @@ namespace MegawattValley.Core
                     Debug.Log("[MegawattValley] You decline. Dignity preserved. Cash preserved.");
                 }
             }
+        }
+
+        /// <summary>
+        /// The bargain lot is cheap capacity with a worse nameplate than a normal build.
+        /// </summary>
+        private void SpawnBargainArray()
+        {
+            var footprint = new Vector3(4f, 0.4f, 2f);
+
+            var root = new GameObject("BargainSolarArray");
+            root.transform.position = new Vector3(4f, 0f, 2f);
+
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            body.name = "PanelTable";
+            body.transform.SetParent(root.transform, false);
+            body.transform.localScale = footprint;
+            body.transform.localPosition = new Vector3(0f, footprint.y * 0.5f, 0f);
+            Destroy(body.GetComponent<Collider>());
+
+            var renderer = body.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                renderer.sharedMaterial = GroundClickMarker.CreateColorMaterial(new Color(0.3f, 0.3f, 0.42f));
+            }
+
+            var collider = root.AddComponent<BoxCollider>();
+            collider.center = new Vector3(0f, footprint.y * 0.5f, 0f);
+            collider.size = footprint;
+
+            var unit = root.AddComponent<SolarArrayUnit>();
+            unit.SetNameplate(0.15f);
+            root.AddComponent<EquipmentCondition>();
         }
 
         private void OnGUI()

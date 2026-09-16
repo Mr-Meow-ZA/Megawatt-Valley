@@ -14,6 +14,8 @@ namespace MegawattValley.Core
 
         private Transform _target;
         private bool _hasTarget;
+        private Vector3 _homePosition;
+        private bool _walking;
 
         public float MoveSpeed
         {
@@ -21,13 +23,31 @@ namespace MegawattValley.Core
             set => moveSpeed = Mathf.Max(0.1f, value);
         }
 
+        public bool HasTask => _hasTarget && _target != null;
+
+        public string Activity
+        {
+            get
+            {
+                if (HasTask)
+                {
+                    var condition = _target.GetComponent<EquipmentCondition>();
+                    if (condition != null && condition.IsRepairing && !_walking)
+                    {
+                        return $"Repairing {_target.name}";
+                    }
+
+                    return $"Walking to {_target.name}";
+                }
+
+                return _walking ? "Returning to base" : "Idle at base";
+            }
+        }
+
         private void Awake()
         {
             Instance = this;
-            if (homePoint == null)
-            {
-                homePoint = transform;
-            }
+            _homePosition = homePoint != null ? homePoint.position : transform.position;
 
             var identity = GetComponent<StaffIdentity>();
             if (identity != null && identity.ActiveTrait == StaffIdentity.Trait.SpeedyBoots)
@@ -54,16 +74,19 @@ namespace MegawattValley.Core
         private void Update()
         {
             float dt = SimulationClock.Instance != null ? SimulationClock.Instance.SimulationDeltaTime : Time.deltaTime;
-            Vector3 destination = _hasTarget && _target != null
-                ? _target.position
-                : (homePoint != null ? homePoint.position : transform.position);
-
+            Vector3 destination = HasTask ? _target.position : _homePosition;
             destination.y = transform.position.y;
-            transform.position = Vector3.MoveTowards(transform.position, destination, moveSpeed * Mathf.Max(dt, 0f));
 
-            if (_hasTarget && _target != null && Vector3.Distance(transform.position, destination) < 0.4f)
+            float distance = Vector3.Distance(transform.position, destination);
+            _walking = distance > 0.4f;
+            if (_walking)
             {
-                // Stay near the asset while repairing; clear when no longer repairing.
+                transform.position = Vector3.MoveTowards(transform.position, destination, moveSpeed * Mathf.Max(dt, 0f));
+            }
+
+            if (HasTask && !_walking)
+            {
+                // Stay near the asset while repairing; head home once the repair finishes.
                 var condition = _target.GetComponent<EquipmentCondition>();
                 if (condition == null || !condition.IsRepairing)
                 {

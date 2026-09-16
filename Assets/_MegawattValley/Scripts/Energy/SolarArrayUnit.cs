@@ -10,23 +10,69 @@ namespace MegawattValley.Core
     {
         private static readonly List<SolarArrayUnit> Units = new List<SolarArrayUnit>();
 
+        /// <summary>Power actually being exported right now.</summary>
         public static float TotalMegawatts
         {
             get
             {
+                Prune();
                 float sum = 0f;
-                for (int i = Units.Count - 1; i >= 0; i--)
+                foreach (var unit in Units)
                 {
-                    if (Units[i] == null)
-                    {
-                        Units.RemoveAt(i);
-                        continue;
-                    }
-
-                    sum += Units[i].CurrentMegawatts;
+                    sum += unit.CurrentMegawatts;
                 }
 
                 return sum;
+            }
+        }
+
+        /// <summary>Nameplate capacity built, regardless of sun or condition.</summary>
+        public static float InstalledMegawatts
+        {
+            get
+            {
+                Prune();
+                float sum = 0f;
+                foreach (var unit in Units)
+                {
+                    sum += unit.NameplateMegawatts;
+                }
+
+                return sum;
+            }
+        }
+
+        public static float TotalRevenuePerSecond
+        {
+            get
+            {
+                Prune();
+                float sum = 0f;
+                foreach (var unit in Units)
+                {
+                    sum += unit.RevenuePerSecond;
+                }
+
+                return sum;
+            }
+        }
+
+        /// <summary>Arrays built outside grid export range — they earn nothing.</summary>
+        public static int DisconnectedCount
+        {
+            get
+            {
+                Prune();
+                int count = 0;
+                foreach (var unit in Units)
+                {
+                    if (!unit.IsConnectedToGrid)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
             }
         }
 
@@ -42,6 +88,17 @@ namespace MegawattValley.Core
         {
             Units.Remove(unit);
         }
+
+        private static void Prune()
+        {
+            for (int i = Units.Count - 1; i >= 0; i--)
+            {
+                if (Units[i] == null)
+                {
+                    Units.RemoveAt(i);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -50,32 +107,32 @@ namespace MegawattValley.Core
     public sealed class SolarArrayUnit : MonoBehaviour
     {
         [SerializeField] private float nameplateMw = 0.25f;
-        [SerializeField] private float revenuePerMwPerSecond = 4f;
+        [SerializeField] private float revenuePerMwPerSecond = 8f;
         [SerializeField] private bool connectedToGrid = true;
         [SerializeField] private float outputMultiplier = 1f;
 
-        public float CurrentMegawatts
-        {
-            get
-            {
-                bool connected = connectedToGrid;
-                if (GridExportNode.Instance != null)
-                {
-                    connected = GridExportNode.Instance.IsInRange(transform.position);
-                    connectedToGrid = connected;
-                }
+        public float NameplateMegawatts => nameplateMw;
+        public bool IsConnectedToGrid => connectedToGrid;
 
-                return connected ? nameplateMw * DayNightSun.SolarFactor * outputMultiplier : 0f;
-            }
-        }
+        public float CurrentMegawatts => connectedToGrid
+            ? nameplateMw * DayNightSun.SolarFactor * outputMultiplier
+            : 0f;
+
+        public float RevenuePerSecond => CurrentMegawatts * revenuePerMwPerSecond;
 
         public void SetOutputMultiplier(float multiplier)
         {
             outputMultiplier = Mathf.Clamp01(multiplier);
         }
 
+        public void SetNameplate(float megawatts)
+        {
+            nameplateMw = Mathf.Max(0f, megawatts);
+        }
+
         private void OnEnable()
         {
+            RefreshGridConnection();
             PowerBoard.Register(this);
         }
 
@@ -86,24 +143,21 @@ namespace MegawattValley.Core
 
         private void Update()
         {
-            if (!connectedToGrid || PlayerEconomy.Instance == null)
-            {
-                return;
-            }
+            RefreshGridConnection();
 
-            float mw = CurrentMegawatts;
-            if (mw <= 0f)
+            if (PlayerEconomy.Instance == null)
             {
                 return;
             }
 
             float dt = SimulationClock.Instance != null ? SimulationClock.Instance.SimulationDeltaTime : Time.deltaTime;
-            PlayerEconomy.Instance.Add(mw * revenuePerMwPerSecond * dt);
+            PlayerEconomy.Instance.Add(RevenuePerSecond * dt);
         }
 
-        public void SetGridConnection(bool connected)
+        private void RefreshGridConnection()
         {
-            connectedToGrid = connected;
+            connectedToGrid = GridExportNode.Instance == null ||
+                              GridExportNode.Instance.IsInRange(transform.position);
         }
     }
 }

@@ -10,8 +10,10 @@ namespace MegawattValley.Core
     public sealed class EquipmentCondition : MonoBehaviour
     {
         [SerializeField] private float condition = 100f;
-        [SerializeField] private float naturalWearPerSecond = 1.2f;
-        [SerializeField] private float faultChancePerSecondAtLowCondition = 0.25f;
+
+        /// <summary>Wear only accrues while the array is actually generating, so panels do not rot overnight.</summary>
+        [SerializeField] private float naturalWearPerSecond = 0.1f;
+        [SerializeField] private float faultChancePerSecondAtLowCondition = 0.06f;
         [SerializeField] private float repairCost = 80f;
         [SerializeField] private float preventiveCost = 35f;
         [SerializeField] private float repairSeconds = 2.5f;
@@ -30,6 +32,11 @@ namespace MegawattValley.Core
         public bool IsRepairing => isRepairing;
 
         public static EquipmentCondition Selected { get; private set; }
+
+        public static void ClearSelection()
+        {
+            Selected = null;
+        }
 
         private void Awake()
         {
@@ -89,6 +96,7 @@ namespace MegawattValley.Core
                     if (condition == this)
                     {
                         Selected = this;
+                        StaffIdentity.ClearSelection();
                         Debug.Log($"[MegawattValley] Selected equipment {name} ({this.condition:0}%)");
                     }
                 }
@@ -122,10 +130,16 @@ namespace MegawattValley.Core
                 return;
             }
 
+            bool generating = _solar == null || _solar.CurrentMegawatts > 0f;
+            if (!generating)
+            {
+                return;
+            }
+
             if (!isFaulted)
             {
                 condition = Mathf.Max(0f, condition - naturalWearPerSecond * dt);
-                float faultChance = Mathf.InverseLerp(40f, 0f, condition) * faultChancePerSecondAtLowCondition * dt;
+                float faultChance = Mathf.InverseLerp(50f, 0f, condition) * faultChancePerSecondAtLowCondition * dt;
                 if (Random.value < faultChance || condition <= 0.01f)
                 {
                     TriggerFault();
@@ -222,7 +236,7 @@ namespace MegawattValley.Core
                 return;
             }
 
-            float multiplier = isFaulted ? 0f : Mathf.Lerp(0.2f, 1f, condition / 100f);
+            float multiplier = isFaulted ? 0f : Mathf.Lerp(0.55f, 1f, condition / 100f);
             _solar.SetOutputMultiplier(multiplier);
         }
 
@@ -233,9 +247,10 @@ namespace MegawattValley.Core
                 return;
             }
 
-            string state = isFaulted ? "FAULT" : isRepairing ? "REPAIR" : "OK";
+            bool offGrid = _solar != null && !_solar.IsConnectedToGrid;
+            string state = isFaulted ? "FAULT" : isRepairing ? "REPAIR" : offGrid ? "NO GRID" : "OK";
             _label.text = $"{condition:0}%\n{state}";
-            _label.color = isFaulted ? new Color(1f, 0.4f, 0.3f) : Color.white;
+            _label.color = isFaulted || offGrid ? new Color(1f, 0.4f, 0.3f) : Color.white;
         }
 
         private void FaceLabelToCamera()
@@ -256,10 +271,16 @@ namespace MegawattValley.Core
                 return;
             }
 
-            GUI.Box(new Rect(12f, 210f, 280f, 88f), GUIContent.none);
-            GUI.Label(new Rect(22f, 218f, 260f, 22f), $"Selected: {name}");
-            GUI.Label(new Rect(22f, 240f, 260f, 22f), $"Condition {condition:0}%  {(isFaulted ? "FAULTED" : "online")}");
-            GUI.Label(new Rect(22f, 262f, 260f, 22f), "F repair · M preventive maintenance");
+            bool offGrid = _solar != null && !_solar.IsConnectedToGrid;
+            GUI.Box(new Rect(12f, 262f, 320f, 112f), GUIContent.none);
+            GUI.Label(new Rect(22f, 270f, 300f, 22f), $"Selected: {name}");
+            GUI.Label(new Rect(22f, 292f, 300f, 22f), $"Condition {condition:0}%  {(isFaulted ? "FAULTED" : "online")}");
+            GUI.Label(new Rect(22f, 314f, 300f, 22f), _solar != null
+                ? $"Output {_solar.CurrentMegawatts:0.000} MW  ·  ${_solar.RevenuePerSecond:0.0}/s"
+                : "No generator attached");
+            GUI.Label(new Rect(22f, 336f, 300f, 22f), offGrid
+                ? "Not connected — move inside the blue ring"
+                : "F repair · M preventive maintenance");
         }
     }
 }

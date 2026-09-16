@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Named staff with one gameplay trait (S5-02).
+    /// Named staff with one gameplay trait, clickable for a details panel (S5-02).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class StaffIdentity : MonoBehaviour
@@ -18,26 +19,125 @@ namespace MegawattValley.Core
         [SerializeField] private string staffName = "Jordan Watts";
         [SerializeField] private string role = "Technician";
         [SerializeField] private Trait trait = Trait.SpeedyBoots;
+        [SerializeField] private bool showNameTag = true;
+
+        private TechnicianActor _technician;
+        private TextMesh _nameTag;
 
         public string StaffName => staffName;
         public string Role => role;
         public Trait ActiveTrait => trait;
 
+        public static StaffIdentity Selected { get; private set; }
+
+        public string TraitDescription
+        {
+            get
+            {
+                switch (trait)
+                {
+                    case Trait.SpeedyBoots:
+                        return "Speedy Boots — walks to callouts 45% faster.";
+                    case Trait.CarefulHands:
+                        return "Careful Hands — repairs restore more condition.";
+                    case Trait.BargainHunter:
+                        return "Bargain Hunter — cheaper parts on repairs.";
+                    default:
+                        return "No trait.";
+                }
+            }
+        }
+
+        public static void ClearSelection()
+        {
+            Selected = null;
+        }
+
         private void Awake()
         {
-            var tech = GetComponent<TechnicianActor>();
-            if (tech != null && trait == Trait.SpeedyBoots)
+            _technician = GetComponent<TechnicianActor>();
+
+            if (showNameTag)
             {
-                // Speedy boots: faster walk (applied via technician move speed reflection-free public API would be nicer).
-                // For now, scale transform slightly as a readable joke and log the trait.
+                var tagGo = new GameObject("NameTag");
+                tagGo.transform.SetParent(transform, false);
+                tagGo.transform.localPosition = new Vector3(0f, 1.6f, 0f);
+                tagGo.transform.localScale = new Vector3(0.6f, 0.35f, 0.6f);
+                _nameTag = tagGo.AddComponent<TextMesh>();
+                _nameTag.text = staffName;
+                _nameTag.fontSize = 48;
+                _nameTag.characterSize = 0.14f;
+                _nameTag.anchor = TextAnchor.MiddleCenter;
+                _nameTag.alignment = TextAlignment.Center;
+                _nameTag.color = Color.white;
             }
 
             Debug.Log($"[MegawattValley] Staff on site: {staffName} ({role}) — trait: {trait}");
         }
 
+        private void Update()
+        {
+            HandleSelectionInput();
+            FaceNameTagToCamera();
+        }
+
+        private void HandleSelectionInput()
+        {
+            var mouse = Mouse.current;
+            var cam = UnityEngine.Camera.main;
+            if (mouse == null || cam == null || !mouse.leftButton.wasPressedThisFrame)
+            {
+                return;
+            }
+
+            if (BuildModeController.Instance != null && BuildModeController.Instance.IsPlacing)
+            {
+                return;
+            }
+
+            Ray ray = cam.ScreenPointToRay(mouse.position.ReadValue());
+            if (!Physics.Raycast(ray, out RaycastHit hit, 500f))
+            {
+                return;
+            }
+
+            if (hit.collider.GetComponentInParent<StaffIdentity>() != this)
+            {
+                return;
+            }
+
+            Selected = this;
+            EquipmentCondition.ClearSelection();
+            Debug.Log($"[MegawattValley] Selected staff {staffName} ({role}).");
+        }
+
+        private void FaceNameTagToCamera()
+        {
+            var cam = UnityEngine.Camera.main;
+            if (cam == null || _nameTag == null)
+            {
+                return;
+            }
+
+            _nameTag.transform.rotation = Quaternion.LookRotation(_nameTag.transform.position - cam.transform.position);
+        }
+
         private void OnGUI()
         {
-            GUI.Label(new Rect(12f, 150f, 360f, 24f), $"Staff: {staffName} · {role} · {trait}");
+            if (Selected != this)
+            {
+                return;
+            }
+
+            GUI.Box(new Rect(12f, 262f, 320f, 112f), GUIContent.none);
+            GUI.Label(new Rect(22f, 270f, 300f, 22f), $"{staffName} — {role}");
+            GUI.Label(new Rect(22f, 292f, 300f, 22f), TraitDescription);
+            GUI.Label(new Rect(22f, 314f, 300f, 22f), _technician != null ? $"Status: {_technician.Activity}" : "Status: on site");
+            GUI.Label(new Rect(22f, 336f, 200f, 22f), _technician != null ? $"Walk speed: {_technician.MoveSpeed:0.0} m/s" : string.Empty);
+            if (GUI.Button(new Rect(232f, 336f, 90f, 22f), "Close"))
+            {
+                ClearSelection();
+            }
         }
     }
 }
