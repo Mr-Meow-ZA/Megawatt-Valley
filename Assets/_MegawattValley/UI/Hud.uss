@@ -1,0 +1,348 @@
+/* Megawatt Valley prototype HUD.
+   Grey-box presentation, but legibility is treated as a requirement, not a later polish pass. */
+
+.hud-root {
+    flex-grow: 1;
+    font-size: 16px;
+    color: rgb(240, 245, 250);
+}
+
+.hidden {
+    display: none;
+}
+
+/* ---------- cards ---------- */
+
+.card {
+    background-color: rgba(16, 22, 30, 0.88);
+    border-left-color: rgba(120, 200, 255, 0.35);
+    border-right-color: rgba(120, 200, 255, 0.35);
+    border-top-color: rgba(120, 200, 255, 0.35);
+    border-bottom-color: rgba(120, 200, 255, 0.35);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-right: 10px;
+    min-width: 170px;
+}
+
+.card-title {
+    font-size: 13px;
+    color: rgb(150, 170, 190);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.metric-value {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+}
+
+.metric-sub {
+    font-size: 15px;
+    color: rgb(185, 200, 215);
+    margin-top: 2px;
+}
+
+.metric-good {
+    color: rgb(120, 230, 160);
+}
+
+.metric-warn {
+    color: rgb(255, 190, 90);
+}
+
+.metric-bad {
+    color: rgb(255, 120, 105);
+}
+
+/* ---------- top bar ---------- */
+
+.top-bar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.objective-card {
+    margin-left: auto;
+    margin-right: 0;
+    min-width: 240px;
+}
+
+.objective-track {
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.objective-fill {
+    height: 8px;
+    width: 0%;
+    background-color: rgb(120, 220, 150);
+}
+
+.win-label {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(255, 214, 90);
+    margin-top: 6px;
+}
+
+/* ---------- speed controls ---------- */
+
+.speed-row {
+    flex-direction: row;
+    margin-top: 8px;
+}
+
+.speed-button {
+    min-width: 40px;
+    height: 28px;
+    margin-left: 0;
+    margin-right: 6px;
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: rgb(230, 240, 250);
+    background-color: rgba(60, 76, 94, 0.95);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.speed-button:hover {
+    background-color: rgba(84, 104, 126, 0.95);
+}
+
+.speed-button-active {
+    background-color: rgb(70, 150, 220);
+    color: rgb(255, 255, 255);
+}
+
+/* ---------- alerts ---------- */
+
+.alert {
+    position: absolute;
+    top: 150px;
+    left: 14px;
+    max-width: 520px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(20, 16, 8);
+    background-color: rgba(255, 196, 92, 0.94);
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    white-space: normal;
+}
+
+/* ---------- selection ---------- */
+
+.selection-panel {
+    position: absolute;
+    left: 14px;
+    bottom: 132px;
+    width: 360px;
+    margin-right: 0;
+}
+
+.panel-line {
+    font-size: 15px;
+    color: rgb(210, 222, 234);
+    margin-top: 3px;
+    white-space: normal;
+}
+
+.button-row {
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+.action-button {
+    height: 32px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 0;
+    margin-right: 8px;
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    background-color: rgb(58, 122, 186);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.action-button:hover {
+    background-color: rgb(74, 146, 214);
+}
+
+.action-button:disabled {
+    background-color: rgb(70, 78, 88);
+    color: rgb(150, 158, 168);
+}
+
+.action-button-danger {
+    background-color: rgb(170, 68, 58);
+}
+
+.action-button-danger:hover {
+    background-color: rgb(198, 84, 72);
+}
+
+/* ---------- build bar ---------- */
+
+.build-bar {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.build-button {
+    width: 180px;
+    height: 76px;
+    margin-left: 0;
+    margin-right: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    align-items: flex-start;
+    justify-content: center;
+    background-color: rgb(46, 96, 146);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.build-button:hover {
+    background-color: rgb(62, 120, 178);
+}
+
+.build-button-active {
+    background-color: rgb(206, 138, 40);
+}
+
+.build-button-unaffordable {
+    background-color: rgb(78, 66, 62);
+}
+
+.build-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+}
+
+.build-cost {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(190, 235, 255);
+    margin-top: 2px;
+}
+
+.build-note {
+    font-size: 13px;
+    color: rgb(215, 195, 160);
+    margin-top: 2px;
+}
+
+.hint-stack {
+    padding-bottom: 6px;
+}
+
+.hint {
+    font-size: 14px;
+    color: rgb(205, 216, 228);
+    margin-top: 2px;
+}
+
+/* ---------- event modal ---------- */
+
+.modal-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+    width: 560px;
+    background-color: rgba(22, 28, 38, 0.98);
+    border-left-color: rgb(120, 200, 255);
+    border-right-color: rgb(120, 200, 255);
+    border-top-color: rgb(120, 200, 255);
+    border-bottom-color: rgb(120, 200, 255);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.modal-title {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(255, 214, 90);
+}
+
+.modal-body {
+    font-size: 16px;
+    color: rgb(225, 234, 243);
+    margin-top: 10px;
+    white-space: normal;
+}
+
+.modal-button {
+    height: 40px;
+    flex-grow: 1;
+    white-space: normal;
+}

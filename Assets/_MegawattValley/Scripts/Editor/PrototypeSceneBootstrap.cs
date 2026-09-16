@@ -3,8 +3,10 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using MegawattValley.Cameras;
 using MegawattValley.Core;
+using MegawattValley.UI;
 
 namespace MegawattValley.EditorTools
 {
@@ -148,6 +150,14 @@ namespace MegawattValley.EditorTools
 
             systems.AddComponent<HumorousEventController>();
             systems.AddComponent<ScenarioObjective>();
+
+            // HUD (S6-03). UIDocument is added before HudController so the tree exists first.
+            var hud = new GameObject("HUD");
+            var document = hud.AddComponent<UIDocument>();
+            document.panelSettings = UiAssetBootstrap.EnsurePanelSettings();
+            document.visualTreeAsset = UiAssetBootstrap.LoadHudTree();
+            hud.AddComponent<HudController>();
+            UiAssetBootstrap.ValidateHudContract();
 
             // Ambient
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;

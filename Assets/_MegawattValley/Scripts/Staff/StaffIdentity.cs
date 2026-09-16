@@ -85,7 +85,7 @@ namespace MegawattValley.Core
         {
             var mouse = Mouse.current;
             var cam = UnityEngine.Camera.main;
-            if (mouse == null || cam == null || !mouse.leftButton.wasPressedThisFrame)
+            if (mouse == null || cam == null || !mouse.leftButton.wasPressedThisFrame || UiInputGuard.PointerOverUi)
             {
                 return;
             }
@@ -122,22 +122,6 @@ namespace MegawattValley.Core
             _nameTag.transform.rotation = Quaternion.LookRotation(_nameTag.transform.position - cam.transform.position);
         }
 
-        private void OnGUI()
-        {
-            if (Selected != this)
-            {
-                return;
-            }
-
-            GUI.Box(new Rect(12f, 262f, 320f, 112f), GUIContent.none);
-            GUI.Label(new Rect(22f, 270f, 300f, 22f), $"{staffName} — {role}");
-            GUI.Label(new Rect(22f, 292f, 300f, 22f), TraitDescription);
-            GUI.Label(new Rect(22f, 314f, 300f, 22f), _technician != null ? $"Status: {_technician.Activity}" : "Status: on site");
-            GUI.Label(new Rect(22f, 336f, 200f, 22f), _technician != null ? $"Walk speed: {_technician.MoveSpeed:0.0} m/s" : string.Empty);
-            if (GUI.Button(new Rect(232f, 336f, 90f, 22f), "Close"))
-            {
-                ClearSelection();
-            }
-        }
+        public TechnicianActor Technician => _technician;
     }
 }

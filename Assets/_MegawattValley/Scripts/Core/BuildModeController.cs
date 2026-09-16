@@ -13,8 +13,10 @@ namespace MegawattValley.Core
         [SerializeField] private UnityEngine.Camera worldCamera;
         [SerializeField] private LayerMask groundMask = ~0;
         [SerializeField] private float solarCost = 250f;
+        [SerializeField] private float solarNameplateMw = 0.25f;
         [SerializeField] private Vector3 solarFootprint = new Vector3(4f, 0.4f, 2f);
         [SerializeField] private float rotateStepDegrees = 90f;
+        [SerializeField] private float demolishRefundFraction = 0.5f;
 
         private GameObject _ghost;
         private float _ghostYaw;
@@ -24,6 +26,9 @@ namespace MegawattValley.Core
         private SelectablePlot _buildablePlot;
 
         public bool IsPlacing => _placing;
+        public float SolarCost => solarCost;
+        public float SolarNameplateMw => solarNameplateMw;
+        public bool CanAffordSolar => PlayerEconomy.Instance == null || PlayerEconomy.Instance.CanAfford(solarCost);
 
         private void Awake()
         {
@@ -46,18 +51,15 @@ namespace MegawattValley.Core
             }
         }
 
-        private void OnGUI()
+        public void ToggleSolarPlacement()
         {
-            if (GUI.Button(new Rect(12f, 222f, 160f, 32f), _placing ? "Cancel Build" : "Build: Solar Array"))
+            if (_placing)
             {
-                if (_placing)
-                {
-                    CancelPlacement();
-                }
-                else
-                {
-                    BeginSolarPlacement();
-                }
+                CancelPlacement();
+            }
+            else
+            {
+                BeginSolarPlacement();
             }
         }
 
@@ -112,7 +114,7 @@ namespace MegawattValley.Core
                 valid = false;
             }
 
-            if (mouse.leftButton.wasPressedThisFrame && valid)
+            if (mouse.leftButton.wasPressedThisFrame && valid && !UiInputGuard.PointerOverUi)
             {
                 PlaceSolar(hit.point, _ghostYaw);
             }
@@ -136,7 +138,7 @@ namespace MegawattValley.Core
             Debug.Log("[MegawattValley] Build mode: Solar Array. LMB place, R rotate, Esc/RMB cancel, X demolish.");
         }
 
-        private void CancelPlacement()
+        public void CancelPlacement()
         {
             _placing = false;
             if (_ghost != null)
@@ -156,7 +158,8 @@ namespace MegawattValley.Core
             var placed = CreateSolarVisual("SolarArray", isGhost: false);
             placed.transform.position = Snap(point);
             placed.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-            placed.AddComponent<SolarArrayUnit>();
+            var unit = placed.AddComponent<SolarArrayUnit>();
+            unit.SetNameplate(solarNameplateMw);
             placed.AddComponent<EquipmentCondition>();
 
             Debug.Log($"[MegawattValley] Placed solar array for ${solarCost:0}.");
@@ -166,7 +169,7 @@ namespace MegawattValley.Core
         private void TryDemolishUnderCursor()
         {
             var mouse = Mouse.current;
-            if (mouse == null)
+            if (mouse == null || UiInputGuard.PointerOverUi)
             {
                 return;
             }
@@ -177,13 +180,32 @@ namespace MegawattValley.Core
                 return;
             }
 
-            var unit = hit.collider.GetComponentInParent<SolarArrayUnit>();
+            Demolish(hit.collider.GetComponentInParent<SolarArrayUnit>());
+        }
+
+        /// <summary>Demolishes whatever the player currently has selected, for the HUD button.</summary>
+        public void DemolishSelected()
+        {
+            var selected = EquipmentCondition.Selected;
+            if (selected != null)
+            {
+                Demolish(selected.GetComponent<SolarArrayUnit>());
+            }
+        }
+
+        private void Demolish(SolarArrayUnit unit)
+        {
             if (unit == null)
             {
                 return;
             }
 
-            float refund = solarCost * 0.5f;
+            if (EquipmentCondition.Selected != null && EquipmentCondition.Selected.gameObject == unit.gameObject)
+            {
+                EquipmentCondition.ClearSelection();
+            }
+
+            float refund = solarCost * demolishRefundFraction;
             if (PlayerEconomy.Instance != null)
             {
                 PlayerEconomy.Instance.Add(refund);

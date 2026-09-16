@@ -41,7 +41,7 @@ namespace MegawattValley.Core
         private void Update()
         {
             var mouse = Mouse.current;
-            if (mouse == null || worldCamera == null || !mouse.leftButton.wasPressedThisFrame)
+            if (mouse == null || worldCamera == null || !mouse.leftButton.wasPressedThisFrame || UiInputGuard.PointerOverUi)
             {
                 return;
             }

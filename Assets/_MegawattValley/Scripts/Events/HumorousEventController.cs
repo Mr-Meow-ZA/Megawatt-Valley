@@ -9,6 +9,9 @@ namespace MegawattValley.Core
     public sealed class HumorousEventController : MonoBehaviour
     {
         [SerializeField] private float firstTriggerSeconds = 25f;
+        [SerializeField] private float bargainCost = 120f;
+        [SerializeField] private float bargainNameplateMw = 0.15f;
+        [SerializeField] private float declineConditionBonus = 8f;
         [SerializeField] private bool eventShown;
         [SerializeField] private bool eventResolved;
 
@@ -17,6 +20,37 @@ namespace MegawattValley.Core
         private string _body;
         private string _choiceA;
         private string _choiceB;
+
+        public static HumorousEventController Instance { get; private set; }
+
+        public bool IsPending => eventShown && !eventResolved;
+        public string Title => _title;
+        public string Body => _body;
+        public string ChoiceALabel => _choiceA;
+        public string ChoiceBLabel => _choiceB;
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
+        public void Choose(bool choiceA)
+        {
+            if (!IsPending)
+            {
+                return;
+            }
+
+            Resolve(choiceA);
+        }
 
         private void Update()
         {
@@ -47,9 +81,10 @@ namespace MegawattValley.Core
         {
             eventShown = true;
             _title = "Supplier Soft Pitch";
-            _body = "A salesman offers \"premium\" panels that look suspiciously like last year's stock with a fresh sticker.";
-            _choiceA = "8) Buy cheap lot (-$120, +0.15 MW later)";
-            _choiceB = "9) Politely decline (keep cash, +5 condition on selected)";
+            _body = "A salesman offers \"premium\" panels that look suspiciously like last year's stock with a fresh sticker. " +
+                    "He is already unloading them.";
+            _choiceA = $"Buy the bargain lot\n-${bargainCost:0} for {bargainNameplateMw:0.00} MW";
+            _choiceB = $"Politely decline\nFree panel wipe, +{declineConditionBonus:0} condition";
             Debug.Log($"[MegawattValley] EVENT: {_title} — {_body}");
         }
 
@@ -59,26 +94,24 @@ namespace MegawattValley.Core
             eventShown = false;
             if (choiceA)
             {
-                if (PlayerEconomy.Instance != null)
+                if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(bargainCost))
                 {
-                    PlayerEconomy.Instance.TrySpend(120f);
+                    Debug.Log("[MegawattValley] The cheque bounces. The salesman leaves with his panels and your dignity.");
+                    return;
                 }
 
                 SpawnBargainArray();
                 Debug.Log("[MegawattValley] You bought the sticker-premium panels. The spreadsheet is optimistic.");
+                return;
             }
-            else
+
+            var equipment = MaintenanceBoard.All;
+            foreach (var item in equipment)
             {
-                if (EquipmentCondition.Selected != null)
-                {
-                    // Soft reward: preventive boost without spending.
-                    Debug.Log("[MegawattValley] You decline. Your technician looks relieved and wipes a panel for free.");
-                }
-                else
-                {
-                    Debug.Log("[MegawattValley] You decline. Dignity preserved. Cash preserved.");
-                }
+                item.ApplyServiceBonus(declineConditionBonus);
             }
+
+            Debug.Log($"[MegawattValley] You decline. The technician wipes down {equipment.Count} array(s) out of relief.");
         }
 
         /// <summary>
@@ -109,22 +142,8 @@ namespace MegawattValley.Core
             collider.size = footprint;
 
             var unit = root.AddComponent<SolarArrayUnit>();
-            unit.SetNameplate(0.15f);
+            unit.SetNameplate(bargainNameplateMw);
             root.AddComponent<EquipmentCondition>();
-        }
-
-        private void OnGUI()
-        {
-            if (!eventShown || eventResolved)
-            {
-                return;
-            }
-
-            GUI.Box(new Rect(Screen.width * 0.5f - 220f, 140f, 440f, 150f), GUIContent.none);
-            GUI.Label(new Rect(Screen.width * 0.5f - 200f, 150f, 400f, 24f), _title);
-            GUI.Label(new Rect(Screen.width * 0.5f - 200f, 178f, 400f, 50f), _body);
-            GUI.Label(new Rect(Screen.width * 0.5f - 200f, 230f, 400f, 24f), _choiceA);
-            GUI.Label(new Rect(Screen.width * 0.5f - 200f, 252f, 400f, 24f), _choiceB);
         }
     }
 }

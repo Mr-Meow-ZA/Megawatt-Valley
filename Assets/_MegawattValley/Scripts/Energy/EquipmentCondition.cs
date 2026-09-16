@@ -1,8 +1,68 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace MegawattValley.Core
 {
+    /// <summary>
+    /// Site-wide view of equipment health, so the HUD and events do not have to search the scene.
+    /// </summary>
+    public static class MaintenanceBoard
+    {
+        private static readonly List<EquipmentCondition> Equipment = new List<EquipmentCondition>();
+
+        public static IReadOnlyList<EquipmentCondition> All
+        {
+            get
+            {
+                Prune();
+                return Equipment;
+            }
+        }
+
+        public static int FaultedCount
+        {
+            get
+            {
+                Prune();
+                int count = 0;
+                foreach (var item in Equipment)
+                {
+                    if (item.IsFaulted)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        public static void Register(EquipmentCondition equipment)
+        {
+            if (equipment != null && !Equipment.Contains(equipment))
+            {
+                Equipment.Add(equipment);
+            }
+        }
+
+        public static void Unregister(EquipmentCondition equipment)
+        {
+            Equipment.Remove(equipment);
+        }
+
+        private static void Prune()
+        {
+            for (int i = Equipment.Count - 1; i >= 0; i--)
+            {
+                if (Equipment[i] == null)
+                {
+                    Equipment.RemoveAt(i);
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Condition, faults, repair, and preventive maintenance for a solar array (S4-01..S4-05).
     /// </summary>
@@ -30,6 +90,9 @@ namespace MegawattValley.Core
         public float Condition => condition;
         public bool IsFaulted => isFaulted;
         public bool IsRepairing => isRepairing;
+        public float RepairCost => repairCost;
+        public float PreventiveCost => preventiveCost;
+        public SolarArrayUnit Solar => _solar;
 
         public static EquipmentCondition Selected { get; private set; }
 
@@ -63,6 +126,16 @@ namespace MegawattValley.Core
             condition = 100f;
             isFaulted = false;
             isRepairing = false;
+            MaintenanceBoard.Register(this);
+        }
+
+        private void OnDisable()
+        {
+            MaintenanceBoard.Unregister(this);
+            if (Selected == this)
+            {
+                Selected = null;
+            }
         }
 
         private void Update()
@@ -86,7 +159,7 @@ namespace MegawattValley.Core
                 return;
             }
 
-            if (mouse.leftButton.wasPressedThisFrame &&
+            if (mouse.leftButton.wasPressedThisFrame && !UiInputGuard.PointerOverUi &&
                 (BuildModeController.Instance == null || !BuildModeController.Instance.IsPlacing))
             {
                 Ray ray = cam.ScreenPointToRay(mouse.position.ReadValue());
@@ -211,7 +284,18 @@ namespace MegawattValley.Core
             Debug.Log($"[MegawattValley] Repair started (${repairCost:0}).");
         }
 
-        private void DoPreventiveMaintenance()
+        /// <summary>Free condition recovery from an event or perk, with no cash cost.</summary>
+        public void ApplyServiceBonus(float amount)
+        {
+            if (isFaulted || amount <= 0f)
+            {
+                return;
+            }
+
+            condition = Mathf.Min(100f, condition + amount);
+        }
+
+        public void DoPreventiveMaintenance()
         {
             if (isFaulted || isRepairing)
             {
@@ -264,23 +348,5 @@ namespace MegawattValley.Core
             _label.transform.rotation = Quaternion.LookRotation(_label.transform.position - cam.transform.position);
         }
 
-        private void OnGUI()
-        {
-            if (Selected != this)
-            {
-                return;
-            }
-
-            bool offGrid = _solar != null && !_solar.IsConnectedToGrid;
-            GUI.Box(new Rect(12f, 262f, 320f, 112f), GUIContent.none);
-            GUI.Label(new Rect(22f, 270f, 300f, 22f), $"Selected: {name}");
-            GUI.Label(new Rect(22f, 292f, 300f, 22f), $"Condition {condition:0}%  {(isFaulted ? "FAULTED" : "online")}");
-            GUI.Label(new Rect(22f, 314f, 300f, 22f), _solar != null
-                ? $"Output {_solar.CurrentMegawatts:0.000} MW  ·  ${_solar.RevenuePerSecond:0.0}/s"
-                : "No generator attached");
-            GUI.Label(new Rect(22f, 336f, 300f, 22f), offGrid
-                ? "Not connected — move inside the blue ring"
-                : "F repair · M preventive maintenance");
-        }
     }
 }

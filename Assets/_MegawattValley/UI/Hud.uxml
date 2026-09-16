@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
+
+        <ui:VisualElement name="top-bar" class="top-bar" picking-mode="Ignore">
+            <ui:VisualElement name="company-card" class="card">
+                <ui:Label class="card-title" text="COMPANY" />
+                <ui:Label name="cash-value" class="metric-value" text="$0" />
+                <ui:Label name="income-value" class="metric-sub" text="+$0.0 / sec" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="power-card" class="card">
+                <ui:Label class="card-title" text="POWER" />
+                <ui:Label name="export-value" class="metric-value" text="0.000 MW" />
+                <ui:Label name="installed-value" class="metric-sub" text="0.00 MW installed" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="time-card" class="card">
+                <ui:Label class="card-title" text="TIME" />
+                <ui:Label name="clock-value" class="metric-value" text="Day 1 - 12:00" />
+                <ui:Label name="sun-value" class="metric-sub" text="Sun 100%" />
+                <ui:VisualElement class="speed-row">
+                    <ui:Button name="speed-pause" class="speed-button" text="II" tooltip="Pause (Space)" />
+                    <ui:Button name="speed-1" class="speed-button" text="1x" />
+                    <ui:Button name="speed-2" class="speed-button" text="2x" />
+                    <ui:Button name="speed-3" class="speed-button" text="3x" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="objective-card" class="card objective-card">
+                <ui:Label class="card-title" text="OBJECTIVE" />
+                <ui:Label name="objective-title" class="metric-sub" text="Build solar capacity" />
+                <ui:Label name="objective-value" class="metric-sub" text="0.00 / 0.75 MW installed" />
+                <ui:VisualElement class="objective-track">
+                    <ui:VisualElement name="objective-fill" class="objective-fill" />
+                </ui:VisualElement>
+                <ui:Label name="objective-win" class="win-label hidden" text="COMPLETE - Tiny Tycoon!" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:Label name="alert-banner" class="alert hidden" text="" />
+
+        <ui:VisualElement name="selection-panel" class="card selection-panel hidden">
+            <ui:Label name="selection-kind" class="card-title" text="SELECTED" />
+            <ui:Label name="selection-title" class="metric-sub" text="" />
+            <ui:Label name="selection-line-1" class="panel-line" text="" />
+            <ui:Label name="selection-line-2" class="panel-line" text="" />
+            <ui:Label name="selection-line-3" class="panel-line" text="" />
+            <ui:VisualElement class="button-row">
+                <ui:Button name="repair-button" class="action-button" text="Repair" />
+                <ui:Button name="maintain-button" class="action-button" text="Service" />
+                <ui:Button name="demolish-button" class="action-button action-button-danger" text="Demolish" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="build-bar" class="build-bar" picking-mode="Ignore">
+            <ui:Button name="build-solar-button" class="build-button">
+                <ui:Label name="build-solar-title" class="build-title" text="Solar Array" />
+                <ui:Label name="build-solar-cost" class="build-cost" text="$250" />
+                <ui:Label name="build-solar-note" class="build-note" text="0.25 MW nameplate" />
+            </ui:Button>
+            <ui:VisualElement class="hint-stack" picking-mode="Ignore">
+                <ui:Label name="hint-primary" class="hint" text="B build - R rotate ghost - Esc cancel - X demolish under cursor" />
+                <ui:Label name="hint-secondary" class="hint" text="Click an array or the technician to inspect it" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="event-modal" class="modal-backdrop hidden">
+            <ui:VisualElement class="modal">
+                <ui:Label name="event-title" class="modal-title" text="" />
+                <ui:Label name="event-body" class="modal-body" text="" />
+                <ui:VisualElement class="button-row">
+                    <ui:Button name="event-choice-a" class="action-button modal-button" text="" />
+                    <ui:Button name="event-choice-b" class="action-button modal-button" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

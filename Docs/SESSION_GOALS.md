@@ -216,15 +216,16 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
 
 ### S6 — Harden & handoff
 
-- [ ] **S6-01 — Rapha playtest acceptance**  
+- [x] **S6-01 — Rapha playtest acceptance**  
   Play `Prototype_Valley` on the home PC; capture fun / confusing / broken notes.  
-  **Victory moment:** the grey-box loop is accepted, rejected, or given a short fix list.
+  **Victory moment:** the grey-box loop is accepted, rejected, or given a short fix list.  
+  *Accepted 2026-09-16 with a fix list: dead arrays off-grid, condition wearing far too fast, no visible clock, unreadable HUD, hidden build cost / income rate, un-clickable technician.*
 
 - [ ] **S6-02 — ChatGPT overnight-slice review**  
   Refresh `Docs/CHATGPT_REVIEW.md` against HEAD / ACTIVITY_LOG; nominate the next single goal.  
   **Victory moment:** review docs match reality again.
 
-- [ ] **S6-03 — UI Toolkit HUD v1**  
+- [x] **S6-03 — UI Toolkit HUD v1**  
   Replace OnGUI cash / MW / speed / build affordances with a minimal UI Toolkit HUD.  
   **Victory moment:** the management bar looks intentional without changing sim rules.
 

@@ -15,6 +15,9 @@ namespace MegawattValley.Core
 
         public float CurrentSpeed => speedSteps[Mathf.Clamp(speedIndex, 0, speedSteps.Length - 1)];
         public float SimulationDeltaTime => Time.unscaledDeltaTime * CurrentSpeed;
+        public int SpeedIndex => Mathf.Clamp(speedIndex, 0, speedSteps.Length - 1);
+        public int SpeedStepCount => speedSteps.Length;
+        public bool IsPaused => CurrentSpeed <= 0f;
 
         private void Awake()
         {
@@ -42,20 +45,19 @@ namespace MegawattValley.Core
             if (keyboard.digit3Key.wasPressedThisFrame) SetSpeedIndex(3);
             if (keyboard.spaceKey.wasPressedThisFrame)
             {
-                SetSpeedIndex(speedIndex == 0 ? 1 : 0);
+                TogglePause();
             }
         }
 
-        private void SetSpeedIndex(int index)
+        public void SetSpeedIndex(int index)
         {
             speedIndex = Mathf.Clamp(index, 0, speedSteps.Length - 1);
             Debug.Log($"[MegawattValley] Sim speed: {CurrentSpeed:0}x");
         }
 
-        private void OnGUI()
+        public void TogglePause()
         {
-            GUI.Label(new Rect(12f, 172f, 300f, 22f), $"Speed: {CurrentSpeed:0}x  (Space pause, 1/2/3)");
-            GUI.Label(new Rect(12f, 194f, 520f, 22f), "B build · R rotate · Esc cancel · X demolish · click asset or staff to inspect");
+            SetSpeedIndex(speedIndex == 0 ? 1 : 0);
         }
     }
 }

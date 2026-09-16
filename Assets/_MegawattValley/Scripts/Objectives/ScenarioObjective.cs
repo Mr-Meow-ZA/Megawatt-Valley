@@ -14,7 +14,24 @@ namespace MegawattValley.Core
         [SerializeField] private float targetInstalledMegawatts = 0.75f;
         [SerializeField] private bool completed;
 
+        public static ScenarioObjective Instance { get; private set; }
+
         public bool IsComplete => completed;
+        public float TargetInstalledMegawatts => targetInstalledMegawatts;
+        public string Description => $"Reach {targetInstalledMegawatts:0.00} MW installed";
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
 
         private void Update()
         {
@@ -30,16 +47,5 @@ namespace MegawattValley.Core
             }
         }
 
-        private void OnGUI()
-        {
-            float installed = PowerBoard.InstalledMegawatts;
-            GUI.Box(new Rect(Screen.width - 268f, 12f, 256f, completed ? 94f : 72f), GUIContent.none);
-            GUI.Label(new Rect(Screen.width - 256f, 20f, 236f, 22f), "Objective: build solar capacity");
-            GUI.Label(new Rect(Screen.width - 256f, 42f, 236f, 22f), $"Installed {installed:0.00} / {targetInstalledMegawatts:0.00} MW");
-            if (completed)
-            {
-                GUI.Label(new Rect(Screen.width - 256f, 64f, 236f, 22f), "WIN — Tiny Tycoon!");
-            }
-        }
     }
 }

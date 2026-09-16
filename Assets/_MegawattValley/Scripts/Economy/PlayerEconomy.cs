@@ -49,31 +49,9 @@ namespace MegawattValley.Core
             cash += amount;
         }
 
-        private void OnGUI()
+        public bool CanAfford(float amount)
         {
-            const float pad = 12f;
-            float installed = PowerBoard.InstalledMegawatts;
-            float live = PowerBoard.TotalMegawatts;
-            int disconnected = PowerBoard.DisconnectedCount;
-
-            GUI.Box(new Rect(pad, pad, 300f, 154f), GUIContent.none);
-            GUI.Label(new Rect(pad + 10f, pad + 8f, 280f, 22f), $"Cash: ${cash:0}");
-            GUI.Label(new Rect(pad + 10f, pad + 30f, 280f, 22f), $"Income: ${PowerBoard.TotalRevenuePerSecond:0.0}/s");
-            GUI.Label(new Rect(pad + 10f, pad + 52f, 280f, 22f), $"Exporting: {live:0.000} MW");
-            GUI.Label(new Rect(pad + 10f, pad + 74f, 280f, 22f), $"Installed: {installed:0.000} MW");
-            GUI.Label(new Rect(pad + 10f, pad + 96f, 280f, 22f),
-                $"{DayNightSun.ClockText} · sun {DayNightSun.SolarFactor * 100f:0}%");
-
-            string hint = disconnected > 0
-                ? $"{disconnected} array(s) outside the grid ring"
-                : !DayNightSun.IsDaylight && installed > 0f
-                    ? "Night — no sun, no income"
-                    : string.Empty;
-
-            if (!string.IsNullOrEmpty(hint))
-            {
-                GUI.Label(new Rect(pad + 10f, pad + 118f, 280f, 22f), hint);
-            }
+            return cash >= amount;
         }
     }
 }

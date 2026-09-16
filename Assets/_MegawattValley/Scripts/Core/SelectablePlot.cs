@@ -35,7 +35,7 @@ namespace MegawattValley.Core
         {
             var mouse = Mouse.current;
             var cam = UnityEngine.Camera.main;
-            if (mouse == null || cam == null || !mouse.leftButton.wasPressedThisFrame)
+            if (mouse == null || cam == null || !mouse.leftButton.wasPressedThisFrame || UiInputGuard.PointerOverUi)
             {
                 return;
             }

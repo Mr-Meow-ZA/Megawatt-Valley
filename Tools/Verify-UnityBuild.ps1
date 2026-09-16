@@ -92,12 +92,13 @@ if ($exceptions) {
 }
 
 if ($CopyBackScenes -and $exitCode -eq 0 -and -not $compileErrors) {
-    $shadowScenes = Join-Path $ShadowRoot 'Assets/_MegawattValley/Scenes'
-    $repoScenes = Join-Path $repoRoot 'Assets/_MegawattValley/Scenes'
-    Write-Host "Copying generated scenes back into the repository ..."
-    robocopy $shadowScenes $repoScenes /E /NFL /NDL /NJH /NJS /NP | Out-Null
+    # Copy without /MIR so nothing in the repo is deleted: this only brings over assets Unity
+    # generated in the shadow project, notably .meta files and generated .asset files whose
+    # GUIDs must stay stable in the repository.
+    Write-Host 'Copying generated assets back into the repository ...'
+    robocopy (Join-Path $ShadowRoot 'Assets') (Join-Path $repoRoot 'Assets') /E /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) {
-        throw "robocopy failed copying scenes back (exit $LASTEXITCODE)."
+        throw "robocopy failed copying assets back (exit $LASTEXITCODE)."
     }
 }
 
