@@ -40,6 +40,7 @@ namespace MegawattValley.UI
         private Button _demolishButton;
 
         private Button _buildSolarButton;
+        private Label _buildSolarTitle;
         private Label _buildSolarCost;
         private Label _buildSolarNote;
 
@@ -68,7 +69,7 @@ namespace MegawattValley.UI
             "selection-panel", "selection-kind", "selection-title",
             "selection-line-1", "selection-line-2", "selection-line-3",
             "repair-button", "maintain-button", "demolish-button",
-            "build-solar-button", "build-solar-cost", "build-solar-note",
+            "build-solar-button", "build-solar-title", "build-solar-cost", "build-solar-note",
             "event-modal", "event-title", "event-body", "event-choice-a", "event-choice-b"
         };
 
@@ -111,6 +112,7 @@ namespace MegawattValley.UI
             _demolishButton = _root.Q<Button>("demolish-button");
 
             _buildSolarButton = _root.Q<Button>("build-solar-button");
+            _buildSolarTitle = _root.Q<Label>("build-solar-title");
             _buildSolarCost = _root.Q<Label>("build-solar-cost");
             _buildSolarNote = _root.Q<Label>("build-solar-note");
 
@@ -290,6 +292,7 @@ namespace MegawattValley.UI
                 return;
             }
 
+            SetText(_buildSolarTitle, build.SolarDisplayName);
             SetText(_buildSolarCost, $"${build.SolarCost:N0}");
             SetText(_buildSolarNote, build.IsPlacing
                 ? "placing — Esc to cancel"
@@ -421,11 +424,13 @@ namespace MegawattValley.UI
             if (_eventChoiceA != null)
             {
                 _eventChoiceA.text = pendingEvent.ChoiceALabel;
+                _eventChoiceA.SetEnabled(pendingEvent.CanAffordChoiceA);
             }
 
             if (_eventChoiceB != null)
             {
                 _eventChoiceB.text = pendingEvent.ChoiceBLabel;
+                _eventChoiceB.SetEnabled(pendingEvent.CanAffordChoiceB);
             }
         }
 

@@ -105,9 +105,9 @@ namespace MegawattValley.EditorTools
 
             // Systems
             var systems = new GameObject("GameSystems");
-            systems.AddComponent<PlayerEconomy>();
+            var economy = systems.AddComponent<PlayerEconomy>();
             systems.AddComponent<SimulationClock>();
-            systems.AddComponent<BuildModeController>();
+            var buildMode = systems.AddComponent<BuildModeController>();
             systems.AddComponent<GroundClickMarker>();
 
             // Technician waits by the access road. Keeps its collider so the player can click it.
@@ -148,8 +148,17 @@ namespace MegawattValley.EditorTools
             jokeText.alignment = TextAlignment.Center;
             jokeText.color = Color.black;
 
-            systems.AddComponent<HumorousEventController>();
-            systems.AddComponent<ScenarioObjective>();
+            var events = systems.AddComponent<HumorousEventController>();
+            var objective = systems.AddComponent<ScenarioObjective>();
+
+            // Content pack (S6-04): balance values live in data, not in these components.
+            var scenario = ContentBootstrap.EnsureScenario();
+            var standardArray = ContentBootstrap.EnsureStandardArray();
+            var supplierEvent = ContentBootstrap.EnsureSupplierEvent();
+            AssignReference(economy, "scenario", scenario);
+            AssignReference(objective, "scenario", scenario);
+            AssignReference(buildMode, "solarDefinition", standardArray);
+            AssignReference(events, "eventDefinition", supplierEvent);
 
             // HUD (S6-03). UIDocument is added before HudController so the tree exists first.
             var hud = new GameObject("HUD");
@@ -183,6 +192,23 @@ namespace MegawattValley.EditorTools
 
             AssetDatabase.SaveAssets();
             Debug.Log($"[MegawattValley] Prototype scene created at {ScenePath}");
+        }
+
+        /// <summary>
+        /// Assigns a private [SerializeField] reference without widening the runtime API just for setup.
+        /// </summary>
+        private static void AssignReference(Component component, string fieldName, Object value)
+        {
+            var editable = new SerializedObject(component);
+            var property = editable.FindProperty(fieldName);
+            if (property == null)
+            {
+                Debug.LogError($"[MegawattValley] {component.GetType().Name} has no serialized field '{fieldName}'.");
+                return;
+            }
+
+            property.objectReferenceValue = value;
+            editable.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void CreateScaleBlock(string name, Vector3 position, Vector3 scale, Color color)

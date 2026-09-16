@@ -1,14 +1,16 @@
+using MegawattValley.Data;
 using UnityEngine;
 
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Simple company cash balance with on-screen readout (S3-01).
+    /// Simple company cash balance (S3-01). Starting cash comes from the scenario when one is set.
     /// </summary>
     public sealed class PlayerEconomy : MonoBehaviour
     {
         public static PlayerEconomy Instance { get; private set; }
 
+        [SerializeField] private ScenarioDefinition scenario;
         [SerializeField] private float startingCash = 1000f;
         [SerializeField] private float cash;
 
@@ -17,7 +19,7 @@ namespace MegawattValley.Core
         private void Awake()
         {
             Instance = this;
-            cash = startingCash;
+            cash = scenario != null ? scenario.StartingCash : startingCash;
         }
 
         private void OnDestroy()

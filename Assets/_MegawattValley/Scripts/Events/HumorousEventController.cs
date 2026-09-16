@@ -1,33 +1,35 @@
+using MegawattValley.Construction;
+using MegawattValley.Data;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// One humorous decision event with two meaningful choices (S5-01).
+    /// Runs one humorous decision event from data (S5-01, data-driven in S6-04).
     /// </summary>
     public sealed class HumorousEventController : MonoBehaviour
     {
-        [SerializeField] private float firstTriggerSeconds = 25f;
-        [SerializeField] private float bargainCost = 120f;
-        [SerializeField] private float bargainNameplateMw = 0.15f;
-        [SerializeField] private float declineConditionBonus = 8f;
+        [SerializeField] private DecisionEventDefinition eventDefinition;
+        [SerializeField] private float fallbackTriggerSeconds = 25f;
         [SerializeField] private bool eventShown;
         [SerializeField] private bool eventResolved;
 
         private float _timer;
-        private string _title;
-        private string _body;
-        private string _choiceA;
-        private string _choiceB;
 
         public static HumorousEventController Instance { get; private set; }
 
-        public bool IsPending => eventShown && !eventResolved;
-        public string Title => _title;
-        public string Body => _body;
-        public string ChoiceALabel => _choiceA;
-        public string ChoiceBLabel => _choiceB;
+        public bool IsPending => eventShown && !eventResolved && eventDefinition != null;
+        public string Title => eventDefinition != null ? eventDefinition.Title : string.Empty;
+        public string Body => eventDefinition != null ? eventDefinition.Body : string.Empty;
+        public string ChoiceALabel => eventDefinition != null ? eventDefinition.ChoiceA.ResolvedLabel : string.Empty;
+        public string ChoiceBLabel => eventDefinition != null ? eventDefinition.ChoiceB.ResolvedLabel : string.Empty;
+        public bool CanAffordChoiceA => CanAfford(eventDefinition != null ? eventDefinition.ChoiceA : null);
+        public bool CanAffordChoiceB => CanAfford(eventDefinition != null ? eventDefinition.ChoiceB : null);
+
+        private float TriggerSeconds => eventDefinition != null
+            ? eventDefinition.TriggerAfterSeconds
+            : fallbackTriggerSeconds;
 
         private void Awake()
         {
@@ -44,17 +46,15 @@ namespace MegawattValley.Core
 
         public void Choose(bool choiceA)
         {
-            if (!IsPending)
+            if (IsPending)
             {
-                return;
+                Resolve(choiceA);
             }
-
-            Resolve(choiceA);
         }
 
         private void Update()
         {
-            if (eventResolved)
+            if (eventResolved || eventDefinition == null)
             {
                 return;
             }
@@ -62,9 +62,10 @@ namespace MegawattValley.Core
             float dt = SimulationClock.Instance != null ? SimulationClock.Instance.SimulationDeltaTime : Time.deltaTime;
             _timer += dt;
 
-            if (!eventShown && _timer >= firstTriggerSeconds)
+            if (!eventShown && _timer >= TriggerSeconds)
             {
-                ShowEvent();
+                eventShown = true;
+                Debug.Log($"[MegawattValley] EVENT: {Title} — {Body}");
             }
 
             var keyboard = Keyboard.current;
@@ -73,77 +74,55 @@ namespace MegawattValley.Core
                 return;
             }
 
-            if (keyboard.digit8Key.wasPressedThisFrame) Resolve(choiceA: true);
-            if (keyboard.digit9Key.wasPressedThisFrame) Resolve(choiceA: false);
-        }
+            if (keyboard.digit8Key.wasPressedThisFrame)
+            {
+                Resolve(choiceA: true);
+            }
 
-        private void ShowEvent()
-        {
-            eventShown = true;
-            _title = "Supplier Soft Pitch";
-            _body = "A salesman offers \"premium\" panels that look suspiciously like last year's stock with a fresh sticker. " +
-                    "He is already unloading them.";
-            _choiceA = $"Buy the bargain lot\n-${bargainCost:0} for {bargainNameplateMw:0.00} MW";
-            _choiceB = $"Politely decline\nFree panel wipe, +{declineConditionBonus:0} condition";
-            Debug.Log($"[MegawattValley] EVENT: {_title} — {_body}");
+            if (keyboard.digit9Key.wasPressedThisFrame)
+            {
+                Resolve(choiceA: false);
+            }
         }
 
         private void Resolve(bool choiceA)
         {
-            eventResolved = true;
-            eventShown = false;
-            if (choiceA)
-            {
-                if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(bargainCost))
-                {
-                    Debug.Log("[MegawattValley] The cheque bounces. The salesman leaves with his panels and your dignity.");
-                    return;
-                }
+            var choice = choiceA ? eventDefinition.ChoiceA : eventDefinition.ChoiceB;
 
-                SpawnBargainArray();
-                Debug.Log("[MegawattValley] You bought the sticker-premium panels. The spreadsheet is optimistic.");
+            // An unaffordable choice leaves the decision open rather than silently doing nothing.
+            if (choice.CashCost > 0f && PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(choice.CashCost))
+            {
+                Debug.LogWarning($"[MegawattValley] Cannot afford that choice (${choice.CashCost:0}).");
                 return;
             }
 
-            var equipment = MaintenanceBoard.All;
-            foreach (var item in equipment)
+            eventResolved = true;
+            eventShown = false;
+
+            if (choice.ConditionBonusToAllEquipment > 0f)
             {
-                item.ApplyServiceBonus(declineConditionBonus);
+                foreach (var equipment in MaintenanceBoard.All)
+                {
+                    equipment.ApplyServiceBonus(choice.ConditionBonusToAllEquipment);
+                }
             }
 
-            Debug.Log($"[MegawattValley] You decline. The technician wipes down {equipment.Count} array(s) out of relief.");
+            if (choice.SpawnsArray != null)
+            {
+                SolarArrayFactory.CreateArray(choice.SpawnsArray, choice.SpawnPosition, 0f);
+            }
+
+            Debug.Log($"[MegawattValley] {choice.ResultLog}");
         }
 
-        /// <summary>
-        /// The bargain lot is cheap capacity with a worse nameplate than a normal build.
-        /// </summary>
-        private void SpawnBargainArray()
+        private static bool CanAfford(DecisionChoice choice)
         {
-            var footprint = new Vector3(4f, 0.4f, 2f);
-
-            var root = new GameObject("BargainSolarArray");
-            root.transform.position = new Vector3(4f, 0f, 2f);
-
-            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            body.name = "PanelTable";
-            body.transform.SetParent(root.transform, false);
-            body.transform.localScale = footprint;
-            body.transform.localPosition = new Vector3(0f, footprint.y * 0.5f, 0f);
-            Destroy(body.GetComponent<Collider>());
-
-            var renderer = body.GetComponent<MeshRenderer>();
-            if (renderer != null)
+            if (choice == null || choice.CashCost <= 0f || PlayerEconomy.Instance == null)
             {
-                renderer.sharedMaterial = GroundClickMarker.CreateColorMaterial(new Color(0.3f, 0.3f, 0.42f));
+                return true;
             }
 
-            var collider = root.AddComponent<BoxCollider>();
-            collider.center = new Vector3(0f, footprint.y * 0.5f, 0f);
-            collider.size = footprint;
-
-            var unit = root.AddComponent<SolarArrayUnit>();
-            unit.SetNameplate(bargainNameplateMw);
-            root.AddComponent<EquipmentCondition>();
+            return PlayerEconomy.Instance.CanAfford(choice.CashCost);
         }
     }
 }

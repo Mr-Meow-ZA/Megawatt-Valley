@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MegawattValley.Data;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -69,14 +70,23 @@ namespace MegawattValley.Core
     [DisallowMultipleComponent]
     public sealed class EquipmentCondition : MonoBehaviour
     {
+        [SerializeField] private SolarArrayDefinition definition;
         [SerializeField] private float condition = 100f;
 
+        [Header("Fallbacks used when no definition is assigned")]
         /// <summary>Wear only accrues while the array is actually generating, so panels do not rot overnight.</summary>
         [SerializeField] private float naturalWearPerSecond = 0.1f;
         [SerializeField] private float faultChancePerSecondAtLowCondition = 0.06f;
         [SerializeField] private float repairCost = 80f;
         [SerializeField] private float preventiveCost = 35f;
         [SerializeField] private float repairSeconds = 2.5f;
+
+        [Header("Tuning")]
+        [Tooltip("Output multiplier at 0% condition, before a fault stops generation entirely.")]
+        [SerializeField, Range(0f, 1f)] private float wornOutputMultiplier = 0.55f;
+        [SerializeField] private float preventiveConditionGain = 25f;
+        [SerializeField] private float repairConditionFloor = 70f;
+
         [SerializeField] private bool isFaulted;
         [SerializeField] private bool isRepairing;
         [SerializeField] private float repairTimer;
@@ -90,11 +100,23 @@ namespace MegawattValley.Core
         public float Condition => condition;
         public bool IsFaulted => isFaulted;
         public bool IsRepairing => isRepairing;
-        public float RepairCost => repairCost;
-        public float PreventiveCost => preventiveCost;
         public SolarArrayUnit Solar => _solar;
 
+        public float RepairCost => definition != null ? definition.RepairCost : repairCost;
+        public float PreventiveCost => definition != null ? definition.PreventiveCost : preventiveCost;
+        private float RepairSeconds => definition != null ? definition.RepairSeconds : repairSeconds;
+        private float WearPerSecond => definition != null ? definition.WearPerSecond : naturalWearPerSecond;
+
+        private float FaultChancePerSecondAtLowCondition => definition != null
+            ? definition.FaultChancePerSecondAtLowCondition
+            : faultChancePerSecondAtLowCondition;
+
         public static EquipmentCondition Selected { get; private set; }
+
+        public void Configure(SolarArrayDefinition arrayDefinition)
+        {
+            definition = arrayDefinition;
+        }
 
         public static void ClearSelection()
         {
@@ -211,8 +233,8 @@ namespace MegawattValley.Core
 
             if (!isFaulted)
             {
-                condition = Mathf.Max(0f, condition - naturalWearPerSecond * dt);
-                float faultChance = Mathf.InverseLerp(50f, 0f, condition) * faultChancePerSecondAtLowCondition * dt;
+                condition = Mathf.Max(0f, condition - WearPerSecond * dt);
+                float faultChance = Mathf.InverseLerp(50f, 0f, condition) * FaultChancePerSecondAtLowCondition * dt;
                 if (Random.value < faultChance || condition <= 0.01f)
                 {
                     TriggerFault();
@@ -235,7 +257,7 @@ namespace MegawattValley.Core
 
             isRepairing = false;
             isFaulted = false;
-            condition = Mathf.Max(condition, 70f);
+            condition = Mathf.Max(condition, repairConditionFloor);
             if (_bodyRenderer != null && _healthyMaterial != null)
             {
                 _bodyRenderer.sharedMaterial = _healthyMaterial;
@@ -268,14 +290,14 @@ namespace MegawattValley.Core
                 return;
             }
 
-            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(repairCost))
+            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(RepairCost))
             {
                 Debug.LogWarning("[MegawattValley] Not enough cash to repair.");
                 return;
             }
 
             isRepairing = true;
-            repairTimer = repairSeconds;
+            repairTimer = RepairSeconds;
             if (assignTechnician && TechnicianActor.Instance != null)
             {
                 TechnicianActor.Instance.AssignRepair(transform);
@@ -303,14 +325,14 @@ namespace MegawattValley.Core
                 return;
             }
 
-            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(preventiveCost))
+            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(PreventiveCost))
             {
                 Debug.LogWarning("[MegawattValley] Not enough cash for preventive maintenance.");
                 return;
             }
 
-            condition = Mathf.Min(100f, condition + 25f);
-            Debug.Log($"[MegawattValley] Preventive maintenance (+25 condition, ${preventiveCost:0}). Now {condition:0}%.");
+            condition = Mathf.Min(100f, condition + preventiveConditionGain);
+            Debug.Log($"[MegawattValley] Preventive maintenance (+{preventiveConditionGain:0} condition, ${PreventiveCost:0}). Now {condition:0}%.");
         }
 
         private void ApplyGenerationMultiplier()
@@ -320,8 +342,7 @@ namespace MegawattValley.Core
                 return;
             }
 
-            float multiplier = isFaulted ? 0f : Mathf.Lerp(0.55f, 1f, condition / 100f);
-            _solar.SetOutputMultiplier(multiplier);
+            _solar.SetOutputMultiplier(SolarMath.ConditionMultiplier(condition, isFaulted, wornOutputMultiplier));
         }
 
         private void RefreshLabel()

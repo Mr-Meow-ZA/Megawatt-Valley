@@ -229,7 +229,7 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   Replace OnGUI cash / MW / speed / build affordances with a minimal UI Toolkit HUD.  
   **Victory moment:** the management bar looks intentional without changing sim rules.
 
-- [ ] **S6-04 — First ScriptableObject content pack**  
+- [x] **S6-04 — First ScriptableObject content pack**  
   Move solar definition, one event, and the MW objective into ScriptableObject (or equivalent data) assets.  
   **Victory moment:** balance values change without rewriting gameplay code.
 

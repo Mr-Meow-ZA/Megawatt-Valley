@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MegawattValley.Data;
 using UnityEngine;
 
 namespace MegawattValley.Core
@@ -103,31 +104,37 @@ namespace MegawattValley.Core
 
     /// <summary>
     /// One placed solar array with generation + grid connection + revenue (S3-02..S3-04).
+    /// Balance values come from a <see cref="SolarArrayDefinition"/> when one is assigned.
     /// </summary>
     public sealed class SolarArrayUnit : MonoBehaviour
     {
+        [SerializeField] private SolarArrayDefinition definition;
+
+        [Header("Fallbacks used when no definition is assigned")]
         [SerializeField] private float nameplateMw = 0.25f;
         [SerializeField] private float revenuePerMwPerSecond = 8f;
+
         [SerializeField] private bool connectedToGrid = true;
         [SerializeField] private float outputMultiplier = 1f;
 
-        public float NameplateMegawatts => nameplateMw;
+        public SolarArrayDefinition Definition => definition;
+        public float NameplateMegawatts => definition != null ? definition.NameplateMegawatts : nameplateMw;
+        public float RevenuePerMwPerSecond => definition != null ? definition.RevenuePerMwPerSecond : revenuePerMwPerSecond;
         public bool IsConnectedToGrid => connectedToGrid;
 
-        public float CurrentMegawatts => connectedToGrid
-            ? nameplateMw * DayNightSun.SolarFactor * outputMultiplier
-            : 0f;
+        public float CurrentMegawatts =>
+            SolarMath.Megawatts(NameplateMegawatts, DayNightSun.SolarFactor, outputMultiplier, connectedToGrid);
 
-        public float RevenuePerSecond => CurrentMegawatts * revenuePerMwPerSecond;
+        public float RevenuePerSecond => SolarMath.RevenuePerSecond(CurrentMegawatts, RevenuePerMwPerSecond);
+
+        public void Configure(SolarArrayDefinition arrayDefinition)
+        {
+            definition = arrayDefinition;
+        }
 
         public void SetOutputMultiplier(float multiplier)
         {
             outputMultiplier = Mathf.Clamp01(multiplier);
-        }
-
-        public void SetNameplate(float megawatts)
-        {
-            nameplateMw = Mathf.Max(0f, megawatts);
         }
 
         private void OnEnable()
@@ -151,7 +158,7 @@ namespace MegawattValley.Core
             }
 
             float dt = SimulationClock.Instance != null ? SimulationClock.Instance.SimulationDeltaTime : Time.deltaTime;
-            PlayerEconomy.Instance.Add(RevenuePerSecond * dt);
+            PlayerEconomy.Instance.Add(SolarMath.Revenue(CurrentMegawatts, RevenuePerMwPerSecond, dt));
         }
 
         private void RefreshGridConnection()

@@ -1,3 +1,5 @@
+using MegawattValley.Construction;
+using MegawattValley.Data;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,17 +7,21 @@ namespace MegawattValley.Core
 {
     /// <summary>
     /// Minimal build mode: Solar Array ghost follow + place / demolish (S2-03..S2-08).
+    /// Product values come from a <see cref="SolarArrayDefinition"/> (S6-04).
     /// </summary>
     public sealed class BuildModeController : MonoBehaviour
     {
         public static BuildModeController Instance { get; private set; }
 
+        [SerializeField] private SolarArrayDefinition solarDefinition;
         [SerializeField] private UnityEngine.Camera worldCamera;
         [SerializeField] private LayerMask groundMask = ~0;
+        [SerializeField] private float rotateStepDegrees = 90f;
+
+        [Header("Fallbacks used when no definition is assigned")]
         [SerializeField] private float solarCost = 250f;
         [SerializeField] private float solarNameplateMw = 0.25f;
         [SerializeField] private Vector3 solarFootprint = new Vector3(4f, 0.4f, 2f);
-        [SerializeField] private float rotateStepDegrees = 90f;
         [SerializeField] private float demolishRefundFraction = 0.5f;
 
         private GameObject _ghost;
@@ -26,9 +32,16 @@ namespace MegawattValley.Core
         private SelectablePlot _buildablePlot;
 
         public bool IsPlacing => _placing;
-        public float SolarCost => solarCost;
-        public float SolarNameplateMw => solarNameplateMw;
-        public bool CanAffordSolar => PlayerEconomy.Instance == null || PlayerEconomy.Instance.CanAfford(solarCost);
+        public float SolarCost => solarDefinition != null ? solarDefinition.BuildCost : solarCost;
+        public float SolarNameplateMw => solarDefinition != null ? solarDefinition.NameplateMegawatts : solarNameplateMw;
+        public string SolarDisplayName => solarDefinition != null ? solarDefinition.DisplayName : "Solar Array";
+        public bool CanAffordSolar => PlayerEconomy.Instance == null || PlayerEconomy.Instance.CanAfford(SolarCost);
+
+        private Vector3 Footprint => solarDefinition != null ? solarDefinition.Footprint : solarFootprint;
+
+        private float RefundFraction => solarDefinition != null
+            ? solarDefinition.DemolishRefundFraction
+            : demolishRefundFraction;
 
         private void Awake()
         {
@@ -131,11 +144,11 @@ namespace MegawattValley.Core
             _ghostYaw = 0f;
             if (_ghost == null)
             {
-                _ghost = CreateSolarVisual("SolarArrayGhost", isGhost: true);
+                _ghost = SolarArrayFactory.CreateGhost(solarDefinition, _validMaterial);
             }
 
             _ghost.SetActive(true);
-            Debug.Log("[MegawattValley] Build mode: Solar Array. LMB place, R rotate, Esc/RMB cancel, X demolish.");
+            Debug.Log($"[MegawattValley] Build mode: {SolarDisplayName}. LMB place, R rotate, Esc/RMB cancel, X demolish.");
         }
 
         public void CancelPlacement()
@@ -149,20 +162,14 @@ namespace MegawattValley.Core
 
         private void PlaceSolar(Vector3 point, float yaw)
         {
-            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(solarCost))
+            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(SolarCost))
             {
                 Debug.LogWarning("[MegawattValley] Not enough cash to place solar array.");
                 return;
             }
 
-            var placed = CreateSolarVisual("SolarArray", isGhost: false);
-            placed.transform.position = Snap(point);
-            placed.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-            var unit = placed.AddComponent<SolarArrayUnit>();
-            unit.SetNameplate(solarNameplateMw);
-            placed.AddComponent<EquipmentCondition>();
-
-            Debug.Log($"[MegawattValley] Placed solar array for ${solarCost:0}.");
+            SolarArrayFactory.CreateArray(solarDefinition, Snap(point), yaw);
+            Debug.Log($"[MegawattValley] Placed {SolarDisplayName} for ${SolarCost:0}.");
             CancelPlacement();
         }
 
@@ -205,21 +212,27 @@ namespace MegawattValley.Core
                 EquipmentCondition.ClearSelection();
             }
 
-            float refund = solarCost * demolishRefundFraction;
+            // Refund follows the demolished array's own product, not whatever is currently selected to build.
+            var definition = unit.Definition;
+            float cost = definition != null ? definition.BuildCost : SolarCost;
+            float fraction = definition != null ? definition.DemolishRefundFraction : RefundFraction;
+            float refund = cost * fraction;
+
             if (PlayerEconomy.Instance != null)
             {
                 PlayerEconomy.Instance.Add(refund);
             }
 
-            Debug.Log($"[MegawattValley] Demolished solar array. Refunded ${refund:0}.");
+            Debug.Log($"[MegawattValley] Demolished {unit.name}. Refunded ${refund:0}.");
             Object.Destroy(unit.gameObject);
         }
 
         private bool IsPlacementValid(Vector3 point, float yaw)
         {
-            Vector3 center = Snap(point) + Vector3.up * (solarFootprint.y * 0.5f);
+            Vector3 footprint = Footprint;
+            Vector3 center = Snap(point) + Vector3.up * (footprint.y * 0.5f);
             Quaternion rotation = Quaternion.Euler(0f, yaw, 0f);
-            var hits = Physics.OverlapBox(center, solarFootprint * 0.45f, rotation, ~0, QueryTriggerInteraction.Ignore);
+            var hits = Physics.OverlapBox(center, footprint * 0.45f, rotation, ~0, QueryTriggerInteraction.Ignore);
             foreach (var col in hits)
             {
                 if (col == null)
@@ -262,34 +275,6 @@ namespace MegawattValley.Core
         private Vector3 Snap(Vector3 point)
         {
             return new Vector3(Mathf.Round(point.x * 2f) / 2f, 0f, Mathf.Round(point.z * 2f) / 2f);
-        }
-
-        private GameObject CreateSolarVisual(string objectName, bool isGhost)
-        {
-            var root = new GameObject(objectName);
-            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            body.name = "PanelTable";
-            body.transform.SetParent(root.transform, false);
-            body.transform.localScale = solarFootprint;
-            body.transform.localPosition = new Vector3(0f, solarFootprint.y * 0.5f, 0f);
-            Object.Destroy(body.GetComponent<Collider>());
-
-            var meshRenderer = body.GetComponent<MeshRenderer>();
-            if (meshRenderer != null)
-            {
-                meshRenderer.sharedMaterial = isGhost
-                    ? _validMaterial
-                    : GroundClickMarker.CreateColorMaterial(new Color(0.15f, 0.35f, 0.7f));
-            }
-
-            if (!isGhost)
-            {
-                var col = root.AddComponent<BoxCollider>();
-                col.center = new Vector3(0f, solarFootprint.y * 0.5f, 0f);
-                col.size = solarFootprint;
-            }
-
-            return root;
         }
 
         private void SetGhostMaterial(Material material)
