@@ -233,7 +233,7 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   Move solar definition, one event, and the MW objective into ScriptableObject (or equivalent data) assets.  
   **Victory moment:** balance values change without rewriting gameplay code.
 
-- [ ] **S6-05 — EditMode tests for generation + revenue**  
+- [x] **S6-05 — EditMode tests for generation + revenue**  
   Add a small test assembly covering core MW and cash math.  
   **Victory moment:** Cursor can catch economy regressions without Play Mode.
 

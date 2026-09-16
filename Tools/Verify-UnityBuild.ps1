@@ -22,6 +22,7 @@
 param(
     [string]$Method = 'MegawattValley.EditorTools.BuildVerifier.CompileCheck',
     [switch]$CopyBackScenes,
+    [switch]$RunTests,
     [string]$ShadowRoot = (Join-Path $env:LOCALAPPDATA 'MegawattValley-Verify'),
     [string]$UnityExe = 'C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Unity.exe',
     [int]$TimeoutMinutes = 20
@@ -49,13 +50,29 @@ foreach ($folder in @('Assets', 'Packages', 'ProjectSettings')) {
 $logPath = Join-Path $ShadowRoot 'verify.log'
 if (Test-Path $logPath) { Remove-Item $logPath -Force }
 
-Write-Host "Running Unity batchmode: $Method"
-$arguments = @(
-    '-batchmode', '-nographics', '-quit', '-accept-apiupdate',
-    '-projectPath', $ShadowRoot,
-    '-executeMethod', $Method,
-    '-logFile', $logPath
-)
+$resultsPath = Join-Path $ShadowRoot 'test-results.xml'
+
+if ($RunTests) {
+    if (Test-Path $resultsPath) { Remove-Item $resultsPath -Force }
+    Write-Host 'Running Unity EditMode tests ...'
+    # -runTests quits on its own; passing -quit as well suppresses the results file.
+    $arguments = @(
+        '-batchmode', '-nographics', '-accept-apiupdate',
+        '-projectPath', $ShadowRoot,
+        '-runTests', '-testPlatform', 'EditMode',
+        '-testResults', $resultsPath,
+        '-logFile', $logPath
+    )
+}
+else {
+    Write-Host "Running Unity batchmode: $Method"
+    $arguments = @(
+        '-batchmode', '-nographics', '-quit', '-accept-apiupdate',
+        '-projectPath', $ShadowRoot,
+        '-executeMethod', $Method,
+        '-logFile', $logPath
+    )
+}
 
 # Unity.exe is a GUI-subsystem binary: Start-Process -PassThru and $LASTEXITCODE both fail to
 # report its exit code, so start it through ProcessStartInfo instead.
@@ -102,11 +119,38 @@ if ($CopyBackScenes -and $exitCode -eq 0 -and -not $compileErrors) {
     }
 }
 
+$testsFailed = $false
+if ($RunTests) {
+    if (-not (Test-Path $resultsPath)) {
+        Write-Host 'No test results were produced.' -ForegroundColor Red
+        $testsFailed = $true
+    }
+    else {
+        [xml]$results = Get-Content $resultsPath
+        $run = $results.'test-run'
+        Write-Host ''
+        Write-Host "Tests: $($run.total) total, $($run.passed) passed, $($run.failed) failed, $($run.skipped) skipped"
+
+        if ([int]$run.failed -gt 0) {
+            $testsFailed = $true
+            $results.SelectNodes("//test-case[@result='Failed']") | ForEach-Object {
+                Write-Host "  FAILED $($_.fullname)" -ForegroundColor Red
+                if ($_.failure.message) { Write-Host "    $($_.failure.message.InnerText)" }
+            }
+        }
+
+        if ([int]$run.total -eq 0) {
+            Write-Host 'No tests were discovered.' -ForegroundColor Yellow
+            $testsFailed = $true
+        }
+    }
+}
+
 Write-Host ''
 Write-Host "Unity exit code: $exitCode"
 Write-Host "Log: $logPath"
 
-if ($exitCode -ne 0 -or $compileErrors) {
+if ($exitCode -ne 0 -or $compileErrors -or $testsFailed) {
     exit 1
 }
 
