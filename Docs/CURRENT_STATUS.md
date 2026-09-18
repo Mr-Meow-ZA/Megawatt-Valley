@@ -4,14 +4,14 @@
 
 **Grey-box miniature vertical slice is playable.**
 
-Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-04** are done.
+Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-05** are done.
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
 Playtest focus list: `Docs/PLAYTEST_CHECKLIST.md`  
 Unity MCP: `Docs/UNITY_MCP_SETUP.md`
 
-Includes: Sunny Slope blockout, premium vs bargain build catalog, five-event deck, tariff economy, auto-tech, HUD, save stub, 28 EditMode tests.
+Includes: Sunny Slope blockout, premium vs bargain build catalog, five-event deck, one-star clear (day deadline + restart), tariff economy, auto-tech, HUD, save stub, EditMode tests.
 
 Rapha accepted the grey-box loop on 2026-09-16 with a fix list. **2026-09-18 re-playtest** (via `Docs/PLAYTEST_CHECKLIST.md`): Focus list fully passed, including west-side `NO GRID` after the 14 m radius shrink. Feel/confusion items not flagged.
 
@@ -45,10 +45,9 @@ The project should never depend only on distant phase completion for a sense of 
 
 Current first goals:
 
-1. `L1-05` one-star clear (success / fail / restart)
-2. `L1-06` climax beat
-3. Optional: Rapha light playtest of premium vs bargain + event deck when rested
-4. ChatGPT refresh after L1-05 if needed
+1. `L1-06` climax beat
+2. Optional: Rapha light playtest of 1★ clear + catalog + events when rested
+3. ChatGPT refresh after L1-06 if needed
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
@@ -85,7 +84,7 @@ The planned sequence is:
 
 ## Next action
 
-**L1-05** — one-star scenario clear with success / fail / restart. Rapha playtest only when rested; MCP + tests cover the interim.
+**L1-06** — one scripted late-scenario climax beat. Rapha playtest when rested; MCP + tests cover the interim.
 
 Do not start a major art pass until the grey-box loop feels fun.
 

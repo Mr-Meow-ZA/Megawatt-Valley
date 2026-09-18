@@ -1,10 +1,12 @@
 using MegawattValley.Data;
+using MegawattValley.Persistence;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Tiny scenario objective + win state (S5-04 / S5-05), driven by scenario data (S6-04).
+    /// One-star scenario clear: install target MW before the day deadline (L1-05).
     /// </summary>
     public sealed class ScenarioObjective : MonoBehaviour
     {
@@ -15,18 +17,25 @@ namespace MegawattValley.Core
         /// stays reachable at any time of day and any equipment condition.
         /// </summary>
         [SerializeField] private float fallbackTargetMegawatts = 0.75f;
+        [SerializeField] private int fallbackFailAfterDay = 8;
         [SerializeField] private bool completed;
+        [SerializeField] private bool failed;
 
         public static ScenarioObjective Instance { get; private set; }
 
-        /// <summary>Active scenario data, if this objective is wired to a definition.</summary>
         public ScenarioDefinition Scenario => scenario;
 
         public bool IsComplete => completed;
+        public bool IsFailed => failed;
+        public bool IsTerminal => completed || failed;
 
         public float TargetInstalledMegawatts => scenario != null
             ? scenario.TargetInstalledMegawatts
             : fallbackTargetMegawatts;
+
+        public int FailAfterDay => scenario != null
+            ? scenario.FailAfterDay
+            : fallbackFailAfterDay;
 
         public string Description => scenario != null
             ? $"{scenario.ObjectiveSummary}"
@@ -49,11 +58,39 @@ namespace MegawattValley.Core
         public void SetCompleted(bool value)
         {
             completed = value;
+            if (completed)
+            {
+                failed = false;
+            }
+        }
+
+        public void SetFailed(bool value)
+        {
+            failed = value;
+            if (failed)
+            {
+                completed = false;
+            }
+        }
+
+        /// <summary>Reload the active scene for a clean one-star attempt.</summary>
+        public void RestartScenario()
+        {
+            SaveGameService.Instance?.DeleteSave();
+            var scene = SceneManager.GetActiveScene();
+            if (scene.buildIndex >= 0)
+            {
+                SceneManager.LoadScene(scene.buildIndex);
+            }
+            else
+            {
+                SceneManager.LoadScene(scene.name);
+            }
         }
 
         private void Update()
         {
-            if (completed)
+            if (IsTerminal)
             {
                 return;
             }
@@ -61,7 +98,17 @@ namespace MegawattValley.Core
             if (PowerBoard.InstalledMegawatts >= TargetInstalledMegawatts)
             {
                 completed = true;
-                Debug.Log($"[MegawattValley] OBJECTIVE COMPLETE: {TargetInstalledMegawatts:0.00} MW installed. Tiny Tycoon win!");
+                SimulationClock.Instance?.SetSpeedIndex(0);
+                Debug.Log($"[MegawattValley] 1★ CLEAR: {TargetInstalledMegawatts:0.00} MW installed.");
+                return;
+            }
+
+            int day = DayNightSun.Instance != null ? DayNightSun.Instance.DayNumber : 1;
+            if (day >= FailAfterDay)
+            {
+                failed = true;
+                SimulationClock.Instance?.SetSpeedIndex(0);
+                Debug.Log($"[MegawattValley] SCENARIO FAILED: day {day} reached without {TargetInstalledMegawatts:0.00} MW.");
             }
         }
     }

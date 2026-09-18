@@ -207,6 +207,25 @@ namespace MegawattValley.Persistence
             Debug.Log($"[MegawattValley] Loaded save from {SavePath} ({restored} array(s)).");
         }
 
+        /// <summary>Removes the on-disk save so a scenario restart starts clean.</summary>
+        public void DeleteSave()
+        {
+            try
+            {
+                if (File.Exists(SavePath))
+                {
+                    File.Delete(SavePath);
+                }
+
+                LastMessage = "Save cleared";
+            }
+            catch (Exception exception)
+            {
+                LastMessage = "Could not clear save";
+                Debug.LogWarning($"[MegawattValley] DeleteSave failed: {exception.Message}");
+            }
+        }
+
         private static void ClearPlacedArrays()
         {
             EquipmentCondition.ClearSelection();

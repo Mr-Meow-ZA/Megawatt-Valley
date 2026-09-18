@@ -38,6 +38,28 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — L1-05 — One-star clear (success / fail / restart)
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- `ScenarioDefinition.failAfterDay` (default 8); win still = target MW installed.
+- Fail pauses sim; HUD shows 1★ / fail + Restart (clears save, reloads scene).
+- Objective line shows `day N/failAfterDay`.
+
+**Tested / Verified**
+- Shadow verify EnsureAll + CreatePrototypeScene + EditMode: 28 passed.
+
+**Next recommended step**
+- L1-06 climax beat.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — L1-03 / L1-04 — Bargain vs premium + five-event deck
 
 **Agent:** Cursor
@@ -60,7 +82,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - L1-05 one-star clear (success / fail / restart).
 
 **Git / References**
-- Commit: pending
+- Commit: `d9c9633`
 - Branch: `main`
 
 ---

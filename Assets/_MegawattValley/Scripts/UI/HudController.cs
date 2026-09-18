@@ -28,6 +28,8 @@ namespace MegawattValley.UI
         private Label _objectiveValue;
         private VisualElement _objectiveFill;
         private Label _objectiveWin;
+        private Label _objectiveFail;
+        private Button _restartButton;
         private Label _alertBanner;
 
         private VisualElement _selectionPanel;
@@ -74,6 +76,7 @@ namespace MegawattValley.UI
             "clock-value", "sun-value",
             "speed-pause", "speed-1", "speed-2", "speed-3",
             "objective-title", "objective-value", "objective-fill", "objective-win",
+            "objective-fail", "restart-button",
             "alert-banner",
             "selection-panel", "selection-kind", "selection-title",
             "selection-line-1", "selection-line-2", "selection-line-3",
@@ -110,6 +113,8 @@ namespace MegawattValley.UI
             _objectiveValue = _root.Q<Label>("objective-value");
             _objectiveFill = _root.Q<VisualElement>("objective-fill");
             _objectiveWin = _root.Q<Label>("objective-win");
+            _objectiveFail = _root.Q<Label>("objective-fail");
+            _restartButton = _root.Q<Button>("restart-button");
             _alertBanner = _root.Q<Label>("alert-banner");
 
             _selectionPanel = _root.Q<VisualElement>("selection-panel");
@@ -198,6 +203,11 @@ namespace MegawattValley.UI
             if (_eventChoiceB != null)
             {
                 _eventChoiceB.clicked += () => HumorousEventController.Instance?.Choose(false);
+            }
+
+            if (_restartButton != null)
+            {
+                _restartButton.clicked += () => ScenarioObjective.Instance?.RestartScenario();
             }
 
             // Text that floats over the world should never eat a world click.
@@ -334,9 +344,10 @@ namespace MegawattValley.UI
             float installed = PowerBoard.InstalledMegawatts;
             float target = Mathf.Max(0.0001f, objective.TargetInstalledMegawatts);
             float percent = Mathf.Clamp01(installed / target) * 100f;
+            int day = DayNightSun.Instance != null ? DayNightSun.Instance.DayNumber : 1;
 
             SetText(_objectiveTitle, objective.Description);
-            SetText(_objectiveValue, $"{installed:0.00} / {target:0.00} MW installed");
+            SetText(_objectiveValue, $"{installed:0.00} / {target:0.00} MW · day {day}/{objective.FailAfterDay}");
 
             if (_objectiveFill != null)
             {
@@ -344,6 +355,8 @@ namespace MegawattValley.UI
             }
 
             Show(_objectiveWin, objective.IsComplete);
+            Show(_objectiveFail, objective.IsFailed);
+            Show(_restartButton, objective.IsTerminal);
         }
 
         private void RefreshBuildBar()

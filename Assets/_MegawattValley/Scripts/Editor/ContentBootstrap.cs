@@ -314,6 +314,14 @@ namespace MegawattValley.EditorTools
                     Debug.Log($"[MegawattValley] Patched export tariff on {ScenarioPath}.");
                 }
 
+                var failDay = patch.FindProperty("failAfterDay");
+                if (failDay != null && failDay.intValue <= 0)
+                {
+                    failDay.intValue = 8;
+                    patch.ApplyModifiedPropertiesWithoutUndo();
+                    Debug.Log($"[MegawattValley] Patched fail-after-day on {ScenarioPath}.");
+                }
+
                 return existing;
             }
 
@@ -326,6 +334,7 @@ namespace MegawattValley.EditorTools
             editable.FindProperty("startingCash").floatValue = 1000f;
             editable.FindProperty("exportTariffPerMwPerSecond").floatValue = 8f;
             editable.FindProperty("targetInstalledMegawatts").floatValue = 0.75f;
+            editable.FindProperty("failAfterDay").intValue = 8;
             editable.ApplyModifiedPropertiesWithoutUndo();
 
             Debug.Log($"[MegawattValley] Created {ScenarioPath}.");

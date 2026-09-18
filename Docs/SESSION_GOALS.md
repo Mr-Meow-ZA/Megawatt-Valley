@@ -268,9 +268,10 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   **Victory moment:** personality without a novel-length deck.  
   *Deck of five ScriptableObject events; fires sequentially with a gap between.*
 
-- [ ] **L1-05 — One-star scenario clear**  
+- [x] **L1-05 — One-star scenario clear**  
   Single primary objective with clear success / fail / restart.  
-  **Victory moment:** Level 1 is completable at 1★.
+  **Victory moment:** Level 1 is completable at 1★.  
+  *Install target before `failAfterDay`; HUD shows 1★ / fail + Restart.*
 
 - [ ] **L1-06 — Climax beat**  
   One scripted late-scenario pressure event.  
