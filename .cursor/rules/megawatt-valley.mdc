@@ -12,6 +12,7 @@ Before making significant changes, read:
 - `README.md`
 - `Docs/GAME_VISION.md`
 - `Docs/VISUAL_DIRECTION.md`
+- `Docs/PROGRESSION_AND_ENGAGEMENT.md`
 - `Docs/TECHNICAL_ARCHITECTURE.md`
 - `Docs/ROADMAP.md`
 - `Docs/SESSION_GOALS.md`
@@ -77,6 +78,25 @@ The activity log should stay concise and should include:
 - References are inspiration only. Do not copy proprietary art, text, character designs, UI, names, assets, or code.
 - The first major gameplay target is a **solar-only vertical slice**.
 - Do not introduce wind, BESS, advanced corporate finance, multiplayer, procedural world systems, or other deferred features unless the active task explicitly requests them.
+
+
+## Progression / engagement rules
+
+`Docs/PROGRESSION_AND_ENGAGEMENT.md` is the authoritative design for capability progression, objective cadence and manual-to-automation gameplay.
+
+Current priority is the **E1 — Engagement & Progression Proof** track.
+
+Rules:
+
+- Do not treat the functional Level 1 slice as sufficient proof of fun.
+- Progression should preferably unlock a new capability, management verb, delegation option, policy or automation rather than only a small percentage bonus.
+- Repetitive work should move through the Management Abstraction Ladder where appropriate: **manual → assigned staff → schedule / policy → automation → exception management**.
+- Let the player experience a problem briefly before unlocking the tool that solves it.
+- Automation should remove stale clicks, not remove meaningful decisions.
+- Do not build the complete future capability / research tree now. Implement only the minimum required by the active E1 session goal.
+- Reuse existing gameplay systems behind capability gates where possible. In particular, the current automatic technician fault dispatch should become an earned capability rather than be rebuilt.
+- Do not stretch gameplay by adding waiting, grind or repeated panel placement simply to increase level duration.
+- Hero Corner follows the Engagement Gate; after that, gameplay/content and visual production can progress increasingly in parallel.
 
 ## Approved visual north star
 
