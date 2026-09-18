@@ -57,7 +57,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha: open Unity, wait for packages, Accept Cursor under Project Settings → AI → Unity MCP, then ask Cursor to read the console.
 
 **Git / References**
-- Commit: pending
+- Commit: `d9cc7a8`
 - Branch: `main`
 
 ---
