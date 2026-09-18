@@ -62,7 +62,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Start `L1-03` bargain vs premium build choice (extend existing SO defs).
 
 **Git / References**
-- Commit: pending
+- Commit: `f5e6f57`
 - Branch: `main`
 
 ---
