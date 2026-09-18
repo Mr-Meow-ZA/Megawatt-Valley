@@ -241,15 +241,21 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   Persist cash, placed buildings, and objective progress for one prototype session.  
   **Victory moment:** quit and resume the miniature scenario.
 
+- [x] **S6-07 — Technician seeks faults**  
+  When idle, the on-site technician walks to the nearest faulted array and starts the repair on arrival (if cash allows).  
+  **Victory moment:** faults clear themselves without the player babysitting the F key.
+
 ### L1 — Here Comes the Sun (thin slice)
 
-- [ ] **L1-01 — Scenario map blockout**  
+- [x] **L1-01 — Scenario map blockout**  
   One grey-box valley map with office presence and a coherent buildable area.  
-  **Victory moment:** it feels like a level, not a sandbox pad.
+  **Victory moment:** it feels like a level, not a sandbox pad.  
+  *Sunny Slope Site A: framed hills, creek bed, access road, office compound, fenced plot, site name sign.*
 
-- [ ] **L1-02 — Tunable start economy**  
+- [x] **L1-02 — Tunable start economy**  
   Starting cash + tariff (and related knobs) driven from data.  
-  **Victory moment:** ChatGPT / Rapha can propose numbers Cursor can drop in.
+  **Victory moment:** ChatGPT / Rapha can propose numbers Cursor can drop in.  
+  *`ScenarioDefinition` now owns starting cash and `exportTariffPerMwPerSecond`; live arrays read the scenario tariff.*
 
 - [ ] **L1-03 — Bargain vs premium equipment**  
   Two solar procurement options with different cost / yield / risk.  

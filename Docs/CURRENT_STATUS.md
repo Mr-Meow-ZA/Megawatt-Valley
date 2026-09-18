@@ -4,13 +4,13 @@
 
 **Grey-box miniature vertical slice is playable.**
 
-Unity **6000.6.0f1** / URP. Session goals **S0-01 through S5-05** plus **S6-01, S6-03…S6-06** are done.
+Unity **6000.6.0f1** / URP. Session goals **S0-01 through S5-05**, **S6-01, S6-03…S6-07**, and **L1-01…L1-02** are done. **S6-02** (ChatGPT review) is still open.
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
-Includes: tycoon camera, plot select, solar build/place/demolish, cash + MW + grid radius, day/night clock, sim speeds, equipment condition/faults/repair/preventive maintenance, named technician with working traits, humorous event, zoom-in joke sign, MW objective + win banner, UI Toolkit HUD, ScriptableObject balance data, save/load stub, and 26 EditMode tests.
+Includes: Sunny Slope Site A grey-box valley (hills, creek, access road, office compound, fenced plot), tycoon camera, solar build/place/demolish, cash + scenario tariff + MW + grid radius, day/night clock, sim speeds, equipment condition/faults, technician who auto-seeks faults, humorous event, joke sign, MW objective, UI Toolkit HUD, ScriptableObject balance data, save/load stub, and 28 EditMode tests.
 
-Rapha accepted the grey-box loop on 2026-09-16 with a fix list (dead arrays off-grid, runaway wear, no visible clock, unreadable HUD, hidden prices, un-clickable technician). All listed fixes are implemented but **not yet re-playtested**.
+Rapha accepted the grey-box loop on 2026-09-16 with a fix list. Fixes plus S6 harden + early L1 are on main but **await Rapha re-playtest**.
 
 Badges earned: Foundation Online, Valley Explorer, First Foundations, First Megawatt Earned, Keeping the Lights On, Tiny Tycoon (and related celebration markers in `SESSION_GOALS.md`).
 
@@ -42,10 +42,10 @@ The project should never depend only on distant phase completion for a sense of 
 
 Current first goals:
 
-1. **Rapha re-playtest** of the `S6-01` fix batch
-2. **ChatGPT review** of the S6 commits vs vision / architecture (`S6-02`) — `CHATGPT_REVIEW.md` is currently stale vs ACTIVITY_LOG
-3. `S6-07` technician pathing that seeks out faults on its own
-4. Then Level 1 thin-slice (`L1-01…`) — not a major art pass
+1. **Rapha re-playtest** of the S6 fix batch + Sunny Slope map + auto-technician
+2. **ChatGPT review** (`S6-02`) — `CHATGPT_REVIEW.md` is still stale vs ACTIVITY_LOG
+3. `L1-03` bargain vs premium equipment as a meaningful build choice
+4. Then `L1-04…L1-06` events / one-star clear / climax
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
@@ -82,9 +82,9 @@ The planned sequence is:
 
 ## Next action
 
-**Rapha re-playtests** `Prototype_Valley` in the Unity Editor (home PC) to confirm the `S6-01` fix batch: prices and income visible, clock readable, arrays earning, technician clickable, wear sane.
+**Rapha re-playtests** `Prototype_Valley`: Sunny Slope should feel like a level, the technician should walk to faults on his own, and the company card should show the scenario tariff when idle.
 
-Then ask ChatGPT to refresh `CHATGPT_REVIEW.md` and ratify or amend the proposed **S6 / L1** session track in `SESSION_GOALS.md` and `PRACTICES_AND_PLANNING.md`.
+Then ask ChatGPT to refresh `CHATGPT_REVIEW.md` (`S6-02`) and ratify the L1 track.
 
 Do not start a major art pass until the grey-box loop feels fun.
 

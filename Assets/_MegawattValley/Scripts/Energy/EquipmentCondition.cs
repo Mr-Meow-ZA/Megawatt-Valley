@@ -39,6 +39,33 @@ namespace MegawattValley.Core
             }
         }
 
+        /// <summary>
+        /// Closest faulted array that is not already under repair. Used by the technician's
+        /// auto-dispatch (S6-07).
+        /// </summary>
+        public static EquipmentCondition FindNearestFaulted(Vector3 from)
+        {
+            Prune();
+            EquipmentCondition best = null;
+            float bestDistance = float.MaxValue;
+            foreach (var item in Equipment)
+            {
+                if (item == null || !item.IsFaulted || item.IsRepairing)
+                {
+                    continue;
+                }
+
+                float distance = Vector3.Distance(from, item.transform.position);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = item;
+                }
+            }
+
+            return best;
+        }
+
         public static void Register(EquipmentCondition equipment)
         {
             if (equipment != null && !Equipment.Contains(equipment))
@@ -311,7 +338,7 @@ namespace MegawattValley.Core
                 TechnicianActor.Instance.AssignRepair(transform);
             }
 
-            Debug.Log($"[MegawattValley] Repair started (${repairCost:0}).");
+            Debug.Log($"[MegawattValley] Repair started (${EffectiveRepairCost:0}).");
         }
 
         /// <summary>

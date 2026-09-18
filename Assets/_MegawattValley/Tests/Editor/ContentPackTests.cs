@@ -80,6 +80,27 @@ namespace MegawattValley.Tests
         }
 
         [Test]
+        public void Scenario_HasTunableStartEconomy()
+        {
+            var scenario = Load<ScenarioDefinition>(ScenarioPath);
+            Assert.Greater(scenario.StartingCash, 0f);
+            Assert.Greater(scenario.ExportTariffPerMwPerSecond, 0f);
+            Assert.Greater(scenario.TargetInstalledMegawatts, 0f);
+        }
+
+        [Test]
+        public void Scenario_TariffKeepsStandardArrayPaybackReasonable()
+        {
+            var scenario = Load<ScenarioDefinition>(ScenarioPath);
+            var array = Load<SolarArrayDefinition>(StandardArrayPath);
+            float revenuePerSecondInFullSun = array.NameplateMegawatts * scenario.ExportTariffPerMwPerSecond;
+            float paybackSeconds = array.BuildCost / revenuePerSecondInFullSun;
+
+            Assert.Greater(paybackSeconds, 10f, "Tariff makes payback so fast that cash is meaningless.");
+            Assert.Less(paybackSeconds, 600f, "Tariff makes payback too slow to feel like progress.");
+        }
+
+        [Test]
         public void SupplierEvent_ChoicesBothDoSomething()
         {
             var decisionEvent = Load<DecisionEventDefinition>(EventPath);

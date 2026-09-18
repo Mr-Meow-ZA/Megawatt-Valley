@@ -128,7 +128,25 @@ namespace MegawattValley.Core
 
         public SolarArrayDefinition Definition => definition;
         public float NameplateMegawatts => definition != null ? definition.NameplateMegawatts : nameplateMw;
-        public float RevenuePerMwPerSecond => definition != null ? definition.RevenuePerMwPerSecond : revenuePerMwPerSecond;
+
+        /// <summary>
+        /// Site export tariff comes from the active scenario when one is set (L1-02), so balance
+        /// knobs live on the scenario asset. Falls back to the array definition / field otherwise.
+        /// </summary>
+        public float RevenuePerMwPerSecond
+        {
+            get
+            {
+                var scenario = ScenarioObjective.Instance != null ? ScenarioObjective.Instance.Scenario : null;
+                if (scenario != null)
+                {
+                    return scenario.ExportTariffPerMwPerSecond;
+                }
+
+                return definition != null ? definition.RevenuePerMwPerSecond : revenuePerMwPerSecond;
+            }
+        }
+
         public bool IsConnectedToGrid => connectedToGrid;
 
         public float CurrentMegawatts =>

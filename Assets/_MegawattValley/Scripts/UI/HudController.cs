@@ -267,10 +267,25 @@ namespace MegawattValley.UI
         {
             float cash = PlayerEconomy.Instance != null ? PlayerEconomy.Instance.Cash : 0f;
             float income = PowerBoard.TotalRevenuePerSecond;
+            var scenario = ScenarioObjective.Instance != null ? ScenarioObjective.Instance.Scenario : null;
+            float tariff = scenario != null ? scenario.ExportTariffPerMwPerSecond : 0f;
 
             SetText(_cashValue, $"${cash:N0}");
-            SetText(_incomeValue, income > 0f ? $"+${income:0.0} / sec" : "no income");
-            SetStateClass(_incomeValue, income > 0f ? "metric-good" : "metric-warn");
+            if (income > 0f)
+            {
+                SetText(_incomeValue, $"+${income:0.0} / sec");
+                SetStateClass(_incomeValue, "metric-good");
+            }
+            else if (tariff > 0f)
+            {
+                SetText(_incomeValue, $"tariff ${tariff:0}/MW·s");
+                SetStateClass(_incomeValue, "metric-warn");
+            }
+            else
+            {
+                SetText(_incomeValue, "no income");
+                SetStateClass(_incomeValue, "metric-warn");
+            }
         }
 
         private void RefreshPower()
@@ -405,7 +420,9 @@ namespace MegawattValley.UI
 
             var technician = staff.Technician;
             SetText(_selectionLine2, technician != null ? $"Status: {technician.Activity}" : "Status: on site");
-            SetText(_selectionLine3, technician != null ? $"Walk speed {technician.MoveSpeed:0.0} m/s" : string.Empty);
+            SetText(_selectionLine3, technician != null
+                ? $"Walk {technician.MoveSpeed:0.0} m/s  ·  auto-repairs faults"
+                : string.Empty);
             SetStateClass(_selectionLine3, null);
 
             Show(_repairButton, false);
@@ -421,9 +438,20 @@ namespace MegawattValley.UI
             string message;
             if (faulted > 0)
             {
-                message = faulted == 1
-                    ? "An array has faulted. Select it and repair it."
-                    : $"{faulted} arrays have faulted. Select one and repair it.";
+                var tech = TechnicianActor.Instance;
+                bool techEnRoute = tech != null && tech.HasTask;
+                if (techEnRoute)
+                {
+                    message = faulted == 1
+                        ? "Array faulted — technician is on the way."
+                        : $"{faulted} arrays faulted — technician is working through them.";
+                }
+                else
+                {
+                    message = faulted == 1
+                        ? "An array has faulted. The technician will head over when cash allows."
+                        : $"{faulted} arrays have faulted. The technician will clear them when cash allows.";
+                }
             }
             else if (disconnected > 0)
             {

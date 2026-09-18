@@ -19,6 +19,9 @@ namespace MegawattValley.Core
 
         public static ScenarioObjective Instance { get; private set; }
 
+        /// <summary>Active scenario data, if this objective is wired to a definition.</summary>
+        public ScenarioDefinition Scenario => scenario;
+
         public bool IsComplete => completed;
 
         public float TargetInstalledMegawatts => scenario != null

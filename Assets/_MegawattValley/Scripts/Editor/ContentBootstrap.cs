@@ -137,6 +137,16 @@ namespace MegawattValley.EditorTools
             var existing = AssetDatabase.LoadAssetAtPath<ScenarioDefinition>(ScenarioPath);
             if (existing != null)
             {
+                // New L1-02 field: Unity defaults brand-new floats to 0, which would zero revenue.
+                var patch = new SerializedObject(existing);
+                var tariff = patch.FindProperty("exportTariffPerMwPerSecond");
+                if (tariff != null && tariff.floatValue <= 0f)
+                {
+                    tariff.floatValue = 8f;
+                    patch.ApplyModifiedPropertiesWithoutUndo();
+                    Debug.Log($"[MegawattValley] Patched export tariff on {ScenarioPath}.");
+                }
+
                 return existing;
             }
 
@@ -144,9 +154,10 @@ namespace MegawattValley.EditorTools
             AssetDatabase.CreateAsset(asset, ScenarioPath);
 
             var editable = new SerializedObject(asset);
-            editable.FindProperty("scenarioName").stringValue = "Prototype Valley";
-            editable.FindProperty("objectiveSummary").stringValue = "Build solar capacity";
+            editable.FindProperty("scenarioName").stringValue = "Sunny Slope — Site A";
+            editable.FindProperty("objectiveSummary").stringValue = "Install 0.75 MW of solar";
             editable.FindProperty("startingCash").floatValue = 1000f;
+            editable.FindProperty("exportTariffPerMwPerSecond").floatValue = 8f;
             editable.FindProperty("targetInstalledMegawatts").floatValue = 0.75f;
             editable.ApplyModifiedPropertiesWithoutUndo();
 

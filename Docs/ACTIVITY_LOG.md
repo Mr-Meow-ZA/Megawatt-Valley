@@ -38,6 +38,39 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — S6-07 + L1-01 + L1-02 — Auto-tech, Sunny Slope, tunable tariff
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- `S6-07`: technician auto-dispatches to the nearest faulted array when idle, walks there, then pays and starts the repair on arrival (skipped when cash is short). Alert banner and staff panel reflect the new behaviour.
+- `L1-01`: `Prototype_Valley` rebuilt as Sunny Slope Site A — framing hills, creek bed, access road, office compound + parking + laydown, fenced plot, site name sign. Scale refs stay west of the pad. Technician home is the office parking pad.
+- `L1-02`: `ScenarioDefinition` owns `exportTariffPerMwPerSecond`; live arrays earn from the scenario tariff. HUD shows the tariff when there is no income yet. Content bootstrap patches a zero tariff on old assets.
+- EditMode tests: 26 → 28 (scenario tariff + payback against tariff).
+
+**Tested / Verified**
+- 28 EditMode tests pass; scene regenerates in batchmode with zero compile errors.
+- Not yet re-playtested by Rapha.
+
+**Known issues / limitations**
+- Auto-dispatch is nearest-fault only (no priority queue).
+- Bargain array still only arrives via the supplier event — `L1-03` will make it a build choice.
+- `S6-02` ChatGPT review still outstanding.
+
+**Decisions / assumptions / recommendations**
+- Scenario tariff is the live $/MW/s for every array on the site; array-definition revenue remains a fallback when no scenario is wired.
+- Left `S6-02` for ChatGPT rather than writing the review myself.
+
+**Next recommended step**
+- Rapha re-playtest, then ChatGPT `S6-02`, then `L1-03` bargain vs premium build choice.
+
+**Git / References**
+- Commits: pending this handoff
+- Branch: `main`
+
+---
+
 ## 2026-09-16 — S6-01 → S6-06 — Playtest fixes, HUD, content pack, tests, save stub
 
 **Agent:** Cursor
