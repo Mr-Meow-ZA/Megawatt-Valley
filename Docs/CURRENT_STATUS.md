@@ -4,7 +4,7 @@
 
 **Grey-box miniature vertical slice is playable.**
 
-Unity **6000.6.0f1** / URP. Session goals **S0-01 through S5-05**, **S6-01, S6-03…S6-07**, and **L1-01…L1-02** are done. **S6-02** (ChatGPT review) is still open.
+Unity **6000.6.0f1** / URP. Session goals **S0-01 through S6-07** and **L1-01…L1-02** are done.
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
@@ -43,9 +43,9 @@ The project should never depend only on distant phase completion for a sense of 
 Current first goals:
 
 1. **Rapha re-playtest** of the S6 fix batch + Sunny Slope map + auto-technician
-2. **ChatGPT review** (`S6-02`) — `CHATGPT_REVIEW.md` is still stale vs ACTIVITY_LOG
-3. `L1-03` bargain vs premium equipment as a meaningful build choice
-4. Then `L1-04…L1-06` events / one-star clear / climax
+2. `L1-03` bargain vs premium equipment as a meaningful build choice (extend existing SO defs — do not rebuild procurement)
+3. Then `L1-04…L1-06` events / one-star clear / climax
+4. ChatGPT can refresh review again after the re-playtest if needed
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
@@ -84,7 +84,7 @@ The planned sequence is:
 
 **Rapha re-playtests** `Prototype_Valley`: Sunny Slope should feel like a level, the technician should walk to faults on his own, and the company card should show the scenario tariff when idle.
 
-Then ask ChatGPT to refresh `CHATGPT_REVIEW.md` (`S6-02`) and ratify the L1 track.
+Next implementation goal after that: **L1-03** — make bargain vs premium a real build choice using the existing ScriptableObject defs (per ChatGPT `S6-02` watch note).
 
 Do not start a major art pass until the grey-box loop feels fun.
 

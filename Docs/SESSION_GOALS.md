@@ -221,9 +221,10 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   **Victory moment:** the grey-box loop is accepted, rejected, or given a short fix list.  
   *Accepted 2026-09-16 with a fix list: dead arrays off-grid, condition wearing far too fast, no visible clock, unreadable HUD, hidden build cost / income rate, un-clickable technician.*
 
-- [ ] **S6-02 — ChatGPT overnight-slice review**  
+- [x] **S6-02 — ChatGPT overnight-slice review**  
   Refresh `Docs/CHATGPT_REVIEW.md` against HEAD / ACTIVITY_LOG; nominate the next single goal.  
-  **Victory moment:** review docs match reality again.
+  **Victory moment:** review docs match reality again.  
+  *Refreshed 2026-09-16 against `0afa660`. Nominated re-playtest, then either S6-07 or L1-01 — both now implemented.*
 
 - [x] **S6-03 — UI Toolkit HUD v1**  
   Replace OnGUI cash / MW / speed / build affordances with a minimal UI Toolkit HUD.  

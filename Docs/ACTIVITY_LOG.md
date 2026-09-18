@@ -66,8 +66,9 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha re-playtest, then ChatGPT `S6-02`, then `L1-03` bargain vs premium build choice.
 
 **Git / References**
-- Commits: pending this handoff
+- Commit: `08818d8`
 - Branch: `main`
+- Note: rebased onto ChatGPT's `a491e58` review refresh before push
 
 ---
 
