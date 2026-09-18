@@ -38,6 +38,7 @@ The authoritative progression design is now:
 - Solar-only vertical slice first; Two Point is a design / tone reference only.
 - `Docs/VISUAL_DIRECTION.md` remains the long-term visual north star.
 - The functional Level 1 thin slice is not sufficient by itself to start mass art production.
+- Level 1 asset strategy is **community-first, custom-by-exception**: use commercially safe free/community assets aggressively, adapt them in Blender/Krita, and defer major custom identity production until later.
 - Before Hero Corner, complete the **Engagement & Progression Proof**.
 - Once the Engagement Gate passes, Hero Corner begins and gameplay/content + visual production can increasingly proceed in parallel.
 - Progression should favour capability changes and new management verbs over small percentage-only bonuses.
