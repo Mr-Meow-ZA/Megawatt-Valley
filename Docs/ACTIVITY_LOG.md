@@ -38,6 +38,27 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-19 — Fix — Event modal pause + slower pacing
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Decision events / climax call `SimulationClock.BeginModalPause` while open; resume prior speed on choice.
+- Deck pacing: first event ~90s, gap ~180s sim time (was 25 / 22); supplier SO trigger patched to 90.
+- Fast-forwarded ChatGPT engagement / asset-policy docs onto local `main`.
+
+**Tested / Verified**
+- Shadow compile check passed.
+
+**Next recommended step**
+- E1-01 Radio Dispatch capability unlock (`Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`, issue #5).
+
+**Git / References**
+- Commit: `2ba2ca8`
+- Branch: `main`
+
+---
 
 ## 2026-09-18 — Design — Community-first Level 1 asset policy approved
 
