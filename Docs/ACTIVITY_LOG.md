@@ -38,6 +38,44 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+
+## 2026-09-18 — Design — Progression, unlocks and engagement model
+
+**Agent:** ChatGPT
+**Status:** Complete / Approved design direction
+
+**Changed / Produced**
+- Added `Docs/PROGRESSION_AND_ENGAGEMENT.md` after researching progression patterns from Two Point Hospital / Campus, Planet Zoo, Timberborn, Factorio, Against the Storm and Anno.
+- Defined four progression layers: scenario onboarding, persistent company capabilities, project-specific choices, and campaign / star progression.
+- Defined the **Management Abstraction Ladder**: manual → assigned staff → schedule / policy → automation → exception management.
+- Added future capability examples for cleaning, maintenance, monitoring, vegetation, security, construction, grid / automation and company scale.
+- Redesigned Level 1 engagement around progression beats rather than merely increasing level duration.
+- Added **E1-01…E1-09 — Engagement & Progression Proof** to `SESSION_GOALS.md`.
+- Inserted an Engagement Gate before Hero Corner in `ROADMAP.md`.
+- Updated Level 1, Game Vision, Current Status, Cursor rules, collaboration context and technical architecture to match.
+
+**Tested / Verified**
+- Cross-checked the design against the existing L1-01…L1-08 implementation and reused current systems instead of proposing a rebuild.
+- First implementation proof deliberately reuses existing technician auto-dispatch behind an unlock gate.
+
+**Known issues / limitations**
+- The full capability tree is intentionally not implemented or numerically balanced yet.
+- Exact Level 1 duration remains a playtest outcome; engagement cadence is more important than stretching playtime.
+- Research buildings / staff-time research are future campaign mechanics, not E1 requirements.
+
+**Decisions / assumptions / recommendations**
+- Level 1 should briefly teach manual actions before rewarding the player with delegation / automation.
+- First proof chain: manual technician dispatch → Radio Dispatch unlock → automatic technician dispatch.
+- Second proof chain: panel soiling → manual cleaning → cleaning improvement.
+- Hero Corner begins after the Engagement Gate; gameplay and visual development then proceed increasingly in parallel.
+
+**Next recommended step**
+- **E1-01 — First capability unlock**
+
+**Git / References**
+- Main design file: `Docs/PROGRESSION_AND_ENGAGEMENT.md`
+- Branch: `main`
+
 ## 2026-09-18 — L1-07 / L1-08 — Star tiers + Site B expansion
 
 **Agent:** Cursor
