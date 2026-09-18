@@ -1,106 +1,68 @@
 # Megawatt Valley — Playtest Checklist
 
-Use this when Cursor asks you to playtest. **Only check the Focus list.**  
-Everything under Ignore is known grey-box debt — skip it.
+Use this when Cursor asks you to playtest. **Only check the Focus list.**
 
 Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`  
-Suggested length: ~10–15 minutes (chase at least 1★ + Site B; 3★ if you have time).
+Suggested length: **15–20 minutes** through Radio Dispatch + cleaning kit + Site B.
 
 ---
 
-## Focus now (please report these)
+## Focus now (E1 engagement)
 
-### Core loop
+### Capabilities / Radio Dispatch
 
-- [x] Place **Premium** (key **1**) and **Bargain** (key **2**) arrays on the green **Site A** plot; cash matches HUD costs
-- [x] Cyan pole + post ring (~14 m): arrays inside export in daylight; **west** of Site A outside the ring shows `NO GRID` / no income
-- [x] Demolish refunds some cash
-- [x] Day/night readable; sim speeds **1/2/3** + **Space** pause work
+- [ ] HUD **CAPABILITIES** shows Radio Dispatch **LOCKED** at new game
+- [ ] Force a fault (**select array → K**): Jordan does **not** auto-walk to it
+- [ ] Select faulted array → **F** / Repair: Jordan walks and repairs
+- [ ] After repair completes: Radio Dispatch flips to **UNLOCKED** (or use **U** to debug)
+- [ ] Force another fault: Jordan **auto-dispatches** without F
+- [ ] Save (F5) / Load (F9) keeps unlock state (fresh save; old v2 saves won’t load)
 
+### Soiling / cleaning
 
+- [ ] In daylight, Dust % climbs on array labels; export drops when dusty
+- [ ] **Clean** button or **C** ($15) clears dust after a short wait
+- [ ] Second clean unlocks **Basic Cleaning Kit**; later cleans are clearly faster
 
-### Stars (L1-07)
+### NEXT card / stars / Site B
 
-- [x] HUD shows `☆☆☆` → fills as you progress; objective text swaps to the next star goal
-- [x] **1★:** install **0.75 MW** before day **10** (three premium arrays, or mix with bargain)
-- [x] After 1★ the run **does not** hard-stop — you can keep playing; Restart appears
-- [x] **2★:** force a fault (**select array → K**), let tech repair (or **F** / Repair) — star flips when repair finishes
-- [x] **3★:** keep exporting until lifetime revenue hits **$350** (HUD shows `$earned / $350`) — sim pauses on 3★
-- [x] **Fail path (optional):** if you reach day 10 with under 0.75 MW → FAILED + Restart
+- [ ] **NEXT** card always shows a sensible next beat
+- [ ] 1★ still unlocks Site B; 2★/3★ still work
+- [ ] Events pause the clock; they do not spam every few seconds
 
-
-
-### Site B (L1-08)
-
-- [x] Before 1★: brown pad east of Site A (**Site B**) rejects placement (ghost red / won’t place)
-- [x] After 1★: Site B turns green / buildable; second cyan pole covers that pad
-- [x] Can place at least one array on Site B that exports (inside its ring)
-
-
-
-### Events / climax
-
-- [ ] Decision events pop with two choices (**8** / **9** or buttons); **sim pauses** while the modal is open and resumes after you choose
-- [ ] Events feel occasional (~one per sim day after the first), not a rapid-fire queue
-- [ ] Near day **8** (failAfterDay−2), with arrays built: **Severe Hail Forecast** — protect vs ride out
-
-
-
-### Staff / save
-
-- [x] Tech auto-walks to faults; inspection walks still happen
-- [x] **F5** save / **F9** load restore cash, arrays, stars roughly correctly (old v1 saves won’t load — start fresh)
-
-
-
-### Feel / confusion (only if it blocks understanding)
+### Feel / confusion
 
 - [ ] Something important missing from the HUD
 - [ ] A control did nothing / wrong thing
-- [ ] Could not tell Site A from Site B, or locked vs unlocked
+- [ ] Unlock feedback felt invisible or confusing
 
 ---
-
-
 
 ## Ignore for now
 
-- Grey cubes, flat materials, missing animations, ugly UI chrome
-- No music / SFX / particles
-- Capsule technician
-- Hills / creek / fence blockout quality
-- Tech walks in straight lines (no NavMesh)
-- Exact balance numbers unless something feels *broken* (never earns / always bankrupt / 3★ impossible)
-- Hiring UI, salaries, wind, storage
+- Grey-box looks, capsule tech, no SFX
+- E1-06 choice / fancy unlock VFX (not built yet)
+- Exact dust balance unless generation feels broken
 
 ---
-
-
 
 ## Quick keys
 
-
-| Key                             | Action                                |
-| ------------------------------- | ------------------------------------- |
-| **1 / 2**                       | Premium / Bargain build               |
-| **R**                           | Rotate ghost                          |
-| **Esc**                         | Cancel place                          |
-| **F**                           | Repair selected fault (dispatch tech) |
-| **M**                           | Service selected healthy array        |
-| **K**                           | Force fault on selected array         |
-| **8 / 9**                       | Event choice A / B                    |
-| **1–3** (speed row) / **Space** | Sim speed / pause                     |
-| **F5 / F9**                     | Save / Load                           |
-
+| Key | Action |
+| --- | --- |
+| **1 / 2** | Premium / Bargain |
+| **F** | Manual repair dispatch |
+| **C** | Clean selected array |
+| **K** | Force fault |
+| **U** | Debug unlock Radio Dispatch |
+| **M** | Service |
+| **8 / 9** | Event choices |
+| **F5 / F9** | Save / Load |
 
 ---
 
-
-
 ## How to reply
 
-1. **Pass / Fail** on Focus items that mattered
-2. **Bugs only** — unexpected behaviour
-3. **Confusion** — anything unclear without asking
-
-Skip grey-box looks unless they made the loop unreadable.
+1. Pass/Fail on Focus items  
+2. Bugs only  
+3. Confusion / boring stretches (feeds E1-08)

@@ -126,6 +126,30 @@
     min-width: 140px;
 }
 
+.capabilities-card {
+    position: absolute;
+    left: 16px;
+    bottom: 120px;
+    min-width: 240px;
+    max-width: 280px;
+}
+
+.beat-card {
+    position: absolute;
+    right: 16px;
+    bottom: 120px;
+    min-width: 260px;
+    max-width: 320px;
+}
+
+.cap-unlocked {
+    color: rgb(140, 230, 160);
+}
+
+.cap-locked {
+    color: rgb(180, 170, 150);
+}
+
 /* ---------- speed controls ---------- */
 
 .speed-row {

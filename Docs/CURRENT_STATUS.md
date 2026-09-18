@@ -2,94 +2,31 @@
 
 ## Status
 
-**Functional grey-box Level 1 thin slice is complete; project is entering the Engagement & Progression Proof.**
+**Engagement Proof in progress — E1-01…E1-05 implemented; awaiting Rapha playtest.**
 
-Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-08** are complete.
+Unity **6000.6.0f1** / URP. Functional L1 thin slice (**L1-01…L1-08**) plus capability progression through **E1-05**.
 
-Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
+Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`  
+Checklist: `Docs/PLAYTEST_CHECKLIST.md`
 
-Includes: Sunny Slope Sites A+B, premium vs bargain equipment, five-event deck + hail climax, 1★/2★/3★ goals, day deadline, tariff economy, technician behaviour, HUD stars, save stub v2 and EditMode tests.
+## What is new for playtest
 
-## Current product finding
-
-The prototype now proves that the major systems can function together.
-
-It does **not yet prove that Level 1 is fun enough as a full management-game experience**.
-
-Rapha's current design direction is to strengthen the first level around:
-
-- constant short / medium-term purpose;
-- visible unlocks and rewards;
-- capability progression;
-- new responsibilities arriving as old chores become easier;
-- manual → staff-assigned → scheduled → automated progression;
-- a long-term Company Capability Tree covering technology, operations, automation, people, grid and commercial capability.
-
-The authoritative progression design is now:
-
-`Docs/PROGRESSION_AND_ENGAGEMENT.md`
-
-## Locked decisions so far
-
-- Working game title: **Megawatt Valley**.
-- Engine: **Unity 6000.6.0f1** with **URP**.
-- GitHub is the source of truth; ChatGPT reviews via pushed HEAD.
-- Cursor remains the primary Unity implementation AI.
-- Solar-only vertical slice first; Two Point is a design / tone reference only.
-- `Docs/VISUAL_DIRECTION.md` remains the long-term visual north star.
-- The functional Level 1 thin slice is not sufficient by itself to start mass art production.
-- Level 1 asset strategy is **community-first, custom-by-exception**: use commercially safe free/community assets aggressively, adapt them in Blender/Krita, and defer major custom identity production until later.
-- Before Hero Corner, complete the **Engagement & Progression Proof**.
-- Once the Engagement Gate passes, Hero Corner begins and gameplay/content + visual production can increasingly proceed in parallel.
-- Progression should favour capability changes and new management verbs over small percentage-only bonuses.
-- Repetitive responsibilities should become easier / delegated / automated before they become boring.
-
-## Current session-sized strategy
-
-New track: **E1 — Engagement & Progression Proof** in `Docs/SESSION_GOALS.md`.
-
-The first proof deliberately stays small:
-
-1. **E1-01 — First capability unlock**
-2. **E1-02 — Earn automatic technician dispatch**
-3. **E1-03 — Dirt actually matters**
-4. **E1-04 — First cleaning upgrade**
-5. **E1-05 — Objective ladder**
-6. **E1-06 — First capability choice**
-7. **E1-07 — Unlocks feel rewarding**
-8. **E1-08 — Engagement playtest**
-9. **E1-09 — Engagement gate**
+- **Radio Dispatch** starts LOCKED — Jordan will not auto-fix faults until you manually repair once (or press **U** to debug-unlock).
+- After first repair: Radio Dispatch UNLOCKED → auto-dispatch works.
+- Arrays **get dusty**; output drops; **Clean (C)** / Clean button ($15).
+- Second clean unlocks **Basic Cleaning Kit** (much faster cleans).
+- **NEXT** card + **CAPABILITIES** card on the HUD.
+- Events still pause the sim; slower event pacing.
 
 ## Next action
 
-**Cursor task:** GitHub issue **#5 — E1-01 First capability unlock (Radio Dispatch)**  
-**Implementation brief:** `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`
+1. **Rapha playtest** the E1 chain (see checklist).
+2. Then **E1-06** capability choice / **E1-07** unlock presentation, or E1-08 engagement notes.
 
-**E1-01 — First capability unlock**
+Do not start Hero Corner until the Engagement Gate (E1-08/09) passes.
 
-Implement only the minimum capability-state model and UI needed to show that:
+## Locked decisions (short)
 
-- a capability can be locked;
-- the player can see what they are working toward;
-- an objective can unlock it;
-- the unlocked state can change gameplay.
-
-Do **not** build the complete future research tree yet.
-
-The first practical progression chain should reuse existing systems:
-
-**manual fault dispatch → earn Radio Dispatch → automatic technician fault response**
-
-After that, introduce simple soiling / cleaning progression.
-
-## Visual timing
-
-Do not wait until every mechanic in the game exists before improving visuals.
-
-However, do not launch a broad art-production pass yet.
-
-Sequence:
-
-**functional systems ✅ → engagement/progression proof → Hero Corner → gameplay + visuals continue together**
-
-The Hero Corner remains the first serious visual-quality milestone.
+- Community-first Level 1 assets (`Docs/ASSET_POLICY.md`).
+- Progression authority: `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+- Cursor brief: `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`.

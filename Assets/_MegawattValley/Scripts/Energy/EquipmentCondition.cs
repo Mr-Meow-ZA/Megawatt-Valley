@@ -117,6 +117,15 @@ namespace MegawattValley.Core
         [SerializeField] private bool isFaulted;
         [SerializeField] private bool isRepairing;
         [SerializeField] private float repairTimer;
+        [SerializeField] private float soiling;
+        [SerializeField] private bool isCleaning;
+        [SerializeField] private float cleanTimer;
+        [SerializeField] private float soilingPerSecond = 0.8f;
+        [SerializeField] private float baseCleanSeconds = 4f;
+        [SerializeField] private float kitCleanSeconds = 1.25f;
+        [SerializeField] private float cleanCashCost = 15f;
+
+        private static int _siteCleansCompleted;
 
         private SolarArrayUnit _solar;
         private TextMesh _label;
@@ -125,8 +134,10 @@ namespace MegawattValley.Core
         private MeshRenderer _bodyRenderer;
 
         public float Condition => condition;
+        public float Soiling => soiling;
         public bool IsFaulted => isFaulted;
         public bool IsRepairing => isRepairing;
+        public bool IsCleaning => isCleaning;
         public SolarArrayUnit Solar => _solar;
 
         public float RepairCost => definition != null ? definition.RepairCost : repairCost;
@@ -197,7 +208,9 @@ namespace MegawattValley.Core
             float dt = SimulationClock.Instance != null ? SimulationClock.Instance.SimulationDeltaTime : Time.deltaTime;
             HandleSelectionInput();
             TickWearAndFaults(dt);
+            TickSoiling(dt);
             TickRepair(dt);
+            TickClean(dt);
             ApplyGenerationMultiplier();
             RefreshLabel();
             FaceLabelToCamera();
@@ -247,6 +260,52 @@ namespace MegawattValley.Core
             if (keyboard.kKey.wasPressedThisFrame)
             {
                 TriggerFault();
+            }
+
+            if (keyboard.cKey.wasPressedThisFrame)
+            {
+                BeginClean();
+            }
+        }
+
+        private void TickSoiling(float dt)
+        {
+            if (isFaulted || isRepairing || isCleaning || dt <= 0f)
+            {
+                return;
+            }
+
+            bool generating = _solar == null || (_solar.IsConnectedToGrid && DayNightSun.SolarFactor > 0.05f);
+            if (!generating)
+            {
+                return;
+            }
+
+            soiling = Mathf.Min(100f, soiling + soilingPerSecond * dt);
+        }
+
+        private void TickClean(float dt)
+        {
+            if (!isCleaning)
+            {
+                return;
+            }
+
+            cleanTimer -= dt;
+            if (cleanTimer > 0f)
+            {
+                return;
+            }
+
+            isCleaning = false;
+            soiling = 0f;
+            _siteCleansCompleted++;
+            ObjectiveLadder.Instance?.NotifyCleaned();
+            Debug.Log($"[MegawattValley] Clean complete on {name}.");
+
+            if (_siteCleansCompleted >= 2 && CompanyCapabilities.Instance != null)
+            {
+                CompanyCapabilities.Instance.Unlock(CapabilityIds.BasicCleaningKit);
             }
         }
 
@@ -300,6 +359,7 @@ namespace MegawattValley.Core
 
             Debug.Log($"[MegawattValley] Repair complete on {name}.");
             ScenarioObjective.Instance?.NotifyRepairCompleted();
+            CompanyCapabilities.Instance?.Unlock(CapabilityIds.RadioDispatch);
         }
 
         private void TriggerFault()
@@ -428,6 +488,41 @@ namespace MegawattValley.Core
             Debug.Log($"[MegawattValley] Preventive maintenance (+{preventiveConditionGain:0} condition, ${PreventiveCost:0}). Now {condition:0}%.");
         }
 
+        public float EffectiveCleanSeconds
+        {
+            get
+            {
+                bool kit = CompanyCapabilities.Instance != null &&
+                           CompanyCapabilities.Instance.IsUnlocked(CapabilityIds.BasicCleaningKit);
+                return kit ? kitCleanSeconds : baseCleanSeconds;
+            }
+        }
+
+        public void BeginClean()
+        {
+            if (isFaulted || isRepairing || isCleaning)
+            {
+                Debug.Log("[MegawattValley] Cannot clean during fault/repair/clean.");
+                return;
+            }
+
+            if (soiling < 5f)
+            {
+                Debug.Log("[MegawattValley] Array is already clean enough.");
+                return;
+            }
+
+            if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(cleanCashCost))
+            {
+                Debug.LogWarning($"[MegawattValley] Not enough cash to clean (${cleanCashCost:0}).");
+                return;
+            }
+
+            isCleaning = true;
+            cleanTimer = EffectiveCleanSeconds;
+            Debug.Log($"[MegawattValley] Cleaning {name} ({cleanTimer:0.0}s, ${cleanCashCost:0}).");
+        }
+
         private void ApplyGenerationMultiplier()
         {
             if (_solar == null)
@@ -435,7 +530,9 @@ namespace MegawattValley.Core
                 return;
             }
 
-            _solar.SetOutputMultiplier(SolarMath.ConditionMultiplier(condition, isFaulted, wornOutputMultiplier));
+            float conditionMul = SolarMath.ConditionMultiplier(condition, isFaulted, wornOutputMultiplier);
+            float soilMul = isCleaning ? 0.2f : SolarMath.SoilingMultiplier(soiling);
+            _solar.SetOutputMultiplier(conditionMul * soilMul);
         }
 
         private void RefreshLabel()
@@ -446,9 +543,11 @@ namespace MegawattValley.Core
             }
 
             bool offGrid = _solar != null && !_solar.IsConnectedToGrid;
-            string state = isFaulted ? "FAULT" : isRepairing ? "REPAIR" : offGrid ? "NO GRID" : "OK";
-            _label.text = $"{condition:0}%\n{state}";
-            _label.color = isFaulted || offGrid ? new Color(1f, 0.4f, 0.3f) : Color.white;
+            string state = isFaulted ? "FAULT" : isRepairing ? "REPAIR" : isCleaning ? "CLEAN" : offGrid ? "NO GRID" : "OK";
+            string dust = soiling >= 8f ? $"\nDust {soiling:0}%" : string.Empty;
+            _label.text = $"{condition:0}%\n{state}{dust}";
+            _label.color = isFaulted || offGrid ? new Color(1f, 0.4f, 0.3f) :
+                soiling >= 40f ? new Color(1f, 0.85f, 0.4f) : Color.white;
         }
 
         private void FaceLabelToCamera()

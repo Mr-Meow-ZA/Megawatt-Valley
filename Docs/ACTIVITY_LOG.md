@@ -38,6 +38,30 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-19 — E1-01…E1-05 — Capability unlock chain + soiling + objective beats
+
+**Agent:** Cursor
+**Status:** Complete (mechanics); Rapha playtest still required for E1-08
+
+**Changed / Produced**
+- E1-01/02: `CompanyCapabilities`, Radio Dispatch SO, HUD Capabilities card; auto-dispatch gated until first manual repair (U debug).
+- E1-03/04: array soiling + Clean (C); Basic Cleaning Kit after 2 cleans.
+- E1-05: `ObjectiveLadder` + NEXT HUD card.
+- Save stub v3 stores unlocked capability ids.
+- Playtest checklist rewritten for engagement pass.
+
+**Tested / Verified**
+- EnsureAll + CreatePrototypeScene + EditMode: 30 passed.
+
+**Next recommended step**
+- Rapha playtest `Docs/PLAYTEST_CHECKLIST.md`; then E1-06/07 or engagement fixes.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-19 — Fix — Event modal pause + slower pacing
 
 **Agent:** Cursor

@@ -299,25 +299,30 @@ The functional Level 1 thin slice now exists. Before Hero Corner, prove that pro
 
 Design authority: `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
 
-- [ ] **E1-01 — First capability unlock**  
+- [x] **E1-01 — First capability unlock**  
   Add a minimal capability-state model and small UI showing the first unlocked / locked capabilities. Do not build the complete future tree yet.  
-  **Victory moment:** the player can see a cool thing they are working toward and then unlock it.
+  **Victory moment:** the player can see a cool thing they are working toward and then unlock it.  
+  *`CompanyCapabilities` + Radio Dispatch SO; HUD Capabilities card; auto-dispatch gated; U debug unlock.*
 
-- [ ] **E1-02 — Earn automatic technician dispatch**  
+- [x] **E1-02 — Earn automatic technician dispatch**  
   Begin with manual fault dispatch; after the first successful repair, unlock **Radio Dispatch / Auto Dispatch** and enable the existing automatic fault-seeking behaviour.  
-  **Victory moment:** a chore the player just learned is now handled by their growing organisation.
+  **Victory moment:** a chore the player just learned is now handled by their growing organisation.  
+  *First completed repair unlocks Radio Dispatch.*
 
-- [ ] **E1-03 — Dirt actually matters**  
+- [x] **E1-03 — Dirt actually matters**  
   Add simple panel soiling that visibly reduces generation and can be manually cleaned.  
-  **Victory moment:** cleaning has a clear cause-and-effect loop rather than being flavour text.
+  **Victory moment:** cleaning has a clear cause-and-effect loop rather than being flavour text.  
+  *Dust % on arrays; Clean button / C; output falls with dust.*
 
-- [ ] **E1-04 — First cleaning upgrade**  
+- [x] **E1-04 — First cleaning upgrade**  
   Unlock a Basic Cleaning Kit, dedicated cleaner, or similarly small first improvement that materially reduces cleaning time / staff burden.  
-  **Victory moment:** the player feels a noticeable improvement rather than receiving a tiny percentage bonus.
+  **Victory moment:** the player feels a noticeable improvement rather than receiving a tiny percentage bonus.  
+  *Second clean unlocks Basic Cleaning Kit (≈4s → ≈1.25s).*
 
-- [ ] **E1-05 — Objective ladder**  
+- [x] **E1-05 — Objective ladder**  
   Build an approximately 8-step contextual objective sequence that teaches and rewards the player through the opening scenario.  
-  **Victory moment:** there is almost always an understandable next purpose beyond “place more panels”.
+  **Victory moment:** there is almost always an understandable next purpose beyond “place more panels”.  
+  *`ObjectiveLadder` + NEXT card drives opening beats.*
 
 - [ ] **E1-06 — First capability choice**  
   Offer two useful upgrades and let the player choose which to unlock first; the other remains obtainable later.  

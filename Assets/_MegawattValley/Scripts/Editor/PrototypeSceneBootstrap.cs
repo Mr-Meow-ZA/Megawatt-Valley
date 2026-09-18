@@ -131,6 +131,8 @@ namespace MegawattValley.EditorTools
             AssignFloat(events, "fallbackTriggerSeconds", 90f);
             AssignFloat(events, "gapBetweenEventsSeconds", 180f);
             var objective = systems.AddComponent<ScenarioObjective>();
+            var capabilities = systems.AddComponent<CompanyCapabilities>();
+            systems.AddComponent<ObjectiveLadder>();
 
             var saveService = systems.AddComponent<SaveGameService>();
 
@@ -140,11 +142,13 @@ namespace MegawattValley.EditorTools
             var bargainArray = ContentBootstrap.EnsureBargainArray();
             var eventDeck = ContentBootstrap.EnsureEventDeck();
             var climax = ContentBootstrap.EnsureHailClimax();
+            var capabilityPack = ContentBootstrap.EnsureCapabilityPack();
             AssignReference(economy, "scenario", scenario);
             AssignReference(objective, "scenario", scenario);
             AssignReferenceArray(buildMode, "catalog", new Object[] { standardArray, bargainArray });
             AssignReferenceArray(events, "eventDeck", eventDeck);
             AssignReference(events, "climaxEvent", climax);
+            AssignReferenceArray(capabilities, "knownCapabilities", capabilityPack);
             AssignReferenceArray(saveService, "knownArrays", new Object[] { standardArray, bargainArray });
 
             // HUD (S6-03). UIDocument is added before HudController so the tree exists first.

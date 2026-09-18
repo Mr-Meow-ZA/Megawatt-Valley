@@ -221,7 +221,12 @@ namespace MegawattValley.Core
 
         private void TickAutoDispatch(float dt)
         {
-            if (!autoDispatch || HasTask || _walking || _inspectionLingerRemaining > 0f)
+            if (!CanAutoDispatchFaults())
+            {
+                return;
+            }
+
+            if (HasTask || _walking || _inspectionLingerRemaining > 0f)
             {
                 return;
             }
@@ -238,13 +243,14 @@ namespace MegawattValley.Core
 
         private void TickIdleInspection(float dt)
         {
-            if (!autoDispatch || HasTask || _walking || _inspectionLingerRemaining > 0f)
+            // Inspections stay available without Radio Dispatch so the site still feels alive.
+            if (HasTask || _walking || _inspectionLingerRemaining > 0f)
             {
                 return;
             }
 
-            // Faults always win over sightseeing.
-            if (MaintenanceBoard.FaultedCount > 0)
+            // Faults always win over sightseeing when auto-dispatch is available.
+            if (CanAutoDispatchFaults() && MaintenanceBoard.FaultedCount > 0)
             {
                 return;
             }
@@ -257,6 +263,17 @@ namespace MegawattValley.Core
 
             _idleInspectionCooldown = idleInspectionInterval;
             TryStartInspectionWalk();
+        }
+
+        private static bool CanAutoDispatchFaults()
+        {
+            if (CompanyCapabilities.Instance == null)
+            {
+                // Pre-E1 scenes without a capability board keep old behaviour.
+                return true;
+            }
+
+            return CompanyCapabilities.Instance.IsUnlocked(MegawattValley.Data.CapabilityIds.RadioDispatch);
         }
 
         private void TryDispatchToNearestFault()

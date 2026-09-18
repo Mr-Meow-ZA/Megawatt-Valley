@@ -22,6 +22,8 @@ namespace MegawattValley.EditorTools
         public const string EventInfluencerPath = DataFolder + "/Event_InfluencerTour.asset";
         public const string EventNightPath = DataFolder + "/Event_NightShiftDonuts.asset";
         public const string EventHailPath = DataFolder + "/Event_HailForecast.asset";
+        public const string CapRadioPath = DataFolder + "/Capability_RadioDispatch.asset";
+        public const string CapCleaningKitPath = DataFolder + "/Capability_BasicCleaningKit.asset";
 
         [MenuItem("Megawatt Valley/Create Missing Content Assets")]
         public static void EnsureAll()
@@ -34,8 +36,19 @@ namespace MegawattValley.EditorTools
             EnsureInfluencerEvent();
             EnsureNightEvent();
             EnsureHailClimax();
+            EnsureRadioDispatchCapability();
+            EnsureCleaningKitCapability();
             EnsureScenario();
             AssetDatabase.SaveAssets();
+        }
+
+        public static CapabilityDefinition[] EnsureCapabilityPack()
+        {
+            return new[]
+            {
+                EnsureRadioDispatchCapability(),
+                EnsureCleaningKitCapability()
+            };
         }
 
         public static DecisionEventDefinition[] EnsureEventDeck()
@@ -285,6 +298,57 @@ namespace MegawattValley.EditorTools
 
             editable.ApplyModifiedPropertiesWithoutUndo();
             Debug.Log($"[MegawattValley] Created {EventHailPath}.");
+            return asset;
+        }
+
+        public static CapabilityDefinition EnsureRadioDispatchCapability()
+        {
+            return EnsureCapability(
+                CapRadioPath,
+                CapabilityIds.RadioDispatch,
+                "Radio Dispatch",
+                "Automatically send an available technician to the nearest fault.",
+                "Locked — repair a fault yourself once to unlock.",
+                "Unlocked — Jordan auto-responds to faults.");
+        }
+
+        public static CapabilityDefinition EnsureCleaningKitCapability()
+        {
+            return EnsureCapability(
+                CapCleaningKitPath,
+                CapabilityIds.BasicCleaningKit,
+                "Basic Cleaning Kit",
+                "Dedicated brushes and water — cleaning jobs finish much faster.",
+                "Locked — clean dusty arrays twice to unlock.",
+                "Unlocked — cleans finish in about a second.");
+        }
+
+        private static CapabilityDefinition EnsureCapability(
+            string path,
+            string id,
+            string displayName,
+            string description,
+            string lockedHint,
+            string unlockedHint)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<CapabilityDefinition>(path);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            EnsureFolder(DataFolder);
+            var asset = ScriptableObject.CreateInstance<CapabilityDefinition>();
+            AssetDatabase.CreateAsset(asset, path);
+
+            var editable = new SerializedObject(asset);
+            editable.FindProperty("id").stringValue = id;
+            editable.FindProperty("displayName").stringValue = displayName;
+            editable.FindProperty("description").stringValue = description;
+            editable.FindProperty("lockedHint").stringValue = lockedHint;
+            editable.FindProperty("unlockedHint").stringValue = unlockedHint;
+            editable.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log($"[MegawattValley] Created {path}.");
             return asset;
         }
 

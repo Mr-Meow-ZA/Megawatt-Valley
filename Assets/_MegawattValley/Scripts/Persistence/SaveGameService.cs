@@ -22,7 +22,7 @@ namespace MegawattValley.Persistence
     [Serializable]
     public sealed class SaveFile
     {
-        public int version = 2;
+        public int version = 3;
         public float cash;
         public float lifetimeRevenue;
         public int dayNumber = 1;
@@ -31,15 +31,16 @@ namespace MegawattValley.Persistence
         public bool twoStar;
         public bool threeStar;
         public int repairsCompleted;
+        public List<string> unlockedCapabilities = new List<string>();
         public List<SavedArray> arrays = new List<SavedArray>();
     }
 
     /// <summary>
-    /// Save / load stub (S6-06 / L1-07): cash, revenue, stars, arrays, clock.
+    /// Save / load stub (S6-06 / L1-07 / E1): cash, revenue, stars, capabilities, arrays, clock.
     /// </summary>
     public sealed class SaveGameService : MonoBehaviour
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         [Tooltip("Array products the loader can rebuild. A save referencing anything else is skipped.")]
         [SerializeField] private SolarArrayDefinition[] knownArrays = Array.Empty<SolarArrayDefinition>();
@@ -98,7 +99,10 @@ namespace MegawattValley.Persistence
                 objectiveCompleted = ScenarioObjective.Instance != null && ScenarioObjective.Instance.HasOneStar,
                 twoStar = ScenarioObjective.Instance != null && ScenarioObjective.Instance.HasTwoStar,
                 threeStar = ScenarioObjective.Instance != null && ScenarioObjective.Instance.HasThreeStar,
-                repairsCompleted = ScenarioObjective.Instance != null ? ScenarioObjective.Instance.RepairsCompleted : 0
+                repairsCompleted = ScenarioObjective.Instance != null ? ScenarioObjective.Instance.RepairsCompleted : 0,
+                unlockedCapabilities = CompanyCapabilities.Instance != null
+                    ? new List<string>(CompanyCapabilities.Instance.UnlockedIds)
+                    : new List<string>()
             };
 
             foreach (var unit in PowerBoard.All)
@@ -187,6 +191,11 @@ namespace MegawattValley.Persistence
             {
                 ScenarioObjective.Instance.SetRepairsCompleted(file.repairsCompleted);
                 ScenarioObjective.Instance.SetStars(file.objectiveCompleted, file.twoStar, file.threeStar);
+            }
+
+            if (CompanyCapabilities.Instance != null)
+            {
+                CompanyCapabilities.Instance.SetUnlockedIds(file.unlockedCapabilities);
             }
 
             SelectablePlot.RestoreUnlockState(file.objectiveCompleted);

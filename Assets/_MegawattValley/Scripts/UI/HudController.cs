@@ -41,7 +41,13 @@ namespace MegawattValley.UI
         private Label _selectionLine3;
         private Button _repairButton;
         private Button _maintainButton;
+        private Button _cleanButton;
         private Button _demolishButton;
+
+        private Label _capRadioLine;
+        private Label _capCleanLine;
+        private Label _beatTitle;
+        private Label _beatBody;
 
         private Button _buildPremiumButton;
         private Label _buildPremiumTitle;
@@ -81,7 +87,8 @@ namespace MegawattValley.UI
             "alert-banner",
             "selection-panel", "selection-kind", "selection-title",
             "selection-line-1", "selection-line-2", "selection-line-3",
-            "repair-button", "maintain-button", "demolish-button",
+            "repair-button", "maintain-button", "clean-button", "demolish-button",
+            "cap-radio-line", "cap-clean-line", "beat-title", "beat-body",
             "build-premium-button", "build-premium-title", "build-premium-cost", "build-premium-note",
             "build-bargain-button", "build-bargain-title", "build-bargain-cost", "build-bargain-note",
             "save-button", "load-button", "save-status",
@@ -127,7 +134,13 @@ namespace MegawattValley.UI
             _selectionLine3 = _root.Q<Label>("selection-line-3");
             _repairButton = _root.Q<Button>("repair-button");
             _maintainButton = _root.Q<Button>("maintain-button");
+            _cleanButton = _root.Q<Button>("clean-button");
             _demolishButton = _root.Q<Button>("demolish-button");
+
+            _capRadioLine = _root.Q<Label>("cap-radio-line");
+            _capCleanLine = _root.Q<Label>("cap-clean-line");
+            _beatTitle = _root.Q<Label>("beat-title");
+            _beatBody = _root.Q<Label>("beat-body");
 
             _buildPremiumButton = _root.Q<Button>("build-premium-button");
             _buildPremiumTitle = _root.Q<Label>("build-premium-title");
@@ -180,6 +193,11 @@ namespace MegawattValley.UI
             if (_maintainButton != null)
             {
                 _maintainButton.clicked += () => EquipmentCondition.Selected?.DoPreventiveMaintenance();
+            }
+
+            if (_cleanButton != null)
+            {
+                _cleanButton.clicked += () => EquipmentCondition.Selected?.BeginClean();
             }
 
             if (_demolishButton != null)
@@ -272,6 +290,8 @@ namespace MegawattValley.UI
             RefreshTime();
             RefreshObjective();
             RefreshBuildBar();
+            RefreshCapabilities();
+            RefreshBeat();
             RefreshSelection();
             RefreshAlert();
             RefreshSaveBar();
@@ -395,6 +415,32 @@ namespace MegawattValley.UI
             Show(_restartButton, objective.IsTerminal || objective.HasOneStar);
         }
 
+        private void RefreshCapabilities()
+        {
+            var caps = CompanyCapabilities.Instance;
+            bool radio = caps != null && caps.IsUnlocked(MegawattValley.Data.CapabilityIds.RadioDispatch);
+            bool kit = caps != null && caps.IsUnlocked(MegawattValley.Data.CapabilityIds.BasicCleaningKit);
+
+            SetText(_capRadioLine, radio ? "Radio Dispatch — UNLOCKED" : "Radio Dispatch — LOCKED");
+            SetText(_capCleanLine, kit ? "Cleaning Kit — UNLOCKED" : "Cleaning Kit — LOCKED");
+            _capRadioLine?.EnableInClassList("cap-unlocked", radio);
+            _capRadioLine?.EnableInClassList("cap-locked", !radio);
+            _capCleanLine?.EnableInClassList("cap-unlocked", kit);
+            _capCleanLine?.EnableInClassList("cap-locked", !kit);
+        }
+
+        private void RefreshBeat()
+        {
+            var ladder = ObjectiveLadder.Instance;
+            if (ladder == null)
+            {
+                return;
+            }
+
+            SetText(_beatTitle, ladder.CurrentBeatTitle);
+            SetText(_beatBody, ladder.CurrentBeatBody);
+        }
+
         private void RefreshBuildBar()
         {
             var build = BuildModeController.Instance;
@@ -465,8 +511,9 @@ namespace MegawattValley.UI
             SetText(_selectionKind, "SELECTED EQUIPMENT");
             SetText(_selectionTitle, equipment.name);
 
-            string state = equipment.IsFaulted ? "FAULTED" : equipment.IsRepairing ? "under repair" : "online";
-            SetText(_selectionLine1, $"Condition {equipment.Condition:0}%  ·  {state}");
+            string state = equipment.IsFaulted ? "FAULTED" : equipment.IsRepairing ? "under repair" :
+                equipment.IsCleaning ? "cleaning" : "online";
+            SetText(_selectionLine1, $"Condition {equipment.Condition:0}%  ·  Dust {equipment.Soiling:0}%  ·  {state}");
 
             var solar = equipment.Solar;
             SetText(_selectionLine2, solar != null
@@ -476,18 +523,22 @@ namespace MegawattValley.UI
             bool offGrid = solar != null && !solar.IsConnectedToGrid;
             SetText(_selectionLine3, offGrid
                 ? "Outside the grid ring — earns nothing here"
-                : $"Repair ${equipment.EffectiveRepairCost:0} (F)  ·  Service ${equipment.PreventiveCost:0} (M)");
+                : $"Repair ${equipment.EffectiveRepairCost:0} (F)  ·  Service ${equipment.PreventiveCost:0} (M)  ·  Clean $15 (C)");
             SetStateClass(_selectionLine3, offGrid ? "metric-bad" : null);
 
             Show(_repairButton, true);
             Show(_maintainButton, true);
+            Show(_cleanButton, true);
             Show(_demolishButton, true);
             var economy = PlayerEconomy.Instance;
             bool canPayRepair = economy == null || economy.CanAfford(equipment.EffectiveRepairCost);
             bool canPayService = economy == null || economy.CanAfford(equipment.PreventiveCost);
+            bool canPayClean = economy == null || economy.CanAfford(15f);
 
             _repairButton?.SetEnabled(equipment.IsFaulted && !equipment.IsRepairing && canPayRepair);
-            _maintainButton?.SetEnabled(!equipment.IsFaulted && !equipment.IsRepairing && canPayService);
+            _maintainButton?.SetEnabled(!equipment.IsFaulted && !equipment.IsRepairing && !equipment.IsCleaning && canPayService);
+            _cleanButton?.SetEnabled(!equipment.IsFaulted && !equipment.IsRepairing && !equipment.IsCleaning &&
+                                     equipment.Soiling >= 5f && canPayClean);
 
             if (_repairButton != null)
             {
@@ -497,6 +548,11 @@ namespace MegawattValley.UI
             if (_maintainButton != null)
             {
                 _maintainButton.text = $"Service ${equipment.PreventiveCost:0}";
+            }
+
+            if (_cleanButton != null)
+            {
+                _cleanButton.text = $"Clean ${15:0} ({equipment.EffectiveCleanSeconds:0.0}s)";
             }
         }
 
@@ -510,12 +566,16 @@ namespace MegawattValley.UI
             var technician = staff.Technician;
             SetText(_selectionLine2, technician != null ? $"Status: {technician.Activity}" : "Status: on site");
             SetText(_selectionLine3, technician != null
-                ? $"Walk {technician.MoveSpeed:0.0} m/s  ·  auto-repairs faults"
+                ? (CompanyCapabilities.Instance != null &&
+                   CompanyCapabilities.Instance.IsUnlocked(MegawattValley.Data.CapabilityIds.RadioDispatch)
+                    ? $"Walk {technician.MoveSpeed:0.0} m/s  ·  Radio Dispatch ON"
+                    : $"Walk {technician.MoveSpeed:0.0} m/s  ·  Radio Dispatch LOCKED — use F")
                 : string.Empty);
             SetStateClass(_selectionLine3, null);
 
             Show(_repairButton, false);
             Show(_maintainButton, false);
+            Show(_cleanButton, false);
             Show(_demolishButton, false);
         }
 
@@ -537,9 +597,15 @@ namespace MegawattValley.UI
                 }
                 else
                 {
-                    message = faulted == 1
-                        ? "Array faulted — waiting on cash or a free technician. (Dev: select array, press K to force faults.)"
-                        : $"{faulted} arrays faulted — technician will clear them when cash allows.";
+                    bool radio = CompanyCapabilities.Instance != null &&
+                                 CompanyCapabilities.Instance.IsUnlocked(MegawattValley.Data.CapabilityIds.RadioDispatch);
+                    message = radio
+                        ? (faulted == 1
+                            ? "Array faulted — technician will clear when cash allows."
+                            : $"{faulted} arrays faulted — technician will clear them when cash allows.")
+                        : (faulted == 1
+                            ? "Array faulted — Radio Dispatch locked. Select it and press F to send Jordan."
+                            : $"{faulted} arrays faulted — Radio Dispatch locked. Select one and press F.");
                 }
             }
             else if (disconnected > 0)

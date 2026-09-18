@@ -1,3 +1,4 @@
+using MegawattValley.Data;
 using MegawattValley.Persistence;
 using NUnit.Framework;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace MegawattValley.Tests
                 threeStar = false,
                 repairsCompleted = 2
             };
+            file.unlockedCapabilities.Add(CapabilityIds.RadioDispatch);
 
             file.arrays.Add(new SavedArray
             {
@@ -64,6 +66,8 @@ namespace MegawattValley.Tests
             Assert.AreEqual(original.twoStar, restored.twoStar);
             Assert.AreEqual(original.threeStar, restored.threeStar);
             Assert.AreEqual(original.repairsCompleted, restored.repairsCompleted);
+            Assert.AreEqual(1, restored.unlockedCapabilities.Count);
+            Assert.AreEqual(CapabilityIds.RadioDispatch, restored.unlockedCapabilities[0]);
         }
 
         [Test]

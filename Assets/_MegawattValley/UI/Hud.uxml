@@ -52,8 +52,22 @@
             <ui:VisualElement class="button-row">
                 <ui:Button name="repair-button" class="action-button" text="Repair" />
                 <ui:Button name="maintain-button" class="action-button" text="Service" />
+                <ui:Button name="clean-button" class="action-button" text="Clean" />
                 <ui:Button name="demolish-button" class="action-button action-button-danger" text="Demolish" />
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="capabilities-card" class="card capabilities-card" picking-mode="Ignore">
+            <ui:Label class="card-title" text="CAPABILITIES" />
+            <ui:Label name="cap-radio-line" class="panel-line" text="Radio Dispatch — LOCKED" />
+            <ui:Label name="cap-clean-line" class="panel-line" text="Cleaning Kit — LOCKED" />
+            <ui:Label name="cap-hint" class="metric-sub" text="Earn unlocks by playing — U debug Radio" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="beat-card" class="card beat-card" picking-mode="Ignore">
+            <ui:Label class="card-title" text="NEXT" />
+            <ui:Label name="beat-title" class="metric-sub" text="First Power" />
+            <ui:Label name="beat-body" class="panel-line" text="Place solar inside the cyan grid ring." />
         </ui:VisualElement>
 
         <ui:VisualElement name="build-bar" class="build-bar" picking-mode="Ignore">

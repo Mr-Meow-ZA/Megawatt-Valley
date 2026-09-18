@@ -23,6 +23,13 @@ namespace MegawattValley.Core
             return Mathf.Lerp(Mathf.Clamp01(minMultiplier), 1f, normalised);
         }
 
+        /// <summary>Soiling multiplies after condition. 100% dust → ~40% remaining output.</summary>
+        public static float SoilingMultiplier(float soilingPercent)
+        {
+            float dust = Mathf.Clamp01(soilingPercent / 100f);
+            return Mathf.Lerp(1f, 0.4f, dust);
+        }
+
         /// <summary>Instantaneous output. Nothing flows unless the array is connected to the grid.</summary>
         public static float Megawatts(float nameplateMw, float solarFactor, float outputMultiplier, bool connectedToGrid)
         {
