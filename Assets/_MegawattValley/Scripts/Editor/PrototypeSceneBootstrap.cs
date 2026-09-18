@@ -122,10 +122,12 @@ namespace MegawattValley.EditorTools
             var standardArray = ContentBootstrap.EnsureStandardArray();
             var bargainArray = ContentBootstrap.EnsureBargainArray();
             var eventDeck = ContentBootstrap.EnsureEventDeck();
+            var climax = ContentBootstrap.EnsureHailClimax();
             AssignReference(economy, "scenario", scenario);
             AssignReference(objective, "scenario", scenario);
             AssignReferenceArray(buildMode, "catalog", new Object[] { standardArray, bargainArray });
             AssignReferenceArray(events, "eventDeck", eventDeck);
+            AssignReference(events, "climaxEvent", climax);
             AssignReferenceArray(saveService, "knownArrays", new Object[] { standardArray, bargainArray });
 
             // HUD (S6-03). UIDocument is added before HudController so the tree exists first.

@@ -21,6 +21,7 @@ namespace MegawattValley.EditorTools
         public const string EventGridPath = DataFolder + "/Event_GridCurtailmentMemo.asset";
         public const string EventInfluencerPath = DataFolder + "/Event_InfluencerTour.asset";
         public const string EventNightPath = DataFolder + "/Event_NightShiftDonuts.asset";
+        public const string EventHailPath = DataFolder + "/Event_HailForecast.asset";
 
         [MenuItem("Megawatt Valley/Create Missing Content Assets")]
         public static void EnsureAll()
@@ -32,6 +33,7 @@ namespace MegawattValley.EditorTools
             EnsureGridEvent();
             EnsureInfluencerEvent();
             EnsureNightEvent();
+            EnsureHailClimax();
             EnsureScenario();
             AssetDatabase.SaveAssets();
         }
@@ -231,6 +233,51 @@ namespace MegawattValley.EditorTools
                 0f,
                 0f,
                 "You suggest apples. Jordan files this under \"leadership moments\".");
+        }
+
+        /// <summary>L1-06 climax: protect the plant vs ride out the hail.</summary>
+        public static DecisionEventDefinition EnsureHailClimax()
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<DecisionEventDefinition>(EventHailPath);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            EnsureFolder(DataFolder);
+            var asset = ScriptableObject.CreateInstance<DecisionEventDefinition>();
+            AssetDatabase.CreateAsset(asset, EventHailPath);
+
+            var editable = new SerializedObject(asset);
+            editable.FindProperty("title").stringValue = "Severe Hail Forecast";
+            editable.FindProperty("body").stringValue =
+                "Met office just upgraded the afternoon cells to \"golf-ball adjacent\". " +
+                "You can tarp the tables now, or keep exporting and hope the insurance forms are funny.";
+            editable.FindProperty("triggerAfterSeconds").floatValue = 0f;
+
+            var choiceA = editable.FindProperty("choiceA");
+            choiceA.FindPropertyRelative("label").stringValue = "Deploy hail covers\n-${cost}, +{condition} protection";
+            choiceA.FindPropertyRelative("cashCost").floatValue = 180f;
+            choiceA.FindPropertyRelative("conditionBonusToAllEquipment").floatValue = 20f;
+            choiceA.FindPropertyRelative("conditionPenaltyToAllEquipment").floatValue = 0f;
+            choiceA.FindPropertyRelative("forceFaultOnAllEquipment").boolValue = false;
+            choiceA.FindPropertyRelative("spawnsArray").objectReferenceValue = null;
+            choiceA.FindPropertyRelative("resultLog").stringValue =
+                "Covers deployed. Export dips while the crew cheers the thunder.";
+
+            var choiceB = editable.FindProperty("choiceB");
+            choiceB.FindPropertyRelative("label").stringValue = "Keep exporting\nNo cost — storm damage likely";
+            choiceB.FindPropertyRelative("cashCost").floatValue = 0f;
+            choiceB.FindPropertyRelative("conditionBonusToAllEquipment").floatValue = 0f;
+            choiceB.FindPropertyRelative("conditionPenaltyToAllEquipment").floatValue = 35f;
+            choiceB.FindPropertyRelative("forceFaultOnAllEquipment").boolValue = true;
+            choiceB.FindPropertyRelative("spawnsArray").objectReferenceValue = null;
+            choiceB.FindPropertyRelative("resultLog").stringValue =
+                "You rode it out. Several tables now sound like broken biscuits.";
+
+            editable.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log($"[MegawattValley] Created {EventHailPath}.");
+            return asset;
         }
 
         private static DecisionEventDefinition EnsureSimpleEvent(

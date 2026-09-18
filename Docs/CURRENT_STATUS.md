@@ -4,14 +4,14 @@
 
 **Grey-box miniature vertical slice is playable.**
 
-Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-05** are done.
+Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-06** (thin slice) are done.
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
 Playtest focus list: `Docs/PLAYTEST_CHECKLIST.md`  
 Unity MCP: `Docs/UNITY_MCP_SETUP.md`
 
-Includes: Sunny Slope blockout, premium vs bargain build catalog, five-event deck, one-star clear (day deadline + restart), tariff economy, auto-tech, HUD, save stub, EditMode tests.
+Includes: Sunny Slope blockout, premium vs bargain, five-event deck, hail climax, one-star clear, tariff economy, auto-tech, HUD, save stub, EditMode tests.
 
 Rapha accepted the grey-box loop on 2026-09-16 with a fix list. **2026-09-18 re-playtest** (via `Docs/PLAYTEST_CHECKLIST.md`): Focus list fully passed, including west-side `NO GRID` after the 14 m radius shrink. Feel/confusion items not flagged.
 
@@ -45,9 +45,9 @@ The project should never depend only on distant phase completion for a sense of 
 
 Current first goals:
 
-1. `L1-06` climax beat
-2. Optional: Rapha light playtest of 1★ clear + catalog + events when rested
-3. ChatGPT refresh after L1-06 if needed
+1. Optional Rapha playtest of L1 thin slice (catalog, events, 1★, hail climax) when rested
+2. ChatGPT review refresh on HEAD
+3. Next stretch only after playtest: 2★/3★ or second-site modifiers — do not invent scope
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
@@ -84,7 +84,7 @@ The planned sequence is:
 
 ## Next action
 
-**L1-06** — one scripted late-scenario climax beat. Rapha playtest when rested; MCP + tests cover the interim.
+**Rapha playtest** of the Level 1 thin slice when rested (`Docs/PLAYTEST_CHECKLIST.md`). ChatGPT can refresh review on current HEAD.
 
 Do not start a major art pass until the grey-box loop feels fun.
 

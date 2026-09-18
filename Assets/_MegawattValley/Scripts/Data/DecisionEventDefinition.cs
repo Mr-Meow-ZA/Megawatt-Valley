@@ -13,12 +13,17 @@ namespace MegawattValley.Data
         [SerializeField] private string label = "Do the thing";
         [SerializeField] private float cashCost;
         [SerializeField] private float conditionBonusToAllEquipment;
+        [Tooltip("Negative hits for risky climax choices (e.g. ride out a hailstorm).")]
+        [SerializeField] private float conditionPenaltyToAllEquipment;
+        [SerializeField] private bool forceFaultOnAllEquipment;
         [SerializeField] private SolarArrayDefinition spawnsArray;
         [SerializeField] private Vector3 spawnPosition = new Vector3(4f, 0f, 2f);
         [SerializeField] private string resultLog = "Done.";
 
         public float CashCost => cashCost;
         public float ConditionBonusToAllEquipment => conditionBonusToAllEquipment;
+        public float ConditionPenaltyToAllEquipment => conditionPenaltyToAllEquipment;
+        public bool ForceFaultOnAllEquipment => forceFaultOnAllEquipment;
         public SolarArrayDefinition SpawnsArray => spawnsArray;
         public Vector3 SpawnPosition => spawnPosition;
         public string ResultLog => resultLog;

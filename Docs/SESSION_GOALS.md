@@ -273,9 +273,10 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   **Victory moment:** Level 1 is completable at 1★.  
   *Install target before `failAfterDay`; HUD shows 1★ / fail + Restart.*
 
-- [ ] **L1-06 — Climax beat**  
+- [x] **L1-06 — Climax beat**  
   One scripted late-scenario pressure event.  
-  **Victory moment:** the ending is memorable.
+  **Victory moment:** the ending is memorable.  
+  *Hail forecast on day `failAfterDay−2`: protect (cash + condition) vs ride it out (hits + faults).*
 
 Stretch after L1-05 is fun: second/third site modifiers, 2★/3★, larger event deck.
 

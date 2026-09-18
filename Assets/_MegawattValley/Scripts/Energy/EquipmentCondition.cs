@@ -392,6 +392,23 @@ namespace MegawattValley.Core
             condition = Mathf.Min(100f, condition + amount);
         }
 
+        /// <summary>Storm / climax damage. Optional forced fault for the risky choice.</summary>
+        public void ApplyConditionHit(float amount, bool forceFault)
+        {
+            if (amount > 0f)
+            {
+                condition = Mathf.Max(0f, condition - amount);
+            }
+
+            if (forceFault || condition <= 0.01f)
+            {
+                TriggerFault();
+            }
+
+            ApplyGenerationMultiplier();
+            RefreshLabel();
+        }
+
         public void DoPreventiveMaintenance()
         {
             if (isFaulted || isRepairing)

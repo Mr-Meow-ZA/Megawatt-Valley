@@ -6,11 +6,12 @@ using UnityEngine.InputSystem;
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Small deck of data-driven decision events (S5-01 / L1-04).
+    /// Small deck of data-driven decision events (S5-01 / L1-04) plus one late climax (L1-06).
     /// </summary>
     public sealed class HumorousEventController : MonoBehaviour
     {
         [SerializeField] private DecisionEventDefinition[] eventDeck;
+        [SerializeField] private DecisionEventDefinition climaxEvent;
         [SerializeField] private float fallbackTriggerSeconds = 25f;
         [SerializeField] private float gapBetweenEventsSeconds = 22f;
 
@@ -18,6 +19,8 @@ namespace MegawattValley.Core
         private float _timer;
         private bool _eventShown;
         private bool _armed;
+        private bool _showingClimax;
+        private bool _climaxDone;
         private DecisionEventDefinition _active;
 
         public static HumorousEventController Instance { get; private set; }
@@ -54,6 +57,8 @@ namespace MegawattValley.Core
 
         private void Update()
         {
+            TryStartClimax();
+
             if (!_armed || _active == null || _eventShown)
             {
                 PollHotkeys();
@@ -72,6 +77,38 @@ namespace MegawattValley.Core
                 _eventShown = true;
                 Debug.Log($"[MegawattValley] EVENT: {Title} — {Body}");
             }
+        }
+
+        private void TryStartClimax()
+        {
+            if (_climaxDone || _showingClimax || climaxEvent == null || _eventShown)
+            {
+                return;
+            }
+
+            var objective = ScenarioObjective.Instance;
+            if (objective != null && objective.IsTerminal)
+            {
+                return;
+            }
+
+            if (PowerBoard.InstalledMegawatts < 0.01f)
+            {
+                return;
+            }
+
+            int day = DayNightSun.Instance != null ? DayNightSun.Instance.DayNumber : 1;
+            int triggerDay = objective != null ? Mathf.Max(2, objective.FailAfterDay - 2) : 6;
+            if (day < triggerDay)
+            {
+                return;
+            }
+
+            _active = climaxEvent;
+            _armed = false;
+            _eventShown = true;
+            _showingClimax = true;
+            Debug.Log($"[MegawattValley] CLIMAX: {Title} — {Body}");
         }
 
         private void PollHotkeys()
@@ -125,12 +162,29 @@ namespace MegawattValley.Core
                 }
             }
 
+            if (choice.ConditionPenaltyToAllEquipment > 0f || choice.ForceFaultOnAllEquipment)
+            {
+                foreach (var equipment in MaintenanceBoard.All)
+                {
+                    equipment.ApplyConditionHit(choice.ConditionPenaltyToAllEquipment, choice.ForceFaultOnAllEquipment);
+                }
+            }
+
             if (choice.SpawnsArray != null)
             {
                 SolarArrayFactory.CreateArray(choice.SpawnsArray, choice.SpawnPosition, 0f);
             }
 
             Debug.Log($"[MegawattValley] {choice.ResultLog}");
+
+            if (_showingClimax)
+            {
+                _showingClimax = false;
+                _climaxDone = true;
+                ArmCurrent();
+                return;
+            }
+
             _deckIndex++;
             ArmCurrent();
         }

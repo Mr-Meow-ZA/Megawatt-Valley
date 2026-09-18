@@ -38,6 +38,28 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — L1-06 — Hail climax beat
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- `Event_HailForecast`: protect (cash + condition) vs ride out (penalty + forced faults).
+- Fires on day `failAfterDay−2` once any MW is installed; wired as `climaxEvent` on event controller.
+- L1 thin-slice goals L1-01…L1-06 marked done; next action = Rapha playtest.
+
+**Tested / Verified**
+- EnsureAll + CreatePrototypeScene + EditMode: 28 passed.
+
+**Next recommended step**
+- Rapha playtest thin slice when rested; ChatGPT review refresh.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — L1-05 — One-star clear (success / fail / restart)
 
 **Agent:** Cursor
