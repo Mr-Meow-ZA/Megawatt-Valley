@@ -1,4 +1,4 @@
-# Megawatt Valley — Level 1 Design v0.1
+# Megawatt Valley — Level 1 Design v0.2
 
 ## Working title
 
@@ -49,6 +49,71 @@ Level 1’s full destination (three sites, star tiers, climax, larger event deck
 6. one climax beat;
 
 then stretch into multi-site choice and 2★/3★.
+
+
+## Engagement and progression requirement
+
+The functional thin slice is not the final Level 1 experience.
+
+Level 1 must create a steady feeling of **purpose → action → reward → new responsibility**. The progression model is defined in `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+
+The player should not spend the scenario repeatedly placing the same solar object until a capacity target is reached.
+
+### Motivation stack
+
+After the opening tutorial, the player should usually have some combination of:
+
+- an immediate operational concern;
+- a short contextual objective;
+- a visible unlock / reward approaching;
+- an optional star / mastery goal.
+
+### First manual-to-automation proof
+
+Level 1 should deliberately demonstrate that the company is getting smarter.
+
+Recommended first proof:
+
+1. first fault requires manual technician dispatch;
+2. successful repair unlocks **Radio Dispatch / automatic fault response**;
+3. later, panel soiling introduces manual cleaning;
+4. a Cleaning Kit / cleaner upgrade reduces that burden;
+5. later campaign tiers visibly tease scheduled cleaning and autonomous cleaning robots.
+
+The objective is not to make the tutorial tedious. Manual work should exist only long enough for the player to understand and appreciate the upgrade.
+
+### Progression beats
+
+Use a beat structure rather than rigid time gates:
+
+1. First Power — build, connect, earn.
+2. Cheap or Good? — bargain vs premium procurement.
+3. First Failure — manual response, then auto-dispatch unlock.
+4. Dust Happens — manual cleaning, then first cleaning improvement.
+5. Growing Up — capacity / cash target unlocks Site B.
+6. Choose What to Improve — first capability choice.
+7. Growing Pains — overlapping responsibilities make better organisation valuable.
+8. First Automation Payoff — repetitive work becomes easier.
+9. Hail / Weather Climax — test prior choices.
+10. Continue or Move On — 1★ unlocks progress, 2★ / 3★ remain for mastery.
+
+Exact timing is a balancing question. Fun is more important than stretching the scenario to a target duration.
+
+### Content-density starting target
+
+For the eventual first-level experience, aim initially for roughly:
+
+- 8–12 guided / contextual objectives;
+- 5–8 decision events;
+- 2 equipment procurement choices;
+- 2–3 staff / operations concepts;
+- 3–5 capability unlock moments;
+- 1 plot expansion;
+- 1 meaningful automation payoff;
+- 1 memorable climax;
+- 1★ / 2★ / 3★ goals.
+
+These are design targets, not hard quotas.
 
 ## Candidate sites
 
@@ -255,4 +320,4 @@ Level 1 is successful when a first-time player can:
 - understand what they unlocked;
 - want to continue or replay more efficiently.
 
-The most important test is whether the loop is enjoyable before art polish and large-scale content are added.
+The most important test is whether the loop is enjoyable before large-scale content is added. Once the Engagement Gate in `Docs/PROGRESSION_AND_ENGAGEMENT.md` passes, Hero Corner visual work should begin and then visuals / gameplay can advance together.
