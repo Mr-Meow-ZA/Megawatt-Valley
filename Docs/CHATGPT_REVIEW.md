@@ -4,75 +4,93 @@
 
 **Review date:** 2026-09-18
 
-**Repository state reviewed:** `main` through `ac8ff84`
+**Repository state reviewed:** functional Level 1 thin slice through `L1-08`, followed by the progression / engagement design update
 
-**Alignment status:** Healthy and aligned
+**Alignment status:** Healthy; project priority has deliberately shifted from “more functional features” to “prove fun, progression and changing responsibility”
 
-## Summary
+## Current state
 
-Megawatt Valley now has a playable grey-box miniature vertical slice rather than only a prototype shell.
+The functional grey-box Level 1 slice now includes:
 
-Current implemented / accepted scope includes:
-
-- Unity 6000.6.0f1 / URP project foundation;
-- tycoon camera and site navigation;
-- solar placement, rotation, validation and demolition;
-- cash, scenario tariff, export MW and sim-speed loop;
-- visible grid sell radius and testable connected / unconnected placement;
-- day / night clock;
-- equipment condition, faults, repair and preventive maintenance;
-- named technician with traits, inspection walks and automatic fault dispatch;
-- first humorous decision event and environmental joke;
-- objective / win state;
-- UI Toolkit HUD;
-- ScriptableObject-driven scenario / equipment / event data;
+- Sunny Slope Sites A + B;
+- solar placement / grid / revenue loop;
+- bargain vs premium equipment;
+- equipment condition, faults and maintenance;
+- technician behaviour and automatic fault dispatch;
+- five-event deck and hail climax;
+- 1★ / 2★ / 3★ goals;
+- plot expansion;
 - save / load stub;
-- 28 passing EditMode tests;
-- Sunny Slope Site A grey-box scenario map.
+- UI Toolkit HUD;
+- data-driven content and EditMode tests.
 
-Rapha's 2026-09-18 re-playtest passed the important core-loop, economy-readability, staff / maintenance and scenario / win checks. The remaining grid checklist ambiguity was addressed by shrinking the grid radius so the west side of the plot is clearly outside coverage and by relabelling the HUD output card as EXPORT.
+This demonstrates that the systems can function together.
 
-## Alignment review
+It does **not yet demonstrate that the first level has enough momentum, progression and reward to feel like a strong tycoon scenario**.
 
-**Good:** Scope remains disciplined. The project has not jumped into wind, BESS, large art production, complex finance or a second simulation framework.
+## New approved design direction
 
-**Good:** The implementation still follows the intended architecture: conventional Unity components, data-driven balance, and separation of simulation from presentation where useful.
+`Docs/PROGRESSION_AND_ENGAGEMENT.md` is now the authority for the next gameplay phase.
 
-**Good:** The technician now produces visible world activity without artificially forcing constant faults. This supports the character-driven management vision.
+Key principles:
 
-**Good:** Sunny Slope is a meaningful step from sandbox pad toward Level 1 without overspending on final art.
+- maintain a stack of immediate, short-term and longer-term motivations;
+- unlock capabilities that change what the player can do, not only percentage bonuses;
+- let the player understand a chore manually before making it easier;
+- evolve repetitive systems through **manual → assigned staff → schedule / policy → automation → exception management**;
+- introduce new responsibility as old responsibility becomes easier;
+- do not increase scenario length through waiting or repetitive panel placement;
+- keep project-specific trade-offs even after company technologies are permanently unlocked.
 
-**Good:** The re-playtest feedback loop is working: observed confusion was fixed directly rather than answered with more systems.
+The long-term progression system is a **Company Capability Tree**, broader than pure technology, with branches such as generation, operations, digital / automation, people, grid and development / commercial capability.
 
-## Watch items
+## Immediate proof
 
-- `L1-03 — Bargain vs premium equipment` is the correct next implementation goal. Extend the existing ScriptableObject equipment definitions; do not create a separate procurement architecture.
-- Keep save / load as a prototype stub for now.
-- Camera zoom over HUD remains minor UX debt, not a blocker.
-- The visual target remains a long-term benchmark. Do not start the major art pass yet.
-- Open issue #2 and draft PR #4 are now largely historical / stale relative to current progress; treat them as reference unless Rapha explicitly revives them.
+Do **not** build the full capability tree.
+
+The new session track is **E1 — Engagement & Progression Proof**.
+
+First chain:
+
+**manual fault dispatch → first successful repair → Radio Dispatch unlock → existing automatic technician behaviour becomes available**
+
+Second chain:
+
+**panel soiling → manual cleaning → first cleaning improvement**
+
+This proves that an unlock can materially change the level of management abstraction.
+
+## Visual timing
+
+The visual plan has been clarified:
+
+**functional systems ✅ → engagement / progression proof → Hero Corner → gameplay + visuals advance together**
+
+Do not wait until every future mechanic is complete before improving visuals.
+
+Do not start mass final-art production before the Engagement Gate.
 
 ## Recommended next session goal
 
-**L1-03 — Bargain vs premium equipment**
+**E1-01 — First capability unlock**
 
-Give the player two clearly differentiated solar build choices using the existing equipment-definition system.
+Implement only enough capability state + UI to prove:
 
-The choice should be understandable in seconds and create a real trade-off, for example:
+- locked capability is visible;
+- the player understands the reward;
+- an objective can unlock it;
+- the unlocked state changes gameplay.
 
-- cheaper / lower output / higher reliability risk;
-- more expensive / higher output / better reliability.
+Avoid generic effect engines, giant tech-tree frameworks, research currencies or department systems at this stage.
 
-Keep the first implementation small: two options, clear UI differences, data-driven values, and one playtestable decision.
+## Playtest question
 
-After that:
+The next important project question is no longer:
 
-1. L1-04 — Five decision events
-2. L1-05 — One-star scenario clear
-3. L1-06 — Climax beat
+> Does it work?
 
-## Overall assessment
+It is:
 
-The project is progressing well. The core risk at this stage is no longer “can we build a game loop?” — that has been demonstrated.
+> Does the player keep getting interesting reasons to do the next thing, and do they feel the company becoming more capable while they play?
 
-The next risk is whether the Level 1 thin slice becomes genuinely fun and choice-driven rather than merely functional. The current sequence is appropriate for testing that without expanding scope too early.
+That is the acceptance criterion for the Engagement Gate.
