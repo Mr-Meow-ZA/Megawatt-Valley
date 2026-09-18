@@ -12,6 +12,8 @@ Before making significant changes, read:
 - `README.md`
 - `Docs/GAME_VISION.md`
 - `Docs/VISUAL_DIRECTION.md`
+- `Docs/ASSET_POLICY.md`
+- `Docs/ASSET_REGISTER.md`
 - `Docs/PROGRESSION_AND_ENGAGEMENT.md`
 - `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`
 - `Docs/TECHNICAL_ARCHITECTURE.md`
@@ -114,6 +116,19 @@ Important rules:
 - Camera, world scale, asset scale, building footprints, roads, UI composition, and simulation/presentation separation should be designed with the eventual visual target in mind.
 - Before mass-producing final assets, the project should build and approve a small style-prototype / hero scene as defined in `Docs/VISUAL_DIRECTION.md`.
 - Keep Megawatt Valley visually original. Inspiration is not permission to clone another game's assets or art language.
+
+## Asset sourcing rules
+
+For Hero Corner and Level 1, follow `Docs/ASSET_POLICY.md`.
+
+- Default to commercially safe free/community assets.
+- Prefer modification / kitbashing in Blender over from-scratch modelling when sensible.
+- Custom-by-exception: make an asset yourself when no suitable sourced option exists, adaptation is slower than simple modelling, or a specific identity/readability need requires it.
+- Record durable third-party assets in `Docs/ASSET_REGISTER.md`.
+- Do not import assets with unclear commercial-use rights.
+- Do not use ripped game assets or copyrighted material without explicit permission.
+- Do not let “free” override visual coherence, performance, scale, or style.
+- Hero Corner is a style-unification proof, not a custom-modelling requirement.
 
 ## Architecture rules
 
