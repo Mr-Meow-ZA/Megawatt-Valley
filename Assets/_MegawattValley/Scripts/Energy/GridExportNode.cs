@@ -9,7 +9,7 @@ namespace MegawattValley.Core
     {
         public static GridExportNode Instance { get; private set; }
 
-        [SerializeField] private float connectRadius = 26f;
+        [SerializeField] private float connectRadius = 14f;
         [SerializeField] private bool showCoverageRing = true;
         [SerializeField] private int coverageRingPosts = 40;
 

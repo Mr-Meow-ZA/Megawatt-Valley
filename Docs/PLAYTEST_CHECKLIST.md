@@ -12,8 +12,8 @@ Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 ### Core loop
 
 - [x] Can place a solar array on the green plot; cash drops by the build price shown in the HUD
-- [ ] **Grid connection:** find the bright cyan/light-blue **cylinder** on the plot (looks like a fat pole). At Play, a circle of small cyan posts appears around it — that circle is the sell radius (~26 m). An array **inside** it should raise export MW in daylight and climb income
-- [ ] An array placed **far outside** that circle of posts (away from the cyan cylinder) should show `NO GRID` on its floating label and earn nothing
+- [ ] **Grid connection:** find the bright cyan/light-blue **cylinder** on the plot (fat pole). At Play, a circle of small cyan posts marks the sell radius (~14 m). Place near the cyan pole → export climbs in daylight
+- [ ] Place on the **west** side of the green plot (away from the cyan pole, outside the post circle) → floating `NO GRID`, no income from that array
 - [x] Demolish refunds some cash
 - [x] Day/night clock is readable; night does not feel endless compared to day
 - [x] Sim speed 1 / 2 / 3 and pause work

@@ -2426,7 +2426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7924706223d16524fbb0dfe69806b6ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MegawattValley.Core.GridExportNode
-  connectRadius: 26
+  connectRadius: 14
   showCoverageRing: 1
   coverageRingPosts: 40
 --- !u!23 &523408374

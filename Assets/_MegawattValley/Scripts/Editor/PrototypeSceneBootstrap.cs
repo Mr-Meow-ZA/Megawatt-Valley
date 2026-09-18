@@ -38,7 +38,10 @@ namespace MegawattValley.EditorTools
                 gridRenderer.sharedMaterial = CreateLit(new Color(0.2f, 0.75f, 1f));
             }
 
-            grid.AddComponent<GridExportNode>();
+            var gridNode = grid.AddComponent<GridExportNode>();
+            // Radius is intentionally smaller than the green pad so the west side is outside
+            // the sell circle — that is how players learn NO GRID without leaving the plot.
+            AssignFloat(gridNode, "connectRadius", 14f);
 
             // Sun
             var sunGo = new GameObject("Sun");
@@ -294,6 +297,20 @@ namespace MegawattValley.EditorTools
             }
 
             property.objectReferenceValue = value;
+            editable.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void AssignFloat(Component component, string fieldName, float value)
+        {
+            var editable = new SerializedObject(component);
+            var property = editable.FindProperty(fieldName);
+            if (property == null)
+            {
+                Debug.LogError($"[MegawattValley] {component.GetType().Name} has no serialized field '{fieldName}'.");
+                return;
+            }
+
+            property.floatValue = value;
             editable.ApplyModifiedPropertiesWithoutUndo();
         }
 

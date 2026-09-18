@@ -38,6 +38,28 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — Fix — Testable grid edge + EXPORT HUD labels
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Grid sell radius 26 m → 14 m so the **west** side of the green plot sits outside the cyan post circle (NO GRID is testable on-pad).
+- POWER card retitled **EXPORT**; big number reads `MW exporting`, subline stays `MW installed`.
+- Playtest checklist updated for the smaller radius / west-side test.
+
+**Tested / Verified**
+- 28 EditMode tests pass; scene `connectRadius: 14`.
+
+**Next recommended step**
+- Optional quick re-check of the two grid checklist items, then **L1-03**.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — Support — Rapha re-playtest results + checklist clarity
 
 **Agent:** Cursor (handoff) / Rapha (playtest)

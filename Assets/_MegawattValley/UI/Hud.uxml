@@ -10,7 +10,7 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="power-card" class="card">
-                <ui:Label class="card-title" text="POWER" />
+                <ui:Label class="card-title" text="EXPORT" />
                 <ui:Label name="export-value" class="metric-value" text="0.000 MW" />
                 <ui:Label name="installed-value" class="metric-sub" text="0.00 MW installed" />
             </ui:VisualElement>

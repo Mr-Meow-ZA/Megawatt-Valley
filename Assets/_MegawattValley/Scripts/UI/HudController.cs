@@ -290,7 +290,7 @@ namespace MegawattValley.UI
 
         private void RefreshPower()
         {
-            SetText(_exportValue, $"{PowerBoard.TotalMegawatts:0.000} MW");
+            SetText(_exportValue, $"{PowerBoard.TotalMegawatts:0.000} MW exporting");
             SetText(_installedValue, $"{PowerBoard.InstalledMegawatts:0.00} MW installed");
         }
 
