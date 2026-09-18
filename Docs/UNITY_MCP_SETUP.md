@@ -22,12 +22,36 @@ Official overview: [Unity MCP get started](https://docs.unity3d.com/Packages/com
 6. First connection: Unity shows **Pending Connections**. Select **Accept** / **Allow** for Cursor.
 7. Smoke test in chat: ask Cursor to *read the Unity console and summarize any errors*. You should see a Unity MCP tool call (e.g. console / scene tools).
 
+## Recommended Unity MCP settings (max useful autonomy)
+
+In **Edit → Project Settings → AI → Unity MCP Server**:
+
+| Setting | Recommendation | Why |
+| --- | --- | --- |
+| **Unity Bridge** | Running | Required |
+| **Connected Clients** | Cursor listed after Accept | You already did this |
+| **Tools** (all checkboxes) | **Enable every tool** | Lets Cursor read console, scenes, GameObjects, scripts, assets — needed for “do as much as possible” |
+| **Validation Level** | **Standard** | Applies to `Unity_ManageScript`. Basic is too soft; comprehensive/strict slows or blocks edits. Standard catches real compile issues without babysitting |
+| **Show Debug Logs** | Off | Only turn on when debugging the bridge |
+| **Auto-approve in Batch Mode** | On | Fine for our shadow `Verify-UnityBuild` runs |
+
+Do **not** leave half the tools unticked if you want Cursor to verify Play Mode work without you copy-pasting console text.
+
+### Cursor side
+
+1. **Settings → Tools & MCP** (or MCP) → `unity-mcp` should be **enabled** (green).
+2. If tools don’t appear in chat after Accept: toggle the server off/on, or restart Cursor with Unity still open.
+3. Smoke test: ask Cursor to read the Unity console.
+
+### Note on Unity’s roadmap
+
+Unity’s package docs now prefer **Unity CLI** over MCP for some workflows. For Megawatt Valley we still use MCP for live Editor context; file edits + `Tools/Verify-UnityBuild.ps1` remain the fallback.
+
 ## Rules of use (Megawatt Valley)
 
 - MCP is optional — file edits + `Tools/Verify-UnityBuild.ps1` remain the default if the bridge is down.
-- Prefer **read-only** tools (console, hierarchy, scene inspect) first.
-- Prefer Cursor file edits for C#; use MCP for verification.
-- Write tools (create/delete objects, broad Editor mutations) only with Rapha nearby, preferably on a feature branch.
+- With all tools enabled (recommended), Cursor may read the console and inspect/edit the open scene.
+- Prefer Cursor file edits for C#; use MCP for verification and scene wiring.
 - After MCP write sessions, spot-check Play Mode before committing.
 
 ## Troubleshooting
