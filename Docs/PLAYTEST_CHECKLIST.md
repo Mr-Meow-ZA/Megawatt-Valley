@@ -10,35 +10,50 @@ Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 ## Focus now (please report these)
 
 ### Core loop
-- [ ] Can place a solar array on the green plot; cash drops by the build price shown in the HUD
-- [ ] Arrays inside the cyan grid ring show export MW and income climbs in daylight
-- [ ] Arrays clearly outside the ring show a NO GRID / off-grid warning and earn nothing
-- [ ] Demolish refunds some cash
-- [ ] Day/night clock is readable; night does not feel endless compared to day
-- [ ] Sim speed 1 / 2 / 3 and pause work
+
+- [x] Can place a solar array on the green plot; cash drops by the build price shown in the HUD
+- [ ] **Grid connection:** find the bright cyan/light-blue **cylinder** on the plot (looks like a fat pole). At Play, a circle of small cyan posts appears around it — that circle is the sell radius (~26 m). An array **inside** it should raise export MW in daylight and climb income
+- [ ] An array placed **far outside** that circle of posts (away from the cyan cylinder) should show `NO GRID` on its floating label and earn nothing
+- [x] Demolish refunds some cash
+- [x] Day/night clock is readable; night does not feel endless compared to day
+- [x] Sim speed 1 / 2 / 3 and pause work
+
+
 
 ### Economy readability
-- [ ] Build bar shows cost before you commit
-- [ ] Company card shows cash and either income `/sec` or the tariff when idle
-- [ ] You can tell whether you are making money within ~30 seconds of placing in daylight
+
+- [x] Build bar shows cost before you commit
+- [x] Company card shows cash and either income `/sec` or the tariff when idle
+- [x] You can tell whether you are making money within ~30 seconds of placing in daylight
+
+
 
 ### Staff / maintenance
-- [ ] Yellow technician is clickable; details panel shows name + trait + status
-- [ ] Status label above the tech changes (Idle / Inspection walk / Heading to fault / Repairing)
-- [ ] With at least one array built, tech eventually leaves the parking pad for an **inspection walk** even with no fault
-- [ ] **Force a fault:** select an array → press **K** → tech should walk over and repair (if you can afford ~$80)
-- [ ] Repair button / **F** also sends the tech (repair starts when they arrive, not instantly)
+
+- [x] Yellow technician is clickable; details panel shows name + trait + status
+- [x] Status label above the tech changes (Idle / Inspection walk / Heading to fault / Repairing)
+- [x] With at least one array built, tech eventually leaves the parking pad for an **inspection walk** even with no fault
+- [x] **Force a fault:** select an array → press **K** → tech should walk over and repair (if you can afford ~$80)
+- [x] Repair button / **F** also sends the tech (repair starts when they arrive, not instantly)
+
+
 
 ### Scenario / win
-- [ ] Objective text is visible; installing enough MW completes it
-- [ ] Save (F5) / Load (F9) or HUD buttons restore cash + placed arrays roughly correctly
+
+- [x] Objective text is visible; installing enough MW completes it
+- [x] Save (F5) / Load (F9) or HUD buttons restore cash + placed arrays roughly correctly
+
+
 
 ### Feel / confusion (only if it blocks understanding)
+
 - [ ] Something important is missing from the HUD that you needed to decide
 - [ ] A control did nothing, or did the wrong thing
 - [ ] You could not tell a real array from a prop
 
 ---
+
+
 
 ## Ignore for now (do not spend playtest time on these)
 
@@ -54,28 +69,34 @@ Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
 ---
 
+
+
 ## Quick repro keys
 
-| Key | What it does |
-|-----|----------------|
-| **B** (or Build button) | Toggle solar placement |
-| **R** | Rotate ghost while placing |
-| **Esc** | Cancel placement |
-| **F** | Repair selected faulted array (dispatches tech) |
-| **M** | Preventive service on selected healthy array |
-| **K** | Force a fault on selected array (best way to test the tech) |
-| **1 / 2 / 3** | Sim speed |
-| **Space** | Pause |
-| **F5 / F9** | Save / Load |
+
+| Key                     | What it does                                                |
+| ----------------------- | ----------------------------------------------------------- |
+| **B** (or Build button) | Toggle solar placement                                      |
+| **R**                   | Rotate ghost while placing                                  |
+| **Esc**                 | Cancel placement                                            |
+| **F**                   | Repair selected faulted array (dispatches tech)             |
+| **M**                   | Preventive service on selected healthy array                |
+| **K**                   | Force a fault on selected array (best way to test the tech) |
+| **1 / 2 / 3**           | Sim speed                                                   |
+| **Space**               | Pause                                                       |
+| **F5 / F9**             | Save / Load                                                 |
+
 
 ---
+
+
 
 ## How to reply after playtest
 
 One short note is enough:
 
-1. **Pass / Fail** on Focus items that mattered  
-2. **Bugs only** — unexpected behaviour, not “looks ugly”  
-3. **Confusion** — anything you could not understand without asking  
+1. **Pass / Fail** on Focus items that mattered
+2. **Bugs only** — unexpected behaviour, not “looks ugly”
+3. **Confusion** — anything you could not understand without asking
 
 Skip listing grey-box visuals unless they made the core loop unreadable.

@@ -38,6 +38,35 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — Support — Rapha re-playtest results + checklist clarity
+
+**Agent:** Cursor (handoff) / Rapha (playtest)
+**Status:** Complete
+
+**Changed / Produced**
+- Rapha filled `Docs/PLAYTEST_CHECKLIST.md`: core loop (except grid items), economy, staff/maintenance, and scenario/win all marked pass.
+- Clarified the two open grid items: sell radius = bright cyan cylinder + runtime circle of cyan posts (not a filled “cyan grid”).
+- Did **not** commit Unity Editor package churn (`com.unity.ai.assistant` / `com.unity.ai.inference`) or ProBuilder settings noise — reverted as incidental / not an accepted project dependency.
+
+**Tested / Verified**
+- Human playtest against the Focus list. Grid inside/outside still unchecked pending clearer understanding of the posts.
+
+**Known issues / limitations**
+- Grid sell-radius marking is easy to miss; checklist wording was the confusion, not a failed earn loop (income/tariff items passed).
+
+**Decisions / assumptions / recommendations**
+- Treat the S6 fix + Sunny Slope + auto-tech batch as re-playtest accepted for Focus items that passed.
+- Next implementation goal remains **L1-03**.
+
+**Next recommended step**
+- Start `L1-03` bargain vs premium build choice (extend existing SO defs).
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — Fix — Technician visibility + playtest checklist
 
 **Agent:** Cursor

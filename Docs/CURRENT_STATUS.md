@@ -12,7 +12,7 @@ Playtest focus list (what to check vs ignore): `Docs/PLAYTEST_CHECKLIST.md`
 
 Includes: Sunny Slope Site A grey-box valley (hills, creek, access road, office compound, fenced plot), tycoon camera, solar build/place/demolish, cash + scenario tariff + MW + grid radius, day/night clock, sim speeds, equipment condition/faults, technician who auto-seeks faults, humorous event, joke sign, MW objective, UI Toolkit HUD, ScriptableObject balance data, save/load stub, and 28 EditMode tests.
 
-Rapha accepted the grey-box loop on 2026-09-16 with a fix list. Fixes plus S6 harden + early L1 are on main but **await Rapha re-playtest**.
+Rapha accepted the grey-box loop on 2026-09-16 with a fix list. **2026-09-18 re-playtest** (via `Docs/PLAYTEST_CHECKLIST.md`): core loop, economy readability, staff/maintenance, and scenario/win all passed. Two grid-connection checklist items left open only because the sell-radius visual was unclear — wording clarified to “cyan cylinder + circle of posts.” Feel/confusion items not flagged.
 
 Badges earned: Foundation Online, Valley Explorer, First Foundations, First Megawatt Earned, Keeping the Lights On, Tiny Tycoon (and related celebration markers in `SESSION_GOALS.md`).
 
@@ -44,10 +44,10 @@ The project should never depend only on distant phase completion for a sense of 
 
 Current first goals:
 
-1. **Rapha re-playtest** of the S6 fix batch + Sunny Slope map + auto-technician
+1. Optional: finish the two grid-connection checklist items (inside vs far-outside the cyan post circle) once the visual is clear
 2. `L1-03` bargain vs premium equipment as a meaningful build choice (extend existing SO defs — do not rebuild procurement)
 3. Then `L1-04…L1-06` events / one-star clear / climax
-4. ChatGPT can refresh review again after the re-playtest if needed
+4. ChatGPT can refresh review again after this re-playtest if needed
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 
@@ -84,9 +84,9 @@ The planned sequence is:
 
 ## Next action
 
-**Rapha re-playtests** `Prototype_Valley`: Sunny Slope should feel like a level, the technician should walk to faults on his own, and the company card should show the scenario tariff when idle.
+**L1-03** — make bargain vs premium a real build choice using the existing ScriptableObject defs (per ChatGPT `S6-02` watch note).
 
-Next implementation goal after that: **L1-03** — make bargain vs premium a real build choice using the existing ScriptableObject defs (per ChatGPT `S6-02` watch note).
+Optional follow-up from Rapha: confirm one array inside vs far outside the cyan post circle if desired; not blocking L1-03.
 
 Do not start a major art pass until the grey-box loop feels fun.
 
