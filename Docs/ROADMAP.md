@@ -1,4 +1,4 @@
-# Megawatt Valley — Development Roadmap v0.4
+# Megawatt Valley — Development Roadmap v0.5
 
 ## Roadmap philosophy
 
@@ -12,9 +12,11 @@ The approved long-term visual target is defined in `Docs/VISUAL_DIRECTION.md`.
 
 The game will not attempt final art quality during early prototypes, but early decisions about camera, scale, world layout, UI composition, simulation / presentation separation, and asset structure must support the eventual visual target.
 
-The visual-production strategy is:
+The production strategy is:
 
-**prove the game → prove the visual language → build reusable art systems → scale content → polish**
+**prove the systems → prove engagement and progression → prove the visual language → build reusable art systems → scale content and polish**
+
+The progression / engagement model is defined in `Docs/PROGRESSION_AND_ENGAGEMENT.md`. A technically functional loop is not enough: before major visual production, the first scenario must demonstrate satisfying objective cadence, unlocks, delegation and at least one manual-to-automated progression.
 
 ## Session-sized progress rule
 
@@ -45,8 +47,9 @@ Session badges prove a *miniature* version of a phase. They do **not** automatic
 | 6 Maintenance | S4-01…S4-05 ✅ | Richer reliability, schedules, costs |
 | 7 Staff | S4-04 + S5-02 ✅ | Hire/fire, multi-role, salary, traits depth |
 | 8 Events | S5-01 ✅ | Reusable framework + ~5 then ~10–20 events |
-| 9 Objectives | S5-04…S5-05 ✅ | Star tiers, unlocks, research |
-| 10 Level 1 | Not started | Thin-slice track `L1-01…` in `SESSION_GOALS.md` |
+| 9 Objectives | S5-04…S5-05 ✅ | Deeper capability / research progression |
+| 10 Level 1 functional slice | L1-01…L1-08 ✅ | Engagement depth, content cadence and balance |
+| 10B Engagement & Progression | New track `E1-01…E1-09` | Prove the level is fun before Hero Corner |
 
 **Anti-duplication rule:** Do not restart Phase 3/4 as a new framework after S3. Extend the existing loop with the next smallest session goal instead.
 
@@ -335,16 +338,82 @@ Only then stretch into multi-site choice, 2★/3★, and a larger event deck.
 ### Exit criteria
 - A new player can start, learn, build, operate, make decisions, complete the level, and want to play again.
 
-This is the first major **go / change / rethink** point for the project.
+This proves that the scenario systems can function together, but it is **not yet the fun gate**.
 
-If the gameplay loop passes this checkpoint, begin **V1 — Style Prototype / Hero Corner** before large-scale art production.
+After the functional thin slice, complete **Phase 10B — Engagement & Progression Vertical Slice**. Only once the engagement gate passes should **V1 — Style Prototype / Hero Corner** begin.
+
+
+---
+
+## Phase 10B — Engagement & Progression Vertical Slice
+
+### Goal
+
+Turn the functional Level 1 slice into a management-game experience with momentum, rewards, unlocks and changing responsibilities.
+
+The governing design is `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+
+The core principle is:
+
+> **Introduce complexity → teach it manually → improve the tools → delegate it → automate stale work → add a new layer of responsibility.**
+
+### Why this phase exists
+
+The current prototype proves that solar, cash, maintenance, staff, events, stars and expansion can work.
+
+It does not yet prove that the player will enjoy operating the site for a full scenario.
+
+Do not try to solve this by stretching timers, raising MW targets or making the player repeat the same construction action more often.
+
+### First proof systems
+
+Use existing systems wherever possible.
+
+- Gate the current automatic technician dispatch behind an earnable capability so the player briefly learns manual dispatch first.
+- Introduce simple panel soiling and manual cleaning.
+- Unlock a cleaning improvement that materially reduces workload.
+- Create a staged objective ladder so new systems / rewards arrive at a useful cadence.
+- Present at least one progression choice rather than only a fixed sequence.
+- Make new capability / plot / tool unlocks feel rewarding and visible.
+
+### Management Abstraction Ladder
+
+Future repetitive systems should broadly evolve through:
+
+1. direct manual action;
+2. assign staff;
+3. set schedules / policies;
+4. automate routine work;
+5. manage exceptions at portfolio scale.
+
+This applies to maintenance, cleaning, monitoring, vegetation, security and other operational systems.
+
+### Session-goal sequence
+
+See `E1-01` through `E1-09` in `Docs/SESSION_GOALS.md`.
+
+### Exit criteria
+
+Rapha can play from a fresh scenario through at least 1★ and confirm that:
+
+- there is usually a meaningful next purpose;
+- unlocks are things the player wants;
+- workload evolves rather than merely growing;
+- at least one responsibility moves from manual to automated;
+- repeated chores become easier before they become boring;
+- there are no long stretches where the best action is simply waiting;
+- the grey-box is engaging enough that the gameplay itself creates a desire to continue.
+
+This is the real **go / change / rethink gameplay gate**.
+
+Once it passes, begin **V1 — Hero Corner**. From that point onward, gameplay/content and visual production should increasingly proceed in parallel rather than waiting for every mechanic to be completed.
 
 ---
 
 ## Phase 11 — Visual Identity and Production Pipeline
 
 ### Goal
-Prove that the approved visual target is achievable, then create the reusable art systems needed to scale it.
+After the Engagement Gate passes, prove that the approved visual target is achievable, then create the reusable art systems needed to scale it.
 
 ### Stage A — Style prototype / hero corner
 
