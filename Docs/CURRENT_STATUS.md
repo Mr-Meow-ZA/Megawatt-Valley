@@ -8,11 +8,12 @@ Unity **6000.6.0f1** / URP. Session goals **S0-01 through S6-07** and **L1-01…
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
-Playtest focus list (what to check vs ignore): `Docs/PLAYTEST_CHECKLIST.md`
+Playtest focus list (what to check vs ignore): `Docs/PLAYTEST_CHECKLIST.md`  
+Unity MCP (Cursor ↔ Editor): `Docs/UNITY_MCP_SETUP.md`
 
 Includes: Sunny Slope Site A grey-box valley (hills, creek, access road, office compound, fenced plot), tycoon camera, solar build/place/demolish, cash + scenario tariff + MW + grid radius, day/night clock, sim speeds, equipment condition/faults, technician who auto-seeks faults, humorous event, joke sign, MW objective, UI Toolkit HUD, ScriptableObject balance data, save/load stub, and 28 EditMode tests.
 
-Rapha accepted the grey-box loop on 2026-09-16 with a fix list. **2026-09-18 re-playtest** (via `Docs/PLAYTEST_CHECKLIST.md`): core loop, economy readability, staff/maintenance, and scenario/win all passed. Two grid-connection checklist items left open only because the sell-radius visual was unclear — wording clarified to “cyan cylinder + circle of posts.” Feel/confusion items not flagged.
+Rapha accepted the grey-box loop on 2026-09-16 with a fix list. **2026-09-18 re-playtest** (via `Docs/PLAYTEST_CHECKLIST.md`): Focus list fully passed, including west-side `NO GRID` after the 14 m radius shrink. Feel/confusion items not flagged.
 
 Badges earned: Foundation Online, Valley Explorer, First Foundations, First Megawatt Earned, Keeping the Lights On, Tiny Tycoon (and related celebration markers in `SESSION_GOALS.md`).
 
@@ -44,10 +45,10 @@ The project should never depend only on distant phase completion for a sense of 
 
 Current first goals:
 
-1. Optional: finish the two grid-connection checklist items (inside vs far-outside the cyan post circle) once the visual is clear
+1. Finish Unity MCP connection on the home PC (`Docs/UNITY_MCP_SETUP.md` — Accept pending client in Unity)
 2. `L1-03` bargain vs premium equipment as a meaningful build choice (extend existing SO defs — do not rebuild procurement)
 3. Then `L1-04…L1-06` events / one-star clear / climax
-4. ChatGPT can refresh review again after this re-playtest if needed
+4. ChatGPT can refresh review again after L1-03 if needed
 
 Planning enrichment (Cursor, 2026-09-15): `Docs/PRACTICES_AND_PLANNING.md` — Cursor↔Unity practices, hybrid asset policy, ChatGPT/Grok assist patterns, ROADMAP crosswalk, proposed S6/L1 goals. Awaiting Rapha/ChatGPT acceptance of locked decisions listed there.
 

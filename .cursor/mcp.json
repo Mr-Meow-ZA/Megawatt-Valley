@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "unity-mcp": {
+      "command": "C:\\Users\\rapha\\.unity\\relay\\relay_win.exe",
+      "args": [
+        "--mcp",
+        "--project-path",
+        "C:\\Users\\rapha\\Documents\\Megawatt-Valley"
+      ]
+    }
+  }
+}

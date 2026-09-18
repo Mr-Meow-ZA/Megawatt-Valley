@@ -38,6 +38,30 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — Support — Enable Unity MCP for Cursor
+
+**Agent:** Cursor
+**Status:** Partial (repo configured; Rapha must Accept in Unity)
+
+**Changed / Produced**
+- Added `com.unity.ai.assistant` `2.19.0-pre.2` and `com.unity.ai.inference` `2.6.1` to `Packages/manifest.json`.
+- Project `.cursor/mcp.json` launches `relay_win.exe --mcp` with `--project-path` to Megawatt-Valley.
+- `Docs/UNITY_MCP_SETUP.md` one-time Accept / smoke-test steps; PRACTICES §3.2 marked in-scope.
+- Playtest checklist: grid Focus items marked passed.
+
+**Tested / Verified**
+- Relay binary present at `%USERPROFILE%\.unity\relay\relay_win.exe`.
+- Live Cursor↔Unity tool call not yet verified (needs Editor open + Pending Connection Accept).
+
+**Next recommended step**
+- Rapha: open Unity, wait for packages, Accept Cursor under Project Settings → AI → Unity MCP, then ask Cursor to read the console.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — Fix — Testable grid edge + EXPORT HUD labels
 
 **Agent:** Cursor

@@ -122,7 +122,7 @@ Prerequisites (Unity docs, May 2026):
 - Do not commit secrets; pin package versions; treat `.cursor/mcp.json` like infra.
 - After MCP write sessions, Rapha spot-checks Play Mode before merge.
 
-**Decision for Rapha:** enable MCP when local AI beta access is confirmed; until then continue Editor menus + GitHub.
+**Decision for Rapha:** Unity MCP is **in scope** for Megawatt Valley on the home PC. Setup steps: `Docs/UNITY_MCP_SETUP.md`. Keep the default file-edit + verify script loop as fallback when the bridge is unavailable.
 
 ### 3.3 Cursor session discipline (Megawatt-specific)
 

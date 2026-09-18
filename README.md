@@ -73,7 +73,7 @@ The project will use complementary roles:
 - **ChatGPT** — ongoing game-design, planning, review, architecture, balancing, research, and quality partner.
 - **Grok Bot** — supporting research, critique, QA, ideation, and doc-drift watch (recommendations, not automatic design authority).
 
-GitHub is the shared source of truth between these roles. Collaboration protocol: `Docs/COLLABORATION_GUIDE.md`. Practical Cursor↔Unity / asset / assist recommendations: `Docs/PRACTICES_AND_PLANNING.md`.
+GitHub is the shared source of truth between these roles. Collaboration protocol: `Docs/COLLABORATION_GUIDE.md`. Practical Cursor↔Unity / asset / assist recommendations: `Docs/PRACTICES_AND_PLANNING.md`. Unity MCP setup: `Docs/UNITY_MCP_SETUP.md`.
 
 ## Current status
 
