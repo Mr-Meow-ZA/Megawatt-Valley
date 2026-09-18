@@ -72,6 +72,9 @@ Do not start mass final-art production before the Engagement Gate.
 
 ## Recommended next session goal
 
+**Cursor handoff:** `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`  
+**GitHub task:** issue **#5 — E1-01 First capability unlock (Radio Dispatch)**
+
 **E1-01 — First capability unlock**
 
 Implement only enough capability state + UI to prove:
