@@ -238,6 +238,26 @@ Events should be data-driven where possible and support:
 
 Scenarios should support multiple objective tiers, broadly corresponding to 1-star, 2-star, and 3-star completion.
 
+### Progression / capabilities
+
+Progression design is governed by `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+
+For the E1 proof, keep implementation deliberately small:
+
+- data-driven capability definitions / IDs where useful;
+- runtime / save state recording which capabilities are unlocked;
+- simple prerequisite metadata only when an active feature needs it;
+- gameplay systems query capability state to enable behaviour;
+- effects remain owned by the relevant gameplay system rather than building a generic reflection / modifier framework.
+
+Example first use:
+
+`Manual technician dispatch → unlock Radio Dispatch → enable existing automatic technician dispatch behaviour`
+
+Do not build the complete future research tree, research currency, department system, or generic effect engine during E1.
+
+Later research may add staff/time/cash requirements and persistent company-wide unlocks once the campaign needs them.
+
 ## Performance philosophy
 
 Optimise based on profiling, not fear.
