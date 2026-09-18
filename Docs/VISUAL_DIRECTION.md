@@ -320,6 +320,26 @@ The Level 1 vertical slice should eventually be able to produce screenshots broa
 
 This does **not** mean reproducing the concept image literally. The benchmark defines quality and feeling, not exact geometry or UI layout.
 
+## Approved Level 1 asset strategy
+
+**Community-first, custom-by-exception.**
+
+For Hero Corner and the full first production version of Level 1, prefer commercially safe free/community assets wherever practical.
+
+Use Blender / Krita to adapt, simplify, recolour, retexture, kitbash, rescale and unify sourced assets before choosing from-scratch custom production.
+
+Hero Corner must prove that mixed-source assets can be made to look like one coherent Megawatt Valley visual language. It does **not** require that the assets themselves be original.
+
+Custom/original asset production is justified during Level 1 when:
+- no suitable safe asset exists;
+- adapting a sourced asset would take longer than making a simple one;
+- the object is essential to gameplay readability;
+- a specific identity / branding element needs to be unique.
+
+Major custom identity production is deferred until the game and Level 1 visual needs are clearer.
+
+Authoritative details: `Docs/ASSET_POLICY.md` and `Docs/ASSET_REGISTER.md`.
+
 ## Art acquisition / creation options
 
 The project should remain flexible about how final assets are produced.
@@ -335,7 +355,7 @@ Potential sources include:
 
 **Tooling note (recommendation):** Cursor can assist Blender (MCP or export scripts) and Krita (Python export plugins; optional typed MCP) on the home PC. See `Docs/CURSOR_BLENDER_KRITA.md`. This does not change the prove-game → hero corner → kits sequence.
 
-A later art-pipeline decision should evaluate time, budget, consistency, licensing, and maintainability before mass production.
+For Level 1, the art-pipeline decision is now community-first and governed by `Docs/ASSET_POLICY.md`. Time, consistency, licensing, performance and maintainability still determine whether a sourced asset is accepted, modified or replaced.
 
 ## Quality rule
 
