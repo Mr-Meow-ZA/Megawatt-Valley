@@ -2,35 +2,90 @@
 
 ## Status
 
-**Grey-box Level 1 thin slice + star tiers + Site B expansion is playable.**
+**Functional grey-box Level 1 thin slice is complete; project is entering the Engagement & Progression Proof.**
 
-Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-08** are done.
+Unity **6000.6.0f1** / URP. Session goals **S0–S6** and **L1-01…L1-08** are complete.
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
-Playtest focus list: `Docs/PLAYTEST_CHECKLIST.md`  
-Unity MCP: `Docs/UNITY_MCP_SETUP.md`
+Includes: Sunny Slope Sites A+B, premium vs bargain equipment, five-event deck + hail climax, 1★/2★/3★ goals, day deadline, tariff economy, technician behaviour, HUD stars, save stub v2 and EditMode tests.
 
-Includes: Sunny Slope Sites A+B, premium vs bargain, five-event deck + hail climax, 1★/2★/3★ goals, day deadline, tariff economy, auto-tech, HUD stars, save stub v2, EditMode tests.
+## Current product finding
+
+The prototype now proves that the major systems can function together.
+
+It does **not yet prove that Level 1 is fun enough as a full management-game experience**.
+
+Rapha's current design direction is to strengthen the first level around:
+
+- constant short / medium-term purpose;
+- visible unlocks and rewards;
+- capability progression;
+- new responsibilities arriving as old chores become easier;
+- manual → staff-assigned → scheduled → automated progression;
+- a long-term Company Capability Tree covering technology, operations, automation, people, grid and commercial capability.
+
+The authoritative progression design is now:
+
+`Docs/PROGRESSION_AND_ENGAGEMENT.md`
 
 ## Locked decisions so far
-
-(Unchanged — see prior status / design docs.)
 
 - Working game title: **Megawatt Valley**.
 - Engine: **Unity 6000.6.0f1** with **URP**.
 - GitHub is the source of truth; ChatGPT reviews via pushed HEAD.
-- Solar-only vertical slice first; Two Point as tonal inspiration only.
-- `Docs/VISUAL_DIRECTION.md` is the long-term visual north star — do not art-polish yet.
+- Cursor remains the primary Unity implementation AI.
+- Solar-only vertical slice first; Two Point is a design / tone reference only.
+- `Docs/VISUAL_DIRECTION.md` remains the long-term visual north star.
+- The functional Level 1 thin slice is not sufficient by itself to start mass art production.
+- Before Hero Corner, complete the **Engagement & Progression Proof**.
+- Once the Engagement Gate passes, Hero Corner begins and gameplay/content + visual production can increasingly proceed in parallel.
+- Progression should favour capability changes and new management verbs over small percentage-only bonuses.
+- Repetitive responsibilities should become easier / delegated / automated before they become boring.
 
-## Current Session-sized progress strategy
+## Current session-sized strategy
 
-1. **Rapha playtest** using the updated `Docs/PLAYTEST_CHECKLIST.md` (stars + Site B)
-2. ChatGPT review refresh on HEAD after playtest notes
-3. Next stretch only from playtest: event deck growth, second tech, or balance — do not invent scope
+New track: **E1 — Engagement & Progression Proof** in `Docs/SESSION_GOALS.md`.
+
+The first proof deliberately stays small:
+
+1. **E1-01 — First capability unlock**
+2. **E1-02 — Earn automatic technician dispatch**
+3. **E1-03 — Dirt actually matters**
+4. **E1-04 — First cleaning upgrade**
+5. **E1-05 — Objective ladder**
+6. **E1-06 — First capability choice**
+7. **E1-07 — Unlocks feel rewarding**
+8. **E1-08 — Engagement playtest**
+9. **E1-09 — Engagement gate**
 
 ## Next action
 
-**Rapha:** playtest Level 1 through at least 1★ + Site B unlock (ideally 2★/3★). Report Focus-list results.
+**E1-01 — First capability unlock**
 
-Do not start a major art pass until the grey-box loop feels fun.
+Implement only the minimum capability-state model and UI needed to show that:
+
+- a capability can be locked;
+- the player can see what they are working toward;
+- an objective can unlock it;
+- the unlocked state can change gameplay.
+
+Do **not** build the complete future research tree yet.
+
+The first practical progression chain should reuse existing systems:
+
+**manual fault dispatch → earn Radio Dispatch → automatic technician fault response**
+
+After that, introduce simple soiling / cleaning progression.
+
+## Visual timing
+
+Do not wait until every mechanic in the game exists before improving visuals.
+
+However, do not launch a broad art-production pass yet.
+
+Sequence:
+
+**functional systems ✅ → engagement/progression proof → Hero Corner → gameplay + visuals continue together**
+
+The Hero Corner remains the first serious visual-quality milestone.
