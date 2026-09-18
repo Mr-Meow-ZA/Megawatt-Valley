@@ -118,6 +118,12 @@ Possible technology progression:
 
 Company capability should progress too, including development, engineering, construction, finance, asset management, O&M, grid, community, environmental, and commercial functions.
 
+A core progression pattern is the **Management Abstraction Ladder**: the player first understands a responsibility through direct action, then delegates it to staff, then manages it through schedules / policy, and eventually automates routine work. As old chores become easier, new strategic responsibilities should appear.
+
+Examples include cleaning, maintenance dispatch, monitoring, vegetation and security. The player should eventually remember doing these jobs manually and feel the company has genuinely matured when systems and people handle them automatically.
+
+Detailed progression and unlock design lives in `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+
 ## Main gameplay loop
 
 **DEVELOP → FINANCE → BUILD → OPERATE → EXPAND**
