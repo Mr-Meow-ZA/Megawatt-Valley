@@ -127,6 +127,14 @@ namespace MegawattValley.EditorTools
             var existing = AssetDatabase.LoadAssetAtPath<DecisionEventDefinition>(SupplierEventPath);
             if (existing != null)
             {
+                var patch = new SerializedObject(existing);
+                var trigger = patch.FindProperty("triggerAfterSeconds");
+                if (trigger != null && trigger.floatValue < 60f)
+                {
+                    trigger.floatValue = 90f;
+                    patch.ApplyModifiedPropertiesWithoutUndo();
+                }
+
                 return existing;
             }
 
@@ -138,7 +146,7 @@ namespace MegawattValley.EditorTools
             editable.FindProperty("body").stringValue =
                 "A salesman offers \"premium\" panels that look suspiciously like last year's stock with a fresh sticker. " +
                 "He is already unloading them onto your access road.";
-            editable.FindProperty("triggerAfterSeconds").floatValue = 25f;
+            editable.FindProperty("triggerAfterSeconds").floatValue = 90f;
 
             var choiceA = editable.FindProperty("choiceA");
             choiceA.FindPropertyRelative("label").stringValue = "Buy the bargain lot\n-${cost} for {mw} MW";

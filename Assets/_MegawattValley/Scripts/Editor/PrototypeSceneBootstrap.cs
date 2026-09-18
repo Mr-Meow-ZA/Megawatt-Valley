@@ -128,6 +128,8 @@ namespace MegawattValley.EditorTools
             jokeText.color = Color.black;
 
             var events = systems.AddComponent<HumorousEventController>();
+            AssignFloat(events, "fallbackTriggerSeconds", 90f);
+            AssignFloat(events, "gapBetweenEventsSeconds", 180f);
             var objective = systems.AddComponent<ScenarioObjective>();
 
             var saveService = systems.AddComponent<SaveGameService>();

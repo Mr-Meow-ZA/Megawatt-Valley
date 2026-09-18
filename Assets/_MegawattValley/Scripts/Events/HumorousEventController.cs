@@ -7,13 +7,16 @@ namespace MegawattValley.Core
 {
     /// <summary>
     /// Small deck of data-driven decision events (S5-01 / L1-04) plus one late climax (L1-06).
+    /// Sim pauses while an event is on screen; gaps are paced for a full scenario day.
     /// </summary>
     public sealed class HumorousEventController : MonoBehaviour
     {
         [SerializeField] private DecisionEventDefinition[] eventDeck;
         [SerializeField] private DecisionEventDefinition climaxEvent;
-        [SerializeField] private float fallbackTriggerSeconds = 25f;
-        [SerializeField] private float gapBetweenEventsSeconds = 22f;
+        [Tooltip("Fallback delay before the first deck event if the SO has no trigger time.")]
+        [SerializeField] private float fallbackTriggerSeconds = 90f;
+        [Tooltip("Simulation seconds between successive deck events (after the player dismisses one).")]
+        [SerializeField] private float gapBetweenEventsSeconds = 180f;
 
         private int _deckIndex;
         private float _timer;
@@ -69,13 +72,12 @@ namespace MegawattValley.Core
             _timer += dt;
 
             float delay = _deckIndex == 0
-                ? (_active.TriggerAfterSeconds > 0f ? _active.TriggerAfterSeconds : fallbackTriggerSeconds)
-                : gapBetweenEventsSeconds;
+                ? Mathf.Max(60f, _active.TriggerAfterSeconds > 0f ? _active.TriggerAfterSeconds : fallbackTriggerSeconds)
+                : Mathf.Max(90f, gapBetweenEventsSeconds);
 
             if (_timer >= delay)
             {
-                _eventShown = true;
-                Debug.Log($"[MegawattValley] EVENT: {Title} — {Body}");
+                ShowEvent();
             }
         }
 
@@ -106,9 +108,24 @@ namespace MegawattValley.Core
 
             _active = climaxEvent;
             _armed = false;
-            _eventShown = true;
             _showingClimax = true;
+            ShowEvent();
             Debug.Log($"[MegawattValley] CLIMAX: {Title} — {Body}");
+        }
+
+        private void ShowEvent()
+        {
+            if (_eventShown || _active == null)
+            {
+                return;
+            }
+
+            _eventShown = true;
+            SimulationClock.Instance?.BeginModalPause();
+            if (!_showingClimax)
+            {
+                Debug.Log($"[MegawattValley] EVENT: {Title} — {Body}");
+            }
         }
 
         private void PollHotkeys()
@@ -153,6 +170,7 @@ namespace MegawattValley.Core
 
             _eventShown = false;
             _armed = false;
+            SimulationClock.Instance?.EndModalPause();
 
             if (choice.ConditionBonusToAllEquipment > 0f)
             {

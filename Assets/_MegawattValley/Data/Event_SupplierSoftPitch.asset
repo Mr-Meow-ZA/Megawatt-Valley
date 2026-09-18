@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MegawattValley.Data.DecisionEventDefinition
   title: Supplier Soft Pitch
   body: A salesman offers "premium" panels that look suspiciously like last year's stock with a fresh sticker. He is already unloading them onto your access road.
-  triggerAfterSeconds: 25
+  triggerAfterSeconds: 90
   choiceA:
     label: 'Buy the bargain lot
 

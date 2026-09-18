@@ -5499,8 +5499,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bdbcc7887fe72a84fb574d7237578653, type: 2}
   - {fileID: 11400000, guid: d25281f0435d12f448c285634f81a94a, type: 2}
   climaxEvent: {fileID: 11400000, guid: 395ccbae80353a64f937d4a5be8abac7, type: 2}
-  fallbackTriggerSeconds: 25
-  gapBetweenEventsSeconds: 22
+  fallbackTriggerSeconds: 90
+  gapBetweenEventsSeconds: 180
 --- !u!114 &1424825015
 MonoBehaviour:
   m_ObjectHideFlags: 0
