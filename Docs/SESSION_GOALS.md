@@ -290,6 +290,57 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
 
 Stretch after L1-08: larger event deck, second technician, 3★ balance tuning from playtest.
 
+
+---
+
+## E1 — Engagement & Progression Proof — "It is fun, not just functional"
+
+The functional Level 1 thin slice now exists. Before Hero Corner, prove that progression creates a satisfying management-game rhythm.
+
+Design authority: `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+
+- [ ] **E1-01 — First capability unlock**  
+  Add a minimal capability-state model and small UI showing the first unlocked / locked capabilities. Do not build the complete future tree yet.  
+  **Victory moment:** the player can see a cool thing they are working toward and then unlock it.
+
+- [ ] **E1-02 — Earn automatic technician dispatch**  
+  Begin with manual fault dispatch; after the first successful repair, unlock **Radio Dispatch / Auto Dispatch** and enable the existing automatic fault-seeking behaviour.  
+  **Victory moment:** a chore the player just learned is now handled by their growing organisation.
+
+- [ ] **E1-03 — Dirt actually matters**  
+  Add simple panel soiling that visibly reduces generation and can be manually cleaned.  
+  **Victory moment:** cleaning has a clear cause-and-effect loop rather than being flavour text.
+
+- [ ] **E1-04 — First cleaning upgrade**  
+  Unlock a Basic Cleaning Kit, dedicated cleaner, or similarly small first improvement that materially reduces cleaning time / staff burden.  
+  **Victory moment:** the player feels a noticeable improvement rather than receiving a tiny percentage bonus.
+
+- [ ] **E1-05 — Objective ladder**  
+  Build an approximately 8-step contextual objective sequence that teaches and rewards the player through the opening scenario.  
+  **Victory moment:** there is almost always an understandable next purpose beyond “place more panels”.
+
+- [ ] **E1-06 — First capability choice**  
+  Offer two useful upgrades and let the player choose which to unlock first; the other remains obtainable later.  
+  **Victory moment:** progression includes agency, not only a fixed tutorial chain.
+
+- [ ] **E1-07 — Unlocks feel rewarding**  
+  Add a clear unlock / reward presentation for new capabilities, plots, tools or staff options.  
+  **Victory moment:** earning something new feels like an event even in grey-box.
+
+- [ ] **E1-08 — Engagement playtest**  
+  Rapha plays from new game through at least 1★ and records boring stretches, repeated chores, unclear rewards and missing decisions.  
+  **Victory moment:** we can judge fun and momentum rather than only correctness.
+
+- [ ] **E1-09 — Engagement gate**  
+  Apply the smallest fixes required for the scenario to feel engaging and progression-driven.  
+  **Victory moment:** Rapha would continue playing the grey-box because the management loop itself is enjoyable.
+
+### Engagement badge
+
+When E1-01 through E1-09 are accepted: **🚀 Growing Company**
+
+**Then begin 🎨 Hero Corner.** Gameplay/content development and visual production can continue in parallel after this gate.
+
 ---
 
 # Major Celebration Markers
