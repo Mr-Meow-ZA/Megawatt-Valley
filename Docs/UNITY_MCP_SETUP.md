@@ -8,7 +8,8 @@ Official overview: [Unity MCP get started](https://docs.unity3d.com/Packages/com
 ## What is already in the repo
 
 - `Packages/manifest.json` includes `com.unity.ai.assistant` (+ inference dependency).
-- `.cursor/mcp.json` points Cursor at `%USERPROFILE%\.unity\relay\relay_win.exe` with `--mcp` and this project path.
+- Project `.cursor/mcp.json` points at `relay_win.exe --mcp` with this project path.
+- Cursor agents also need the same `unity-mcp` entry in the **user** config `%USERPROFILE%\.cursor\mcp.json` (project-only config was not enough for agent tool discovery in practice).
 - Project rules for MCP use: `Docs/PRACTICES_AND_PLANNING.md` §3.2.
 
 ## One-time setup on this PC
