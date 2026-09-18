@@ -57,7 +57,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha playtest `Docs/PLAYTEST_CHECKLIST.md`; then E1-06/07 or engagement fixes.
 
 **Git / References**
-- Commit: pending
+- Commit: `5143420`
 - Branch: `main`
 
 ---
