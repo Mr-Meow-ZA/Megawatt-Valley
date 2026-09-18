@@ -39,6 +39,40 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 ---
 
 
+## 2026-09-18 — Handoff — Cursor E1 implementation brief + issue #5
+
+**Agent:** ChatGPT
+**Status:** Complete
+
+**Changed / Produced**
+- Added `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md` as the concrete Cursor handoff for the full E1 Engagement & Progression Proof.
+- Defined exact non-negotiable progression rules, E1 sequencing, testing / handoff expectations, and explicit out-of-scope systems.
+- Wrote detailed implementation / architecture / acceptance criteria for **E1-01 — First capability unlock** using **Radio Dispatch**.
+- Opened GitHub issue **#5** as Cursor's active implementation task.
+- Added the brief to Cursor's mandatory read list and collaboration context.
+- Updated `CURRENT_STATUS.md` to point directly at issue #5.
+
+**Tested / Verified**
+- Repo state still shows E1-01 as the next unchecked session goal.
+- Brief deliberately reuses the existing technician auto-dispatch behaviour instead of introducing a replacement system.
+
+**Known issues / limitations**
+- No Unity code was changed by ChatGPT in this handoff.
+- Full research tree, research currency, cleaning, Hero Corner, wind / BESS and generic modifier systems remain explicitly out of scope for E1-01.
+
+**Decisions / assumptions / recommendations**
+- E1-01 should prove capability state, UI, save persistence and a real gameplay query.
+- E1-02 will wire the unlock to the first successful manual repair; Cursor should stop after E1-01 unless Rapha explicitly asks it to continue.
+
+**Next recommended step**
+- Cursor implements GitHub issue **#5 — E1-01 First capability unlock (Radio Dispatch)**.
+
+**Git / References**
+- Brief: `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`
+- Issue: #5
+- Branch: `main`
+
+
 ## 2026-09-18 — Design — Progression, unlocks and engagement model
 
 **Agent:** ChatGPT
