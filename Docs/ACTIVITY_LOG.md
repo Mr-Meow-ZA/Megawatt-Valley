@@ -38,6 +38,30 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — Fix — Technician visibility + playtest checklist
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Technician was idle most of the time because natural faults are rare (by design after the wear fix). Manual repair also started the 2.5s timer before the walk, so the tech barely moved.
+- Repair is now walk-then-pay-on-arrival for both auto-dispatch and F/HUD.
+- Healthy-site **inspection walks** every ~10s so the worker is visibly active without forcing faults.
+- Floating status label on the tech (Idle / Inspection / Heading to fault / Repairing).
+- Added `Docs/PLAYTEST_CHECKLIST.md` — Focus vs Ignore, plus K to force faults.
+
+**Tested / Verified**
+- 28 EditMode tests pass.
+
+**Next recommended step**
+- Rapha re-playtest using `Docs/PLAYTEST_CHECKLIST.md` only.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — S6-07 + L1-01 + L1-02 — Auto-tech, Sunny Slope, tunable tariff
 
 **Agent:** Cursor

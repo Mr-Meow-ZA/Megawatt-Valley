@@ -8,6 +8,8 @@ Unity **6000.6.0f1** / URP. Session goals **S0-01 through S6-07** and **L1-01…
 
 Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
+Playtest focus list (what to check vs ignore): `Docs/PLAYTEST_CHECKLIST.md`
+
 Includes: Sunny Slope Site A grey-box valley (hills, creek, access road, office compound, fenced plot), tycoon camera, solar build/place/demolish, cash + scenario tariff + MW + grid radius, day/night clock, sim speeds, equipment condition/faults, technician who auto-seeks faults, humorous event, joke sign, MW objective, UI Toolkit HUD, ScriptableObject balance data, save/load stub, and 28 EditMode tests.
 
 Rapha accepted the grey-box loop on 2026-09-16 with a fix list. Fixes plus S6 harden + early L1 are on main but **await Rapha re-playtest**.

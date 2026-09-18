@@ -449,8 +449,8 @@ namespace MegawattValley.UI
                 else
                 {
                     message = faulted == 1
-                        ? "An array has faulted. The technician will head over when cash allows."
-                        : $"{faulted} arrays have faulted. The technician will clear them when cash allows.";
+                        ? "Array faulted — waiting on cash or a free technician. (Dev: select array, press K to force faults.)"
+                        : $"{faulted} arrays faulted — technician will clear them when cash allows.";
                 }
             }
             else if (disconnected > 0)

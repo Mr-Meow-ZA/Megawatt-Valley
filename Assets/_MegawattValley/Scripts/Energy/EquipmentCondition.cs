@@ -315,10 +315,35 @@ namespace MegawattValley.Core
                 _bodyRenderer.sharedMaterial = _faultMaterial;
             }
 
-            Debug.LogWarning($"[MegawattValley] FAULT on {name}. Press F to repair (with technician), M for preventive next time.");
+            Debug.LogWarning($"[MegawattValley] FAULT on {name}. Technician should auto-dispatch (or press F / Repair).");
         }
 
         public void BeginRepair(bool assignTechnician)
+        {
+            if (!isFaulted || isRepairing)
+            {
+                return;
+            }
+
+            // Manual / HUD callouts send the tech first; cash is taken when they arrive
+            // (BeginRepairOnSite). That way a 2.5s repair timer does not finish before the walk.
+            if (assignTechnician && TechnicianActor.Instance != null)
+            {
+                if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.CanAfford(EffectiveRepairCost))
+                {
+                    Debug.LogWarning("[MegawattValley] Not enough cash to repair.");
+                    return;
+                }
+
+                TechnicianActor.Instance.DispatchToRepair(this);
+                return;
+            }
+
+            BeginRepairOnSite();
+        }
+
+        /// <summary>Spend cash and start the repair timer. Called when the technician is on site.</summary>
+        public void BeginRepairOnSite()
         {
             if (!isFaulted || isRepairing)
             {
@@ -333,12 +358,7 @@ namespace MegawattValley.Core
 
             isRepairing = true;
             repairTimer = RepairSeconds;
-            if (assignTechnician && TechnicianActor.Instance != null)
-            {
-                TechnicianActor.Instance.AssignRepair(transform);
-            }
-
-            Debug.Log($"[MegawattValley] Repair started (${EffectiveRepairCost:0}).");
+            Debug.Log($"[MegawattValley] Repair started on site (${EffectiveRepairCost:0}).");
         }
 
         /// <summary>
