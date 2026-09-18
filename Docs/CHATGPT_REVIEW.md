@@ -1,80 +1,78 @@
 # Megawatt Valley — ChatGPT Review State
 
-## Purpose
-
-This file records the latest project state reviewed by ChatGPT so Cursor can see whether its recent work has been reviewed and what guidance resulted.
-
-It should remain short and current.
-
 ## Latest review
 
-**Review date:** 2026-09-16
+**Review date:** 2026-09-18
 
-**Repository state reviewed:** `main` through `0afa660` — S6 hardening batch after Rapha's first grey-box playtest
+**Repository state reviewed:** `main` through `ac8ff84`
 
-**Alignment status:** Aligned, with two sequencing notes
+**Alignment status:** Healthy and aligned
 
 ## Summary
 
-Megawatt Valley has advanced from pre-production into a genuinely playable grey-box miniature vertical slice.
+Megawatt Valley now has a playable grey-box miniature vertical slice rather than only a prototype shell.
 
-Reviewed changes include:
+Current implemented / accepted scope includes:
 
-- Unity 6000.6.0f1 / URP project and project structure;
-- tycoon camera, plot selection and solar placement / demolition;
-- generation, grid export, revenue and simulation-speed loop;
-- condition, faults, repair and preventive maintenance;
-- named technician and functional traits;
-- first humorous event, environmental joke, objective and win state;
-- Rapha's first playtest fix batch: grid reach, wear rate, clock / daylight behaviour, technician selection, objective measurement and economy readability;
-- UI Toolkit HUD replacing prototype OnGUI;
-- ScriptableObject definitions for solar equipment, events and scenario balance;
-- pure `SolarMath` plus 26 passing EditMode tests;
-- prototype save / load for cash, clock, objective progress and placed arrays;
-- self-review fixes for selection feedback, scale-reference confusion, trait behaviour and affordability controls.
+- Unity 6000.6.0f1 / URP project foundation;
+- tycoon camera and site navigation;
+- solar placement, rotation, validation and demolition;
+- cash, scenario tariff, export MW and sim-speed loop;
+- visible grid sell radius and testable connected / unconnected placement;
+- day / night clock;
+- equipment condition, faults, repair and preventive maintenance;
+- named technician with traits, inspection walks and automatic fault dispatch;
+- first humorous decision event and environmental joke;
+- objective / win state;
+- UI Toolkit HUD;
+- ScriptableObject-driven scenario / equipment / event data;
+- save / load stub;
+- 28 passing EditMode tests;
+- Sunny Slope Site A grey-box scenario map.
 
-The implementation remains consistent with the core architectural direction: conventional Unity components, data-driven balance, simulation / presentation separation where useful, and no premature DOTS / ECS or major framework dependency.
+Rapha's 2026-09-18 re-playtest passed the important core-loop, economy-readability, staff / maintenance and scenario / win checks. The remaining grid checklist ambiguity was addressed by shrinking the grid radius so the west side of the plot is clearly outside coverage and by relabelling the HUD output card as EXPORT.
 
-The UI work is also directionally consistent with the visual plan: it improves readability now without pretending the grey-box is the final art target.
+## Alignment review
 
-## Alignment / scope review
+**Good:** Scope remains disciplined. The project has not jumped into wind, BESS, large art production, complex finance or a second simulation framework.
 
-**Good:** The ScriptableObject content pack is exactly the kind of data-driven boundary the architecture called for, and extracting generation / revenue maths for tests is a useful separation rather than speculative abstraction.
+**Good:** The implementation still follows the intended architecture: conventional Unity components, data-driven balance, and separation of simulation from presentation where useful.
 
-**Good:** The S6 playtest fixes respond directly to observed player problems rather than adding unrelated systems.
+**Good:** The technician now produces visible world activity without artificially forcing constant faults. This supports the character-driven management vision.
 
-**Good:** The save/load stub is somewhat ahead of the minimum grey-box need, but it is deliberately small, versioned, tested and limited to one prototype session. Keep it a stub; do not expand into a full save architecture yet.
+**Good:** Sunny Slope is a meaningful step from sandbox pad toward Level 1 without overspending on final art.
 
-**Watch:** `L1-03 — Bargain vs premium equipment` is now partially pre-built by the S6 content pack. Do not rebuild a second procurement system. Level 1 should extend the existing standard/bargain definitions into a meaningful player choice.
+**Good:** The re-playtest feedback loop is working: observed confusion was fixed directly rather than answered with more systems.
 
-**Watch:** `CURRENT_STATUS.md` mentions an `S6-07` technician pathing goal, but `SESSION_GOALS.md` currently moves from S6-06 directly to L1-01. Reconcile that numbering before implementation. Autonomous fault-seeking is a good small candidate, but it should be explicitly added / accepted rather than existing only in status prose.
+## Watch items
 
-## Current concerns / follow-ups
-
-- Rapha has not yet re-playtested the S6 fix batch in the Unity Editor. Automated tests prove correctness of core maths / content constraints, not whether the revised loop feels good.
-- Camera zoom is still allowed while the pointer is over the HUD; minor UX issue, not a blocker.
-- Scene regeneration creates noisy Unity YAML file-ID diffs; tolerate for now but avoid unnecessary regeneration when reviewing semantic changes.
-- Do not begin the major art pass yet. The next visual work should remain readability / blockout-level until the revised loop is re-playtested and Level 1 thin-slice structure is underway.
-
-## Decision needed from Rapha
-
-No major design decision is required before re-playtest.
-
-After re-playtest, accept or amend the proposed Level 1 thin-slice sequence. In particular, decide whether autonomous technician fault-seeking becomes a formal `S6-07` before `L1-01`.
+- `L1-03 — Bargain vs premium equipment` is the correct next implementation goal. Extend the existing ScriptableObject equipment definitions; do not create a separate procurement architecture.
+- Keep save / load as a prototype stub for now.
+- Camera zoom over HUD remains minor UX debt, not a blocker.
+- The visual target remains a long-term benchmark. Do not start the major art pass yet.
+- Open issue #2 and draft PR #4 are now largely historical / stale relative to current progress; treat them as reference unless Rapha explicitly revives them.
 
 ## Recommended next session goal
 
-**Immediate human checkpoint — Re-playtest the S6 fix batch.**
+**L1-03 — Bargain vs premium equipment**
 
-Open `Prototype_Valley` and verify that prices / income are readable, the clock makes sense, arrays earn across the intended buildable plot, wear feels sane, the technician is selectable, HUD interactions do not leak into the world, and save/load behaves as expected.
+Give the player two clearly differentiated solar build choices using the existing equipment-definition system.
 
-If that passes, the next implementation goal should be either:
+The choice should be understandable in seconds and create a real trade-off, for example:
 
-1. **S6-07 — Technician seeks a fault automatically** — a small visible step toward the character-driven operations vision; or
-2. **L1-01 — Scenario map blockout** if Rapha prefers to move directly into Level 1.
+- cheaper / lower output / higher reliability risk;
+- more expensive / higher output / better reliability.
 
-Do not start a broad art pass or a new simulation framework.
+Keep the first implementation small: two options, clear UI differences, data-driven values, and one playtestable decision.
 
-## Review protocol
+After that:
 
-On future reviews, replace the sections above with the current review state and preserve only information still relevant to Cursor's next session.
+1. L1-04 — Five decision events
+2. L1-05 — One-star scenario clear
+3. L1-06 — Climax beat
+
+## Overall assessment
+
+The project is progressing well. The core risk at this stage is no longer “can we build a game loop?” — that has been demonstrated.
+
+The next risk is whether the Level 1 thin slice becomes genuinely fun and choice-driven rather than merely functional. The current sequence is appropriate for testing that without expanding scope too early.
