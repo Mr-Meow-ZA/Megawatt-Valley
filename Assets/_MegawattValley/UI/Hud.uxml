@@ -29,12 +29,13 @@
 
             <ui:VisualElement name="objective-card" class="card objective-card">
                 <ui:Label class="card-title" text="OBJECTIVE" />
+                <ui:Label name="objective-stars" class="stars-label" text="☆☆☆" />
                 <ui:Label name="objective-title" class="metric-sub" text="Build solar capacity" />
                 <ui:Label name="objective-value" class="metric-sub" text="0.00 / 0.75 MW installed" />
                 <ui:VisualElement class="objective-track">
                     <ui:VisualElement name="objective-fill" class="objective-fill" />
                 </ui:VisualElement>
-                <ui:Label name="objective-win" class="win-label hidden" text="1★ CLEAR - Tiny Tycoon!" />
+                <ui:Label name="objective-win" class="win-label hidden" text="3★ CLEAR - Sunny Slope!" />
                 <ui:Label name="objective-fail" class="fail-label hidden" text="FAILED - deadline missed" />
                 <ui:Button name="restart-button" class="action-button restart-button hidden" text="Restart scenario" />
             </ui:VisualElement>

@@ -22,21 +22,24 @@ namespace MegawattValley.Persistence
     [Serializable]
     public sealed class SaveFile
     {
-        public int version = 1;
+        public int version = 2;
         public float cash;
+        public float lifetimeRevenue;
         public int dayNumber = 1;
         public float timeOfDay = 0.5f;
         public bool objectiveCompleted;
+        public bool twoStar;
+        public bool threeStar;
+        public int repairsCompleted;
         public List<SavedArray> arrays = new List<SavedArray>();
     }
 
     /// <summary>
-    /// Save / load stub for one prototype session (S6-06): cash, placed arrays with their wear,
-    /// the clock, and objective progress. Written as JSON next to the player's other Unity data.
+    /// Save / load stub (S6-06 / L1-07): cash, revenue, stars, arrays, clock.
     /// </summary>
     public sealed class SaveGameService : MonoBehaviour
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         [Tooltip("Array products the loader can rebuild. A save referencing anything else is skipped.")]
         [SerializeField] private SolarArrayDefinition[] knownArrays = Array.Empty<SolarArrayDefinition>();
@@ -89,9 +92,13 @@ namespace MegawattValley.Persistence
             {
                 version = CurrentVersion,
                 cash = PlayerEconomy.Instance != null ? PlayerEconomy.Instance.Cash : 0f,
+                lifetimeRevenue = PlayerEconomy.Instance != null ? PlayerEconomy.Instance.LifetimeRevenue : 0f,
                 dayNumber = DayNightSun.Instance != null ? DayNightSun.Instance.DayNumber : 1,
                 timeOfDay = DayNightSun.Instance != null ? DayNightSun.Instance.TimeOfDay : 0.5f,
-                objectiveCompleted = ScenarioObjective.Instance != null && ScenarioObjective.Instance.IsComplete
+                objectiveCompleted = ScenarioObjective.Instance != null && ScenarioObjective.Instance.HasOneStar,
+                twoStar = ScenarioObjective.Instance != null && ScenarioObjective.Instance.HasTwoStar,
+                threeStar = ScenarioObjective.Instance != null && ScenarioObjective.Instance.HasThreeStar,
+                repairsCompleted = ScenarioObjective.Instance != null ? ScenarioObjective.Instance.RepairsCompleted : 0
             };
 
             foreach (var unit in PowerBoard.All)
@@ -168,6 +175,7 @@ namespace MegawattValley.Persistence
             if (PlayerEconomy.Instance != null)
             {
                 PlayerEconomy.Instance.SetCash(file.cash);
+                PlayerEconomy.Instance.SetLifetimeRevenue(file.lifetimeRevenue);
             }
 
             if (DayNightSun.Instance != null)
@@ -177,8 +185,11 @@ namespace MegawattValley.Persistence
 
             if (ScenarioObjective.Instance != null)
             {
-                ScenarioObjective.Instance.SetCompleted(file.objectiveCompleted);
+                ScenarioObjective.Instance.SetRepairsCompleted(file.repairsCompleted);
+                ScenarioObjective.Instance.SetStars(file.objectiveCompleted, file.twoStar, file.threeStar);
             }
+
+            SelectablePlot.RestoreUnlockState(file.objectiveCompleted);
 
             int restored = 0;
             if (file.arrays != null)

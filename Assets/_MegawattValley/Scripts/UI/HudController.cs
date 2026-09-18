@@ -26,6 +26,7 @@ namespace MegawattValley.UI
         private Label _sunValue;
         private Label _objectiveTitle;
         private Label _objectiveValue;
+        private Label _objectiveStars;
         private VisualElement _objectiveFill;
         private Label _objectiveWin;
         private Label _objectiveFail;
@@ -75,7 +76,7 @@ namespace MegawattValley.UI
             "export-value", "installed-value",
             "clock-value", "sun-value",
             "speed-pause", "speed-1", "speed-2", "speed-3",
-            "objective-title", "objective-value", "objective-fill", "objective-win",
+            "objective-stars", "objective-title", "objective-value", "objective-fill", "objective-win",
             "objective-fail", "restart-button",
             "alert-banner",
             "selection-panel", "selection-kind", "selection-title",
@@ -111,6 +112,7 @@ namespace MegawattValley.UI
             _sunValue = _root.Q<Label>("sun-value");
             _objectiveTitle = _root.Q<Label>("objective-title");
             _objectiveValue = _root.Q<Label>("objective-value");
+            _objectiveStars = _root.Q<Label>("objective-stars");
             _objectiveFill = _root.Q<VisualElement>("objective-fill");
             _objectiveWin = _root.Q<Label>("objective-win");
             _objectiveFail = _root.Q<Label>("objective-fail");
@@ -343,20 +345,54 @@ namespace MegawattValley.UI
 
             float installed = PowerBoard.InstalledMegawatts;
             float target = Mathf.Max(0.0001f, objective.TargetInstalledMegawatts);
-            float percent = Mathf.Clamp01(installed / target) * 100f;
             int day = DayNightSun.Instance != null ? DayNightSun.Instance.DayNumber : 1;
+            float revenue = PlayerEconomy.Instance != null ? PlayerEconomy.Instance.LifetimeRevenue : 0f;
+            float revenueTarget = Mathf.Max(0.0001f, objective.LifetimeRevenueForThreeStars);
 
-            SetText(_objectiveTitle, objective.Description);
-            SetText(_objectiveValue, $"{installed:0.00} / {target:0.00} MW · day {day}/{objective.FailAfterDay}");
+            float percent;
+            if (!objective.HasOneStar)
+            {
+                percent = Mathf.Clamp01(installed / target) * 100f;
+                SetText(_objectiveValue, $"{installed:0.00} / {target:0.00} MW · day {day}/{objective.FailAfterDay}");
+            }
+            else if (!objective.HasTwoStar)
+            {
+                percent = Mathf.Clamp01(objective.RepairsCompleted / (float)objective.RepairsForTwoStars) * 100f;
+                SetText(_objectiveValue, $"Repairs {objective.RepairsCompleted}/{objective.RepairsForTwoStars} · day {day}/{objective.FailAfterDay}");
+            }
+            else
+            {
+                percent = Mathf.Clamp01(revenue / revenueTarget) * 100f;
+                SetText(_objectiveValue, $"Revenue ${revenue:0} / ${revenueTarget:0} · day {day}/{objective.FailAfterDay}");
+            }
+
+            SetText(_objectiveStars, objective.StarsLabel);
+            SetText(_objectiveTitle, objective.NextGoalText);
 
             if (_objectiveFill != null)
             {
                 _objectiveFill.style.width = new StyleLength(new Length(percent, LengthUnit.Percent));
             }
 
-            Show(_objectiveWin, objective.IsComplete);
+            if (_objectiveWin != null)
+            {
+                if (objective.HasThreeStar)
+                {
+                    _objectiveWin.text = "3★ CLEAR — Sunny Slope!";
+                }
+                else if (objective.HasTwoStar)
+                {
+                    _objectiveWin.text = "2★ — keep exporting for 3★";
+                }
+                else if (objective.HasOneStar)
+                {
+                    _objectiveWin.text = "1★ — Site B unlocked";
+                }
+            }
+
+            Show(_objectiveWin, objective.HasOneStar && !objective.IsFailed);
             Show(_objectiveFail, objective.IsFailed);
-            Show(_restartButton, objective.IsTerminal);
+            Show(_restartButton, objective.IsTerminal || objective.HasOneStar);
         }
 
         private void RefreshBuildBar()

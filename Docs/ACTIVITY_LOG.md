@@ -38,6 +38,32 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — L1-07 / L1-08 — Star tiers + Site B expansion
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- L1-07: 1★ MW / 2★ repair / 3★ lifetime revenue; fail only if day 10 without 1★; HUD ★★★.
+- L1-08: locked Site B pad + second grid pole unlock after 1★; multi-node grid range.
+- Save stub v2 (revenue + stars + repairs). Playtest checklist rewritten for this pass.
+
+**Tested / Verified**
+- EnsureAll + CreatePrototypeScene + EditMode: 28 passed (shadow Verify-L107).
+
+**Known issues / limitations**
+- Old v1 saves will not load (version bump).
+- 3★ $350 / day-10 window may need balance after Rapha playtest.
+
+**Next recommended step**
+- Rapha playtest via `Docs/PLAYTEST_CHECKLIST.md` (at least 1★ + Site B).
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — Support — Session-end handoff (clean tree)
 
 **Agent:** Cursor

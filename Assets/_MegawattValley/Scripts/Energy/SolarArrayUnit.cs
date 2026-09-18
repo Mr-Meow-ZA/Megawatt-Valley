@@ -185,13 +185,12 @@ namespace MegawattValley.Core
             }
 
             float dt = SimulationClock.Instance != null ? SimulationClock.Instance.SimulationDeltaTime : Time.deltaTime;
-            PlayerEconomy.Instance.Add(SolarMath.Revenue(CurrentMegawatts, RevenuePerMwPerSecond, dt));
+            PlayerEconomy.Instance.AddRevenue(SolarMath.Revenue(CurrentMegawatts, RevenuePerMwPerSecond, dt));
         }
 
         private void RefreshGridConnection()
         {
-            connectedToGrid = GridExportNode.Instance == null ||
-                              GridExportNode.Instance.IsInRange(transform.position);
+            connectedToGrid = GridExportNode.IsInRangeOfAny(transform.position);
         }
     }
 }

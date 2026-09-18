@@ -1,23 +1,30 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Simple grid export point — solar must be within range to sell power (S3-03).
+    /// Grid export point — solar must be within range of any node to sell power (S3-03 / L1-08).
     /// </summary>
     public sealed class GridExportNode : MonoBehaviour
     {
-        public static GridExportNode Instance { get; private set; }
+        private static readonly List<GridExportNode> Nodes = new List<GridExportNode>();
 
         [SerializeField] private float connectRadius = 14f;
         [SerializeField] private bool showCoverageRing = true;
         [SerializeField] private int coverageRingPosts = 40;
 
+        /// <summary>First registered node (legacy callers / HUD).</summary>
+        public static GridExportNode Instance => Nodes.Count > 0 ? Nodes[0] : null;
+
         public float ConnectRadius => connectRadius;
 
         private void Awake()
         {
-            Instance = this;
+            if (!Nodes.Contains(this))
+            {
+                Nodes.Add(this);
+            }
         }
 
         private void Start()
@@ -30,10 +37,7 @@ namespace MegawattValley.Core
 
         private void OnDestroy()
         {
-            if (Instance == this)
-            {
-                Instance = null;
-            }
+            Nodes.Remove(this);
         }
 
         public bool IsInRange(Vector3 worldPosition)
@@ -44,9 +48,24 @@ namespace MegawattValley.Core
             return (dx * dx) + (dz * dz) <= connectRadius * connectRadius;
         }
 
-        /// <summary>
-        /// Marks the export boundary in-world so "why does this array earn nothing?" is answerable without the inspector.
-        /// </summary>
+        public static bool IsInRangeOfAny(Vector3 worldPosition)
+        {
+            if (Nodes.Count == 0)
+            {
+                return true;
+            }
+
+            foreach (var node in Nodes)
+            {
+                if (node != null && node.IsInRange(worldPosition))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private void BuildCoverageRing()
         {
             var ringRoot = new GameObject("GridCoverageRing");

@@ -107,6 +107,13 @@
     margin-top: 6px;
 }
 
+.stars-label {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: rgb(255, 214, 90);
+    margin-bottom: 4px;
+}
+
 .fail-label {
     font-size: 16px;
     -unity-font-style: bold;

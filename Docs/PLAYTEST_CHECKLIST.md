@@ -1,9 +1,10 @@
 # Megawatt Valley — Playtest Checklist
 
 Use this when Cursor asks you to playtest. **Only check the Focus list.**  
-Everything under Ignore is known grey-box debt and is not useful feedback yet.
+Everything under Ignore is known grey-box debt — skip it.
 
-Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
+Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`  
+Suggested length: ~10–15 minutes (chase at least 1★ + Site B; 3★ if you have time).
 
 ---
 
@@ -11,92 +12,76 @@ Scene: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`
 
 ### Core loop
 
-- [x] Can place a solar array on the green plot; cash drops by the build price shown in the HUD
-- [ ] **Grid connection:** find the bright cyan/light-blue **cylinder** on the plot (fat pole). At Play, a circle of small cyan posts marks the sell radius (~14 m). Place near the cyan pole → export climbs in daylight
-- [ ] Place on the **west** side of the green plot (away from the cyan pole, outside the post circle) → floating `NO GRID`, no income from that array
-- [x] Demolish refunds some cash
-- [x] Day/night clock is readable; night does not feel endless compared to day
-- [x] Sim speed 1 / 2 / 3 and pause work
+- [ ] Place **Premium** (key **1**) and **Bargain** (key **2**) arrays on the green **Site A** plot; cash matches HUD costs
+- [ ] Cyan pole + post ring (~14 m): arrays inside export in daylight; **west** of Site A outside the ring shows `NO GRID` / no income
+- [ ] Demolish refunds some cash
+- [ ] Day/night readable; sim speeds **1/2/3** + **Space** pause work
 
+### Stars (L1-07)
 
+- [ ] HUD shows `☆☆☆` → fills as you progress; objective text swaps to the next star goal
+- [ ] **1★:** install **0.75 MW** before day **10** (three premium arrays, or mix with bargain)
+- [ ] After 1★ the run **does not** hard-stop — you can keep playing; Restart appears
+- [ ] **2★:** force a fault (**select array → K**), let tech repair (or **F** / Repair) — star flips when repair finishes
+- [ ] **3★:** keep exporting until lifetime revenue hits **$350** (HUD shows `$earned / $350`) — sim pauses on 3★
+- [ ] **Fail path (optional):** if you reach day 10 with under 0.75 MW → FAILED + Restart
 
-### Economy readability
+### Site B (L1-08)
 
-- [x] Build bar shows cost before you commit
-- [x] Company card shows cash and either income `/sec` or the tariff when idle
-- [x] You can tell whether you are making money within ~30 seconds of placing in daylight
+- [ ] Before 1★: brown pad east of Site A (**Site B**) rejects placement (ghost red / won’t place)
+- [ ] After 1★: Site B turns green / buildable; second cyan pole covers that pad
+- [ ] Can place at least one array on Site B that exports (inside its ring)
 
+### Events / climax
 
+- [ ] Decision events still pop with two choices (**8** / **9** or buttons)
+- [ ] Near day **8** (failAfterDay−2), with arrays built: **Severe Hail Forecast** — protect (costs cash) vs ride out (damage / faults)
 
-### Staff / maintenance
+### Staff / save
 
-- [x] Yellow technician is clickable; details panel shows name + trait + status
-- [x] Status label above the tech changes (Idle / Inspection walk / Heading to fault / Repairing)
-- [x] With at least one array built, tech eventually leaves the parking pad for an **inspection walk** even with no fault
-- [x] **Force a fault:** select an array → press **K** → tech should walk over and repair (if you can afford ~$80)
-- [x] Repair button / **F** also sends the tech (repair starts when they arrive, not instantly)
-
-
-
-### Scenario / win
-
-- [x] Objective text is visible; installing enough MW completes it
-- [x] Save (F5) / Load (F9) or HUD buttons restore cash + placed arrays roughly correctly
-
-
+- [ ] Tech auto-walks to faults; inspection walks still happen
+- [ ] **F5** save / **F9** load restore cash, arrays, stars roughly correctly (old v1 saves won’t load — start fresh)
 
 ### Feel / confusion (only if it blocks understanding)
 
-- [ ] Something important is missing from the HUD that you needed to decide
-- [ ] A control did nothing, or did the wrong thing
-- [ ] You could not tell a real array from a prop
+- [ ] Something important missing from the HUD
+- [ ] A control did nothing / wrong thing
+- [ ] Could not tell Site A from Site B, or locked vs unlocked
 
 ---
 
-
-
-## Ignore for now (do not spend playtest time on these)
+## Ignore for now
 
 - Grey cubes, flat materials, missing animations, ugly UI chrome
-- No music / SFX / particles / polish VFX
-- Capsule “person” instead of a character model
-- Hills / creek / fence are blockout shapes, not final art
-- No NavMesh pathfinding around buildings (tech walks in straight lines)
-- Camera zoom still works over the HUD
-- Bargain vs premium is not a build-bar choice yet (bargain still comes from the event)
-- Star ratings, multiple sites, wind, storage, hiring UI, salaries
-- Exact balance numbers (unless something feels *broken*, e.g. never earns / always bankrupt)
+- No music / SFX / particles
+- Capsule technician
+- Hills / creek / fence blockout quality
+- Tech walks in straight lines (no NavMesh)
+- Exact balance numbers unless something feels *broken* (never earns / always bankrupt / 3★ impossible)
+- Hiring UI, salaries, wind, storage
 
 ---
 
+## Quick keys
 
-
-## Quick repro keys
-
-
-| Key                     | What it does                                                |
-| ----------------------- | ----------------------------------------------------------- |
-| **B** (or Build button) | Toggle solar placement                                      |
-| **R**                   | Rotate ghost while placing                                  |
-| **Esc**                 | Cancel placement                                            |
-| **F**                   | Repair selected faulted array (dispatches tech)             |
-| **M**                   | Preventive service on selected healthy array                |
-| **K**                   | Force a fault on selected array (best way to test the tech) |
-| **1 / 2 / 3**           | Sim speed                                                   |
-| **Space**               | Pause                                                       |
-| **F5 / F9**             | Save / Load                                                 |
-
+| Key | Action |
+| --- | --- |
+| **1 / 2** | Premium / Bargain build |
+| **R** | Rotate ghost |
+| **Esc** | Cancel place |
+| **F** | Repair selected fault (dispatch tech) |
+| **M** | Service selected healthy array |
+| **K** | Force fault on selected array |
+| **8 / 9** | Event choice A / B |
+| **1–3** (speed row) / **Space** | Sim speed / pause |
+| **F5 / F9** | Save / Load |
 
 ---
 
+## How to reply
 
+1. **Pass / Fail** on Focus items that mattered  
+2. **Bugs only** — unexpected behaviour  
+3. **Confusion** — anything unclear without asking  
 
-## How to reply after playtest
-
-One short note is enough:
-
-1. **Pass / Fail** on Focus items that mattered
-2. **Bugs only** — unexpected behaviour, not “looks ugly”
-3. **Confusion** — anything you could not understand without asking
-
-Skip listing grey-box visuals unless they made the core loop unreadable.
+Skip grey-box looks unless they made the loop unreadable.

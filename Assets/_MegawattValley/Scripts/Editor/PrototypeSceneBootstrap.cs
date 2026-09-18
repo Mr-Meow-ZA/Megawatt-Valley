@@ -43,6 +43,21 @@ namespace MegawattValley.EditorTools
             // the sell circle — that is how players learn NO GRID without leaving the plot.
             AssignFloat(gridNode, "connectRadius", 14f);
 
+            // Site B grid pole (L1-08) — active once the expansion plot unlocks for placement.
+            var gridB = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            gridB.name = "GridExportNode_SiteB";
+            gridB.transform.position = new Vector3(26f, 0.75f, 0f);
+            gridB.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+            Object.DestroyImmediate(gridB.GetComponent<Collider>());
+            var gridBRenderer = gridB.GetComponent<MeshRenderer>();
+            if (gridBRenderer != null)
+            {
+                gridBRenderer.sharedMaterial = CreateLit(new Color(0.2f, 0.75f, 1f));
+            }
+
+            var gridNodeB = gridB.AddComponent<GridExportNode>();
+            AssignFloat(gridNodeB, "connectRadius", 10f);
+
             // Sun
             var sunGo = new GameObject("Sun");
             var sun = sunGo.AddComponent<Light>();
@@ -203,7 +218,29 @@ namespace MegawattValley.EditorTools
                 plotRenderer.sharedMaterial = CreateLit(new Color(0.35f, 0.55f, 0.35f));
             }
 
-            plot.AddComponent<SelectablePlot>();
+            var siteA = plot.AddComponent<SelectablePlot>();
+            AssignBool(siteA, "startsUnlocked", true);
+            AssignString(siteA, "displayName", "Site A");
+
+            // Site B expansion plot (L1-08) — locked brown pad until 1★.
+            var plotB = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            plotB.name = "OwnedPlot_SiteB";
+            plotB.transform.position = new Vector3(26f, 0.05f, 0f);
+            plotB.transform.localScale = new Vector3(14f, 0.1f, 12f);
+            Object.DestroyImmediate(plotB.GetComponent<Collider>());
+            var plotBCollider = plotB.AddComponent<BoxCollider>();
+            plotBCollider.size = Vector3.one;
+            var plotBRenderer = plotB.GetComponent<MeshRenderer>();
+            if (plotBRenderer != null)
+            {
+                plotBRenderer.sharedMaterial = CreateLit(new Color(0.35f, 0.32f, 0.28f));
+            }
+
+            var siteB = plotB.AddComponent<SelectablePlot>();
+            AssignBool(siteB, "startsUnlocked", false);
+            AssignString(siteB, "displayName", "Site B");
+            AssignColor(siteB, "normalColor", new Color(0.4f, 0.58f, 0.38f));
+            AssignColor(siteB, "lockedColor", new Color(0.35f, 0.32f, 0.28f));
 
             // Fence posts around the plot edge (readable boundary without sealing placement)
             CreateFenceRing();
@@ -313,6 +350,48 @@ namespace MegawattValley.EditorTools
             }
 
             property.floatValue = value;
+            editable.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void AssignBool(Component component, string fieldName, bool value)
+        {
+            var editable = new SerializedObject(component);
+            var property = editable.FindProperty(fieldName);
+            if (property == null)
+            {
+                Debug.LogError($"[MegawattValley] {component.GetType().Name} has no serialized field '{fieldName}'.");
+                return;
+            }
+
+            property.boolValue = value;
+            editable.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void AssignString(Component component, string fieldName, string value)
+        {
+            var editable = new SerializedObject(component);
+            var property = editable.FindProperty(fieldName);
+            if (property == null)
+            {
+                Debug.LogError($"[MegawattValley] {component.GetType().Name} has no serialized field '{fieldName}'.");
+                return;
+            }
+
+            property.stringValue = value;
+            editable.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void AssignColor(Component component, string fieldName, Color value)
+        {
+            var editable = new SerializedObject(component);
+            var property = editable.FindProperty(fieldName);
+            if (property == null)
+            {
+                Debug.LogError($"[MegawattValley] {component.GetType().Name} has no serialized field '{fieldName}'.");
+                return;
+            }
+
+            property.colorValue = value;
             editable.ApplyModifiedPropertiesWithoutUndo();
         }
 

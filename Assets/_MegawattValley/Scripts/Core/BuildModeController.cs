@@ -340,19 +340,8 @@ namespace MegawattValley.Core
                 return false;
             }
 
-            var plot = SelectablePlot.Current != null ? SelectablePlot.Current : _buildablePlot;
-            if (plot == null)
-            {
-                return true;
-            }
-
-            var plotCollider = plot.GetComponent<Collider>();
-            if (plotCollider != null && !plotCollider.bounds.Contains(Snap(point)))
-            {
-                return false;
-            }
-
-            return true;
+            // Must sit on an unlocked owned plot (Site A always; Site B after 1★).
+            return SelectablePlot.IsInsideUnlockedPlot(Snap(point));
         }
 
         private Vector3 Snap(Vector3 point)

@@ -17,4 +17,8 @@ MonoBehaviour:
   startingCash: 1000
   exportTariffPerMwPerSecond: 8
   targetInstalledMegawatts: 0.75
-  failAfterDay: 8
+  failAfterDay: 10
+  repairsForTwoStars: 1
+  lifetimeRevenueForThreeStars: 350
+  twoStarSummary: Repair at least one faulted array
+  threeStarSummary: Earn $350 from export revenue

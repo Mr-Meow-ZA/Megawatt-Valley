@@ -278,7 +278,17 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   **Victory moment:** the ending is memorable.  
   *Hail forecast on day `failAfterDay−2`: protect (cash + condition) vs ride it out (hits + faults).*
 
-Stretch after L1-05 is fun: second/third site modifiers, 2★/3★, larger event deck.
+- [x] **L1-07 — Two / three-star tiers**  
+  1★ MW, 2★ repair a fault, 3★ lifetime export revenue; deadline fails only without 1★.  
+  **Victory moment:** chasing stars after the first clear feels natural.  
+  *HUD shows ★★★ progress; scenario continues after 1★; pauses on 3★ or fail.*
+
+- [x] **L1-08 — Site B expansion plot**  
+  Second buildable pad + grid pole unlock after 1★.  
+  **Victory moment:** the map grows when you succeed.  
+  *Brown locked pad east of Site A turns green and accepts builds.*
+
+Stretch after L1-08: larger event deck, second technician, 3★ balance tuning from playtest.
 
 ---
 

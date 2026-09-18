@@ -87,6 +87,8 @@ namespace MegawattValley.Tests
             Assert.Greater(scenario.ExportTariffPerMwPerSecond, 0f);
             Assert.Greater(scenario.TargetInstalledMegawatts, 0f);
             Assert.Greater(scenario.FailAfterDay, 1);
+            Assert.Greater(scenario.RepairsForTwoStars, 0);
+            Assert.Greater(scenario.LifetimeRevenueForThreeStars, 0f);
         }
 
         [Test]

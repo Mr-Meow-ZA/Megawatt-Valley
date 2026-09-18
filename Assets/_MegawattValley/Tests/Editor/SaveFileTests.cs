@@ -18,9 +18,13 @@ namespace MegawattValley.Tests
             {
                 version = SaveGameService.CurrentVersion,
                 cash = 742.5f,
+                lifetimeRevenue = 210f,
                 dayNumber = 3,
                 timeOfDay = 0.25f,
-                objectiveCompleted = true
+                objectiveCompleted = true,
+                twoStar = true,
+                threeStar = false,
+                repairsCompleted = 2
             };
 
             file.arrays.Add(new SavedArray
@@ -56,6 +60,10 @@ namespace MegawattValley.Tests
             Assert.AreEqual(original.dayNumber, restored.dayNumber);
             Assert.AreEqual(original.timeOfDay, restored.timeOfDay, Tolerance);
             Assert.AreEqual(original.objectiveCompleted, restored.objectiveCompleted);
+            Assert.AreEqual(original.lifetimeRevenue, restored.lifetimeRevenue, Tolerance);
+            Assert.AreEqual(original.twoStar, restored.twoStar);
+            Assert.AreEqual(original.threeStar, restored.threeStar);
+            Assert.AreEqual(original.repairsCompleted, restored.repairsCompleted);
         }
 
         [Test]

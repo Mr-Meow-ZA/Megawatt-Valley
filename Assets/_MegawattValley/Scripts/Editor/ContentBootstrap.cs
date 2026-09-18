@@ -362,11 +362,21 @@ namespace MegawattValley.EditorTools
                 }
 
                 var failDay = patch.FindProperty("failAfterDay");
-                if (failDay != null && failDay.intValue <= 0)
+                if (failDay != null && failDay.intValue < 10)
                 {
-                    failDay.intValue = 8;
+                    failDay.intValue = 10;
                     patch.ApplyModifiedPropertiesWithoutUndo();
-                    Debug.Log($"[MegawattValley] Patched fail-after-day on {ScenarioPath}.");
+                }
+
+                var revenue3 = patch.FindProperty("lifetimeRevenueForThreeStars");
+                if (revenue3 != null && revenue3.floatValue <= 0f)
+                {
+                    revenue3.floatValue = 350f;
+                    patch.FindProperty("repairsForTwoStars").intValue = 1;
+                    patch.FindProperty("twoStarSummary").stringValue = "Repair at least one faulted array";
+                    patch.FindProperty("threeStarSummary").stringValue = "Earn $350 from export revenue";
+                    patch.ApplyModifiedPropertiesWithoutUndo();
+                    Debug.Log($"[MegawattValley] Patched star-tier fields on {ScenarioPath}.");
                 }
 
                 return existing;
@@ -381,7 +391,11 @@ namespace MegawattValley.EditorTools
             editable.FindProperty("startingCash").floatValue = 1000f;
             editable.FindProperty("exportTariffPerMwPerSecond").floatValue = 8f;
             editable.FindProperty("targetInstalledMegawatts").floatValue = 0.75f;
-            editable.FindProperty("failAfterDay").intValue = 8;
+            editable.FindProperty("failAfterDay").intValue = 10;
+            editable.FindProperty("repairsForTwoStars").intValue = 1;
+            editable.FindProperty("lifetimeRevenueForThreeStars").floatValue = 350f;
+            editable.FindProperty("twoStarSummary").stringValue = "Repair at least one faulted array";
+            editable.FindProperty("threeStarSummary").stringValue = "Earn $350 from export revenue";
             editable.ApplyModifiedPropertiesWithoutUndo();
 
             Debug.Log($"[MegawattValley] Created {ScenarioPath}.");

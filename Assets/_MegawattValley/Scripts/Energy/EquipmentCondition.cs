@@ -299,6 +299,7 @@ namespace MegawattValley.Core
             }
 
             Debug.Log($"[MegawattValley] Repair complete on {name}.");
+            ScenarioObjective.Instance?.NotifyRepairCompleted();
         }
 
         private void TriggerFault()

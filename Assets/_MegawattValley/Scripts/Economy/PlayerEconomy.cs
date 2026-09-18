@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Simple company cash balance (S3-01). Starting cash comes from the scenario when one is set.
+    /// Company cash + lifetime export revenue for 3★ (S3-01 / L1-07).
     /// </summary>
     public sealed class PlayerEconomy : MonoBehaviour
     {
@@ -13,8 +13,10 @@ namespace MegawattValley.Core
         [SerializeField] private ScenarioDefinition scenario;
         [SerializeField] private float startingCash = 1000f;
         [SerializeField] private float cash;
+        [SerializeField] private float lifetimeRevenue;
 
         public float Cash => cash;
+        public float LifetimeRevenue => lifetimeRevenue;
 
         private void Awake()
         {
@@ -41,6 +43,7 @@ namespace MegawattValley.Core
             return true;
         }
 
+        /// <summary>Refunds / event payouts — does not count toward 3★ revenue.</summary>
         public void Add(float amount)
         {
             if (amount <= 0f)
@@ -51,15 +54,31 @@ namespace MegawattValley.Core
             cash += amount;
         }
 
+        /// <summary>Export income — counts toward 3★ lifetime revenue.</summary>
+        public void AddRevenue(float amount)
+        {
+            if (amount <= 0f)
+            {
+                return;
+            }
+
+            cash += amount;
+            lifetimeRevenue += amount;
+        }
+
         public bool CanAfford(float amount)
         {
             return cash >= amount;
         }
 
-        /// <summary>Used when restoring a saved game.</summary>
         public void SetCash(float amount)
         {
             cash = Mathf.Max(0f, amount);
+        }
+
+        public void SetLifetimeRevenue(float amount)
+        {
+            lifetimeRevenue = Mathf.Max(0f, amount);
         }
     }
 }
