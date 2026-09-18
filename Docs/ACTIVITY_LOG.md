@@ -55,7 +55,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha playtest thin slice when rested; ChatGPT review refresh.
 
 **Git / References**
-- Commit: pending
+- Commit: `bc1856e`
 - Branch: `main`
 
 ---
