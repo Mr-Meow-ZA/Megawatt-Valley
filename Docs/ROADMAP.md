@@ -55,6 +55,19 @@ Session badges prove a *miniature* version of a phase. They do **not** automatic
 
 Practical Cursor / ChatGPT / Grok working practices, asset policy, and post–Tiny Tycoon sequencing live in `Docs/PRACTICES_AND_PLANNING.md` until accepted into this roadmap.
 
+### Level 1 asset production policy
+
+Level 1 uses **community-first, custom-by-exception** asset production.
+
+- Prefer commercially safe free/community assets.
+- Modify / kitbash in Blender where needed for consistency.
+- Maintain provenance in `Docs/ASSET_REGISTER.md`.
+- Do not require custom models for Hero Corner or the full first Level 1.
+- Create custom assets only when sourcing/adaptation is worse than making a simple asset or when a specific identity need justifies it.
+- Reassess custom replacement priorities after the full Level 1 is visually coherent and playable.
+
+Details: `Docs/ASSET_POLICY.md`.
+
 ### Cross-cutting visual checkpoints
 
 These checkpoints run alongside gameplay development rather than replacing it:
@@ -456,7 +469,9 @@ Document:
 - UI design language;
 - LOD and optimisation expectations.
 
-### Stage C — Modular production kits
+### Stage C — Reusable production kits
+
+For Level 1, these kits may be sourced, modified, kitbashed or custom. Standardise them into a coherent Megawatt Valley set before reuse.
 
 Develop reusable kits for:
 
