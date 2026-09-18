@@ -85,9 +85,7 @@ The planned sequence is:
 
 ## Next action
 
-**L1-03** — make bargain vs premium a real build choice using the existing ScriptableObject defs (per ChatGPT `S6-02` watch note).
-
-Optional follow-up from Rapha: confirm one array inside vs far outside the cyan post circle if desired; not blocking L1-03.
+**Rapha:** finish Unity MCP Accept (`Docs/UNITY_MCP_SETUP.md`), then **L1-03** — bargain vs premium as a real build choice using existing ScriptableObject defs.
 
 Do not start a major art pass until the grey-box loop feels fun.
 
