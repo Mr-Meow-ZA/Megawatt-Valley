@@ -55,7 +55,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Optional quick re-check of the two grid checklist items, then **L1-03**.
 
 **Git / References**
-- Commit: pending
+- Commit: `2c740d5`
 - Branch: `main`
 
 ---
