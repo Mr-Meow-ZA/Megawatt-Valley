@@ -59,7 +59,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Rapha playtest via `Docs/PLAYTEST_CHECKLIST.md` (at least 1★ + Site B).
 
 **Git / References**
-- Commit: pending
+- Commit: `85f0885`
 - Branch: `main`
 
 ---
