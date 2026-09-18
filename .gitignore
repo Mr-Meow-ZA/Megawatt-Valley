@@ -50,6 +50,9 @@ CrashReports/
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# Local Unity AI Assistant editor residue (not a project dependency)
+/ProjectSettings/Packages/com.unity.ai.assistant/
+
 # Builds and distribution artifacts
 *.apk
 *.aab
