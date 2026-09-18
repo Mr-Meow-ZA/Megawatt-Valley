@@ -17,6 +17,10 @@ namespace MegawattValley.EditorTools
         public const string BargainArrayPath = DataFolder + "/Solar_BargainLot.asset";
         public const string SupplierEventPath = DataFolder + "/Event_SupplierSoftPitch.asset";
         public const string ScenarioPath = DataFolder + "/Scenario_PrototypeValley.asset";
+        public const string EventBirdPath = DataFolder + "/Event_BirdStrikeBriefing.asset";
+        public const string EventGridPath = DataFolder + "/Event_GridCurtailmentMemo.asset";
+        public const string EventInfluencerPath = DataFolder + "/Event_InfluencerTour.asset";
+        public const string EventNightPath = DataFolder + "/Event_NightShiftDonuts.asset";
 
         [MenuItem("Megawatt Valley/Create Missing Content Assets")]
         public static void EnsureAll()
@@ -24,8 +28,24 @@ namespace MegawattValley.EditorTools
             EnsureStandardArray();
             EnsureBargainArray();
             EnsureSupplierEvent();
+            EnsureBirdEvent();
+            EnsureGridEvent();
+            EnsureInfluencerEvent();
+            EnsureNightEvent();
             EnsureScenario();
             AssetDatabase.SaveAssets();
+        }
+
+        public static DecisionEventDefinition[] EnsureEventDeck()
+        {
+            return new[]
+            {
+                EnsureSupplierEvent(),
+                EnsureBirdEvent(),
+                EnsureGridEvent(),
+                EnsureInfluencerEvent(),
+                EnsureNightEvent()
+            };
         }
 
         public static SolarArrayDefinition EnsureStandardArray()
@@ -33,6 +53,15 @@ namespace MegawattValley.EditorTools
             var existing = AssetDatabase.LoadAssetAtPath<SolarArrayDefinition>(StandardArrayPath);
             if (existing != null)
             {
+                var patch = new SerializedObject(existing);
+                var name = patch.FindProperty("displayName");
+                if (name != null && name.stringValue == "Solar Array")
+                {
+                    name.stringValue = "Premium Array";
+                    patch.FindProperty("blurb").stringValue = "Solid fixed-tilt table. Costs more, lasts longer.";
+                    patch.ApplyModifiedPropertiesWithoutUndo();
+                }
+
                 return existing;
             }
 
@@ -40,8 +69,8 @@ namespace MegawattValley.EditorTools
             AssetDatabase.CreateAsset(asset, StandardArrayPath);
 
             var editable = new SerializedObject(asset);
-            editable.FindProperty("displayName").stringValue = "Solar Array";
-            editable.FindProperty("blurb").stringValue = "Standard fixed-tilt table. Boring, reliable, pays for itself.";
+            editable.FindProperty("displayName").stringValue = "Premium Array";
+            editable.FindProperty("blurb").stringValue = "Solid fixed-tilt table. Costs more, lasts longer.";
             editable.FindProperty("buildCost").floatValue = 250f;
             editable.FindProperty("revenuePerMwPerSecond").floatValue = 8f;
             editable.FindProperty("demolishRefundFraction").floatValue = 0.5f;
@@ -130,6 +159,144 @@ namespace MegawattValley.EditorTools
 
             Debug.Log($"[MegawattValley] Created {SupplierEventPath}.");
             return asset;
+        }
+
+        public static DecisionEventDefinition EnsureBirdEvent()
+        {
+            return EnsureSimpleEvent(
+                EventBirdPath,
+                "Bird Strike Briefing",
+                "A flock of very confident starlings has been using your premium arrays as a landing strip. Ops wants a response.",
+                55f,
+                "Hire a polite falconer\n-${cost}",
+                90f,
+                0f,
+                null,
+                "A falcon named Kevin now patrols. The starlings file a complaint.",
+                "Install shiny deterrents\n+{condition} site-wide wipe",
+                0f,
+                10f,
+                "You hang CDs on string. It is ugly. It works. Kevin is unemployed.");
+        }
+
+        public static DecisionEventDefinition EnsureGridEvent()
+        {
+            return EnsureSimpleEvent(
+                EventGridPath,
+                "Grid Curtailment Memo",
+                "The utility asks you to \"voluntarily\" dial back export this afternoon. Their emoji use is aggressive.",
+                90f,
+                "Comply cheerfully\nFree +{condition} maintenance window",
+                0f,
+                12f,
+                null,
+                "You curtail. The utility sends a thumbs-up sticker.",
+                "Negotiate a tiny fee\n+${cost} cash (they pay you)",
+                -40f,
+                0f,
+                "You extract a courtesy payment. The spreadsheet smiles.");
+        }
+
+        public static DecisionEventDefinition EnsureInfluencerEvent()
+        {
+            return EnsureSimpleEvent(
+                EventInfluencerPath,
+                "Influencer Site Tour",
+                "A renewable-energy influencer wants to film \"Day in the Life: Megawatts\". They brought a drone and zero hard hats.",
+                120f,
+                "Host the tour\n-${cost} for PPE + coffee",
+                60f,
+                5f,
+                null,
+                "The video gets 12 likes. One is your mum.",
+                "Politely decline\nKeep working",
+                0f,
+                0f,
+                "You decline. Productivity remains undramatic and excellent.");
+        }
+
+        public static DecisionEventDefinition EnsureNightEvent()
+        {
+            return EnsureSimpleEvent(
+                EventNightPath,
+                "Night Shift Donuts",
+                "Jordan found a bakery that sells \"inverter-glazed\" donuts at 2am. The crew is watching you.",
+                150f,
+                "Buy the box\n-${cost}, +{condition} morale wipe",
+                45f,
+                8f,
+                null,
+                "Donuts acquired. Condition mysteriously improves.",
+                "Suggest fruit instead\nCrew mutiny averted (barely)",
+                0f,
+                0f,
+                "You suggest apples. Jordan files this under \"leadership moments\".");
+        }
+
+        private static DecisionEventDefinition EnsureSimpleEvent(
+            string path,
+            string title,
+            string body,
+            float triggerSeconds,
+            string labelA,
+            float costA,
+            float conditionA,
+            SolarArrayDefinition spawnA,
+            string resultA,
+            string labelB,
+            float costB,
+            float conditionB,
+            string resultB)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<DecisionEventDefinition>(path);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            EnsureFolder(DataFolder);
+            var asset = ScriptableObject.CreateInstance<DecisionEventDefinition>();
+            AssetDatabase.CreateAsset(asset, path);
+
+            var editable = new SerializedObject(asset);
+            editable.FindProperty("title").stringValue = title;
+            editable.FindProperty("body").stringValue = body;
+            editable.FindProperty("triggerAfterSeconds").floatValue = triggerSeconds;
+
+            var choiceA = editable.FindProperty("choiceA");
+            choiceA.FindPropertyRelative("label").stringValue = labelA;
+            choiceA.FindPropertyRelative("cashCost").floatValue = costA;
+            choiceA.FindPropertyRelative("conditionBonusToAllEquipment").floatValue = conditionA;
+            choiceA.FindPropertyRelative("spawnsArray").objectReferenceValue = spawnA;
+            choiceA.FindPropertyRelative("resultLog").stringValue = resultA;
+
+            var choiceB = editable.FindProperty("choiceB");
+            choiceB.FindPropertyRelative("label").stringValue = labelB;
+            choiceB.FindPropertyRelative("cashCost").floatValue = costB;
+            choiceB.FindPropertyRelative("conditionBonusToAllEquipment").floatValue = conditionB;
+            choiceB.FindPropertyRelative("spawnsArray").objectReferenceValue = null;
+            choiceB.FindPropertyRelative("resultLog").stringValue = resultB;
+
+            editable.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log($"[MegawattValley] Created {path}.");
+            return asset;
+        }
+
+        private static void EnsureFolder(string assetFolder)
+        {
+            if (AssetDatabase.IsValidFolder(assetFolder))
+            {
+                return;
+            }
+
+            string parent = System.IO.Path.GetDirectoryName(assetFolder)?.Replace('\\', '/');
+            string leaf = System.IO.Path.GetFileName(assetFolder);
+            if (!string.IsNullOrEmpty(parent) && !AssetDatabase.IsValidFolder(parent))
+            {
+                EnsureFolder(parent);
+            }
+
+            AssetDatabase.CreateFolder(parent, leaf);
         }
 
         public static ScenarioDefinition EnsureScenario()

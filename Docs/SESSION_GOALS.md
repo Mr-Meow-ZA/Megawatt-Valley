@@ -258,13 +258,15 @@ These goals stay **unchecked** until Rapha playtests and ChatGPT refreshes revie
   **Victory moment:** ChatGPT / Rapha can propose numbers Cursor can drop in.  
   *`ScenarioDefinition` now owns starting cash and `exportTariffPerMwPerSecond`; live arrays read the scenario tariff.*
 
-- [ ] **L1-03 — Bargain vs premium equipment**  
+- [x] **L1-03 — Bargain vs premium equipment**  
   Two solar procurement options with different cost / yield / risk.  
-  **Victory moment:** buying gear is a meaningful choice.
+  **Victory moment:** buying gear is a meaningful choice.  
+  *Build bar: Premium vs Bargain Lot (keys 1 / 2), shared catalog on `BuildModeController`.*
 
-- [ ] **L1-04 — Five decision events**  
+- [x] **L1-04 — Five decision events**  
   Data-driven events reusing the S5 choice pattern.  
-  **Victory moment:** personality without a novel-length deck.
+  **Victory moment:** personality without a novel-length deck.  
+  *Deck of five ScriptableObject events; fires sequentially with a gap between.*
 
 - [ ] **L1-05 — One-star scenario clear**  
   Single primary objective with clear success / fail / restart.  

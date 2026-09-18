@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9e54f34512cd3d46aba563d075bb1c9, type: 3}
   m_Name: Solar_StandardArray
   m_EditorClassIdentifier: Assembly-CSharp::MegawattValley.Data.SolarArrayDefinition
-  displayName: Solar Array
-  blurb: Standard fixed-tilt table. Boring, reliable, pays for itself.
+  displayName: Premium Array
+  blurb: Solid fixed-tilt table. Costs more, lasts longer.
   buildCost: 250
   revenuePerMwPerSecond: 8
   demolishRefundFraction: 0.5

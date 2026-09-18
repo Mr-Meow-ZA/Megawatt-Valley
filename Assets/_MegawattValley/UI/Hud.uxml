@@ -54,14 +54,19 @@
         </ui:VisualElement>
 
         <ui:VisualElement name="build-bar" class="build-bar" picking-mode="Ignore">
-            <ui:Button name="build-solar-button" class="build-button">
-                <ui:Label name="build-solar-title" class="build-title" text="Solar Array" />
-                <ui:Label name="build-solar-cost" class="build-cost" text="$250" />
-                <ui:Label name="build-solar-note" class="build-note" text="0.25 MW nameplate" />
+            <ui:Button name="build-premium-button" class="build-button">
+                <ui:Label name="build-premium-title" class="build-title" text="Premium Array" />
+                <ui:Label name="build-premium-cost" class="build-cost" text="$250" />
+                <ui:Label name="build-premium-note" class="build-note" text="0.25 MW · reliable" />
+            </ui:Button>
+            <ui:Button name="build-bargain-button" class="build-button">
+                <ui:Label name="build-bargain-title" class="build-title" text="Bargain Lot" />
+                <ui:Label name="build-bargain-cost" class="build-cost" text="$120" />
+                <ui:Label name="build-bargain-note" class="build-note" text="0.15 MW · wears faster" />
             </ui:Button>
             <ui:VisualElement class="hint-stack" picking-mode="Ignore">
-                <ui:Label name="hint-primary" class="hint" text="B build - R rotate ghost - Esc cancel - X demolish under cursor" />
-                <ui:Label name="hint-secondary" class="hint" text="Click an array or the technician to inspect it - F5 save - F9 load" />
+                <ui:Label name="hint-primary" class="hint" text="1 premium · 2 bargain · R rotate · Esc cancel · X demolish" />
+                <ui:Label name="hint-secondary" class="hint" text="Click array/tech to inspect · F5 save · F9 load" />
             </ui:VisualElement>
         </ui:VisualElement>
 

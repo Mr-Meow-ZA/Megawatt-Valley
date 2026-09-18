@@ -6,14 +6,15 @@ using UnityEngine.InputSystem;
 namespace MegawattValley.Core
 {
     /// <summary>
-    /// Minimal build mode: Solar Array ghost follow + place / demolish (S2-03..S2-08).
-    /// Product values come from a <see cref="SolarArrayDefinition"/> (S6-04).
+    /// Build mode with a small solar catalog (L1-03: premium vs bargain).
+    /// Ghost follow, place, rotate, demolish (S2-03..S2-08).
     /// </summary>
     public sealed class BuildModeController : MonoBehaviour
     {
         public static BuildModeController Instance { get; private set; }
 
-        [SerializeField] private SolarArrayDefinition solarDefinition;
+        [SerializeField] private SolarArrayDefinition[] catalog;
+        [SerializeField] private int selectedIndex;
         [SerializeField] private UnityEngine.Camera worldCamera;
         [SerializeField] private LayerMask groundMask = ~0;
         [SerializeField] private float rotateStepDegrees = 90f;
@@ -32,15 +33,32 @@ namespace MegawattValley.Core
         private SelectablePlot _buildablePlot;
 
         public bool IsPlacing => _placing;
-        public float SolarCost => solarDefinition != null ? solarDefinition.BuildCost : solarCost;
-        public float SolarNameplateMw => solarDefinition != null ? solarDefinition.NameplateMegawatts : solarNameplateMw;
-        public string SolarDisplayName => solarDefinition != null ? solarDefinition.DisplayName : "Solar Array";
+        public int CatalogCount => catalog != null ? catalog.Length : 0;
+        public int SelectedIndex => Mathf.Clamp(selectedIndex, 0, Mathf.Max(0, CatalogCount - 1));
+
+        public SolarArrayDefinition SelectedDefinition
+        {
+            get
+            {
+                if (catalog == null || catalog.Length == 0)
+                {
+                    return null;
+                }
+
+                return catalog[SelectedIndex];
+            }
+        }
+
+        public float SolarCost => SelectedDefinition != null ? SelectedDefinition.BuildCost : solarCost;
+        public float SolarNameplateMw => SelectedDefinition != null ? SelectedDefinition.NameplateMegawatts : solarNameplateMw;
+        public string SolarDisplayName => SelectedDefinition != null ? SelectedDefinition.DisplayName : "Solar Array";
+        public string SolarBlurb => SelectedDefinition != null ? SelectedDefinition.Blurb : string.Empty;
         public bool CanAffordSolar => PlayerEconomy.Instance == null || PlayerEconomy.Instance.CanAfford(SolarCost);
 
-        private Vector3 Footprint => solarDefinition != null ? solarDefinition.Footprint : solarFootprint;
+        private Vector3 Footprint => SelectedDefinition != null ? SelectedDefinition.Footprint : solarFootprint;
 
-        private float RefundFraction => solarDefinition != null
-            ? solarDefinition.DemolishRefundFraction
+        private float RefundFraction => SelectedDefinition != null
+            ? SelectedDefinition.DemolishRefundFraction
             : demolishRefundFraction;
 
         private void Awake()
@@ -64,6 +82,48 @@ namespace MegawattValley.Core
             }
         }
 
+        public SolarArrayDefinition GetCatalogEntry(int index)
+        {
+            if (catalog == null || index < 0 || index >= catalog.Length)
+            {
+                return null;
+            }
+
+            return catalog[index];
+        }
+
+        public bool CanAffordCatalogEntry(int index)
+        {
+            var definition = GetCatalogEntry(index);
+            if (definition == null || PlayerEconomy.Instance == null)
+            {
+                return true;
+            }
+
+            return PlayerEconomy.Instance.CanAfford(definition.BuildCost);
+        }
+
+        public bool IsCatalogEntrySelected(int index) => _placing && SelectedIndex == index;
+
+        /// <summary>HUD / hotkey: select a catalog slot and enter (or stay in) placement.</summary>
+        public void SelectCatalogEntry(int index)
+        {
+            if (catalog == null || index < 0 || index >= catalog.Length || catalog[index] == null)
+            {
+                return;
+            }
+
+            if (_placing && SelectedIndex == index)
+            {
+                CancelPlacement();
+                return;
+            }
+
+            selectedIndex = index;
+            RebuildGhost();
+            BeginSolarPlacement();
+        }
+
         public void ToggleSolarPlacement()
         {
             if (_placing)
@@ -83,6 +143,16 @@ namespace MegawattValley.Core
             if (keyboard == null || mouse == null || worldCamera == null)
             {
                 return;
+            }
+
+            if (keyboard.digit1Key.wasPressedThisFrame && CatalogCount > 0)
+            {
+                SelectCatalogEntry(0);
+            }
+
+            if (keyboard.digit2Key.wasPressedThisFrame && CatalogCount > 1)
+            {
+                SelectCatalogEntry(1);
             }
 
             if (keyboard.bKey.wasPressedThisFrame)
@@ -144,10 +214,14 @@ namespace MegawattValley.Core
             _ghostYaw = 0f;
             if (_ghost == null)
             {
-                _ghost = SolarArrayFactory.CreateGhost(solarDefinition, _validMaterial);
+                RebuildGhost();
             }
 
-            _ghost.SetActive(true);
+            if (_ghost != null)
+            {
+                _ghost.SetActive(true);
+            }
+
             Debug.Log($"[MegawattValley] Build mode: {SolarDisplayName}. LMB place, R rotate, Esc/RMB cancel, X demolish.");
         }
 
@@ -160,6 +234,21 @@ namespace MegawattValley.Core
             }
         }
 
+        private void RebuildGhost()
+        {
+            if (_ghost != null)
+            {
+                Object.Destroy(_ghost);
+                _ghost = null;
+            }
+
+            _ghost = SolarArrayFactory.CreateGhost(SelectedDefinition, _validMaterial);
+            if (_ghost != null)
+            {
+                _ghost.SetActive(_placing);
+            }
+        }
+
         private void PlaceSolar(Vector3 point, float yaw)
         {
             if (PlayerEconomy.Instance != null && !PlayerEconomy.Instance.TrySpend(SolarCost))
@@ -168,7 +257,7 @@ namespace MegawattValley.Core
                 return;
             }
 
-            SolarArrayFactory.CreateArray(solarDefinition, Snap(point), yaw);
+            SolarArrayFactory.CreateArray(SelectedDefinition, Snap(point), yaw);
             Debug.Log($"[MegawattValley] Placed {SolarDisplayName} for ${SolarCost:0}.");
             CancelPlacement();
         }
@@ -190,7 +279,6 @@ namespace MegawattValley.Core
             Demolish(hit.collider.GetComponentInParent<SolarArrayUnit>());
         }
 
-        /// <summary>Demolishes whatever the player currently has selected, for the HUD button.</summary>
         public void DemolishSelected()
         {
             var selected = EquipmentCondition.Selected;
@@ -212,7 +300,6 @@ namespace MegawattValley.Core
                 EquipmentCondition.ClearSelection();
             }
 
-            // Refund follows the demolished array's own product, not whatever is currently selected to build.
             var definition = unit.Definition;
             float cost = definition != null ? definition.BuildCost : SolarCost;
             float fraction = definition != null ? definition.DemolishRefundFraction : RefundFraction;
@@ -242,24 +329,20 @@ namespace MegawattValley.Core
 
                 if (col.GetComponentInParent<SelectablePlot>() != null)
                 {
-                    // Allow placement on the plot surface itself.
                     continue;
                 }
 
-                // Ignore the infinite ground plane collider only by name convention.
                 if (col.gameObject.name.Contains("Ground"))
                 {
                     continue;
                 }
 
-                // Any other solid thing here — existing array, building, staff, signage — blocks the footprint.
                 return false;
             }
 
             var plot = SelectablePlot.Current != null ? SelectablePlot.Current : _buildablePlot;
             if (plot == null)
             {
-                // Still allow placement in early prototype if the scene has no plot at all.
                 return true;
             }
 
@@ -279,6 +362,11 @@ namespace MegawattValley.Core
 
         private void SetGhostMaterial(Material material)
         {
+            if (_ghost == null)
+            {
+                return;
+            }
+
             var renderers = _ghost.GetComponentsInChildren<MeshRenderer>();
             foreach (var r in renderers)
             {

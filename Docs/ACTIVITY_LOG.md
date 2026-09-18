@@ -38,6 +38,33 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — L1-03 / L1-04 — Bargain vs premium + five-event deck
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Build bar: Premium vs Bargain Lot (keys 1/2) via `BuildModeController` catalog.
+- Sequential five-event deck (new SO events + `HumorousEventController` deck wiring).
+- HUD dual build buttons; ContentBootstrap / PrototypeSceneBootstrap pack updates.
+- Status docs: next action → L1-05.
+
+**Tested / Verified**
+- `Verify-UnityBuild.ps1` EnsureAll + CreatePrototypeScene + EditMode tests: 28 passed.
+- Unity MCP console: 0 errors.
+
+**Known issues / limitations**
+- Rapha light playtest of catalog + deck still optional when rested.
+
+**Next recommended step**
+- L1-05 one-star clear (success / fail / restart).
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — Support — Enable Unity MCP for Cursor
 
 **Agent:** Cursor

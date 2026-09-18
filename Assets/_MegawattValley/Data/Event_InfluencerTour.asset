@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f57202d9ee0ac8c47be4aefa6709e6fd, type: 3}
+  m_Name: Event_InfluencerTour
+  m_EditorClassIdentifier: Assembly-CSharp::MegawattValley.Data.DecisionEventDefinition
+  title: Influencer Site Tour
+  body: 'A renewable-energy influencer wants to film "Day in the Life: Megawatts". They brought a drone and zero hard hats.'
+  triggerAfterSeconds: 120
+  choiceA:
+    label: 'Host the tour
+
+      -${cost} for PPE + coffee'
+    cashCost: 60
+    conditionBonusToAllEquipment: 5
+    spawnsArray: {fileID: 0}
+    spawnPosition: {x: 4, y: 0, z: 2}
+    resultLog: The video gets 12 likes. One is your mum.
+  choiceB:
+    label: 'Politely decline
+
+      Keep working'
+    cashCost: 0
+    conditionBonusToAllEquipment: 0
+    spawnsArray: {fileID: 0}
+    spawnPosition: {x: 4, y: 0, z: 2}
+    resultLog: You decline. Productivity remains undramatic and excellent.

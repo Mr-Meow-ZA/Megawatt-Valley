@@ -40,10 +40,14 @@ namespace MegawattValley.UI
         private Button _maintainButton;
         private Button _demolishButton;
 
-        private Button _buildSolarButton;
-        private Label _buildSolarTitle;
-        private Label _buildSolarCost;
-        private Label _buildSolarNote;
+        private Button _buildPremiumButton;
+        private Label _buildPremiumTitle;
+        private Label _buildPremiumCost;
+        private Label _buildPremiumNote;
+        private Button _buildBargainButton;
+        private Label _buildBargainTitle;
+        private Label _buildBargainCost;
+        private Label _buildBargainNote;
 
         private Button _saveButton;
         private Button _loadButton;
@@ -74,7 +78,8 @@ namespace MegawattValley.UI
             "selection-panel", "selection-kind", "selection-title",
             "selection-line-1", "selection-line-2", "selection-line-3",
             "repair-button", "maintain-button", "demolish-button",
-            "build-solar-button", "build-solar-title", "build-solar-cost", "build-solar-note",
+            "build-premium-button", "build-premium-title", "build-premium-cost", "build-premium-note",
+            "build-bargain-button", "build-bargain-title", "build-bargain-cost", "build-bargain-note",
             "save-button", "load-button", "save-status",
             "event-modal", "event-title", "event-body", "event-choice-a", "event-choice-b"
         };
@@ -117,10 +122,14 @@ namespace MegawattValley.UI
             _maintainButton = _root.Q<Button>("maintain-button");
             _demolishButton = _root.Q<Button>("demolish-button");
 
-            _buildSolarButton = _root.Q<Button>("build-solar-button");
-            _buildSolarTitle = _root.Q<Label>("build-solar-title");
-            _buildSolarCost = _root.Q<Label>("build-solar-cost");
-            _buildSolarNote = _root.Q<Label>("build-solar-note");
+            _buildPremiumButton = _root.Q<Button>("build-premium-button");
+            _buildPremiumTitle = _root.Q<Label>("build-premium-title");
+            _buildPremiumCost = _root.Q<Label>("build-premium-cost");
+            _buildPremiumNote = _root.Q<Label>("build-premium-note");
+            _buildBargainButton = _root.Q<Button>("build-bargain-button");
+            _buildBargainTitle = _root.Q<Label>("build-bargain-title");
+            _buildBargainCost = _root.Q<Label>("build-bargain-cost");
+            _buildBargainNote = _root.Q<Label>("build-bargain-note");
 
             _saveButton = _root.Q<Button>("save-button");
             _loadButton = _root.Q<Button>("load-button");
@@ -146,9 +155,14 @@ namespace MegawattValley.UI
                 }
             }
 
-            if (_buildSolarButton != null)
+            if (_buildPremiumButton != null)
             {
-                _buildSolarButton.clicked += () => BuildModeController.Instance?.ToggleSolarPlacement();
+                _buildPremiumButton.clicked += () => BuildModeController.Instance?.SelectCatalogEntry(0);
+            }
+
+            if (_buildBargainButton != null)
+            {
+                _buildBargainButton.clicked += () => BuildModeController.Instance?.SelectCatalogEntry(1);
             }
 
             if (_repairButton != null)
@@ -335,19 +349,45 @@ namespace MegawattValley.UI
         private void RefreshBuildBar()
         {
             var build = BuildModeController.Instance;
-            if (build == null || _buildSolarButton == null)
+            if (build == null)
             {
                 return;
             }
 
-            SetText(_buildSolarTitle, build.SolarDisplayName);
-            SetText(_buildSolarCost, $"${build.SolarCost:N0}");
-            SetText(_buildSolarNote, build.IsPlacing
-                ? "placing — Esc to cancel"
-                : $"{build.SolarNameplateMw:0.00} MW nameplate");
+            RefreshCatalogButton(0, _buildPremiumButton, _buildPremiumTitle, _buildPremiumCost, _buildPremiumNote, build);
+            RefreshCatalogButton(1, _buildBargainButton, _buildBargainTitle, _buildBargainCost, _buildBargainNote, build);
+        }
 
-            _buildSolarButton.EnableInClassList("build-button-active", build.IsPlacing);
-            _buildSolarButton.EnableInClassList("build-button-unaffordable", !build.CanAffordSolar && !build.IsPlacing);
+        private static void RefreshCatalogButton(
+            int index,
+            Button button,
+            Label title,
+            Label cost,
+            Label note,
+            BuildModeController build)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var definition = build.GetCatalogEntry(index);
+            if (definition == null)
+            {
+                Show(button, false);
+                return;
+            }
+
+            Show(button, true);
+            SetText(title, definition.DisplayName);
+            SetText(cost, $"${definition.BuildCost:N0}");
+            bool placing = build.IsCatalogEntrySelected(index);
+            SetText(note, placing
+                ? "placing — Esc cancel"
+                : $"{definition.NameplateMegawatts:0.00} MW · wear {definition.WearPerSecond:0.00}/s");
+
+            button.EnableInClassList("build-button-active", placing);
+            button.EnableInClassList("build-button-unaffordable", !build.CanAffordCatalogEntry(index) && !placing);
         }
 
         private void RefreshSelection()
