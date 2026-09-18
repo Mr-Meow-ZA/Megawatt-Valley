@@ -38,6 +38,26 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-18 — Support — Session-end handoff (clean tree)
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Committed incidental ProBuilder editor setting drift (`ShapeComponent.ResetSettings`) left dirty after the L1 thin-slice session.
+
+**Tested / Verified**
+- N/A (settings-only). L1-01…L1-06 already verified earlier this session (28 EditMode tests).
+
+**Next recommended step**
+- Rapha playtest of the Level 1 thin slice when rested; ChatGPT can refresh review on HEAD.
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-18 — L1-06 — Hail climax beat
 
 **Agent:** Cursor
