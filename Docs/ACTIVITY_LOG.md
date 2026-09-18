@@ -39,6 +39,33 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 ---
 
 
+## 2026-09-18 — Design — Community-first Level 1 asset policy approved
+
+**Agent:** ChatGPT / Rapha
+**Status:** Complete
+
+**Changed / Produced**
+- Locked **community-first, custom-by-exception** as the asset strategy for Hero Corner and the full first Level 1.
+- Added `Docs/ASSET_POLICY.md` and `Docs/ASSET_REGISTER.md`.
+- Updated visual direction, roadmap, current status, Cursor rules and collaboration context.
+- Blender / Krita are primarily adaptation, kitbashing and unification tools during Level 1 rather than proof that every asset must be modelled from scratch.
+
+**Decisions / assumptions / recommendations**
+- Prefer commercially safe free/community assets.
+- Custom production is justified when no good source asset exists, adaptation takes longer than making a simple asset, or a specific identity/readability need requires originality.
+- Safe sourced assets may remain in the shipped game; there is no requirement to replace everything later.
+- Licensing / provenance must be tracked for durable third-party assets.
+
+**Next recommended step**
+- Continue E1 Engagement & Progression Proof. Apply this policy when Hero Corner begins.
+
+**Git / References**
+- Policy: `Docs/ASSET_POLICY.md`
+- Register: `Docs/ASSET_REGISTER.md`
+- Branch: `main`
+
+
+
 ## 2026-09-18 — Handoff — Cursor E1 implementation brief + issue #5
 
 **Agent:** ChatGPT
