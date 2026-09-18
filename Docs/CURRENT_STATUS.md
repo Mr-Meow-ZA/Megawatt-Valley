@@ -61,6 +61,9 @@ The first proof deliberately stays small:
 
 ## Next action
 
+**Cursor task:** GitHub issue **#5 — E1-01 First capability unlock (Radio Dispatch)**  
+**Implementation brief:** `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`
+
 **E1-01 — First capability unlock**
 
 Implement only the minimum capability-state model and UI needed to show that:
