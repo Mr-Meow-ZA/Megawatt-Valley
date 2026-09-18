@@ -138,6 +138,8 @@ Cursor, ChatGPT and Grok Bot should treat these as the core shared context:
 - `README.md`
 - `Docs/GAME_VISION.md`
 - `Docs/VISUAL_DIRECTION.md`
+- `Docs/ASSET_POLICY.md`
+- `Docs/ASSET_REGISTER.md`
 - `Docs/PROGRESSION_AND_ENGAGEMENT.md`
 - `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md` (active Cursor brief during E1)
 - `Docs/TECHNICAL_ARCHITECTURE.md`
