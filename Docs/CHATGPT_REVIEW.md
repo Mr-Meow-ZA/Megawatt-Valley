@@ -2,98 +2,100 @@
 
 ## Latest review
 
-**Review date:** 2026-09-18
+**Review date:** 2026-09-19
 
-**Repository state reviewed:** functional Level 1 thin slice through `L1-08`, followed by the progression / engagement design update
+**Repository state reviewed:** `main` through `4f1088c` / gameplay commit `5143420`
 
-**Alignment status:** Healthy; project priority has deliberately shifted from “more functional features” to “prove fun, progression and changing responsibility”
+**Alignment status:** Healthy implementation with one process/scope-discipline concern; E1-01…E1-05 are implemented and the next gate is Rapha's playtest.
 
-## Current state
+## What changed since the previous review
 
-The functional grey-box Level 1 slice now includes:
+Cursor implemented a substantial portion of the Engagement & Progression Proof in one pass:
 
-- Sunny Slope Sites A + B;
-- solar placement / grid / revenue loop;
-- bargain vs premium equipment;
-- equipment condition, faults and maintenance;
-- technician behaviour and automatic fault dispatch;
-- five-event deck and hail climax;
-- 1★ / 2★ / 3★ goals;
-- plot expansion;
-- save / load stub;
-- UI Toolkit HUD;
-- data-driven content and EditMode tests.
+- **E1-01 / E1-02 — Radio Dispatch:** `CompanyCapabilities` + capability definitions, locked/unlocked HUD state, save persistence, automatic technician response gated behind Radio Dispatch, and first completed manual repair unlocks it.
+- **E1-03 — Soiling:** arrays accumulate dust; soiling reduces output; the player can manually clean a selected array.
+- **E1-04 — Basic Cleaning Kit:** the second clean unlocks a capability that materially shortens cleaning time.
+- **E1-05 — Objective ladder:** `ObjectiveLadder` and the HUD `NEXT` card guide the opening beats from first power through fault response, cleaning, Site B and star chasing.
+- Save data moved to v3 to preserve capability IDs.
+- The engagement playtest checklist was refreshed.
+- Event handling was also corrected so decision modals pause simulation and event spacing is much slower.
+- EditMode verification reported **30 passing tests** after the E1 implementation.
 
-This demonstrates that the systems can function together.
+The approved Level 1 art strategy was also formalised as **community-first, custom-by-exception**, with `ASSET_POLICY.md` and `ASSET_REGISTER.md`. This is consistent with the visual plan and does not start Hero Corner early.
 
-It does **not yet demonstrate that the first level has enough momentum, progression and reward to feel like a strong tycoon scenario**.
+## Alignment review
 
-## New approved design direction
+### Active goal / progression design
 
-`Docs/PROGRESSION_AND_ENGAGEMENT.md` is now the authority for the next gameplay phase.
+**Strong alignment in gameplay design.** The implementation directly proves the intended abstraction ladder:
 
-Key principles:
+**manual repair → earn Radio Dispatch → automatic fault response**
 
-- maintain a stack of immediate, short-term and longer-term motivations;
-- unlock capabilities that change what the player can do, not only percentage bonuses;
-- let the player understand a chore manually before making it easier;
-- evolve repetitive systems through **manual → assigned staff → schedule / policy → automation → exception management**;
-- introduce new responsibility as old responsibility becomes easier;
-- do not increase scenario length through waiting or repetitive panel placement;
-- keep project-specific trade-offs even after company technologies are permanently unlocked.
+and begins the second chain:
 
-The long-term progression system is a **Company Capability Tree**, broader than pure technology, with branches such as generation, operations, digital / automation, people, grid and development / commercial capability.
+**soiling → manual cleaning → materially faster cleaning**.
 
-## Immediate proof
+This is exactly the kind of capability progression requested in `PROGRESSION_AND_ENGAGEMENT.md`: the player experiences the chore before the organisation becomes more capable.
 
-Do **not** build the full capability tree.
+The capability system remains deliberately small: stable IDs, definitions, unlocked-state storage and gameplay queries. No generic modifier/effect framework, research currency, R&D department or full tech-tree UI appeared. That is good architecture discipline.
 
-The new session track is **E1 — Engagement & Progression Proof**.
+### Game vision
 
-First chain:
+Aligned. The new systems add visible operational work, staff relevance, renewable-energy flavour and tycoon progression rather than unrelated simulation depth. The NEXT card also addresses the previous risk of stretches with no clear purpose.
 
-**manual fault dispatch → first successful repair → Radio Dispatch unlock → existing automatic technician behaviour becomes available**
+### Technical architecture
 
-Second chain:
+Aligned overall. Gameplay ownership remains sensible: capability state answers whether an ability is unlocked; technician behaviour remains with technician logic; array soiling remains with array behaviour; save data serialises state. The additions extend the existing MonoBehaviour / ScriptableObject architecture rather than introducing a new framework.
 
-**panel soiling → manual cleaning → first cleaning improvement**
+### Visual direction / asset policy
 
-This proves that an unlock can materially change the level of management abstraction.
+Aligned. No premature Hero Corner or mass-art pass was started. The new community-first policy is compatible with the approved visual north star as long as sourced assets are unified through scale/material/style and provenance is maintained.
 
-## Visual timing
+## Concern: session-goal discipline
 
-The visual plan has been clarified:
+Cursor was explicitly instructed to stop after **E1-01**, but commit `5143420` implemented **E1-01 through E1-05** in one large step.
 
-**functional systems ✅ → engagement / progression proof → Hero Corner → gameplay + visuals advance together**
+The resulting features are directionally correct, so this is **not product/design drift**, but it is process drift. It bypassed the intended build → play → review rhythm and reduced the opportunity to catch feel problems between progression beats.
 
-Do not wait until every future mechanic is complete before improving visuals.
+Do **not** respond by undoing good work. Instead, restore discipline now: **no E1-06 implementation before Rapha plays the current E1-01…05 chain.** Future Cursor sessions should again stop at the active session goal unless Rapha explicitly authorises a batch.
 
-Do not start mass final-art production before the Engagement Gate.
+## Current blockers / housekeeping
 
-## Recommended next session goal
+- **Rapha playtest is now the real blocker.** Code review cannot establish whether Radio Dispatch, dust, cleaning and NEXT cadence actually feel satisfying.
+- GitHub issue **#5** still describes E1-01 as outstanding even though E1-01 is complete; it should be closed or updated during the next repository housekeeping pass.
+- Draft PR **#4** (`docs: add visual development timeline with milestones`) is based on an old project state that says S6-01 / pre-Level-1 work is current. Do **not** merge it as-is. Refresh/rebase its timeline against the current E1 state or close it if the living roadmap now makes it redundant.
+- The current objective ladder is enough for the proof, but its real cadence should be judged in play rather than expanded merely to hit an arbitrary objective count.
 
-**Cursor handoff:** `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`  
-**GitHub task:** issue **#5 — E1-01 First capability unlock (Radio Dispatch)**
+## Recommended next smallest useful goal
 
-**E1-01 — First capability unlock**
+**Playtest checkpoint — current E1 chain.**
 
-Implement only enough capability state + UI to prove:
+Rapha should run `Prototype_Valley` using `Docs/PLAYTEST_CHECKLIST.md` for roughly 15–20 minutes and verify:
 
-- locked capability is visible;
-- the player understands the reward;
-- an objective can unlock it;
-- the unlocked state changes gameplay.
+1. Radio Dispatch begins locked.
+2. First fault genuinely requires manual dispatch.
+3. First completed repair visibly unlocks Radio Dispatch.
+4. A later fault auto-dispatches Jordan.
+5. Dust creates an understandable generation penalty.
+6. Manual cleaning is clear and the Cleaning Kit improvement is noticeable.
+7. NEXT gives sensible direction without feeling like a rigid tutorial.
+8. Events pause correctly and no longer spam.
+9. Site B / stars still work.
+10. Record boring stretches, confusing controls, invisible rewards or chores that already feel repetitive.
 
-Avoid generic effect engines, giant tech-tree frameworks, research currencies or department systems at this stage.
+After that playtest:
 
-## Playtest question
+- fix any blocking/confusing behaviour first;
+- if the chain feels good, implement **E1-06 — First capability choice** as the next coding goal;
+- then **E1-07 — Unlock presentation**;
+- use the full playthrough notes as **E1-08**, followed by the smallest E1-09 engagement fixes.
 
-The next important project question is no longer:
+Do **not** begin Hero Corner until the Engagement Gate passes.
 
-> Does it work?
+## Current project question
 
-It is:
+The code now contains the intended progression pattern. The question to answer through play is:
 
-> Does the player keep getting interesting reasons to do the next thing, and do they feel the company becoming more capable while they play?
+> Does earning Radio Dispatch and the Cleaning Kit actually create the feeling that the company is becoming more capable, while the NEXT cadence keeps the player wanting to do the next thing?
 
-That is the acceptance criterion for the Engagement Gate.
+That is the decision point before adding more progression systems.
