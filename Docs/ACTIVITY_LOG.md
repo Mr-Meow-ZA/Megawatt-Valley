@@ -38,6 +38,27 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-19 — Support — E1 playtest accepted; session stop
+
+**Agent:** Rapha (playtest) / Cursor (handoff)
+**Status:** Complete
+
+**Changed / Produced**
+- Rapha reported E1 Focus checklist **all passed**.
+- Marked E1-08 complete; status points at E1-06/07 next when resuming.
+
+**Tested / Verified**
+- Human playtest of Radio Dispatch, soiling/cleaning, NEXT/capabilities HUD, stars/Site B, paused events.
+
+**Next recommended step**
+- On resume: E1-06 first capability choice (then E1-07).
+
+**Git / References**
+- Commit: pending
+- Branch: `main`
+
+---
+
 ## 2026-09-19 — E1-01…E1-05 — Capability unlock chain + soiling + objective beats
 
 **Agent:** Cursor

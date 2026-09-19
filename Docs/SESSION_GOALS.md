@@ -332,13 +332,15 @@ Design authority: `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
   Add a clear unlock / reward presentation for new capabilities, plots, tools or staff options.  
   **Victory moment:** earning something new feels like an event even in grey-box.
 
-- [ ] **E1-08 — Engagement playtest**  
+- [x] **E1-08 — Engagement playtest**  
   Rapha plays from new game through at least 1★ and records boring stretches, repeated chores, unclear rewards and missing decisions.  
-  **Victory moment:** we can judge fun and momentum rather than only correctness.
+  **Victory moment:** we can judge fun and momentum rather than only correctness.  
+  *2026-09-19: Focus checklist all passed; no blockers reported.*
 
 - [ ] **E1-09 — Engagement gate**  
   Apply the smallest fixes required for the scenario to feel engaging and progression-driven.  
-  **Victory moment:** Rapha would continue playing the grey-box because the management loop itself is enjoyable.
+  **Victory moment:** Rapha would continue playing the grey-box because the management loop itself is enjoyable.  
+  *Optional polish after E1-06/07 if still needed.*
 
 ### Engagement badge
 
