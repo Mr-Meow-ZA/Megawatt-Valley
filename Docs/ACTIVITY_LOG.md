@@ -54,7 +54,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - On resume: E1-06 first capability choice (then E1-07).
 
 **Git / References**
-- Commit: pending
+- Commit: `d4fd4f2`
 - Branch: `main`
 
 ---
