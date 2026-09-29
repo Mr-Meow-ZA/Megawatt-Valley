@@ -38,6 +38,38 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-29 — Visual — WorldView density toward concept target
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Organic meandering river with varied bank tiles (`tile_bank_0..2`) and water-edge rock props; bridge kept on main road (y=6).
+- Phaser Graphics power lines (3 sagging steel cables) between four pylons in `scatterEnvironment`.
+- More decorative vans/trucks and tech workers around office, yard, and substation.
+- Site A meadow stays tree-clear with full perimeter fence; bush/rock clusters via new `tree_round` / `bush` textures.
+- Default camera zoom `0.88`, recentered on valley for wider concept-like view.
+- Light texture/palette helpers in `textures.ts` / `isoArt.ts` (bank variants, round shrubs).
+
+**Tested / Verified**
+- `npm run typecheck` clean
+- `npm test` — 8 passing
+
+**Known issues / limitations**
+- Still procedural art; not full concept-art parity (pixel plants, richer buildings).
+- GameScene camera defaults unchanged (WorldView owns zoom/center).
+
+**Decisions / assumptions / recommendations**
+- River meander uses sine wobble on center X; bridge remains at tile (19,6).
+- Power lines drawn once as static Graphics (not animated).
+
+**Next recommended step**
+- Browser visual check against `Docs/VISUAL_CONCEPT_TARGET.jpg`; continue M4 scenario polish / deploy path.
+
+**Git / References**
+- Branch: `cursor/worldview-visual-density-4192`
+- Base: `cursor/phaser-level1-build-5938` / PR #7
+
 ## 2026-09-29 — Primary — Phaser Level 1 autonomous scaffold + core loop
 
 **Agent:** Cursor
