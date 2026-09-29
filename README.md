@@ -1,105 +1,118 @@
 # Megawatt Valley
 
-**Megawatt Valley** is a character-driven renewable-energy tycoon and management game being built in **Unity** with **Cursor** as the primary implementation assistant.
+**Megawatt Valley** is a renewable-energy tycoon / management game.
 
-The player starts small: limited cash, a tiny company, a few staff, and access to basic solar projects. By developing sites, selecting equipment, hiring and training staff, building plants, operating assets, surviving failures and unexpected events, and making increasingly difficult commercial decisions, the player grows into a major renewable-energy company managing solar, wind, storage, hybrid plants, and eventually a multi-site portfolio.
+## Primary direction — 29 September 2026
 
-## Design direction
+The project has been rebaselined around one overriding objective:
 
-Megawatt Valley takes inspiration from games such as **Two Point Hospital / Campus / Museum**, **Tropico**, **Planet Zoo**, **Parkitect / Megaquarium**, **Power to the People**, **Against the Storm**, **Timberborn**, **Surviving Mars**, and **Cities: Skylines**.
+> **Cursor should build a complete, polished, ready-to-play game with minimal ongoing manual work from Rapha and no additional paid development tools or services beyond existing Cursor and ChatGPT subscriptions.**
 
-Two Point is the strongest reference for accessibility, personality, visual readability, humour, staff-driven management, and campaign progression. These games are references only; Megawatt Valley will develop its own visual identity, characters, systems, humour, terminology, and world.
+The previous Unity implementation is **archived**. Its design discoveries remain useful, but Unity is no longer the active production path.
 
-The design principle is:
+Archived Unity snapshot:
+- branch: **archive/unity-prototype-2026-09-29**
+- status: historical reference only
+- do not resume Unity development unless Rapha explicitly reverses this decision
 
-> **Realism in cause and effect. Abstraction in execution.**
+## Current production stack
 
-Renewable-energy professionals should recognise the underlying logic, while players with no industry knowledge should still be able to understand and enjoy the game.
+Primary implementation target:
 
-## Core gameplay loop
+- **Phaser** — free/open-source game framework
+- **TypeScript**
+- **Vite**
+- browser-first delivery
+- Git + GitHub
+- free/open-source dependencies and assets only by default
+- local browser storage / IndexedDB for saves
+- Cursor as the primary autonomous implementation team
+- ChatGPT as product/design/review support
 
-**DEVELOP → FINANCE → BUILD → OPERATE → EXPAND**
+No paid Phaser tooling, Unity licence, Godot editor workflow, paid asset packs, paid AI game builder, backend subscription, or other recurring service is required for the primary build.
 
-1. Select and investigate potential project sites.
-2. Secure land, approvals, finance, contractors, staff, and equipment.
-3. Build the renewable-energy project and manage construction risk.
-4. Operate the asset, generate electricity and revenue, maintain equipment, and respond to problems.
-5. Grow company capability, reputation, technology, staff, and portfolio size.
-6. Complete scenario objectives and unlock new regions, technologies, and challenges.
+## Product target
 
-## Initial scope
+The first release target is:
 
-Development will start deliberately small. The first target is not the complete game; it is one genuinely enjoyable solar-focused vertical slice.
+# Megawatt Valley: Solar
 
-The early playable build will prove:
+A polished 30–60 minute first scenario, **Here Comes the Sun**, proving the core game loop:
 
-- tycoon-style camera and world interaction;
-- land / site selection;
-- building placement;
-- solar generation;
-- grid connection;
-- costs and revenue;
+**DEVELOP → FINANCE → BUILD → OPERATE → IMPROVE → EXPAND**
+
+The release should include:
+
+- isometric building and placement;
+- solar generation and grid export;
+- economy and revenue;
 - time and weather;
 - equipment condition and failures;
 - maintenance staff;
-- decision-based events;
-- scenario objectives and progression.
+- panel cleaning / soiling;
+- capability unlocks and automation;
+- decision events;
+- objectives and 1★ / 2★ / 3★ completion;
+- save / load;
+- tutorialised progression;
+- polished UI;
+- a complete playable release build.
 
-Wind, BESS, advanced financing, multi-region portfolios, and other major systems will be added only after the core solar gameplay loop is fun.
+Wind, BESS, multi-region portfolios and advanced finance remain future expansion systems until the solar release is complete and enjoyable.
 
-## Technology direction
+## Visual target
 
-Current planned stack:
+The approved direction is **high-resolution pixel-isometric / illustrated pixel art** with:
 
-- Unity **6000.6.0f1** (Unity 6.6) with Universal Render Pipeline (URP)
-- C# / GameObject-based architecture initially
-- ScriptableObjects and other data-driven definitions for game content
-- UI Toolkit
-- Cinemachine
-- Unity Input System
-- NavMesh for staff movement where appropriate
-- Git + GitHub + Git LFS
-- Cursor for implementation and code assistance
-- Unity MCP integration where useful, but not as a hard dependency
+- a fixed or near-fixed isometric camera;
+- a rich scenic valley;
+- technically recognisable renewable infrastructure;
+- small expressive staff and service vehicles;
+- construction and maintenance activity;
+- animated weather and environmental effects;
+- warm, readable lighting;
+- a crisp modern management UI layered over the world.
 
-The simulation layer should remain separate from the visual representation wherever practical so that large portfolios can be simulated efficiently without making every visible object responsible for game logic.
+The quality benchmark is the approved Megawatt Valley pixel-isometric concept from 29 September 2026. See **Docs/VISUAL_DIRECTION.md**.
 
-## Development partnership
+## Cursor authority
 
-The project will use complementary roles:
+Cursor is expected to own routine implementation rather than wait for step-by-step instructions.
 
-- **Rapha** — product owner / creative director. Sets the vision, makes design decisions, tests builds, and decides priorities.
-- **Cursor** — primary Unity implementation environment. Builds code, scenes, tools, editor utilities, tests, and game systems from defined tasks.
-- **ChatGPT** — ongoing game-design, planning, review, architecture, balancing, research, and quality partner.
-- **Grok Bot** — supporting research, critique, QA, ideation, and doc-drift watch (recommendations, not automatic design authority).
+Cursor should:
 
-GitHub is the shared source of truth between these roles. Collaboration protocol: `Docs/COLLABORATION_GUIDE.md`. Practical Cursor↔Unity / asset / assist recommendations: `Docs/PRACTICES_AND_PLANNING.md`. Unity MCP setup: `Docs/UNITY_MCP_SETUP.md`.
+1. read the primary project documents;
+2. maintain its own implementation backlog;
+3. implement;
+4. build;
+5. run automated tests;
+6. open and visually inspect the game;
+7. play through the affected feature;
+8. fix defects;
+9. repeat until acceptance criteria pass;
+10. commit and push meaningful progress.
 
-## Current status
+Rapha is the product owner / creative director, **not the routine developer or debugger**.
 
-**Grey-box miniature vertical slice playable (S0–S5).**
+Cursor should only escalate choices that materially affect game design, product scope, paid cost, legal/licensing risk, or an irreversible architectural decision.
 
-Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play on the home PC. Next: Rapha playtest (`S6-01`) + ChatGPT review (`S6-02`), then harden HUD/data before Level 1 thin-slice — not a major art pass yet.
+## Primary source of truth
 
-See the `Docs/` folder for the current planning documents.
+Read these first:
 
-## Playtest controls (grey-box)
+1. **Docs/CURSOR_PRIMARY_BUILD_SPEC.md**
+2. **Docs/CURRENT_STATUS.md**
+3. **Docs/VISUAL_DIRECTION.md**
+4. **Docs/TECHNICAL_ARCHITECTURE.md**
+5. **Docs/ROADMAP.md**
+6. **Docs/GAME_VISION.md**
+7. **Docs/PROGRESSION_AND_ENGAGEMENT.md**
+8. **Docs/LEVEL_01_DESIGN.md**
 
-Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play.
+Any older document that conflicts with the files above should be treated as archived historical context.
 
-- **WASD / arrows** pan · **scroll** zoom · **Q/E or RMB drag** rotate · **Shift** fast pan
-- **Click plot** to select · **B** or **Build: Solar Array** button · **R** rotate ghost · **LMB** place · **Esc/RMB** cancel · **X** demolish
-- **F** repair selected faulted array · **M** preventive maintenance · **K** force fault (debug)
-- **Space** pause · **1/2/3** sim speed · Event choices **8/9** when shown
-- Objective: reach **0.50 MW** for Tiny Tycoon win
+## Development principle
 
+> **Build the game, not the development project.**
 
-
-## Parallel autonomous build experiment
-
-Megawatt Valley now also has an experimental **pixel-isometric autonomous build path** intended to compare AI builders without Unity / Godot or routine manual scene-editor work.
-
-Scope: `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md`  
-Tracking issue: **#6 — Pixel-isometric autonomous Megawatt Valley build**
-
-The first benchmark is a complete, self-contained version of **Level 1 — Here Comes the Sun**. This experiment is independent of the existing Unity implementation and must not overwrite its history.
+The objective is a finished playable Megawatt Valley release, not an endless sequence of prototypes or tooling exercises.
