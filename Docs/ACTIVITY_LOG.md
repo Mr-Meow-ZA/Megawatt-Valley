@@ -38,6 +38,34 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+
+## 2026-09-29 — Experiment — Pixel-isometric autonomous build scope
+
+**Agent:** ChatGPT / Rapha
+**Status:** Complete
+
+**Changed / Produced**
+- Added `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md`.
+- Defined a modern pixel-isometric version of Megawatt Valley intended for highly autonomous AI development.
+- Explicitly excluded Unity / Godot and routine manual scene-editor intervention.
+- Preserved the existing core game design: renewable-energy tycoon loop, staff, capability progression, manual-to-automation ladder, events, stars, weather and company growth.
+- Set **Level 1 — Here Comes the Sun** as the common benchmark for comparing autonomous builders.
+- Opened issue **#6** to track the experiment.
+
+**Decisions / assumptions / recommendations**
+- This is a parallel implementation path, not a replacement for the existing Unity project yet.
+- Cursor and MiMo may build independently using different technical approaches.
+- Compare results on autonomy, fun, visual quality, reliability, maintainability and manual effort requested from Rapha.
+
+**Next recommended step**
+- Give both builders the same scope document and compare their first playable Level 1 deliveries.
+
+**Git / References**
+- Scope: `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md`
+- Issue: #6
+- Branch: `main`
+
+
 ## 2026-09-19 — Support — E1 playtest accepted; session stop
 
 **Agent:** Rapha (playtest) / Cursor (handoff)
