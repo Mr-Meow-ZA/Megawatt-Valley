@@ -120,8 +120,10 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
   });
 
   make('shadow_blob', 96, 48, (g) => {
-    g.fillStyle(0x061208, 0.45);
-    g.fillEllipse(48, 24, 84, 30);
+    g.fillStyle(0x061208, 0.6);
+    g.fillEllipse(48, 24, 90, 32);
+    g.fillStyle(0x061208, 0.35);
+    g.fillEllipse(44, 26, 70, 22);
   });
 
   make('cloud', 140, 56, (g) => {
