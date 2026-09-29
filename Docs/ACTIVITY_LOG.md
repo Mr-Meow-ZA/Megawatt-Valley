@@ -99,6 +99,33 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Branch: `cursor/phaser-level1-build-5938`
 - PR: #7
 
+
+## 2026-09-29 — Primary — Kenney CC0 asset integration
+
+**Agent:** Cursor
+**Status:** Partial — continuing quality loop
+
+**Changed / Produced**
+- Downloaded Kenney / OGA CC0 packs (roads-nova, landscape, buildings, nature, industrial, vehicles, icons)
+- Curated runtime pack in `public/assets/game/` + `Docs/ASSET_REGISTER_PHASER.md`
+- Phaser now loads sourced sprites (terrain, trees, solar composites, office, vehicles)
+- Build menu uses sprite thumbnails; HD landscape grass variants
+
+**Tested / Verified**
+- typecheck/test green; assets served as real PNGs via Vite
+- Browser reviews mixed during LFS pointer bugs; fixed by rebuilding binaries
+
+**Known issues / limitations**
+- Style mix of Kenney packs still below hand-painted concept density
+- Continuing review → fix → review until product-quality presentation
+
+**Next recommended step**
+- Another visual pass vs concept; unify remaining prop scales; optional deploy URL
+
+**Git / References**
+- Branch: `cursor/phaser-level1-build-5938`
+- PR: #7
+
 ## 2026-09-29 — Primary — Visual overhaul toward concept art
 
 **Agent:** Cursor
