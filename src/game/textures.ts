@@ -179,16 +179,28 @@ export function generateTextures(scene: Phaser.Scene): void {
     strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x1a5a88, 1, 0.45);
   });
 
-  make('tile_bank', TILE_W, TILE_H + 12, (g, w, h) => {
+  const drawBank = (g: G, w: number, h: number, variant: number) => {
     const cx = w / 2;
     const cy = h / 2 - 2;
     fillDiamond(g, cx, cy + 2, w - 2, TILE_H - 2, Palette.rockDark);
-    fillDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.rock);
-    fillDiamond(g, cx - 8, cy - 2, 20, 12, Palette.grassMid, 0.7);
+    fillDiamond(g, cx, cy, w - 2, TILE_H - 2, variant === 1 ? Palette.rockLite : Palette.rock);
+    if (variant !== 2) {
+      fillDiamond(g, cx - 8, cy - 2, 20, 12, Palette.grassMid, 0.7);
+    } else {
+      fillDiamond(g, cx + 6, cy - 1, 18, 10, Palette.dirt, 0.65);
+    }
     g.fillStyle(Palette.rockLite, 0.7);
-    g.fillEllipse(cx + 8, cy + 2, 12, 6);
+    g.fillEllipse(cx + (variant === 0 ? 8 : -6), cy + 2, 12, 6);
+    if (variant === 1) {
+      g.fillStyle(Palette.rockDark, 0.8);
+      g.fillEllipse(cx - 10, cy + 4, 8, 5);
+    }
     strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.rockDark, 1, 0.4);
-  });
+  };
+  make('tile_bank', TILE_W, TILE_H + 12, (g, w, h) => drawBank(g, w, h, 0));
+  make('tile_bank_0', TILE_W, TILE_H + 12, (g, w, h) => drawBank(g, w, h, 0));
+  make('tile_bank_1', TILE_W, TILE_H + 12, (g, w, h) => drawBank(g, w, h, 1));
+  make('tile_bank_2', TILE_W, TILE_H + 12, (g, w, h) => drawBank(g, w, h, 2));
 
   make('tile_locked', TILE_W, TILE_H + 12, (g, w, h) => {
     const cx = w / 2;
@@ -464,6 +476,17 @@ export function generateTextures(scene: Phaser.Scene): void {
 
   make('tree_round', 72, 96, (g, w, h) => {
     drawPineTree(g, w / 2, h - 8, 1.05, 3);
+  });
+
+  make('bush', 48, 40, (g, w, h) => {
+    groundShadow(g, w / 2, h - 6, 28, 12, 0.3);
+    g.fillStyle(Palette.pineDark, 1);
+    g.fillEllipse(w / 2, h - 16, 30, 18);
+    g.fillStyle(Palette.pine, 1);
+    g.fillEllipse(w / 2 - 6, h - 18, 18, 14);
+    g.fillEllipse(w / 2 + 8, h - 17, 16, 12);
+    g.fillStyle(Palette.pineLite, 0.85);
+    g.fillEllipse(w / 2 + 2, h - 20, 12, 9);
   });
 
   make('rock', 48, 36, (g, w, h) => {

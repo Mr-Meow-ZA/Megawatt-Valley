@@ -8,6 +8,11 @@ import { Palette } from './isoArt';
 const WORLD_W = 42;
 const WORLD_H = 30;
 
+/** Site A buildable meadow — keep clear of trees; fence the perimeter. */
+const SITE_A = { x0: 4, x1: 18, y0: 4, y1: 16 };
+/** Site B locked meadow. */
+const SITE_B = { x0: 22, x1: 34, y0: 6, y1: 16 };
+
 function textureFor(kind: EquipmentKind): string {
   switch (kind) {
     case 'bargain_pv':
@@ -33,6 +38,42 @@ function hash(x: number, y: number): number {
   return Math.abs((x * 73856093) ^ (y * 19349663)) % 1000;
 }
 
+function inRect(
+  x: number,
+  y: number,
+  r: { x0: number; x1: number; y0: number; y1: number },
+): boolean {
+  return x >= r.x0 && x < r.x1 && y >= r.y0 && y < r.y1;
+}
+
+/** Slight meander so the river corridor is not a perfect rectangle. */
+function riverCenterX(y: number): number {
+  const wobble = Math.sin(y * 0.45) * 0.7 + Math.sin(y * 0.17) * 0.4;
+  return 19 + wobble;
+}
+
+function isWater(x: number, y: number): boolean {
+  const cx = riverCenterX(y);
+  return x >= Math.floor(cx - 1.15) && x <= Math.floor(cx + 1.15);
+}
+
+function isBank(x: number, y: number): boolean {
+  if (isWater(x, y)) return false;
+  const cx = riverCenterX(y);
+  const dist = Math.abs(x - cx);
+  return dist >= 1.15 && dist < 2.55;
+}
+
+function isMainRoad(x: number, y: number): boolean {
+  if (y === 6 && x >= 3 && x <= 34) return true;
+  if (x === 11 && y >= 6 && y <= 16) return true;
+  if (x === 15 && y >= 6 && y <= 12) return true;
+  if (y === 12 && x >= 11 && x <= 15) return true;
+  if (y === 8 && x >= 21 && x <= 32) return true;
+  if (x === 26 && y >= 8 && y <= 14) return true;
+  return false;
+}
+
 export class WorldView {
   private readonly ground = new Map<string, Phaser.GameObjects.Image>();
   private readonly props: Phaser.GameObjects.GameObject[] = [];
@@ -52,9 +93,10 @@ export class WorldView {
     this.scatterEnvironment();
     this.spawnClouds();
     const cam = scene.cameras.main;
-    const center = isoToScreen(16, 11);
-    cam.centerOn(center.x, center.y - 20);
-    cam.setZoom(0.95);
+    // Pull back slightly so more of the valley reads like the concept target.
+    const center = isoToScreen(18, 12);
+    cam.centerOn(center.x, center.y - 10);
+    cam.setZoom(0.88);
   }
 
   private tileKey(x: number, y: number): string {
@@ -62,9 +104,15 @@ export class WorldView {
   }
 
   private terrainKey(x: number, y: number): string {
-    // River corridor through valley
-    if (x >= 18 && x <= 20) return 'tile_water';
-    if (x === 17 || x === 21) return 'tile_bank';
+    if (isWater(x, y)) return 'tile_water';
+
+    if (isBank(x, y)) {
+      const h = hash(x, y);
+      // Mix bank variants with occasional grass/dirt for organic edges.
+      if (h % 7 === 0) return `tile_grass_${h % 4}`;
+      if (h % 5 === 0) return 'tile_dirt';
+      return `tile_bank_${h % 3}`;
+    }
 
     // Main loop roads (asphalt)
     if (y === 6 && x >= 3 && x <= 34) return hash(x, y) % 5 === 0 ? 'tile_road_mark' : 'tile_road';
@@ -78,9 +126,9 @@ export class WorldView {
     // Service / dirt pads near office
     if (x >= 4 && x <= 7 && y >= 5 && y <= 7) return 'tile_dirt';
 
-    const inSiteA = x >= 4 && x < 18 && y >= 4 && y < 16;
-    const inSiteB = x >= 22 && x < 34 && y >= 6 && y < 16;
-    if (!inSiteA && !inSiteB && hash(x, y) % 11 === 0) return 'tile_dirt';
+    if (!inRect(x, y, SITE_A) && !inRect(x, y, SITE_B) && hash(x, y) % 11 === 0) {
+      return 'tile_dirt';
+    }
 
     return `tile_grass_${hash(x, y) % 4}`;
   }
@@ -106,8 +154,42 @@ export class WorldView {
     this.props.push(img);
   }
 
+  /** Draw sagging steel cables once between pylon tops. */
+  private drawPowerLines(
+    pylons: Array<{ x: number; y: number; yOff: number; scale: number }>,
+  ): void {
+    const g = this.scene.add.graphics();
+    g.setDepth(depthFor(20, 4, 7));
+    // Thin dark steel cables (concept: transmission spans)
+    g.lineStyle(1.25, Palette.steelDark, 0.92);
+
+    for (let i = 0; i < pylons.length - 1; i++) {
+      const a = pylons[i];
+      const b = pylons[i + 1];
+      const sa = isoToScreen(a.x, a.y);
+      const sb = isoToScreen(b.x, b.y);
+      // Approximate cross-arm height relative to image anchor
+      const ax = sa.x;
+      const ay = sa.y + a.yOff - 52 * a.scale;
+      const bx = sb.x;
+      const by = sb.y + b.yOff - 52 * b.scale;
+      const midX = (ax + bx) / 2;
+      const midY = (ay + by) / 2 + 14; // slight sag
+      // Three parallel conductors with small vertical offset
+      for (let c = 0; c < 3; c++) {
+        const dy = (c - 1) * 4;
+        g.beginPath();
+        g.moveTo(ax - 8 + c * 8, ay + dy);
+        g.lineTo(midX - 4 + c * 4, midY + dy);
+        g.lineTo(bx - 8 + c * 8, by + dy);
+        g.strokePath();
+      }
+    }
+    this.props.push(g);
+  }
+
   private scatterEnvironment(): void {
-    // Bridge across river on main road
+    // Bridge across river on main road (y=6 crossing)
     {
       const s = isoToScreen(19, 6);
       const bridge = this.scene.add.image(s.x, s.y - 10, 'bridge');
@@ -115,42 +197,64 @@ export class WorldView {
       this.props.push(bridge);
     }
 
-    // Pylon near substation
-    this.addProp('pylon', 14, 3, -40, 8, 1);
-    this.addProp('pylon', 22, 4, -40, 8, 0.9);
+    // Transmission pylons + cables
+    const pylons: Array<{ x: number; y: number; yOff: number; scale: number }> = [
+      { x: 10, y: 2, yOff: -40, scale: 0.95 },
+      { x: 14, y: 3, yOff: -40, scale: 1 },
+      { x: 22, y: 4, yOff: -40, scale: 0.9 },
+      { x: 28, y: 3, yOff: -40, scale: 0.85 },
+    ];
+    for (const p of pylons) {
+      this.addProp('pylon', p.x, p.y, p.yOff, 8, p.scale);
+    }
+    this.drawPowerLines(pylons);
 
     // Maintenance yard near office
     this.addProp('yard', 5, 8, -18, 5);
 
-    // Vehicles
+    // Decorative vehicles — office / yard / substation / Site B access
     this.addProp('van', 6, 6, -10, 7);
+    this.addProp('truck', 5, 7, -10, 7, 0.95);
+    this.addProp('van', 7, 5, -10, 7, 0.9);
     this.addProp('truck', 13, 7, -10, 7);
+    this.addProp('van', 14, 5, -10, 7, 0.92);
+    this.addProp('truck', 12, 11, -10, 7, 0.88);
     this.addProp('van', 27, 9, -10, 7);
+    this.addProp('truck', 25, 10, -10, 7, 0.9);
 
-    // Fence rings around Site A solar meadow edges
-    for (let x = 5; x <= 16; x += 2) {
-      this.addProp('fence', x, 15, -6, 3, 0.9);
+    // Tech workers around office, yard, and substation
+    this.addProp('tech', 7, 9, -14, 9, 0.95);
+    this.addProp('tech', 6, 8, -14, 9, 0.9);
+    this.addProp('tech', 8, 7, -14, 9, 0.92);
+    this.addProp('tech', 13, 5, -14, 9, 0.95);
+    this.addProp('tech', 14, 6, -14, 9, 0.88);
+    this.addProp('tech', 12, 10, -14, 9, 0.9);
+    this.addProp('tech', 15, 11, -14, 9, 0.85);
+
+    // Full fence perimeter around Site A meadow
+    for (let x = SITE_A.x0; x < SITE_A.x1; x += 2) {
+      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.9);
+      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.9);
     }
-    for (let y = 8; y <= 14; y += 2) {
-      this.addProp('fence', 4, y, -6, 3, 0.85);
+    for (let y = SITE_A.y0 + 1; y < SITE_A.y1 - 1; y += 2) {
+      this.addProp('fence', SITE_A.x0, y, -6, 3, 0.85);
+      this.addProp('fence', SITE_A.x1 - 1, y, -6, 3, 0.85);
     }
 
-    // Dense pine forests — north hills and river sides
+    // Dense pine forests — north hills and river sides (Site A stays clear)
     const pines: Array<[number, number, boolean]> = [];
     for (let x = 0; x < WORLD_W; x++) {
       for (let y = 0; y < WORLD_H; y++) {
-        const onRiver = x >= 17 && x <= 21;
-        const onRoad =
-          (y === 6 && x >= 3 && x <= 34) ||
-          (x === 11 && y >= 6 && y <= 16) ||
-          (y === 8 && x >= 21 && x <= 32);
-        const inSiteA = x >= 4 && x < 18 && y >= 4 && y < 16;
-        const inSiteB = x >= 22 && x < 34 && y >= 6 && y < 16;
-        if (onRiver || onRoad || inSiteA || inSiteB) continue;
+        if (isWater(x, y) || isBank(x, y)) continue;
+        if (isMainRoad(x, y)) continue;
+        if (inRect(x, y, SITE_A) || inRect(x, y, SITE_B)) continue;
+        // Keep a thin clear strip beside Site A fence for readability
+        if (x >= SITE_A.x0 - 1 && x <= SITE_A.x1 && y >= SITE_A.y0 - 1 && y <= SITE_A.y1) {
+          continue;
+        }
         const h = hash(x, y);
-        // denser forests on edges / hills
         const edge = x < 3 || y < 3 || x > 36 || y > 24;
-        const threshold = edge ? 280 : 120;
+        const threshold = edge ? 320 : 140;
         if (h % 1000 < threshold) {
           pines.push([x, y, h % 3 === 0]);
         }
@@ -160,14 +264,48 @@ export class WorldView {
       this.addProp(big ? 'tree_big' : 'tree', x, y, big ? -28 : -20, 3);
     }
 
-    // Rocks along river banks
-    for (let y = 2; y < WORLD_H; y += 2) {
-      if (hash(17, y) % 3 === 0) this.addProp('rock', 17, y, -4, 2);
-      if (hash(21, y) % 3 === 0) this.addProp('rock', 21, y, -4, 2);
+    // Rocks along river banks + occasional props in the water edge
+    for (let y = 1; y < WORLD_H; y++) {
+      for (let x = 0; x < WORLD_W; x++) {
+        if (!isBank(x, y) && !isWater(x, y)) continue;
+        const h = hash(x, y);
+        if (isBank(x, y) && h % 3 === 0) {
+          this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
+        }
+        // Occasional rocks sitting in shallow water / foam edge
+        if (isWater(x, y) && h % 7 === 0 && y !== 6) {
+          this.addProp('rock', x, y, -2, 1, 0.7 + (h % 2) * 0.1);
+        }
+      }
     }
 
-    // Decorative workers near yard
-    this.addProp('tech', 7, 9, -14, 9, 0.95);
+    // Bush / rock clusters at meadow–forest transitions
+    const clusters: Array<[number, number]> = [
+      [3, 4],
+      [3, 10],
+      [3, 15],
+      [8, 3],
+      [16, 3],
+      [17, 14],
+      [18, 16],
+      [21, 5],
+      [21, 14],
+      [34, 7],
+      [34, 14],
+      [30, 5],
+      [2, 20],
+      [10, 18],
+      [24, 18],
+      [36, 12],
+    ];
+    for (const [cx, cy] of clusters) {
+      if (inRect(cx, cy, SITE_A)) continue;
+      const h = hash(cx, cy);
+      this.addProp('tree_round', cx, cy, -12, 3, 0.85 + (h % 3) * 0.08);
+      if (h % 2 === 0) this.addProp('rock', cx + 1, cy, -4, 2, 0.8);
+      if (h % 3 === 0) this.addProp('bush', cx, cy + 1, -10, 3, 0.75);
+      if (h % 5 === 0) this.addProp('tree_round', cx - 1, cy + 1, -12, 3, 0.7);
+    }
   }
 
   private spawnClouds(): void {
@@ -189,7 +327,7 @@ export class WorldView {
       const [xs, ys] = key.split(',');
       const x = Number(xs);
       const y = Number(ys);
-      const inSiteB = x >= 22 && x < 34 && y >= 6 && y < 16;
+      const inSiteB = inRect(x, y, SITE_B);
       if (inSiteB && siteB && !siteB.unlocked) {
         img.setTexture('tile_locked');
       } else if (img.texture.key === 'tile_locked') {
