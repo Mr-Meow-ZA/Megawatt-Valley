@@ -38,6 +38,36 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-29 — Support — Rebuild curated game sprites (Pillow)
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Rebuilt `public/assets/game/pv_bargain.png` and `pv_premium.png` (~280×220) as multi-panel farms on isometric gravel diamonds with soft shadows; premium adds gold corner/frame accents.
+- Rebuilt `substation.png` (~280×220) as a readable industrial yard: tank + chimney + water tower + container on a concrete pad with fence suggestion.
+- Rebuilt `office.png` from `office_mod.png` with asphalt parking strip + scaled `van.png`.
+- Added reproducible compositor `Tools/rebuild_curated_sprites.py`.
+
+**Tested / Verified**
+- Pillow composite run; confirmed transparent corners and opaque content bounds.
+- Visual QA of all four output PNGs.
+
+**Known issues / limitations**
+- Source Kenney preview sprites stay low-res; composites improve layout/readability, not art fidelity.
+- Fence is a drawn post/rail suggestion plus `fence.png` accents, not a full perimeter mesh.
+
+**Decisions / assumptions / recommendations**
+- No simulation / Phaser code changes — texture keys unchanged.
+- Prefer re-running the Tools script if source props change.
+
+**Next recommended step**
+- Spot-check in-game build menu / world markers for scale vs procedural fallbacks.
+
+**Git / References**
+- Commit: `ac02548`
+- Branch: `cursor/improve-curated-sprites-533e`
+- Parent PR branch: `cursor/phaser-level1-build-5938`
 
 ## 2026-09-29 — Support — CC0 sourced pixel/iso assets download
 
