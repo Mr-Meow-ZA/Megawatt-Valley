@@ -1,184 +1,164 @@
 ---
-description: Core engineering and project rules for Megawatt Valley
+description: Primary autonomous development rules for Megawatt Valley
 alwaysApply: true
 ---
 
-# Megawatt Valley — Cursor Project Rules
+# Megawatt Valley — Cursor Primary Rules
 
-You are working on **Megawatt Valley**, a Unity renewable-energy management / tycoon game.
+## Status
 
-Before making significant changes, read:
+**PRIMARY RULESET — 29 September 2026**
 
-- `README.md`
-- `Docs/GAME_VISION.md`
-- `Docs/VISUAL_DIRECTION.md`
-- `Docs/ASSET_POLICY.md`
-- `Docs/ASSET_REGISTER.md`
-- `Docs/PROGRESSION_AND_ENGAGEMENT.md`
-- `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`
-- `Docs/TECHNICAL_ARCHITECTURE.md`
-- `Docs/ROADMAP.md`
-- `Docs/SESSION_GOALS.md`
-- `Docs/LEVEL_01_DESIGN.md`
-- `Docs/DEVELOPMENT_WORKFLOW.md`
-- `Docs/COLLABORATION_GUIDE.md`
-- `Docs/CURRENT_STATUS.md`
-- `Docs/CHATGPT_REVIEW.md`
+The project is no longer an active Unity project.
 
-## Core development rule
+The full previous Unity state is preserved on branch **archive/unity-prototype-2026-09-29**.
 
-**Build the smallest playable version of the current requirement. Do not build speculative frameworks for future systems.**
+If any old Unity-era rule or document conflicts with this file or the primary build specification, the new Phaser direction wins.
 
-## Session-goal discipline
+## Read first
 
-Megawatt Valley is developed in small, finishable sessions.
+Before meaningful work, read:
 
-- `Docs/SESSION_GOALS.md` is the active small-goal tracker.
-- Unless the user explicitly asks otherwise, work on **one primary session goal at a time**.
-- Do not silently expand a session goal into an entire subsystem.
-- Prefer a visible, playable, testable result over invisible infrastructure where practical.
-- Once the primary session goal works, stop and report it before beginning unrelated stretch work.
-- A session goal is successful even when the larger roadmap phase remains incomplete.
-- When a tracked goal is genuinely complete, mark it `[x]` and commit the change.
-- If a requested task is clearly too large for one focused session, split it into smaller finishable outcomes before implementation.
+- README.md
+- Docs/CURSOR_PRIMARY_BUILD_SPEC.md
+- Docs/CURRENT_STATUS.md
+- Docs/VISUAL_DIRECTION.md
+- Docs/TECHNICAL_ARCHITECTURE.md
+- Docs/ROADMAP.md
+- Docs/GAME_VISION.md
+- Docs/PROGRESSION_AND_ENGAGEMENT.md
+- Docs/LEVEL_01_DESIGN.md
 
-The preferred rhythm is:
+## Your role
 
-**choose one small goal → build it → play/test it → commit it → log it → celebrate it → choose the next goal**
+You are the **primary implementation team**, not merely a coding assistant.
 
-## Mandatory GitHub handoff after meaningful sessions
+Rapha is the product owner / creative director.
 
-GitHub is the shared handoff layer between Cursor and ChatGPT.
+Your job is to turn the approved specification into a complete ready-to-play game with minimal routine input from Rapha.
 
-After meaningful implementation work, follow `Docs/COLLABORATION_GUIDE.md` and leave enough context that ChatGPT can reconstruct the session without having watched it.
+## Core constraint
 
-At minimum:
+Use the approved free/open-source stack.
 
-1. Commit the work with a clear focused commit message.
-2. Append a concise entry to `Docs/ACTIVITY_LOG.md`.
-3. Update `Docs/SESSION_GOALS.md` if the active goal was completed.
-4. Update `Docs/CURRENT_STATUS.md` if phase, next goal, blocker, or locked decision changed.
-5. Update or explicitly flag any authoritative design / architecture document that no longer matches implementation.
-6. Read `Docs/CHATGPT_REVIEW.md` before the next meaningful session if it changed since the previous session.
+Do not introduce a new paid requirement without explicit approval.
 
-Do not skip the activity-log handoff because the code is self-explanatory. The log exists for cross-agent alignment.
+## Primary technical direction
 
-Rapha's standing instruction for this repo: after a meaningful session, **commit, push to origin, and sync Polaris** without waiting to be asked. Project hooks in `.cursor/hooks.json` fetch GitHub at session start and remind you at stop if the working tree is dirty or `main` is unpushed. Hooks do not auto-commit.
+- Phaser
+- TypeScript
+- Vite
+- browser-first
+- static deployable build
+- no required backend for v1
+- local browser persistence
+- automated tests
+- browser/visual playtesting by the agent
 
-The activity log should stay concise and should include:
+## Autonomous execution rule
 
-- what changed;
-- what was tested;
-- known issues / limitations;
-- assumptions or decisions;
-- next recommended step;
-- relevant commit / branch / PR.
+Do **not** stop after every small implementation step to ask what to do next.
 
-## Product boundaries
+If the next action is:
 
-- This is a character-driven renewable-energy tycoon / management game.
-- The strongest design reference is the Two Point series for accessibility, humour, readable management, character-driven systems, and campaign progression.
-- References are inspiration only. Do not copy proprietary art, text, character designs, UI, names, assets, or code.
-- The first major gameplay target is a **solar-only vertical slice**.
-- Do not introduce wind, BESS, advanced corporate finance, multiplayer, procedural world systems, or other deferred features unless the active task explicitly requests them.
+- clearly inside the approved roadmap;
+- technically reversible;
+- free;
+- legally/licensing-safe;
+- consistent with the product spec;
 
+then make a sensible decision and continue.
 
-## Progression / engagement rules
+Maintain an internal implementation backlog and work through it.
 
-`Docs/PROGRESSION_AND_ENGAGEMENT.md` is the authoritative design for capability progression, objective cadence and manual-to-automation gameplay.
+## Required loop
 
-Current priority is the **E1 — Engagement & Progression Proof** track.
+For every meaningful player-facing change:
 
-Rules:
+**implement → build → test → run → visually inspect → interact/play → fix → retest**
 
-- Do not treat the functional Level 1 slice as sufficient proof of fun.
-- Progression should preferably unlock a new capability, management verb, delegation option, policy or automation rather than only a small percentage bonus.
-- Repetitive work should move through the Management Abstraction Ladder where appropriate: **manual → assigned staff → schedule / policy → automation → exception management**.
-- Let the player experience a problem briefly before unlocking the tool that solves it.
-- Automation should remove stale clicks, not remove meaningful decisions.
-- Do not build the complete future capability / research tree now. Implement only the minimum required by the active E1 session goal.
-- Reuse existing gameplay systems behind capability gates where possible. In particular, the current automatic technician fault dispatch should become an earned capability rather than be rebuilt.
-- Do not stretch gameplay by adding waiting, grind or repeated panel placement simply to increase level duration.
-- Hero Corner follows the Engagement Gate; after that, gameplay/content and visual production can progress increasingly in parallel.
+Code compiling is not definition of done.
 
-## Approved visual north star
+Use browser tools to inspect the real game.
 
-`Docs/VISUAL_DIRECTION.md` is the authoritative visual-direction document.
+## Do not ask Rapha to do routine development work
 
-The long-term quality target is a premium, colourful, stylised 3D isometric management-game presentation with warm scenic environments, highly readable renewable infrastructure, expressive staff, visible world activity, polished management UI, and humorous environmental detail.
+Do not ask Rapha to:
 
-Important rules:
+- code;
+- debug;
+- wire UI;
+- edit project configuration that you can edit;
+- assemble ordinary game content;
+- place ordinary assets;
+- run tests you can run;
+- copy logs you can obtain;
+- make low-risk reversible implementation decisions;
+- manually maintain the backlog.
 
-- Grey-box visuals are temporary implementation stages, not the intended final look.
-- Do not mistake placeholder quality for the product target.
-- Do **not** prematurely polish art before gameplay is proven.
-- Conversely, do not make technical decisions that unnecessarily block the approved visual target.
-- Camera, world scale, asset scale, building footprints, roads, UI composition, and simulation/presentation separation should be designed with the eventual visual target in mind.
-- Before mass-producing final assets, the project should build and approve a small style-prototype / hero scene as defined in `Docs/VISUAL_DIRECTION.md`.
-- Keep Megawatt Valley visually original. Inspiration is not permission to clone another game's assets or art language.
+## Escalation triggers
 
-## Asset sourcing rules
+Ask Rapha only when a decision:
 
-For Hero Corner and Level 1, follow `Docs/ASSET_POLICY.md`.
+- materially changes gameplay;
+- materially changes the approved visual direction;
+- materially changes scope;
+- costs money;
+- has uncertain licensing/legal implications;
+- would destroy/replace important history;
+- is difficult to reverse and strategically significant.
 
-- Default to commercially safe free/community assets.
-- Prefer modification / kitbashing in Blender over from-scratch modelling when sensible.
-- Custom-by-exception: make an asset yourself when no suitable sourced option exists, adaptation is slower than simple modelling, or a specific identity/readability need requires it.
-- Record durable third-party assets in `Docs/ASSET_REGISTER.md`.
-- Do not import assets with unclear commercial-use rights.
-- Do not use ripped game assets or copyrighted material without explicit permission.
-- Do not let “free” override visual coherence, performance, scale, or style.
-- Hero Corner is a style-unification proof, not a custom-modelling requirement.
+## Visual target
 
-## Architecture rules
+The active visual north star is **high-resolution pixel-isometric / illustrated pixel art**, with a crisp modern UI.
 
-1. Prefer clear, conventional Unity / C# solutions over clever architecture.
-2. Use GameObjects / MonoBehaviours initially unless there is a demonstrated need for something else.
-3. Do **not** introduce DOTS / ECS unless profiling and an explicit architecture decision justify it.
-4. Keep simulation logic separate from visual presentation where practical.
-5. Prefer data-driven definitions for content such as equipment, events, staff roles, traits, research, scenarios, and objectives.
-6. ScriptableObjects are encouraged where they fit, but do not force every data type into ScriptableObjects.
-7. Avoid giant manager classes with unrelated responsibilities.
-8. Do not add third-party frameworks, dependency-injection systems, service locators, global event buses, or major packages without an explicit project need.
-9. Important calculations should be testable independently of scene presentation where practical.
-10. Do not hard-code configurable balancing values throughout gameplay code.
+Do not drift back toward the archived full-3D Unity target.
 
-## Unity rules
+Do not settle for programmer-art placeholders as the final presentation.
 
-- Keep the Unity project compiling after each coherent task.
-- Check for console errors after implementation when tooling allows it.
-- Preserve Unity `.meta` files.
-- Do not commit Unity-generated folders such as `Library`, `Temp`, `Logs`, `obj`, or build outputs.
-- Do not rename or move large groups of assets without a reason tied to the task.
-- Prefer prefabs and reusable components for repeated scene content.
-- Avoid expensive per-frame work when a tick, event, cached value, or lower-frequency update would work.
+## Product target
 
-## Change discipline
+Ship **Megawatt Valley: Solar — Here Comes the Sun** as a coherent 30–60 minute first scenario with:
 
-- Keep each task focused.
-- Do not make unrelated refactors while implementing a feature.
-- Do not silently change game-design decisions.
-- If a requirement is ambiguous and the choice would materially affect gameplay or architecture, flag the assumption.
-- If a core architecture decision changes, update `Docs/TECHNICAL_ARCHITECTURE.md` or explicitly flag the proposed change for review.
-- If the behaviour of Level 1 changes materially, update `Docs/LEVEL_01_DESIGN.md` or flag it for review.
-- If an implementation choice materially changes the approved art / presentation direction, update or flag `Docs/VISUAL_DIRECTION.md` for review.
-- Follow escalation triggers in `Docs/COLLABORATION_GUIDE.md` when a change has long-term product or architecture consequences.
+- build/placement;
+- solar generation;
+- grid export;
+- economy;
+- time/weather;
+- equipment choice;
+- failures;
+- technician repair;
+- Radio Dispatch automation;
+- soiling/cleaning;
+- site expansion;
+- capability progression;
+- events;
+- severe-weather climax;
+- 1★ / 2★ / 3★ goals;
+- save/load;
+- polished UI;
+- releasable presentation.
 
-## Definition of done for implementation tasks
+## Scope discipline
 
-Unless the task says otherwise, a feature is not done until:
+Do not implement operational wind, BESS, multiplayer, cloud accounts, deep corporate finance or multi-region simulation before the solar release works.
 
-- the project compiles;
-- the requested player-facing behaviour exists;
-- obvious error states are handled;
-- the feature can be exercised in the relevant test scene;
-- no unrelated feature was expanded;
-- key assumptions are reported;
-- any required documentation change is identified;
-- the GitHub handoff has been completed for a meaningful session.
+Locked future content may be teased in UI if useful.
 
-## Development philosophy
+## Git discipline
 
-**Build small → playtest → review → refine → expand.**
+After meaningful progress:
 
-A simple working feature that can be tested is more valuable than a large speculative framework.
+- commit clearly;
+- push to origin;
+- update Docs/CURRENT_STATUS.md when project state changes;
+- keep architecture/visual/spec docs aligned;
+- preserve the archive branch.
+
+Do not create paperwork for its own sake.
+
+## Governing principle
+
+> **Build the game, test the game, finish the game.**
+
+Optimise for a finished playable product, not for producing code or frameworks.
