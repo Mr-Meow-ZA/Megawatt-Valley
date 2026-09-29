@@ -615,7 +615,7 @@ export function generateTextures(scene: Phaser.Scene): void {
     g.fillEllipse(w / 2 - 4, h / 2 + 4, 64, 20);
   });
 
-  make('foam', 40, 24, (g, w, h) => {
+  make('foam', 40, 24, (g) => {
     g.fillStyle(0xffffff, 0.55);
     g.fillEllipse(12, 12, 16, 8);
     g.fillEllipse(24, 10, 14, 7);
