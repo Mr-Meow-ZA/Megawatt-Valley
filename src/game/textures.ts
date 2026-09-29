@@ -29,7 +29,7 @@ function drawGrassTile(g: G, w: number, h: number, variant: number): void {
     const py = cy + ((u - 50) / 50) * (TILE_H * 0.28);
     g.fillRect(px, py, 2, 2);
   }
-  strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.grassDeep, 1, 0.35);
+  strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.grassDeep, 1, 0.12);
 }
 
 /** Tiny isometric-ish car for parking lots. */
@@ -608,6 +608,21 @@ export function generateTextures(scene: Phaser.Scene): void {
   });
 
   // maintenance yard shed
+  make('shadow_blob', 96, 48, (g, w, h) => {
+    g.fillStyle(0x0a1808, 0.35);
+    g.fillEllipse(w / 2 - 2, h / 2 + 2, 80, 28);
+    g.fillStyle(0x0a1808, 0.2);
+    g.fillEllipse(w / 2 - 4, h / 2 + 4, 64, 20);
+  });
+
+  make('foam', 40, 24, (g, w, h) => {
+    g.fillStyle(0xffffff, 0.55);
+    g.fillEllipse(12, 12, 16, 8);
+    g.fillEllipse(24, 10, 14, 7);
+    g.fillStyle(0xd8f0ff, 0.4);
+    g.fillEllipse(18, 14, 10, 5);
+  });
+
   make('yard', 120, 90, (g, w, h) => {
     groundShadow(g, w / 2, h - 14, 90, 30, 0.34);
     fillDiamond(g, w / 2, h - 18, 96, 32, Palette.dirt);

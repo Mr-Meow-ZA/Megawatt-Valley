@@ -78,11 +78,13 @@ export class WorldView {
   private readonly ground = new Map<string, Phaser.GameObjects.Image>();
   private readonly props: Phaser.GameObjects.GameObject[] = [];
   private readonly entitySprites = new Map<string, Phaser.GameObjects.Image>();
+  private readonly entityShadows = new Map<string, Phaser.GameObjects.Image>();
   private readonly overlays = new Map<string, Phaser.GameObjects.Image>();
   private ghost: Phaser.GameObjects.Image | null = null;
   private selectRing: Phaser.GameObjects.Image | null = null;
   private hoverTile: Vec2 | null = null;
   private clouds: Phaser.GameObjects.Image[] = [];
+  private foam: Phaser.GameObjects.Image[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -92,6 +94,7 @@ export class WorldView {
     this.buildTerrain();
     this.scatterEnvironment();
     this.spawnClouds();
+    this.spawnFoam();
     const cam = scene.cameras.main;
     // Pull back slightly so more of the valley reads like the concept target.
     const center = isoToScreen(18, 12);
@@ -358,6 +361,20 @@ export class WorldView {
     }
   }
 
+  private spawnFoam(): void {
+    for (let y = 1; y < WORLD_H; y += 1) {
+      if (hash(19, y) % 3 !== 0) continue;
+      const cx = riverCenterX(y);
+      const s = isoToScreen(cx, y);
+      const foam = this.scene.add.image(s.x, s.y - 4, 'foam');
+      foam.setDepth(depthFor(Math.floor(cx), y, 1));
+      foam.setAlpha(0.45);
+      foam.setScale(0.7 + (hash(y, 3) % 40) / 100);
+      this.foam.push(foam);
+      this.props.push(foam);
+    }
+  }
+
   refreshLockedTiles(): void {
     const snap = this.sim.snapshot();
     const siteB = snap.plots.find((p) => p.id === 'site_b');
@@ -383,11 +400,15 @@ export class WorldView {
     }
     // water shimmer — subtle tint pulse on river tiles
     const pulse = 0.92 + Math.sin(this.scene.time.now / 700) * 0.08;
-    for (const [key, img] of this.ground) {
+    for (const [, img] of this.ground) {
       if (img.texture.key === 'tile_water') {
         img.setAlpha(pulse);
       }
-      void key;
+    }
+    for (let i = 0; i < this.foam.length; i++) {
+      const f = this.foam[i];
+      f.x += Math.sin(this.scene.time.now / 800 + i) * 0.15;
+      f.setAlpha(0.35 + Math.sin(this.scene.time.now / 500 + i) * 0.2);
     }
 
     const seen = new Set<string>();
@@ -400,6 +421,17 @@ export class WorldView {
       const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
       const anchor = isoToScreen(tx, ty);
       const yOff = -14 - elev * 5;
+      let shadow = this.entityShadows.get(eq.id);
+      if (!shadow) {
+        shadow = this.scene.add.image(anchor.x - 6, anchor.y + 10 - elev * 5, 'shadow_blob');
+        this.entityShadows.set(eq.id, shadow);
+      }
+      const shadowScale = isPv(eq.kind) ? 1.35 : eq.kind === 'office' || eq.kind === 'substation' ? 1.5 : 0.9;
+      shadow.setPosition(anchor.x - 8, anchor.y + 12 - elev * 5);
+      shadow.setScale(shadowScale, shadowScale * 0.7);
+      shadow.setDepth(depthFor(eq.tile.x, eq.tile.y, 3));
+      shadow.setAlpha(0.55);
+
       let sprite = this.entitySprites.get(eq.id);
       if (!sprite) {
         sprite = this.scene.add.image(anchor.x, anchor.y + yOff, textureFor(eq.kind));
@@ -408,6 +440,7 @@ export class WorldView {
       sprite.setTexture(textureFor(eq.kind));
       sprite.setPosition(anchor.x, anchor.y + yOff);
       sprite.setDepth(depthFor(eq.tile.x, eq.tile.y, 5));
+      sprite.setScale(isPv(eq.kind) ? 1.12 : 1);
       sprite.setAlpha(eq.commissioned ? 1 : 0.4 + eq.constructionProgress * 0.6);
       if (isPv(eq.kind)) {
         const dust = 1 - eq.soiling * 0.4;
@@ -459,6 +492,8 @@ export class WorldView {
         this.entitySprites.delete(id);
         this.overlays.get(id)?.destroy();
         this.overlays.delete(id);
+        this.entityShadows.get(id)?.destroy();
+        this.entityShadows.delete(id);
       }
     }
 
