@@ -141,7 +141,9 @@ export class WorldView {
       return 'tile_dirt';
     }
 
-    return hash(x, y) % 2 === 0 ? 'tile_grass' : 'tile_grass_alt';
+    const h = hash(x, y);
+    // Prefer higher-detail landscape grass where available; fall back to roads pack.
+    return `tile_grass_hd_${h % 4}`;
   }
 
   /** Fake valley elevation: hills on far edges, lower near river. */
