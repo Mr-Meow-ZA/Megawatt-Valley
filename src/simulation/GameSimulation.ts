@@ -107,7 +107,7 @@ export class GameSimulation {
       id: this.uid('eq'),
       kind: 'bargain_pv',
       plotId: 'site_a',
-      tile: { x: siteA.origin.x + 3, y: siteA.origin.y + 4 },
+      tile: { x: siteA.origin.x + 8, y: siteA.origin.y + 3 },
       condition: 1,
       soiling: 0.05,
       faulted: false,
