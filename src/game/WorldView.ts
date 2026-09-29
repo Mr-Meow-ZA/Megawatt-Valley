@@ -107,7 +107,7 @@ export class WorldView {
   }
 
   private terrainKey(x: number, y: number): string {
-    if (isWater(x, y)) return 'tile_water';
+    if (isWater(x, y)) return `tile_water_${hash(x, y) % 3}`;
 
     if (isBank(x, y)) {
       const h = hash(x, y);
@@ -408,12 +408,15 @@ export class WorldView {
       c.x += 0.08 + i * 0.01;
       if (c.x > 1400) c.x = -400;
     }
-    // water shimmer — subtle tint pulse on river tiles
-    const pulse = 0.92 + Math.sin(this.scene.time.now / 700) * 0.08;
-    for (const [, img] of this.ground) {
-      if (img.texture.key === 'tile_water') {
-        img.setAlpha(pulse);
-      }
+    // Animate river by cycling water tile variants + soft alpha pulse.
+    const frame = Math.floor(this.scene.time.now / 280) % 3;
+    const pulse = 0.94 + Math.sin(this.scene.time.now / 700) * 0.06;
+    for (const [key, img] of this.ground) {
+      if (!img.texture.key.startsWith('tile_water')) continue;
+      const [xs, ys] = key.split(',');
+      const base = hash(Number(xs), Number(ys)) % 3;
+      img.setTexture(`tile_water_${(base + frame) % 3}`);
+      img.setAlpha(pulse);
     }
     for (let i = 0; i < this.foam.length; i++) {
       const f = this.foam[i];

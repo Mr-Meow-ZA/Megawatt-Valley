@@ -22,7 +22,7 @@ function drawGrassTile(g: G, w: number, h: number, variant: number): void {
   fillDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.grassMid);
   fillDiamond(g, cx, cy - 1, w - 14, TILE_H - 10, Palette.grassLight, 0.55);
   g.fillStyle(Palette.grassLight, 0.85);
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 14; i++) {
     const t = (i * 37 + variant * 13) % 100;
     const u = (i * 53 + variant * 7) % 100;
     const px = cx + ((t - 50) / 50) * (w * 0.28);
@@ -186,6 +186,22 @@ export function generateTextures(scene: Phaser.Scene): void {
     strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x2a2e34, 1, 0.5);
   });
 
+  for (let wv = 0; wv < 3; wv++) {
+    make(`tile_water_${wv}`, TILE_W, TILE_H + 12, (g, w, h) => {
+      const cx = w / 2;
+      const cy = h / 2 - 2;
+      fillDiamond(g, cx, cy + 2, w - 2, TILE_H - 2, Palette.waterDeep);
+      fillDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.waterMid);
+      fillDiamond(g, cx, cy - 2 - wv, w - 18, TILE_H - 14, Palette.waterLite, 0.4 + wv * 0.08);
+      g.lineStyle(1, Palette.waterFoam, 0.5 + wv * 0.1);
+      const ox = wv * 4;
+      g.lineBetween(cx - 18 + ox, cy + 2, cx - 4 + ox, cy - 5);
+      g.lineBetween(cx - 2 + ox, cy + 5, cx + 12 + ox, cy - 1);
+      g.fillStyle(Palette.waterFoam, 0.25);
+      g.fillEllipse(cx + (wv - 1) * 8, cy, 10, 4);
+      strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x1a5a88, 1, 0.3);
+    });
+  }
   make('tile_water', TILE_W, TILE_H + 12, (g, w, h) => {
     const cx = w / 2;
     const cy = h / 2 - 2;
@@ -195,7 +211,7 @@ export function generateTextures(scene: Phaser.Scene): void {
     g.lineStyle(1, Palette.waterFoam, 0.55);
     g.lineBetween(cx - 16, cy, cx - 4, cy - 6);
     g.lineBetween(cx + 2, cy + 4, cx + 14, cy - 2);
-    strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x1a5a88, 1, 0.45);
+    strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x1a5a88, 1, 0.3);
   });
 
   const drawBank = (g: G, w: number, h: number, variant: number) => {
