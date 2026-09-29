@@ -465,7 +465,7 @@ export class WorldView {
       const ty = eq.tile.y + def.footprint.y / 2 - 0.5;
       const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
       const anchor = isoToScreen(tx, ty);
-      const yOff = -14 - elev * 5;
+      const yOff = (isPv(eq.kind) ? -36 : eq.kind === 'office' || eq.kind === 'substation' ? -40 : -18) - elev * 5;
       let shadow = this.entityShadows.get(eq.id);
       if (!shadow) {
         shadow = this.scene.add.image(anchor.x - 6, anchor.y + 10 - elev * 5, 'shadow_blob');

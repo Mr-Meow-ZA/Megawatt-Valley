@@ -50,9 +50,11 @@ function seasonForDay(day: number): string {
 }
 
 const BUILD_ICONS: Record<string, string> = {
-  bargain_pv: '🔆',
-  premium_pv: '💎',
+  bargain_pv: '<img src="/assets/game/pv_group.png" alt="" width="36" height="36"/>',
+  premium_pv: '<img src="/assets/game/pv_portrait.png" alt="" width="36" height="36"/>',
   inverter: '🔌',
+  office: '<img src="/assets/game/office_mod2.png" alt="" width="36" height="36"/>',
+  substation: '<img src="/assets/game/tank.png" alt="" width="36" height="36"/>',
 };
 
 export class DomHud {
