@@ -199,6 +199,7 @@ export function gravelPad(g: G, cx: number, cy: number, w: number, h: number, se
 /**
  * Chain-link fence around an isometric diamond pad.
  * Posts + dual rails + diamond mesh suggestion.
+ * `edges`: which sides to draw — 'back' (NW+NE), 'front' (SW+SE), or 'all'.
  */
 export function chainFence(
   g: G,
@@ -208,6 +209,7 @@ export function chainFence(
   h: number,
   postH = 12,
   posts = 7,
+  edges: 'all' | 'back' | 'front' = 'all',
 ): void {
   const hw = w / 2;
   const hh = h / 2;
@@ -217,16 +219,18 @@ export function chainFence(
     { x: cx, y: cy + hh },
     { x: cx - hw, y: cy },
   ];
-  // rails along each edge
+  // edge indices: 0 = NE (top→right), 1 = SE (right→bottom), 2 = SW (bottom→left), 3 = NW (left→top)
+  const edgeList =
+    edges === 'back' ? [0, 3] : edges === 'front' ? [1, 2] : [0, 1, 2, 3];
+
   g.lineStyle(1, Palette.fence, 0.85);
-  for (let e = 0; e < 4; e++) {
+  for (const e of edgeList) {
     const a = corners[e]!;
     const b = corners[(e + 1) % 4]!;
     g.lineBetween(a.x, a.y - postH + 2, b.x, b.y - postH + 2);
     g.lineBetween(a.x, a.y - 3, b.x, b.y - 3);
   }
-  // posts distributed along perimeter
-  for (let e = 0; e < 4; e++) {
+  for (const e of edgeList) {
     const a = corners[e]!;
     const b = corners[(e + 1) % 4]!;
     const n = Math.max(2, Math.floor(posts / 2));
@@ -236,24 +240,25 @@ export function chainFence(
       const py = a.y + (b.y - a.y) * t;
       g.lineStyle(1.5, Palette.steelDark, 0.95);
       g.lineBetween(px, py - postH, px, py + 2);
-      // top knob
       g.fillStyle(Palette.steelLite, 0.9);
       g.fillCircle(px, py - postH, 1.5);
     }
   }
-  // light mesh hint (front two edges only, keep readable)
-  g.lineStyle(1, Palette.steelLite, 0.28);
-  for (let e = 1; e <= 2; e++) {
-    const a = corners[e]!;
-    const b = corners[(e + 1) % 4]!;
-    for (let i = 1; i < 6; i++) {
-      const t0 = (i - 0.4) / 6;
-      const t1 = (i + 0.4) / 6;
-      const x0 = a.x + (b.x - a.x) * t0;
-      const y0 = a.y + (b.y - a.y) * t0;
-      const x1 = a.x + (b.x - a.x) * t1;
-      const y1 = a.y + (b.y - a.y) * t1;
-      g.lineBetween(x0, y0 - postH * 0.65, x1, y1 - postH * 0.25);
+  // mesh hint on front edges
+  if (edges === 'all' || edges === 'front') {
+    g.lineStyle(1, Palette.steelLite, 0.28);
+    for (const e of edges === 'front' ? edgeList : [1, 2]) {
+      const a = corners[e]!;
+      const b = corners[(e + 1) % 4]!;
+      for (let i = 1; i < 6; i++) {
+        const t0 = (i - 0.4) / 6;
+        const t1 = (i + 0.4) / 6;
+        const x0 = a.x + (b.x - a.x) * t0;
+        const y0 = a.y + (b.y - a.y) * t0;
+        const x1 = a.x + (b.x - a.x) * t1;
+        const y1 = a.y + (b.y - a.y) * t1;
+        g.lineBetween(x0, y0 - postH * 0.65, x1, y1 - postH * 0.25);
+      }
     }
   }
 }
