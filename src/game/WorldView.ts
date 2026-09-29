@@ -263,6 +263,18 @@ export class WorldView {
     // Maintenance yard near office
     this.addProp('yard', 5, 8, -18, 5);
 
+    // Decorative starter solar rows (visual density matching concept farm)
+    const demoRows: Array<[number, number]> = [
+      [8, 10],
+      [9, 11],
+      [10, 12],
+      [11, 10],
+      [12, 11],
+    ];
+    for (const [x, y] of demoRows) {
+      this.addProp('pv_row', x, y, -12, 5, 1.05);
+    }
+
     // Decorative vehicles — office / yard / substation / Site B access
     this.addProp('van', 6, 6, -10, 7);
     this.addProp('truck', 5, 7, -10, 7, 0.95);

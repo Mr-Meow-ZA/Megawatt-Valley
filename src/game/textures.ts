@@ -266,6 +266,21 @@ export function generateTextures(scene: Phaser.Scene): void {
   make('pv_bargain', 180, 140, (g, w, h) => drawSolarArray(g, w, h, false));
   make('pv_premium', 180, 140, (g, w, h) => drawSolarArray(g, w, h, true));
 
+  // Single iso panel row strip for dense farm composition
+  make('pv_row', 120, 48, (g, w, h) => {
+    groundShadow(g, w / 2 - 2, h - 10, 100, 22, 0.4);
+    fillDiamond(g, w / 2, h - 14, 100, 28, Palette.dirt);
+    for (let col = 0; col < 5; col++) {
+      const px = 20 + col * 20;
+      const py = 14;
+      g.lineStyle(2, Palette.steelDark, 1);
+      g.lineBetween(px - 5, py + 5, px - 6, py + 14);
+      g.lineBetween(px + 5, py + 5, px + 6, py + 14);
+      isoPanel(g, px, py, Palette.panelBlue, Palette.panelBlueLite, Palette.panelCell, false);
+    }
+  });
+
+
   // --- inverter ---
   make('inverter', 64, 72, (g, w, h) => {
     groundShadow(g, w / 2, h - 12, 40, 16, 0.36);
