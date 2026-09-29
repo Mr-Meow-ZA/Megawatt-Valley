@@ -96,7 +96,7 @@ export class WorldView {
     // Pull back slightly so more of the valley reads like the concept target.
     const center = isoToScreen(18, 12);
     cam.centerOn(center.x, center.y - 10);
-    cam.setZoom(0.88);
+    cam.setZoom(0.82);
   }
 
   private tileKey(x: number, y: number): string {
@@ -381,23 +381,32 @@ export class WorldView {
       c.x += 0.08 + i * 0.01;
       if (c.x > 1400) c.x = -400;
     }
+    // water shimmer — subtle tint pulse on river tiles
+    const pulse = 0.92 + Math.sin(this.scene.time.now / 700) * 0.08;
+    for (const [key, img] of this.ground) {
+      if (img.texture.key === 'tile_water') {
+        img.setAlpha(pulse);
+      }
+      void key;
+    }
 
     const seen = new Set<string>();
 
     for (const eq of snapshot.equipment) {
       seen.add(eq.id);
       const def = EQUIPMENT[eq.kind];
-      const anchor = isoToScreen(
-        eq.tile.x + def.footprint.x / 2 - 0.5,
-        eq.tile.y + def.footprint.y / 2 - 0.5,
-      );
+      const tx = eq.tile.x + def.footprint.x / 2 - 0.5;
+      const ty = eq.tile.y + def.footprint.y / 2 - 0.5;
+      const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
+      const anchor = isoToScreen(tx, ty);
+      const yOff = -14 - elev * 5;
       let sprite = this.entitySprites.get(eq.id);
       if (!sprite) {
-        sprite = this.scene.add.image(anchor.x, anchor.y - 14, textureFor(eq.kind));
+        sprite = this.scene.add.image(anchor.x, anchor.y + yOff, textureFor(eq.kind));
         this.entitySprites.set(eq.id, sprite);
       }
       sprite.setTexture(textureFor(eq.kind));
-      sprite.setPosition(anchor.x, anchor.y - 14);
+      sprite.setPosition(anchor.x, anchor.y + yOff);
       sprite.setDepth(depthFor(eq.tile.x, eq.tile.y, 5));
       sprite.setAlpha(eq.commissioned ? 1 : 0.4 + eq.constructionProgress * 0.6);
       if (isPv(eq.kind)) {

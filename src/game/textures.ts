@@ -50,73 +50,92 @@ function drawCar(g: G, x: number, y: number, color: number, flip = false): void 
   g.fillCircle(x + 7, y + 10, 1);
 }
 
+/** Draw one tilted iso solar panel (parallelogram face + edge). */
+function isoPanel(
+  g: G,
+  cx: number,
+  cy: number,
+  face: number,
+  edge: number,
+  cell: number,
+  premium: boolean,
+): void {
+  const hw = 11;
+  const hh = 6;
+  g.fillStyle(0x0a1838, 0.9);
+  g.beginPath();
+  g.moveTo(cx - hw, cy + 2);
+  g.lineTo(cx, cy + hh + 2);
+  g.lineTo(cx + hw, cy + 2);
+  g.lineTo(cx + hw, cy + 5);
+  g.lineTo(cx, cy + hh + 5);
+  g.lineTo(cx - hw, cy + 5);
+  g.closePath();
+  g.fillPath();
+  g.fillStyle(face, 1);
+  g.beginPath();
+  g.moveTo(cx, cy - hh);
+  g.lineTo(cx + hw, cy);
+  g.lineTo(cx, cy + hh);
+  g.lineTo(cx - hw, cy);
+  g.closePath();
+  g.fillPath();
+  g.lineStyle(1, edge, premium ? 1 : 0.85);
+  g.beginPath();
+  g.moveTo(cx, cy - hh);
+  g.lineTo(cx + hw, cy);
+  g.lineTo(cx, cy + hh);
+  g.lineTo(cx - hw, cy);
+  g.closePath();
+  g.strokePath();
+  g.lineStyle(1, cell, 0.5);
+  g.lineBetween(cx - 4, cy - 2, cx + 4, cy + 2);
+  g.lineBetween(cx + 4, cy - 2, cx - 4, cy + 2);
+  g.lineBetween(cx - 7, cy, cx + 7, cy);
+  g.fillStyle(0xffffff, premium ? 0.4 : 0.25);
+  g.beginPath();
+  g.moveTo(cx + 2, cy - hh + 1);
+  g.lineTo(cx + hw - 2, cy);
+  g.lineTo(cx + 4, cy - 1);
+  g.closePath();
+  g.fillPath();
+}
+
 /**
- * Solar array: 4 rows × 5 panels, mounting racks, chain fence, gravel, soft shadow.
- * Light from top-right → panel glints on upper-right.
+ * Solar array: isometric panel rows, racks, chain fence, gravel, soft shadow.
  */
 function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
   const cx = w / 2;
   const baseY = h - 28;
-  const padW = 138;
-  const padH = 48;
+  const padW = 142;
+  const padH = 50;
 
-  groundShadow(g, cx - 3, baseY + 10, 142, 40, 0.4);
+  groundShadow(g, cx - 3, baseY + 10, 146, 42, 0.42);
   gravelPad(g, cx, baseY, padW, padH, premium ? 3 : 1);
-  // back fence behind panels
   chainFence(g, cx, baseY, padW - 6, padH - 4, 14, 8, 'back');
 
-  const panelColor = premium ? Palette.panelBlueDark : Palette.panelBlue;
-  const cellColor = premium ? 0x5ab0ff : Palette.panelCell;
-  const frameColor = premium ? Palette.accentYellow : Palette.panelBlueDark;
-  const rows = 4;
-  const cols = 5;
-  const pw = 22;
-  const ph = 13;
-  const startX = 18;
-  const startY = 10;
-  const gapX = 26;
-  const gapY = 18;
+  const face = premium ? Palette.panelBlueDark : Palette.panelBlue;
+  const edge = premium ? Palette.accentYellow : Palette.panelBlueLite;
+  const cell = premium ? 0x5ab0ff : Palette.panelCell;
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const px = startX + col * gapX + row * 2;
-      const py = startY + row * gapY;
-      // mounting rack legs (shadow side bottom-left)
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 5; col++) {
+      const px = 28 + col * 24 + row * 3;
+      const py = 18 + row * 16;
       g.lineStyle(2, Palette.steelDark, 1);
-      g.lineBetween(px + 4, py + ph, px + 2, py + ph + 10);
-      g.lineBetween(px + pw - 4, py + ph, px + pw - 2, py + ph + 10);
-      g.lineStyle(1, Palette.steel, 0.9);
-      g.lineBetween(px + 2, py + ph + 10, px + pw - 2, py + ph + 10);
-      g.lineStyle(1, Palette.steelLite, 0.7);
-      g.lineBetween(px + 6, py + ph + 2, px + pw - 6, py + ph + 8);
-
-      g.fillStyle(0x0a1a40, 0.45);
-      g.fillRoundedRect(px - 1, py + 2, pw + 2, ph, 2);
-      g.fillStyle(panelColor, 1);
-      g.fillRoundedRect(px, py, pw, ph, 2);
-      g.lineStyle(1, frameColor, premium ? 0.95 : 0.85);
-      g.strokeRoundedRect(px, py, pw, ph, 2);
-
-      g.lineStyle(1, cellColor, 0.55);
-      g.lineBetween(px + 7, py + 2, px + 7, py + ph - 2);
-      g.lineBetween(px + 14, py + 2, px + 14, py + ph - 2);
-      g.lineBetween(px + 2, py + 6, px + pw - 2, py + 6);
-
-      // glint (top-right light)
-      g.fillStyle(0xffffff, premium ? 0.35 : 0.22);
-      g.fillRect(px + pw - 8, py + 2, 5, 3);
-      if (premium) {
-        g.fillStyle(0xffffff, 0.18);
-        g.fillRect(px + 3, py + 2, 3, 2);
-      }
+      g.lineBetween(px - 6, py + 6, px - 8, py + 16);
+      g.lineBetween(px + 6, py + 6, px + 8, py + 16);
+      g.lineStyle(1, Palette.steel, 0.85);
+      g.lineBetween(px - 8, py + 16, px + 8, py + 16);
+      isoPanel(g, px, py, face, edge, cell, premium);
     }
   }
 
   chainFence(g, cx, baseY, padW - 6, padH - 4, 14, 8, 'front');
-  g.lineStyle(2, Palette.steelLite, 0.9);
-  g.lineBetween(cx - 10, baseY + padH / 2 - 2, cx + 10, baseY + padH / 2 - 2);
-  g.fillStyle(Palette.accentYellow, 0.85);
-  g.fillRect(cx - 3, baseY + padH / 2 - 12, 6, 3);
+  g.lineStyle(2, Palette.steelLite, 0.95);
+  g.lineBetween(cx - 12, baseY + padH / 2, cx + 12, baseY + padH / 2);
+  g.fillStyle(Palette.accentYellow, 0.9);
+  g.fillRect(cx - 4, baseY + padH / 2 - 14, 8, 4);
 }
 
 export function generateTextures(scene: Phaser.Scene): void {
