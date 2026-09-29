@@ -285,7 +285,8 @@ export class WorldView {
       [12, 11],
     ];
     for (const [x, y] of demoRows) {
-      this.addProp('pv_bargain', x, y, -28, 5, 0.42);
+      this.addProp('pv_group', x, y, -22, 5, 0.7);
+      this.addProp('fence', x, y + 1, -8, 4, 0.55);
     }
 
     // Decorative vehicles — office / yard / substation / Site B access
@@ -489,13 +490,14 @@ export class WorldView {
       sprite.setDepth(depthFor(eq.tile.x, eq.tile.y, 5));
       sprite.setScale(isPv(eq.kind) ? 1.2 : 1);
       sprite.setAlpha(eq.commissioned ? 1 : 0.4 + eq.constructionProgress * 0.6);
-      if (isPv(eq.kind)) {
-        const dust = 1 - eq.soiling * 0.4;
+      if (isPv(eq.kind) && eq.soiling > 0.35) {
+        // Light dusting only when heavily soiled — avoid purple/blue tint wash.
+        const dust = Math.min(0.35, eq.soiling * 0.4);
         sprite.setTint(
           Phaser.Display.Color.GetColor(
-            Math.floor(220 * dust + 35),
-            Math.floor(230 * dust + 25),
-            Math.floor(255 * (0.85 + dust * 0.15)),
+            Math.floor(255 - dust * 40),
+            Math.floor(255 - dust * 30),
+            Math.floor(255 - dust * 10),
           ),
         );
       } else {
