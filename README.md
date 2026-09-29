@@ -93,3 +93,13 @@ Open `Assets/_MegawattValley/Scenes/Prototype_Valley.unity` and press Play.
 - **Space** pause · **1/2/3** sim speed · Event choices **8/9** when shown
 - Objective: reach **0.50 MW** for Tiny Tycoon win
 
+
+
+## Parallel autonomous build experiment
+
+Megawatt Valley now also has an experimental **pixel-isometric autonomous build path** intended to compare AI builders without Unity / Godot or routine manual scene-editor work.
+
+Scope: `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md`  
+Tracking issue: **#6 — Pixel-isometric autonomous Megawatt Valley build**
+
+The first benchmark is a complete, self-contained version of **Level 1 — Here Comes the Sun**. This experiment is independent of the existing Unity implementation and must not overwrite its history.
