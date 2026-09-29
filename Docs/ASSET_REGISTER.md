@@ -18,4 +18,4 @@ Policy: `Docs/ASSET_POLICY.md`.
 
 | Status | Asset / Pack | Creator | Source URL | Licence | Attribution Required | Modified? | Project Location / Use | Date Obtained | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| — | _No third-party production assets registered yet_ |  |  |  |  |  |  |  |  |
+| CANDIDATE | Kenney isometric + city/nature/UI packs (batch) | Kenney | https://kenney.nl · https://github.com/KenneyNL | CC0 | No (appreciated) | No | `public/assets/sourced/` — see `INVENTORY.md` | 2026-09-29 | Phaser Level 1 candidate art. Includes iso landscape/city/buildings/roads, nature kit, city-kit industrial (solar GLB+PNG previews), pixel vehicles, characters, game icons. Not yet wired into runtime. |

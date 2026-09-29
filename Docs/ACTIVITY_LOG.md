@@ -39,6 +39,36 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 ---
 
 
+## 2026-09-29 — Support — CC0 sourced pixel/iso assets download
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Downloaded ~29 Kenney CC0 packs into `public/assets/sourced/` (~147 MB, ~13.7k files).
+- Includes isometric landscape/city/buildings/roads, nature kit, city-kit industrial (solar panels), commercial/suburban/roads, pixel vehicles, characters, game/UI icons.
+- Inventory: `public/assets/sourced/INVENTORY.md`.
+- Registered batch as CANDIDATE in `Docs/ASSET_REGISTER.md`.
+
+**Tested / Verified**
+- Confirmed License.txt CC0 on packs; unzipped and counted PNGs per folder.
+- Catalogued useful paths for grass, trees, roads, buildings, characters, vehicles, solar previews, icons.
+
+**Known issues / limitations**
+- No dedicated hardhat worker sprites in free Kenney set.
+- Exact sun/lightning/calendar icons missing; use power/coin/timer/dollar stand-ins.
+- City Kit packs are primarily GLB + PNG previews (good for Phaser placeholders).
+
+**Decisions / assumptions / recommendations**
+- Prefer Kenney iso 128px tiles for Phaser Level 1 map; use industrial solar PNG previews until custom/rendered panels exist.
+
+**Next recommended step**
+- Wire selected PNGs into Phaser asset loader / replace procedural stand-ins where they improve readability.
+
+**Git / References**
+- Branch: `cursor/phaser-level1-build-5938`
+- PR: #7
+
 ## 2026-09-29 — Primary — Visual overhaul toward concept art
 
 **Agent:** Cursor
