@@ -609,10 +609,12 @@ export function generateTextures(scene: Phaser.Scene): void {
 
   // maintenance yard shed
   make('shadow_blob', 96, 48, (g, w, h) => {
-    g.fillStyle(0x0a1808, 0.35);
-    g.fillEllipse(w / 2 - 2, h / 2 + 2, 80, 28);
-    g.fillStyle(0x0a1808, 0.2);
-    g.fillEllipse(w / 2 - 4, h / 2 + 4, 64, 20);
+    g.fillStyle(0x061208, 0.55);
+    g.fillEllipse(w / 2 - 2, h / 2 + 2, 84, 30);
+    g.fillStyle(0x061208, 0.35);
+    g.fillEllipse(w / 2 - 4, h / 2 + 4, 68, 22);
+    g.fillStyle(0x061208, 0.2);
+    g.fillEllipse(w / 2 - 6, h / 2 + 5, 48, 14);
   });
 
   make('foam', 40, 24, (g) => {

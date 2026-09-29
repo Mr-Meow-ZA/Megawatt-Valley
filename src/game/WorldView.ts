@@ -189,7 +189,17 @@ export class WorldView {
   private addProp(tex: string, x: number, y: number, yOff = 0, depthBias = 2, scale = 1): void {
     const s = isoToScreen(x, y);
     const elev = this.heightAt(x, y);
-    const img = this.scene.add.image(s.x, s.y + yOff - elev * 5, tex);
+    const baseY = s.y - elev * 5;
+    // Grounding shadow for props (trees, buildings, vehicles)
+    if (tex !== 'fence' && tex !== 'foam' && tex !== 'cloud' && tex !== 'bridge') {
+      const sh = this.scene.add.image(s.x - 6, baseY + 8, 'shadow_blob');
+      const treeish = tex.startsWith('tree') || tex === 'bush';
+      sh.setScale(treeish ? 0.55 * scale : 0.85 * scale, treeish ? 0.35 * scale : 0.5 * scale);
+      sh.setAlpha(0.5);
+      sh.setDepth(depthFor(x, y, depthBias - 1));
+      this.props.push(sh);
+    }
+    const img = this.scene.add.image(s.x, baseY + yOff, tex);
     img.setScale(scale);
     img.setDepth(depthFor(x, y, depthBias));
     this.props.push(img);
@@ -426,11 +436,11 @@ export class WorldView {
         shadow = this.scene.add.image(anchor.x - 6, anchor.y + 10 - elev * 5, 'shadow_blob');
         this.entityShadows.set(eq.id, shadow);
       }
-      const shadowScale = isPv(eq.kind) ? 1.35 : eq.kind === 'office' || eq.kind === 'substation' ? 1.5 : 0.9;
-      shadow.setPosition(anchor.x - 8, anchor.y + 12 - elev * 5);
-      shadow.setScale(shadowScale, shadowScale * 0.7);
+      const shadowScale = isPv(eq.kind) ? 1.6 : eq.kind === 'office' || eq.kind === 'substation' ? 1.8 : 1.1;
+      shadow.setPosition(anchor.x - 10, anchor.y + 14 - elev * 5);
+      shadow.setScale(shadowScale, shadowScale * 0.55);
       shadow.setDepth(depthFor(eq.tile.x, eq.tile.y, 3));
-      shadow.setAlpha(0.55);
+      shadow.setAlpha(0.7);
 
       let sprite = this.entitySprites.get(eq.id);
       if (!sprite) {
