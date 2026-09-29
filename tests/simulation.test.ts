@@ -41,16 +41,17 @@ describe('GameSimulation', () => {
 
   it('places bargain PV and spends cash', () => {
     const sim = new GameSimulation();
-    const ok = sim.placeEquipment('bargain_pv', 'site_a', { x: 6, y: 8 });
+    const before = sim.cash;
+    const ok = sim.placeEquipment('bargain_pv', 'site_a', { x: 10, y: 10 });
     expect(ok).toBe(true);
-    expect(sim.cash).toBe(50_000 - EQUIPMENT.bargain_pv.cost);
-    expect(sim.equipment.some((e) => e.kind === 'bargain_pv')).toBe(true);
+    expect(sim.cash).toBe(before - EQUIPMENT.bargain_pv.cost);
+    expect(sim.equipment.filter((e) => e.kind === 'bargain_pv').length).toBeGreaterThanOrEqual(2);
   });
 
   it('rejects placement without funds', () => {
     const sim = new GameSimulation();
     sim.cash = 100;
-    const ok = sim.placeEquipment('premium_pv', 'site_a', { x: 6, y: 8 });
+    const ok = sim.placeEquipment('premium_pv', 'site_a', { x: 10, y: 10 });
     expect(ok).toBe(false);
   });
 
@@ -65,13 +66,10 @@ describe('GameSimulation', () => {
 
   it('exports power after commissioning PV at midday clear weather', () => {
     const sim = new GameSimulation();
-    sim.placeEquipment('bargain_pv', 'site_a', { x: 6, y: 8 });
-    const pv = sim.equipment.find((e) => e.kind === 'bargain_pv')!;
-    pv.commissioned = true;
-    pv.constructionProgress = 1;
     sim.hour = 12;
     sim.weather = 'clear';
     const { exportedKw } = sim.computePower();
+    // Starter commissioned PV should export in clear midday sun.
     expect(exportedKw).toBeGreaterThan(20);
   });
 });
