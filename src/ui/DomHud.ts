@@ -11,7 +11,7 @@ function money(n: number): string {
 function weatherLabel(w: GameSnapshot['weather']): string {
   switch (w) {
     case 'clear':
-      return 'Clear';
+      return 'Sunny';
     case 'partly_cloudy':
       return 'Partly cloudy';
     case 'overcast':
@@ -23,11 +23,37 @@ function weatherLabel(w: GameSnapshot['weather']): string {
   }
 }
 
+function weatherIcon(w: GameSnapshot['weather']): string {
+  switch (w) {
+    case 'clear':
+      return '☀️';
+    case 'partly_cloudy':
+      return '⛅';
+    case 'overcast':
+      return '☁';
+    case 'rain':
+      return '🌧';
+    case 'hail':
+      return '⛈';
+  }
+}
+
 function clock(hour: number): string {
   const h = Math.floor(hour) % 24;
   const m = Math.floor((hour % 1) * 60);
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
+
+function seasonForDay(day: number): string {
+  const s = ['Spring', 'Summer', 'Autumn', 'Winter'];
+  return s[Math.floor(((day - 1) % 120) / 30)];
+}
+
+const BUILD_ICONS: Record<string, string> = {
+  bargain_pv: '🔆',
+  premium_pv: '💎',
+  inverter: '🔌',
+};
 
 export class DomHud {
   private root: HTMLElement;
@@ -38,6 +64,8 @@ export class DomHud {
   private lastSelectionKey = '__uninit__';
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
+  private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'all';
+  private minimapCtx: CanvasRenderingContext2D | null = null;
 
   constructor(
     private readonly sim: GameSimulation,
@@ -48,17 +76,52 @@ export class DomHud {
     this.root = el;
     this.root.innerHTML = `
       <header class="hud-top">
-        <div class="brand">Megawatt Valley</div>
-        <div class="stat" data-k="cash"><span class="label">Cash</span><strong>—</strong></div>
-        <div class="stat" data-k="power"><span class="label">Power</span><strong>—</strong></div>
-        <div class="stat" data-k="export"><span class="label">Export</span><strong>—</strong></div>
-        <div class="stat" data-k="weather"><span class="label">Weather</span><strong>—</strong></div>
-        <div class="stat" data-k="time"><span class="label">Day</span><strong>—</strong></div>
+        <div class="brand-block">
+          <div class="brand">Megawatt Valley</div>
+          <div class="brand-sub">Solar · Here Comes the Sun</div>
+        </div>
+
+        <div class="chip cash" data-k="cash-chip">
+          <span class="chip-icon">💰</span>
+          <div>
+            <span class="chip-label">Cash</span>
+            <strong data-k="cash-val">—</strong>
+            <em data-k="cash-rate">—</em>
+          </div>
+        </div>
+
+        <div class="chip power" data-k="power-chip">
+          <span class="chip-icon">⚡</span>
+          <div class="chip-power">
+            <span class="chip-label">Power output</span>
+            <strong data-k="power-val">—</strong>
+            <div class="bar"><i data-k="power-bar"></i></div>
+          </div>
+        </div>
+
+        <div class="chip weather" data-k="weather-chip">
+          <span class="chip-icon" data-k="weather-icon">☀️</span>
+          <div>
+            <span class="chip-label">Weather</span>
+            <strong data-k="weather-val">—</strong>
+            <em data-k="weather-mod">—</em>
+          </div>
+        </div>
+
+        <div class="chip time" data-k="time-chip">
+          <span class="chip-icon">📅</span>
+          <div>
+            <span class="chip-label">Calendar</span>
+            <strong data-k="time-val">—</strong>
+            <em data-k="time-clock">—</em>
+          </div>
+        </div>
+
         <div class="speed-group">
-          <button data-speed="0" type="button">❚❚</button>
-          <button data-speed="1" type="button">▶</button>
-          <button data-speed="2" type="button">▶▶</button>
-          <button data-speed="4" type="button">▶▶▶</button>
+          <button data-speed="0" type="button" title="Pause">❚❚</button>
+          <button data-speed="1" type="button" title="Play">▶</button>
+          <button data-speed="2" type="button" title="2x">▶▶</button>
+          <button data-speed="4" type="button" title="4x">▶▶▶</button>
         </div>
         <div class="stars" data-k="stars">☆☆☆</div>
       </header>
@@ -68,9 +131,23 @@ export class DomHud {
         <ul data-k="objectives"></ul>
       </aside>
 
+      <aside class="panel minimap-panel">
+        <h2>Valley map</h2>
+        <canvas data-k="minimap" width="220" height="120"></canvas>
+        <div class="minimap-legend">
+          <span>Terrain</span><span>Solar</span><span>Grid</span><span>Buildings</span>
+        </div>
+      </aside>
+
       <aside class="panel build">
         <h2>Build</h2>
-        <div class="build-list" data-k="build"></div>
+        <div class="build-tabs">
+          <button type="button" data-cat="all" class="active">All</button>
+          <button type="button" data-cat="generation">Generation</button>
+          <button type="button" data-cat="grid">Grid</button>
+          <button type="button" data-cat="support">Support</button>
+        </div>
+        <div class="build-grid" data-k="build"></div>
         <button type="button" class="ghost" data-action="cancel-build">Cancel placement</button>
       </aside>
 
@@ -82,7 +159,7 @@ export class DomHud {
 
       <aside class="panel caps">
         <h2>Capabilities</h2>
-        <ul data-k="caps"><li class="muted">None yet — earn them.</li></ul>
+        <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
       </aside>
 
       <div class="toast" data-k="toast" hidden></div>
@@ -91,7 +168,7 @@ export class DomHud {
         <button type="button" data-action="save">Save</button>
         <button type="button" data-action="load">Load</button>
         <button type="button" data-action="new">New Game</button>
-        <span class="hint">Drag to pan · Wheel zoom · Click to select/place</span>
+        <span class="hint">Drag pan · Wheel zoom · 1/2 events · R repair · C clean</span>
       </footer>
 
       <div class="modal" data-k="modal" hidden>
@@ -111,11 +188,25 @@ export class DomHud {
       </div>
     `;
 
+    const canvas = this.root.querySelector('[data-k="minimap"]') as HTMLCanvasElement;
+    this.minimapCtx = canvas.getContext('2d');
+
     const handleUiAction = (ev: Event) => {
-      const t = (ev.target as HTMLElement).closest('[data-speed],[data-build],[data-action]') as HTMLElement | null;
+      const t = (ev.target as HTMLElement).closest(
+        '[data-speed],[data-build],[data-action],[data-cat]',
+      ) as HTMLElement | null;
       if (!t) return;
       ev.preventDefault();
       ev.stopPropagation();
+      const cat = t.getAttribute('data-cat') as typeof this.buildCategory | null;
+      if (cat) {
+        this.buildCategory = cat;
+        this.lastBuildKey = '__force__';
+        this.root.querySelectorAll('[data-cat]').forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-cat') === cat);
+        });
+        return;
+      }
       const speed = t.getAttribute('data-speed');
       if (speed) {
         this.sim.setSpeed(Number(speed) as 0 | 1 | 2 | 4);
@@ -175,16 +266,69 @@ export class DomHud {
     });
   }
 
+  private drawMinimap(snapshot: GameSnapshot): void {
+    const ctx = this.minimapCtx;
+    if (!ctx) return;
+    const w = 220;
+    const h = 120;
+    ctx.clearRect(0, 0, w, h);
+    // valley backdrop
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#6db8e8');
+    grad.addColorStop(0.35, '#5aae3a');
+    grad.addColorStop(1, '#3f8a28');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    // river
+    ctx.fillStyle = '#3f9ad4';
+    ctx.fillRect(w * 0.48, 0, w * 0.08, h);
+    // plots
+    for (const plot of snapshot.plots) {
+      const px = 10 + plot.origin.x * 4.2;
+      const py = 8 + plot.origin.y * 3.2;
+      ctx.fillStyle = plot.unlocked ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.28)';
+      ctx.fillRect(px, py, plot.size.x * 4.2, plot.size.y * 3.2);
+      ctx.strokeStyle = plot.unlocked ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.15)';
+      ctx.strokeRect(px, py, plot.size.x * 4.2, plot.size.y * 3.2);
+    }
+    // equipment dots
+    for (const eq of snapshot.equipment) {
+      const px = 10 + eq.tile.x * 4.2;
+      const py = 8 + eq.tile.y * 3.2;
+      if (eq.kind === 'office') ctx.fillStyle = '#f4f7fb';
+      else if (eq.kind === 'substation') ctx.fillStyle = '#9aa3b0';
+      else if (eq.kind.includes('pv')) ctx.fillStyle = eq.faulted ? '#ff4455' : '#2f6fd4';
+      else ctx.fillStyle = '#f5c542';
+      ctx.fillRect(px, py, 5, 5);
+    }
+  }
+
   render(snapshot: GameSnapshot): void {
-    const set = (k: string, text: string) => {
-      const el = this.root.querySelector(`[data-k="${k}"] strong`) as HTMLElement | null;
+    const setText = (k: string, text: string) => {
+      const el = this.root.querySelector(`[data-k="${k}"]`) as HTMLElement | null;
       if (el && el.textContent !== text) el.textContent = text;
     };
-    set('cash', `${money(snapshot.cash)} (${money(snapshot.revenuePerHour || 0)}/h)`);
-    set('power', `${snapshot.powerKw.toFixed(0)} kW`);
-    set('export', `${snapshot.exportedKw.toFixed(0)} kW`);
-    set('weather', `${weatherLabel(snapshot.weather)} · ${Math.round(snapshot.irradiance * 100)}% sun`);
-    set('time', `${snapshot.day} · ${clock(snapshot.hour)}`);
+
+    setText('cash-val', money(snapshot.cash));
+    setText('cash-rate', `+${money(snapshot.revenuePerHour || 0)}/h`);
+    setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
+    const capacity = Math.max(100, snapshot.powerKw * 1.15, snapshot.exportedKw);
+    const pct = Math.min(100, (snapshot.exportedKw / capacity) * 100);
+    const bar = this.root.querySelector('[data-k="power-bar"]') as HTMLElement;
+    bar.style.width = `${pct}%`;
+
+    setText('weather-icon', weatherIcon(snapshot.weather));
+    setText('weather-val', weatherLabel(snapshot.weather));
+    const mod = Math.round((snapshot.irradiance - 1) * 100);
+    setText(
+      'weather-mod',
+      snapshot.irradiance >= 0.95
+        ? `+${Math.round(snapshot.irradiance * 18)}% output`
+        : `${mod >= 0 ? '+' : ''}${mod}% sun`,
+    );
+
+    setText('time-val', `Day ${snapshot.day}, ${seasonForDay(snapshot.day)}, Year 1`);
+    setText('time-clock', clock(snapshot.hour));
 
     const stars = this.root.querySelector('[data-k="stars"]') as HTMLElement;
     const starText = `${'★'.repeat(snapshot.stars)}${'☆'.repeat(3 - snapshot.stars)}`;
@@ -201,27 +345,43 @@ export class DomHud {
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
       objList.innerHTML = snapshot.objectives
         .filter((o) => o.active || o.complete)
-        .slice(0, 8)
-        .map(
-          (o) =>
-            `<li class="${o.complete ? 'done' : 'active'}"><strong>${o.title}</strong><span>${o.description}</span></li>`,
-        )
+        .slice(0, 6)
+        .map((o) => {
+          const mark = o.complete ? '✓' : '○';
+          return `<li class="${o.complete ? 'done' : 'active'}">
+            <span class="check">${mark}</span>
+            <div><strong>${o.title}</strong><span>${o.description}</span></div>
+          </li>`;
+        })
         .join('');
     }
 
-    const buildKey = `${snapshot.buildMode ?? ''}`;
+    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}`;
     if (buildKey !== this.lastBuildKey) {
       this.lastBuildKey = buildKey;
       const build = this.root.querySelector('[data-k="build"]') as HTMLElement;
-      build.innerHTML = BUILD_MENU_ORDER.map((id) => {
+      const items = BUILD_MENU_ORDER.filter((id) => {
         const def = EQUIPMENT[id];
-        const active = snapshot.buildMode === id ? 'active' : '';
-        return `<button type="button" class="build-item ${active}" data-build="${id}">
-        <strong>${def.name}</strong>
-        <span>${money(def.cost)} · ${def.nameplateKw} kW</span>
-        <em>${def.description}</em>
-      </button>`;
-      }).join('');
+        if (this.buildCategory === 'all') return true;
+        if (this.buildCategory === 'generation') return def.category === 'generation';
+        if (this.buildCategory === 'grid') return def.category === 'electrical';
+        if (this.buildCategory === 'support') return def.category === 'building';
+        return true;
+      });
+      build.innerHTML = items
+        .map((id) => {
+          const def = EQUIPMENT[id];
+          const active = snapshot.buildMode === id ? 'active' : '';
+          return `<button type="button" class="build-card ${active}" data-build="${id}">
+            <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
+            <strong>${def.name}</strong>
+            <span class="price">${money(def.cost)}</span>
+          </button>`;
+        })
+        .join('');
+      if (items.length === 0) {
+        build.innerHTML = `<div class="muted">Nothing in this category yet.</div>`;
+      }
     }
 
     const capsKey = snapshot.capabilities.join(',');
@@ -229,10 +389,13 @@ export class DomHud {
       this.lastCapsKey = capsKey;
       const caps = this.root.querySelector('[data-k="caps"]') as HTMLElement;
       if (snapshot.capabilities.length === 0) {
-        caps.innerHTML = `<li class="muted">None yet — earn them.</li>`;
+        caps.innerHTML = `<li class="muted">None yet — earn them in play.</li>`;
       } else {
         caps.innerHTML = snapshot.capabilities
-          .map((c) => `<li><strong>${CAPABILITY_INFO[c].name}</strong><span>${CAPABILITY_INFO[c].description}</span></li>`)
+          .map(
+            (c) =>
+              `<li><strong>${CAPABILITY_INFO[c].name}</strong><span>${CAPABILITY_INFO[c].description}</span></li>`,
+          )
           .join('');
       }
     }
@@ -266,10 +429,12 @@ export class DomHud {
         const def = EQUIPMENT[selected.kind];
         selBody.innerHTML = `
         <strong>${def.name}</strong>
-        <div>Condition ${(selected.condition * 100).toFixed(0)}%</div>
-        <div>Soiling ${(selected.soiling * 100).toFixed(0)}%</div>
-        <div>${selected.faulted ? '⚠ FAULTED' : selected.commissioned ? 'Online' : 'Under construction'}</div>
-        <div>Plot: ${selected.plotId}</div>`;
+        <div class="sel-grid">
+          <span>Condition</span><b>${(selected.condition * 100).toFixed(0)}%</b>
+          <span>Soiling</span><b>${(selected.soiling * 100).toFixed(0)}%</b>
+          <span>Status</span><b class="${selected.faulted ? 'bad' : 'ok'}">${selected.faulted ? 'FAULTED' : selected.commissioned ? 'Online' : 'Building…'}</b>
+          <span>Plot</span><b>${selected.plotId}</b>
+        </div>`;
       } else if (staff) {
         selBody.innerHTML = `<strong>${staff.name}</strong><div>Technician · ${staff.task.type}</div>`;
       } else {
@@ -299,8 +464,10 @@ export class DomHud {
       modal.hidden = false;
       if (this.lastEventId !== snapshot.activeEvent.id) {
         this.lastEventId = snapshot.activeEvent.id;
-        (this.root.querySelector('[data-k="modal-title"]') as HTMLElement).textContent = snapshot.activeEvent.title;
-        (this.root.querySelector('[data-k="modal-body"]') as HTMLElement).textContent = snapshot.activeEvent.body;
+        (this.root.querySelector('[data-k="modal-title"]') as HTMLElement).textContent =
+          snapshot.activeEvent.title;
+        (this.root.querySelector('[data-k="modal-body"]') as HTMLElement).textContent =
+          snapshot.activeEvent.body;
         const actions = this.root.querySelector('[data-k="modal-actions"]') as HTMLElement;
         actions.innerHTML = snapshot.activeEvent.choices
           .map(
@@ -315,11 +482,11 @@ export class DomHud {
     }
 
     const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
-    if (snapshot.scenarioComplete && snapshot.stars >= 1) {
-      if (!win.dataset.shown) {
-        win.hidden = false;
-        win.dataset.shown = '1';
-      }
+    if (snapshot.scenarioComplete && snapshot.stars >= 1 && !win.dataset.shown) {
+      win.hidden = false;
+      win.dataset.shown = '1';
     }
+
+    this.drawMinimap(snapshot);
   }
 }

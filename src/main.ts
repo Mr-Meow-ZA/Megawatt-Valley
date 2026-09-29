@@ -11,7 +11,7 @@ new Phaser.Game({
   parent,
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundColor: '#7eb7e0',
+  backgroundColor: '#8ec8ef',
   scene: [GameScene],
   scale: {
     mode: Phaser.Scale.RESIZE,

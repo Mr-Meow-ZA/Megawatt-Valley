@@ -1,6 +1,6 @@
-/** 2:1 isometric helpers. Tile size in screen pixels. */
-export const TILE_W = 64;
-export const TILE_H = 32;
+/** 2:1 isometric helpers. Larger tiles for concept-art density. */
+export const TILE_W = 80;
+export const TILE_H = 40;
 
 export function isoToScreen(tileX: number, tileY: number): { x: number; y: number } {
   return {
