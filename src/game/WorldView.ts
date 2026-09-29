@@ -256,17 +256,19 @@ export class WorldView {
       this.props.push(bridge);
     }
 
-    // Transmission pylons + cables
+    // Tall industrial towers as stand-ins for transmission structures
     const pylons: Array<{ x: number; y: number; yOff: number; scale: number }> = [
-      { x: 10, y: 2, yOff: -50, scale: 0.55 },
-      { x: 14, y: 3, yOff: -50, scale: 0.6 },
-      { x: 22, y: 4, yOff: -50, scale: 0.55 },
-      { x: 28, y: 3, yOff: -50, scale: 0.5 },
+      { x: 10, y: 2, yOff: -55, scale: 0.45 },
+      { x: 14, y: 3, yOff: -55, scale: 0.5 },
+      { x: 22, y: 4, yOff: -55, scale: 0.45 },
+      { x: 28, y: 3, yOff: -55, scale: 0.4 },
     ];
     for (const p of pylons) {
-      this.addProp('water_tower', p.x, p.y, p.yOff, 8, p.scale);
+      this.addProp('chimney', p.x, p.y, p.yOff, 8, p.scale);
     }
     this.drawPowerLines(pylons);
+    this.addProp('water_tower', 13, 4, -40, 7, 0.5);
+    this.addProp('tank', 14, 5, -28, 6, 0.45);
 
     // Maintenance yard near office
     this.addProp('yard', 5, 8, -24, 5, 0.85);
@@ -281,7 +283,7 @@ export class WorldView {
       [12, 11],
     ];
     for (const [x, y] of demoRows) {
-      this.addProp('pv_group', x, y, -20, 5, 0.55);
+      this.addProp('pv_bargain', x, y, -28, 5, 0.42);
     }
 
     // Decorative vehicles — office / yard / substation / Site B access
