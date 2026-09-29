@@ -38,6 +38,36 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+
+## 2026-09-29 — Primary — Visual overhaul toward concept art
+
+**Agent:** Cursor
+**Status:** Partial
+
+**Changed / Produced**
+- Major pixel-isometric visual pass vs Docs/VISUAL_CONCEPT_TARGET.jpg
+- Iso art pipeline, detailed solar/office/substation/pylons/trees
+- Dense valley (river foam/animation, hills, power lines, fences, vehicles)
+- Concept HUD (SVG chips, power bar, build grid, minimap)
+- Drop shadows under props/equipment
+- Starter PV + compact chrome
+
+**Tested / Verified**
+- npm typecheck/test/build green (8 tests)
+- Repeated browser visual comparisons; latest self-score ~83% vs concept
+
+**Known issues / limitations**
+- Procedural Graphics still below hand-painted concept density for solar rows/substation complexity
+- Continuing toward 90% parity
+
+**Next recommended step**
+- Another solar/terrain polish pass; then human playthrough + deploy URL
+
+**Git / References**
+- Branch: `cursor/phaser-level1-build-5938`
+- PR: #7
+- Issue: #6
+
 ## 2026-09-29 — Primary — Phaser Level 1 autonomous scaffold + core loop
 
 **Agent:** Cursor
