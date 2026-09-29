@@ -1,567 +1,217 @@
-# Megawatt Valley — Development Roadmap v0.5
+# Megawatt Valley — Production Roadmap v2.0
 
-## Roadmap philosophy
+## Status
 
-Megawatt Valley will be built in playable layers. Each phase must produce something testable before the next major system is added.
+**Primary roadmap — 29 September 2026**
 
-The first strategic goal is not “build the full renewable-energy tycoon.” It is:
+This roadmap replaces the Unity phase plan.
 
-> **Prove that placing, operating, maintaining, and growing a small solar project is fun.**
+The objective is not to complete an engine migration. The objective is to ship **Megawatt Valley: Solar**.
 
-The approved long-term visual target is defined in `Docs/VISUAL_DIRECTION.md`.
-
-The game will not attempt final art quality during early prototypes, but early decisions about camera, scale, world layout, UI composition, simulation / presentation separation, and asset structure must support the eventual visual target.
-
-The production strategy is:
-
-**prove the systems → prove engagement and progression → prove the visual language → build reusable art systems → scale content and polish**
-
-The progression / engagement model is defined in `Docs/PROGRESSION_AND_ENGAGEMENT.md`. A technically functional loop is not enough: before major visual production, the first scenario must demonstrate satisfying objective cadence, unlocks, delegation and at least one manual-to-automated progression.
-
-## Session-sized progress rule
-
-The larger phases in this roadmap are direction, not the unit of daily work.
-
-Actual development should be driven by the smaller goals in `Docs/SESSION_GOALS.md`.
-
-Each focused work session should normally have **one primary session goal** with a clear finish line and, whenever practical, a visible or playable result. Completing a session goal is a valid success even when the larger phase remains incomplete.
-
-Progress rhythm:
-
-**choose one small goal → build it → play/test it → commit it → celebrate it → choose the next goal**
-
-Do not let a small session goal silently expand into an entire subsystem. Optional stretch work comes after the primary goal is complete.
-
-### Phase ↔ session-goal crosswalk
-
-Session badges prove a *miniature* version of a phase. They do **not** automatically close the full roadmap phase.
-
-| ROADMAP phase | First miniature proof | Still open after miniature |
-| --- | --- | --- |
-| 0 Foundation | S0-01…S0-05 ✅ | Package / tooling polish as needed |
-| 1 World & Camera | S1-01…S1-05 ✅ | Edge scroll, camera presets, bounds polish |
-| 2 Building Placement | S2-01…S2-08 ✅ | Snapping rules, multi-tile footprints, construction staging |
-| 3 Energy Loop | S3-02…S3-03 (partial) ✅ | Irradiance curves, conversion topology, stats |
-| 4 Economy | S3-01…S3-04 (partial) ✅ | OpEx, salaries, bankruptcy boundary, deeper finance |
-| 5 Time & Weather | S3-05 + day-factor stub | Full clock, weather variation, visual weather |
-| 6 Maintenance | S4-01…S4-05 ✅ | Richer reliability, schedules, costs |
-| 7 Staff | S4-04 + S5-02 ✅ | Hire/fire, multi-role, salary, traits depth |
-| 8 Events | S5-01 ✅ | Reusable framework + ~5 then ~10–20 events |
-| 9 Objectives | S5-04…S5-05 ✅ | Deeper capability / research progression |
-| 10 Level 1 functional slice | L1-01…L1-08 ✅ | Engagement depth, content cadence and balance |
-| 10B Engagement & Progression | New track `E1-01…E1-09` | Prove the level is fun before Hero Corner |
-
-**Anti-duplication rule:** Do not restart Phase 3/4 as a new framework after S3. Extend the existing loop with the next smallest session goal instead.
-
-Practical Cursor / ChatGPT / Grok working practices, asset policy, and post–Tiny Tycoon sequencing live in `Docs/PRACTICES_AND_PLANNING.md` until accepted into this roadmap.
-
-### Level 1 asset production policy
-
-Level 1 uses **community-first, custom-by-exception** asset production.
-
-- Prefer commercially safe free/community assets.
-- Modify / kitbash in Blender where needed for consistency.
-- Maintain provenance in `Docs/ASSET_REGISTER.md`.
-- Do not require custom models for Hero Corner or the full first Level 1.
-- Create custom assets only when sourcing/adaptation is worse than making a simple asset or when a specific identity need justifies it.
-- Reassess custom replacement priorities after the full Level 1 is visually coherent and playable.
-
-Details: `Docs/ASSET_POLICY.md`.
-
-### Cross-cutting visual checkpoints
-
-These checkpoints run alongside gameplay development rather than replacing it:
-
-- **V0 — Grey-box readability:** camera, zoom, scale, silhouettes, building footprints, roads, solar-array readability, and UI composition.
-- **V1 — Style prototype / hero corner:** after the core loop is proven, build one small scene at roughly 60–70% of final intended style to validate materials, lighting, proportions, character scale, vegetation, and performance.
-- **V2 — Art bible + modular kits:** document and standardise asset scale, material language, colour ranges, bevel / geometry rules, character direction, vegetation, signage, UI language, and optimisation rules before mass production.
-- **V3 — Level 1 environment pass:** replace grey-box terrain, roads, buildings, solar assets, substations, props, vehicles, and vegetation progressively.
-- **V4 — Characters + world activity:** staff roles, animations, maintenance actions, construction activity, vehicles, idle behaviour, and environmental humour.
-- **V5 — UI + weather + VFX + audio integration:** presentation systems come together.
-- **V6 — Final polish benchmark:** Level 1 should eventually reach the warmth, readability, density, charm, and screenshot quality of the approved concept direction without copying it literally.
+Cursor should progress through the roadmap autonomously and should not stop after every small implementation task unless a true escalation decision is required.
 
 ---
 
-## Phase 0 — Foundation
+# M0 — Rebaseline
 
-### Goal
-Create a stable Unity + Cursor + Git workflow.
+## Goal
 
-### Tasks
-- Create Unity project using the agreed Unity 6 LTS / URP baseline.
-- Connect project folder to this GitHub repository.
-- Add Unity-aware `.gitignore` and Git LFS configuration where appropriate.
-- Confirm scene / prefab / script conventions.
-- Add basic project folders.
-- Configure Input System, Cinemachine, UI Toolkit, and other agreed packages.
-- Test Cursor editing and Unity compilation workflow.
-- Explore Unity MCP integration if useful.
-- Confirm the rendering baseline can support the approved stylised 3D target without introducing premature custom-rendering complexity.
+Turn the repository into the active Phaser / TypeScript production project while preserving the Unity archive.
 
-### Session-goal sequence
-See `S0-01` through `S0-05` in `Docs/SESSION_GOALS.md`.
+## Work
 
-### Exit criteria
-- Unity project opens cleanly.
-- Project is committed to GitHub.
-- Cursor can work safely in the project.
-- A simple test scene runs without errors.
+- preserve archive branch;
+- establish Phaser + TypeScript + Vite;
+- establish conventional npm scripts;
+- establish core folders;
+- establish basic tests;
+- create playable browser shell;
+- establish current docs/rules as source of truth.
+
+## Exit
+
+- project installs and builds;
+- browser opens to Megawatt Valley shell;
+- Cursor can inspect/test it;
+- no Unity editor is needed for active work.
 
 ---
 
-## Phase 1 — World and Camera
+# M1 — Visual proof + first playable site
 
-### Goal
-Create a basic tycoon-game world that feels good to navigate.
+## Goal
 
-### Tasks
-- Grey-box terrain / site.
-- Pan, zoom, rotate, and edge / mouse navigation as appropriate.
-- Selectable ground / plots.
-- Basic cursor feedback.
-- Simple world-space selection indicator.
-- Establish an initial scale reference for a person, vehicle, road, solar table, fence, and representative building.
-- Test camera angle and zoom range against the long-term visual target.
+Prove the new visual direction in the real game.
 
-### Session-goal sequence
-See `S1-01` through `S1-05` in `Docs/SESSION_GOALS.md`.
+## Work
 
-### Exit criteria
-- Player can comfortably inspect and navigate the test site.
-- Normal gameplay zoom can clearly distinguish roads, buildings, solar infrastructure, and people-scale placeholders.
+- isometric projection;
+- pan/zoom;
+- terrain;
+- roads;
+- first solar array;
+- office;
+- substation/grid point;
+- a technician;
+- core top HUD;
+- objective panel;
+- build menu;
+- selection / hover feedback.
 
----
+## Exit
 
-## Phase 2 — Building Placement
-
-### Goal
-Make construction interaction satisfying before adding detailed energy logic.
-
-### Tasks
-- Build menu.
-- Placement ghost.
-- Valid / invalid placement feedback.
-- Grid / snapping rules where appropriate.
-- Rotation.
-- Purchase cost.
-- Cancel placement.
-- Demolish / remove.
-- Initial placeholder solar-array object.
-- Confirm placement footprints and spacing are visually compatible with the intended stylised scale rather than blindly using real-world dimensions.
-
-### Session-goal sequence
-See `S2-01` through `S2-08` in `Docs/SESSION_GOALS.md`.
-
-### Exit criteria
-- Player can spend money to place and remove solar infrastructure reliably.
+A screenshot from the running game clearly resembles the approved pixel-isometric direction rather than a grey developer prototype.
 
 ---
 
-## Phase 3 — Energy Loop
+# M2 — Core solar tycoon loop
 
-### Goal
-Make the first renewable-energy system actually work.
+## Goal
 
-### Initial chain
+Make BUILD → GENERATE → SELL → EXPAND work end to end.
 
-`SUN → SOLAR ARRAY → POWER CONVERSION → GRID → REVENUE`
+## Work
 
-### Tasks
-- Solar generation model.
-- Basic irradiance input.
-- Connection state.
-- Grid export.
-- Current output display.
-- Generation statistics.
-- Preserve separation between logical plant simulation and visual representation so richer future scenes do not require thousands of individual simulation objects.
+- placement;
+- build costs;
+- cash;
+- generation;
+- grid connection;
+- revenue;
+- time;
+- basic weather;
+- equipment choice;
+- first expansion target.
 
-### Session-goal sequence
-The first end-to-end energy/economy loop is split across `S3-01` through `S3-05` in `Docs/SESSION_GOALS.md`.
+## Exit
 
-### Exit criteria
-- A correctly connected solar asset visibly produces power.
-
----
-
-## Phase 4 — Economy
-
-### Goal
-Turn power generation into a tycoon loop.
-
-### Tasks
-- Cash balance.
-- Build costs.
-- Basic operating costs.
-- Revenue from exported energy.
-- Simple financial feedback.
-- Bankruptcy / failure boundary for testing.
-
-### Exit criteria
-- Player spends money to build, earns money by operating, and can make financially bad decisions.
+A player can build a functioning solar site, earn money and make meaningful build choices.
 
 ---
 
-## Phase 5 — Time and Weather
+# M3 — Operations + staff + automation
 
-### Goal
-Make generation dynamic rather than constant.
+## Goal
 
-### Tasks
-- Game clock.
-- Pause / speed controls.
-- Day / night cycle.
-- Solar resource curve.
-- Basic cloud / weather variation.
-- Visual relationship between weather and production.
-- Keep weather architecture compatible with later atmospheric polish, but use simple prototype visuals first.
+Make operating the plant interesting.
 
-### Exit criteria
-- Output changes predictably with time and weather, and the player can understand why.
+## Work
 
----
+- condition/degradation;
+- fault states;
+- technician dispatch;
+- visible repair;
+- Radio Dispatch unlock;
+- soiling;
+- cleaning;
+- cleaning improvement;
+- staff/task feedback;
+- automation payoff.
 
-## Phase 6 — Equipment Condition and Maintenance
+## Exit
 
-### Goal
-Create operational gameplay.
-
-### Tasks
-- Equipment condition.
-- Reliability / failure logic.
-- Preventive maintenance concept.
-- Corrective maintenance.
-- Failed state affects generation.
-- Repair action.
-- Maintenance cost.
-
-### Session-goal sequence
-Initial operations goals are `S4-01` through `S4-05` in `Docs/SESSION_GOALS.md`.
-
-### Exit criteria
-- An operating asset can degrade, fail, lose revenue, and be restored.
+At least one responsibility progresses from manual intervention to automation and feels rewarding.
 
 ---
 
-## Phase 7 — Staff
+# M4 — Full Level 1 progression
 
-### Goal
-Introduce character-driven management.
+## Goal
 
-### First roles
-- Technician
-- Engineer
-- Site Manager
-- Security
-- Cleaner / panel-cleaning worker
+Turn the sandbox into **Here Comes the Sun**.
 
-### Tasks
-- Hire / dismiss.
-- Salary.
-- Role.
-- Skill.
-- Assignment.
-- Basic staff navigation.
-- Staff performs at least one meaningful task in-world.
-- Initial traits system or placeholder for it.
-- Establish staff scale and navigation assumptions that can later support expressive final characters without rewriting core staff logic.
+## Work
 
-### Exit criteria
-- Staff are visibly involved in keeping the project running and materially affect gameplay.
+- contextual objective chain;
+- procurement trade-off;
+- second plot;
+- capability choices;
+- 5–8 events;
+- severe-weather climax;
+- one-star completion;
+- two-star and three-star mastery;
+- pacing/balance for approximately 30–60 minute first completion.
+
+## Exit
+
+Level 1 can be played from start to completion and feels like a scenario rather than a systems demo.
 
 ---
 
-## Phase 8 — Decision Events
+# M5 — Product polish
 
-### Goal
-Add uncertainty, humour, and player agency.
+## Goal
 
-### Tasks
-- Reusable event framework.
-- Trigger / condition support.
-- Multiple choices.
-- Costs and effects.
-- Weighted outcomes where appropriate.
-- Event log.
-- Approximately 10–20 prototype events.
+Make the game feel releasable.
 
-### Exit criteria
-- Events create interesting trade-offs rather than arbitrary punishment.
+## Work
 
----
+- full UI polish;
+- visual effects;
+- improved environment density;
+- construction stages;
+- staff/vehicle animation polish;
+- audio/music using free/owned assets;
+- onboarding/tooltips;
+- settings;
+- accessibility/readability pass;
+- save/load hardening;
+- performance profiling;
+- remove developer UI.
 
-## Phase 9 — Objectives and Progression
+## Exit
 
-### Goal
-Turn the sandbox loop into a scenario.
-
-### Tasks
-- Objective framework.
-- One-star objective set.
-- Two-star optional mastery objectives.
-- Three-star optional mastery objectives.
-- Unlock / reward framework.
-- Basic research / capability unlocks.
-
-### Session-goal sequence
-Early identity and objective goals appear as `S5-01` through `S5-05` in `Docs/SESSION_GOALS.md`; the sequence will be extended as these phases approach.
-
-### Exit criteria
-- The player can complete a defined scenario and understand what they achieved and unlocked.
+Normal play no longer feels like testing an internal build.
 
 ---
 
-## Phase 10 — Level 1 Functional Vertical Slice
+# M6 — Release hardening
 
-### Goal
-Combine the systems into the first coherent 30–60 minute scenario before expensive final-art production.
+## Goal
 
-Working level title:
+Ship Megawatt Valley: Solar v1.0.
 
-**Level 1 — Here Comes the Sun**
+## Work
 
-### Build order (thin slice first)
+- complete automated test suite;
+- full new-game-to-1★ playthrough;
+- 2★/3★ verification;
+- save/reload verification;
+- common viewport testing;
+- console/error cleanup;
+- production build;
+- static deployment;
+- final README/player instructions;
+- known-issues review.
 
-Do **not** attempt the full Level 1 ingredient list in one pass. Use the `L1-01…` session track in `Docs/SESSION_GOALS.md`:
+## Exit
 
-1. One grey-box scenario map + office presence.
-2. Tunable starting cash / tariff data.
-3. Two equipment choices.
-4. Five decision events (not 10–20).
-5. One-star objective + restart clarity.
-6. One scripted climax beat.
-
-Only then stretch into multi-site choice, 2★/3★, and a larger event deck.
-
-### Full Level 1 destination ingredients
-- one coherent grey-box / early-art test map;
-- multiple candidate project sites or site choices (stretch after thin slice);
-- small company / office presence;
-- starting cash constraint;
-- basic staff;
-- simple equipment choice;
-- construction;
-- generation and revenue;
-- weather;
-- failures and maintenance;
-- decision events;
-- objectives;
-- 1–3 star completion (1★ first);
-- one memorable scripted climax / final challenge.
-
-### Exit criteria
-- A new player can start, learn, build, operate, make decisions, complete the level, and want to play again.
-
-This proves that the scenario systems can function together, but it is **not yet the fun gate**.
-
-After the functional thin slice, complete **Phase 10B — Engagement & Progression Vertical Slice**. Only once the engagement gate passes should **V1 — Style Prototype / Hero Corner** begin.
-
+A player opens a URL and plays the complete game without development tools.
 
 ---
 
-## Phase 10B — Engagement & Progression Vertical Slice
+# After v1.0
 
-### Goal
+Do not automatically begin large expansion work.
 
-Turn the functional Level 1 slice into a management-game experience with momentum, rewards, unlocks and changing responsibilities.
+Review:
 
-The governing design is `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
+- fun;
+- retention;
+- visual quality;
+- technical health;
+- how autonomous Cursor development actually was;
+- what systems deserve expansion.
 
-The core principle is:
+Potential future roadmap:
 
-> **Introduce complexity → teach it manually → improve the tools → delegate it → automate stale work → add a new layer of responsibility.**
+- wind;
+- BESS;
+- hybrid plants;
+- richer project development;
+- deeper finance;
+- multiple regions;
+- headquarters;
+- portfolio management / command centre.
 
-### Why this phase exists
-
-The current prototype proves that solar, cash, maintenance, staff, events, stars and expansion can work.
-
-It does not yet prove that the player will enjoy operating the site for a full scenario.
-
-Do not try to solve this by stretching timers, raising MW targets or making the player repeat the same construction action more often.
-
-### First proof systems
-
-Use existing systems wherever possible.
-
-- Gate the current automatic technician dispatch behind an earnable capability so the player briefly learns manual dispatch first.
-- Introduce simple panel soiling and manual cleaning.
-- Unlock a cleaning improvement that materially reduces workload.
-- Create a staged objective ladder so new systems / rewards arrive at a useful cadence.
-- Present at least one progression choice rather than only a fixed sequence.
-- Make new capability / plot / tool unlocks feel rewarding and visible.
-
-### Management Abstraction Ladder
-
-Future repetitive systems should broadly evolve through:
-
-1. direct manual action;
-2. assign staff;
-3. set schedules / policies;
-4. automate routine work;
-5. manage exceptions at portfolio scale.
-
-This applies to maintenance, cleaning, monitoring, vegetation, security and other operational systems.
-
-### Session-goal sequence
-
-See `E1-01` through `E1-09` in `Docs/SESSION_GOALS.md`.
-
-### Exit criteria
-
-Rapha can play from a fresh scenario through at least 1★ and confirm that:
-
-- there is usually a meaningful next purpose;
-- unlocks are things the player wants;
-- workload evolves rather than merely growing;
-- at least one responsibility moves from manual to automated;
-- repeated chores become easier before they become boring;
-- there are no long stretches where the best action is simply waiting;
-- the grey-box is engaging enough that the gameplay itself creates a desire to continue.
-
-This is the real **go / change / rethink gameplay gate**.
-
-Once it passes, begin **V1 — Hero Corner**. From that point onward, gameplay/content and visual production should increasingly proceed in parallel rather than waiting for every mechanic to be completed.
-
----
-
-## Phase 11 — Visual Identity and Production Pipeline
-
-### Goal
-After the Engagement Gate passes, prove that the approved visual target is achievable, then create the reusable art systems needed to scale it.
-
-### Stage A — Style prototype / hero corner
-
-Build one small representative scene at roughly 60–70% of final intended quality containing:
-
-- one small office;
-- one O&M workshop;
-- one solar-array section;
-- one simplified substation;
-- one service road;
-- one utility vehicle;
-- one technician character;
-- representative vegetation / landscaping;
-- representative UI;
-- target lighting and post-processing.
-
-Validate:
-
-- visual identity;
-- proportions and scale;
-- material style;
-- lighting;
-- camera composition;
-- readability;
-- performance;
-- whether the art direction remains practical for a small development effort.
-
-### Stage B — Art bible
-
-Document:
-
-- colour language;
-- material rules;
-- geometry / bevel standards;
-- texture approach;
-- scale guide;
-- character proportion language;
-- vegetation language;
-- signage / fictional-brand language;
-- UI design language;
-- LOD and optimisation expectations.
-
-### Stage C — Reusable production kits
-
-For Level 1, these kits may be sourced, modified, kitbashed or custom. Standardise them into a coherent Megawatt Valley set before reuse.
-
-Develop reusable kits for:
-
-- offices;
-- O&M / industrial buildings;
-- roads / paths;
-- fencing / gates;
-- solar components;
-- substation components;
-- landscaping / vegetation;
-- site props;
-- vehicles;
-- signage / decals.
-
-### Exit criteria
-- The hero scene convincingly demonstrates the intended Megawatt Valley visual identity.
-- The style is achievable in Unity at acceptable performance.
-- Future assets can be produced consistently using a documented pipeline.
-
----
-
-## Phase 12 — Level 1 Presentation Pass
-
-### Goal
-Turn the proven functional vertical slice into a polished Megawatt Valley experience.
-
-### Tasks
-- Replace grey-box terrain and environment progressively.
-- Production-quality solar / electrical infrastructure.
-- Buildings and site facilities.
-- Vehicles and props.
-- Landscaping / vegetation.
-- Character visual pass.
-- Task and idle animations.
-- Construction animation / staging.
-- Weather effects.
-- Humorous environmental storytelling.
-- Audio feedback.
-- Music direction.
-- Radio / announcement experiments.
-- UI polish.
-- Camera polish.
-- VFX and feedback.
-
-### Exit criteria
-- Screenshots and short clips clearly communicate the intended identity of the game.
-- Level 1 can eventually approach the approved concept benchmark in warmth, readability, density, charm, and polish.
-
----
-
-## Phase 13 — Expansion Systems
-
-Only after the solar vertical slice is proven and its production pipeline is understood.
-
-Potential additions:
-- BESS.
-- Wind development and operations.
-- Hybrid plants.
-- More sophisticated grid constraints.
-- Company headquarters expansion.
-- Department management.
-- More complex finance.
-- Contractors and vendors.
-- Multi-site portfolio operations.
-- Command centre.
-- Regional campaign map.
-- Research tree expansion.
-- Company reputation and stakeholder systems.
-- Advanced random events / event chains.
-
-## Explicitly deferred for now
-
-These are not first-prototype requirements:
-
-- multiplayer;
-- console ports;
-- Steam integration;
-- procedural world generation at scale;
-- detailed electrical power-flow simulation;
-- full corporate finance simulation;
-- realistic individual-panel electrical modelling;
-- DOTS / ECS conversion;
-- mod support;
-- online services;
-- massive content libraries.
-
-## Development rule
-
-If a new feature does not improve or validate the current playable loop, it should normally wait.
-
-If visual polish does not validate a reusable art direction or materially improve the current vertical slice, it should also normally wait.
-
-If a task cannot produce a clear finish line for one working session, split it into smaller entries in `Docs/SESSION_GOALS.md` before implementation.
+Those are future product decisions, not current requirements.
