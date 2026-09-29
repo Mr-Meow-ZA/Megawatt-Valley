@@ -202,10 +202,10 @@ export class WorldView {
     const baseY = s.y - elev * 5;
     // Grounding shadow for props (trees, buildings, vehicles)
     if (tex !== 'fence' && tex !== 'foam' && tex !== 'cloud' && tex !== 'tile_bridge') {
-      const sh = this.scene.add.image(s.x - 6, baseY + 8, 'shadow_blob');
+      const sh = this.scene.add.image(s.x - 8, baseY + 10, 'shadow_blob');
       const treeish = tex.startsWith('tree') || tex === 'bush';
-      sh.setScale(treeish ? 0.55 * scale : 0.85 * scale, treeish ? 0.35 * scale : 0.5 * scale);
-      sh.setAlpha(0.5);
+      sh.setScale(treeish ? 0.7 * scale : 1.05 * scale, treeish ? 0.4 * scale : 0.55 * scale);
+      sh.setAlpha(0.75);
       sh.setDepth(depthFor(x, y, depthBias - 1));
       this.props.push(sh);
     }
@@ -285,8 +285,7 @@ export class WorldView {
       [12, 11],
     ];
     for (const [x, y] of demoRows) {
-      this.addProp('pv_group', x, y, -22, 5, 0.7);
-      this.addProp('fence', x, y + 1, -8, 4, 0.55);
+      this.addProp('pv_group', x, y, -22, 5, 0.75);
     }
 
     // Decorative vehicles — office / yard / substation / Site B access
@@ -478,7 +477,7 @@ export class WorldView {
       shadow.setPosition(anchor.x - 10, anchor.y + 14 - elev * 5);
       shadow.setScale(shadowScale, shadowScale * 0.55);
       shadow.setDepth(depthFor(eq.tile.x, eq.tile.y, 3));
-      shadow.setAlpha(0.7);
+      shadow.setAlpha(0.85);
 
       let sprite = this.entitySprites.get(eq.id);
       if (!sprite) {
