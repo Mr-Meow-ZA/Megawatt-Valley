@@ -116,7 +116,7 @@ export interface ActiveEvent {
 
 export interface GameSnapshot {
   cash: number;
-  revenueLifetimeHour: number;
+  revenuePerHour: number;
   powerKw: number;
   exportedKw: number;
   day: number;
@@ -179,4 +179,7 @@ export interface SerializedGameState {
   nextFaultCheck: number;
   nextSoilTick: number;
   revenuePerHour: number;
+  lifetimeRevenue: number;
+  peakExportKw: number;
+  scriptedFirstFault: boolean;
 }

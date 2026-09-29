@@ -66,6 +66,7 @@ export class GameSimulation {
   curtailmentFactor = 1;
   curtailmentTimer = 0;
   eventClock = 0;
+  scriptedFirstFault = false;
 
   constructor() {
     this.seedWorld();
@@ -133,7 +134,7 @@ export class GameSimulation {
   }
 
   private inverterCapacity(): number {
-    const starter = 80;
+    const starter = 100;
     const extra = this.equipment
       .filter((e) => e.kind === 'inverter' && e.commissioned && !e.faulted)
       .reduce((sum, e) => sum + EQUIPMENT.inverter.nameplateKw * e.condition, 0);
@@ -569,6 +570,17 @@ export class GameSimulation {
   }
 
   private rollFaults(): void {
+    if (!this.scriptedFirstFault && this.objectives.find((o) => o.id === 'first_power')?.complete) {
+      const candidate = this.equipment.find((e) => isPv(e.kind) && e.commissioned && !e.faulted);
+      if (candidate) {
+        candidate.faulted = true;
+        candidate.condition = clamp(candidate.condition - 0.1, 0.25, 1);
+        this.scriptedFirstFault = true;
+        this.message = `${EQUIPMENT[candidate.kind].name} faulted! Select it and dispatch Tess.`;
+        this.activateObjective('first_repair');
+        return;
+      }
+    }
     for (const eq of this.equipment) {
       if (!eq.commissioned || eq.faulted) continue;
       if (!isPv(eq.kind) && eq.kind !== 'inverter') continue;
@@ -613,17 +625,18 @@ export class GameSimulation {
   }
 
   private scheduleNarrativeEvents(): void {
-    const { exportedKw } = this.computePower();
-    if (exportedKw > 5 && !this.triggeredEvents.includes('community_meeting')) {
+    const pvCount = this.equipment.filter((e) => isPv(e.kind) && e.commissioned).length;
+    if (pvCount >= 2 && !this.triggeredEvents.includes('community_meeting')) {
       this.enqueueEvent('community_meeting');
     }
-    if (this.day >= 2 && !this.triggeredEvents.includes('bargain_batch')) {
+    /* Delay bargain_batch until day 3 so early fault loop can be practiced. */
+    if (this.day >= 3 && pvCount >= 1 && !this.triggeredEvents.includes('bargain_batch')) {
       this.enqueueEvent('bargain_batch');
     }
     if (this.objectives.find((o) => o.id === 'first_repair')?.complete && !this.triggeredEvents.includes('grid_curtailment')) {
       this.enqueueEvent('grid_curtailment');
     }
-    if (this.capabilities.includes('radio_dispatch') && !this.triggeredEvents.includes('temp_worker')) {
+    if (this.capabilities.includes('radio_dispatch') && this.day >= 2 && !this.triggeredEvents.includes('temp_worker')) {
       this.enqueueEvent('temp_worker');
     }
     if (this.plots.find((p) => p.id === 'site_b')?.unlocked && !this.triggeredEvents.includes('insurance_upsell')) {
@@ -724,7 +737,7 @@ export class GameSimulation {
     const { generationKw, exportedKw } = this.computePower();
     return {
       cash: this.cash,
-      revenueLifetimeHour: this.revenuePerHour,
+      revenuePerHour: this.revenuePerHour,
       powerKw: generationKw,
       exportedKw,
       day: this.day,
@@ -789,13 +802,17 @@ export class GameSimulation {
       nextFaultCheck: this.nextFaultCheck,
       nextSoilTick: this.nextSoilTick,
       revenuePerHour: this.revenuePerHour,
+      lifetimeRevenue: this.lifetimeRevenue,
+      peakExportKw: this.peakExportKw,
+      scriptedFirstFault: this.scriptedFirstFault,
     };
   }
 
   load(data: SerializedGameState): void {
     Object.assign(this, data);
-    this.lifetimeRevenue = Math.max(this.lifetimeRevenue, data.totalEnergyKwh * data.tariffPerKwh * 0.5);
-    this.peakExportKw = Math.max(this.peakExportKw, 0);
+    this.lifetimeRevenue = data.lifetimeRevenue ?? this.lifetimeRevenue;
+    this.peakExportKw = data.peakExportKw ?? this.peakExportKw;
+    this.scriptedFirstFault = data.scriptedFirstFault ?? false;
   }
 }
 

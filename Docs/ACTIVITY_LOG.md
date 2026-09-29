@@ -38,6 +38,42 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-29 — Primary — Phaser Level 1 autonomous scaffold + core loop
+
+**Agent:** Cursor
+**Status:** Partial
+
+**Changed / Produced**
+- Added Phaser 4 + TypeScript + Vite app alongside preserved Unity folders.
+- Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.
+- Simulation: build/place, generation, export cap, revenue, weather, faults, technician dispatch, Radio Dispatch, soiling/cleaning, Cleaning Kit, Site B unlock, 6+ events, hail climax, 1★/2★/3★, save/load.
+- Procedural isometric world + DOM management HUD.
+- Unit + automated 1★ playthrough smoke tests.
+- PR #7 on branch `cursor/phaser-level1-build-5938`.
+
+**Tested / Verified**
+- `npm run typecheck`, `npm test` (8 passing), `npm run build`.
+- Browser play at localhost:5173 — world/HUD/build/place/power/events visible.
+- Fixed event-modal click delegation (nested button text).
+
+**Known issues / limitations**
+- Art is procedural/code-generated (aligned with autonomy strategy; not yet concept-art parity).
+- Full human new-game-to-1★ timed playthrough still being hardened.
+- No production deployment URL yet.
+- WebGL ReadPixels perf warnings observed in Chromium during texture generation.
+
+**Decisions / assumptions / recommendations**
+- Keep Unity folders untouched on this branch; archive branch remains historical.
+- Starter grid export 100 kW; inverters expand capacity (needed for 1★ peak).
+- Star 1 targets: 120 kW peak + $12k lifetime revenue.
+
+**Next recommended step**
+- Continue browser play hardening, visual density toward concept art, then static deploy.
+
+**Git / References**
+- Branch: `cursor/phaser-level1-build-5938`
+- PR: #7
+- Issue: #6
 
 ## 2026-09-29 — Experiment — Pixel-isometric autonomous build scope
 

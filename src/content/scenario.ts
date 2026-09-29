@@ -6,7 +6,7 @@ export const SAVE_VERSION = 1;
 export const SAVE_KEY = 'megawatt-valley-solar-v1';
 
 /** Simulation minutes per real second at speed 1. */
-export const SIM_MINUTES_PER_REAL_SECOND = 8;
+export const SIM_MINUTES_PER_REAL_SECOND = 12;
 
 export const CAPABILITY_INFO: Record<
   CapabilityId,
@@ -105,19 +105,19 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'star_1',
       title: '1★ Here Comes the Sun',
-      description: 'Export 150 kW peak and earn $20,000 lifetime revenue.',
+      description: 'Export 120 kW peak and earn $12,000 lifetime revenue.',
       rewardText: 'Scenario complete — continue for mastery',
     },
     {
       id: 'star_2',
       title: '2★ Strong Operator',
-      description: 'Own Site B PV, Radio Dispatch, and 250 kW peak.',
+      description: 'Own Site B PV, Radio Dispatch, and 220 kW peak.',
       rewardText: 'Mastery',
     },
     {
       id: 'star_3',
       title: '3★ Valley Pro',
-      description: 'Survive hail prepared, hold Cleaning Kit, and 350 kW peak.',
+      description: 'Survive hail prepared, hold Cleaning Kit, and 300 kW peak.',
       rewardText: 'Full mastery',
     },
   ];
@@ -133,8 +133,8 @@ export function createInitialObjectives(): ObjectiveState[] {
 }
 
 export const STAR_THRESHOLDS = {
-  star1PeakKw: 150,
-  star1Revenue: 20_000,
-  star2PeakKw: 250,
-  star3PeakKw: 350,
+  star1PeakKw: 120,
+  star1Revenue: 12_000,
+  star2PeakKw: 220,
+  star3PeakKw: 300,
 };

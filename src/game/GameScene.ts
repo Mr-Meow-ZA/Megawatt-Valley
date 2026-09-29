@@ -20,13 +20,28 @@ export class GameScene extends Phaser.Scene {
     this.startNewGame();
 
     const cam = this.cameras.main;
+    let pressWorld: { x: number; y: number } | null = null;
+    let pressScreen = { x: 0, y: 0 };
+    let moved = false;
+
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.rightButtonDown() || pointer.middleButtonDown()) {
-        this.dragging = true;
-        this.dragLast = { x: pointer.x, y: pointer.y };
+      if (this.sim.snapshot().activeEvent) return;
+      pressScreen = { x: pointer.x, y: pointer.y };
+      pressWorld = cam.getWorldPoint(pointer.x, pointer.y);
+      moved = false;
+      this.dragging = false;
+      this.dragLast = { x: pointer.x, y: pointer.y };
+    });
+
+    this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      if (this.sim.snapshot().activeEvent) {
+        this.dragging = false;
         return;
       }
-      // left click: place or select
+      const wasDragging = this.dragging || moved;
+      this.dragging = false;
+      if (wasDragging || !pressWorld) return;
+
       const snapshot = this.sim.snapshot();
       const worldPoint = cam.getWorldPoint(pointer.x, pointer.y);
       if (snapshot.buildMode) {
@@ -42,12 +57,15 @@ export class GameScene extends Phaser.Scene {
       this.sim.selectEntity(id);
     });
 
-    this.input.on('pointerup', () => {
-      this.dragging = false;
-    });
-
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (this.dragging && pointer.isDown) {
+      if (!pointer.isDown || this.sim.snapshot().activeEvent) return;
+      const dx = pointer.x - pressScreen.x;
+      const dy = pointer.y - pressScreen.y;
+      if (!moved && Math.hypot(dx, dy) > 6) {
+        moved = true;
+        this.dragging = true;
+      }
+      if (this.dragging) {
         cam.scrollX -= (pointer.x - this.dragLast.x) / cam.zoom;
         cam.scrollY -= (pointer.y - this.dragLast.y) / cam.zoom;
         this.dragLast = { x: pointer.x, y: pointer.y };
@@ -59,13 +77,20 @@ export class GameScene extends Phaser.Scene {
       cam.setZoom(next);
     });
 
-    // Space / number keys for speed
     this.input.keyboard?.on('keydown-SPACE', () => {
       this.sim.setSpeed(this.sim.speed === 0 ? 1 : 0);
     });
     this.input.keyboard?.on('keydown-ONE', () => this.sim.setSpeed(1));
     this.input.keyboard?.on('keydown-TWO', () => this.sim.setSpeed(2));
     this.input.keyboard?.on('keydown-FOUR', () => this.sim.setSpeed(4));
+    this.input.keyboard?.on('keydown-R', () => {
+      const id = this.sim.selectedId;
+      if (id) this.sim.dispatchRepair(id);
+    });
+    this.input.keyboard?.on('keydown-C', () => {
+      const id = this.sim.selectedId;
+      if (id) this.sim.dispatchClean(id);
+    });
   }
 
   private startNewGame(): void {

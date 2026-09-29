@@ -30,21 +30,28 @@ body,
 #game-root {
   position: absolute;
   inset: 0;
+  z-index: 0;
+}
+
+#game-root canvas {
+  z-index: 0;
 }
 
 #ui-root {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 20;
 }
 
 #ui-root button,
 #ui-root .panel,
 #ui-root .modal,
+#ui-root .modal-card,
 #ui-root .win,
 #ui-root .hud-top,
-#ui-root .hud-bottom {
+#ui-root .hud-bottom,
+#ui-root .toast {
   pointer-events: auto;
 }
 
@@ -266,6 +273,7 @@ body,
   display: grid;
   place-items: center;
   background: rgba(4, 10, 20, 0.55);
+  z-index: 100;
 }
 
 .modal[hidden],

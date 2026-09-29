@@ -2,11 +2,9 @@
 
 ## Status
 
-**PRIMARY DIRECTION REBASELINED — 29 September 2026**
+**PRIMARY DIRECTION — Phaser Level 1 in active autonomous build — 29 September 2026**
 
-Megawatt Valley is now officially an **AI-autonomous Phaser / TypeScript production project**.
-
-The previous Unity implementation is archived and is no longer the active development path.
+Megawatt Valley is an **AI-autonomous Phaser / TypeScript production project**.
 
 ## Archive
 
@@ -14,9 +12,7 @@ Full pre-pivot Unity state preserved on:
 
 **archive/unity-prototype-2026-09-29**
 
-That branch is historical reference only.
-
-Do not continue Unity implementation unless Rapha explicitly changes the project direction.
+Unity folders remain on the working tree for history; do not continue Unity implementation unless Rapha explicitly changes direction.
 
 ## Active goal
 
@@ -24,40 +20,33 @@ Build and release:
 
 # Megawatt Valley: Solar — Level 1: Here Comes the Sun
 
-Primary constraints:
+Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.
 
-- minimal to no routine manual development work by Rapha;
-- zero additional paid development tooling beyond existing Cursor and ChatGPT subscriptions;
-- Phaser + TypeScript browser-first implementation;
-- free/open-source dependencies and assets by default;
-- high-resolution pixel-isometric / illustrated pixel visual direction;
-- complete playable game rather than prototype;
-- Cursor owns implementation, testing, debugging, integration and routine technical decisions.
+## Progress (branch `cursor/phaser-level1-build-5938`, PR #7)
 
-## Immediate Cursor action
+| Milestone | Status |
+|-----------|--------|
+| M0 Rebaseline (Phaser+Vite+TS) | Done |
+| M1 Visual proof + HUD/build | Done (procedural iso; polish ongoing) |
+| M2 Core solar loop | Done |
+| M3 Ops / staff / automation | Done (fault→Radio Dispatch, soiling→Cleaning Kit) |
+| M4 Full Level 1 scenario | In progress (objectives, events, stars, hail; automated 1★ smoke passes) |
+| M5–M6 Polish / deploy | Not started |
 
-1. Read **Docs/CURSOR_PRIMARY_BUILD_SPEC.md**.
-2. Read the new architecture / visual / roadmap documents.
-3. Rebaseline the working tree for the Phaser implementation without touching the archived Unity branch.
-4. Establish the Phaser + TypeScript + Vite project.
-5. Create the first visual/gameplay slice using the approved pixel-isometric direction.
-6. Run it in-browser and validate it visually before expanding.
-7. Continue through the roadmap autonomously.
+## How to run
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test
+npm run build
+```
 
 ## Product owner involvement
 
-Rapha should primarily:
-
-- set vision;
-- review major product decisions;
-- play builds;
-- give feedback on fun, presentation and priorities.
-
-Rapha should not become the routine coder, debugger, scene assembler or test runner.
+Rapha should primarily set vision, review major decisions, play builds, and give feedback.
 
 ## Source of truth
-
-If older documents conflict with the following, the newer documents win:
 
 1. Docs/CURSOR_PRIMARY_BUILD_SPEC.md
 2. Docs/CURRENT_STATUS.md
