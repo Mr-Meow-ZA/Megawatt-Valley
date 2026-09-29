@@ -141,6 +141,7 @@ Cursor, ChatGPT and Grok Bot should treat these as the core shared context:
 - `Docs/ASSET_POLICY.md`
 - `Docs/ASSET_REGISTER.md`
 - `Docs/PROGRESSION_AND_ENGAGEMENT.md`
+- `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md` (parallel non-Unity/Godot experiment)
 - `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md` (active Cursor brief during E1)
 - `Docs/TECHNICAL_ARCHITECTURE.md`
 - `Docs/ROADMAP.md`
