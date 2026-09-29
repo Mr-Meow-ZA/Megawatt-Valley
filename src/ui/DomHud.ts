@@ -82,7 +82,7 @@ export class DomHud {
         </div>
 
         <div class="chip cash" data-k="cash-chip">
-          <span class="chip-icon svg-coin" aria-hidden="true"></span>
+          <span class="chip-icon"><img src="/assets/game/icon_dollar.png" alt="" width="22" height="22"/></span>
           <div>
             <span class="chip-label">Cash</span>
             <strong data-k="cash-val">—</strong>
@@ -91,7 +91,7 @@ export class DomHud {
         </div>
 
         <div class="chip power" data-k="power-chip">
-          <span class="chip-icon svg-bolt" aria-hidden="true"></span>
+          <span class="chip-icon"><img src="/assets/game/icon_power.png" alt="" width="22" height="22" style="filter:invert(1) sepia(1) saturate(5) hue-rotate(80deg)"/></span>
           <div class="chip-power">
             <span class="chip-label">Power output</span>
             <strong data-k="power-val">—</strong>

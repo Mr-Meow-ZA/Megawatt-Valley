@@ -3,7 +3,9 @@ import { EQUIPMENT } from '../content/equipment';
 import type { GameSimulation } from '../simulation/GameSimulation';
 import type { EquipmentKind, GameSnapshot, Vec2 } from '../simulation/types';
 import { depthFor, isoToScreen, screenToIso, TILE_H } from './iso';
-import { Palette } from './isoArt';
+const SKY = 0x8ec8ef;
+const GRASS_DEEP = 0x2f6b1c;
+const STEEL_DARK = 0x5a6370;
 
 const WORLD_W = 42;
 const WORLD_H = 30;
@@ -90,7 +92,7 @@ export class WorldView {
     private readonly scene: Phaser.Scene,
     private readonly sim: GameSimulation,
   ) {
-    scene.cameras.main.setBackgroundColor(Palette.sky);
+    scene.cameras.main.setBackgroundColor(SKY);
     this.buildTerrain();
     this.scatterEnvironment();
     this.spawnClouds();
@@ -107,24 +109,30 @@ export class WorldView {
   }
 
   private terrainKey(x: number, y: number): string {
-    if (isWater(x, y)) return `tile_water_${hash(x, y) % 3}`;
+    if (isWater(x, y)) {
+      const h = hash(x, y) % 3;
+      return h === 0 ? 'tile_water' : h === 1 ? 'tile_water_n' : 'tile_river';
+    }
 
     if (isBank(x, y)) {
       const h = hash(x, y);
       // Mix bank variants with occasional grass/dirt for organic edges.
-      if (h % 7 === 0) return `tile_grass_${h % 4}`;
+      if (h % 7 === 0) return h % 2 === 0 ? 'tile_grass' : 'tile_grass_alt';
       if (h % 5 === 0) return 'tile_dirt';
-      return `tile_bank_${h % 3}`;
+      return h % 2 === 0 ? 'tile_bank' : 'tile_bank_ew';
     }
 
     // Main loop roads (asphalt)
-    if (y === 6 && x >= 3 && x <= 34) return hash(x, y) % 5 === 0 ? 'tile_road_mark' : 'tile_road';
-    if (x === 11 && y >= 6 && y <= 16) return 'tile_road';
-    if (x === 15 && y >= 6 && y <= 12) return 'tile_road';
-    if (y === 12 && x >= 11 && x <= 15) return 'tile_road';
+    if (y === 6 && x >= 3 && x <= 34) {
+      if (x === 11 || x === 15) return 'tile_crossroad';
+      return hash(x, y) % 4 === 0 ? 'tile_road_ew' : 'tile_road';
+    }
+    if (x === 11 && y >= 6 && y <= 16) return 'tile_road_ns';
+    if (x === 15 && y >= 6 && y <= 12) return 'tile_road_ns';
+    if (y === 12 && x >= 11 && x <= 15) return 'tile_road_ew';
     // Site B access
-    if (y === 8 && x >= 21 && x <= 32) return 'tile_road';
-    if (x === 26 && y >= 8 && y <= 14) return 'tile_road';
+    if (y === 8 && x >= 21 && x <= 32) return 'tile_road_ew';
+    if (x === 26 && y >= 8 && y <= 14) return 'tile_road_ns';
 
     // Service / dirt pads near office
     if (x >= 4 && x <= 7 && y >= 5 && y <= 7) return 'tile_dirt';
@@ -133,7 +141,7 @@ export class WorldView {
       return 'tile_dirt';
     }
 
-    return `tile_grass_${hash(x, y) % 4}`;
+    return hash(x, y) % 2 === 0 ? 'tile_grass' : 'tile_grass_alt';
   }
 
   /** Fake valley elevation: hills on far edges, lower near river. */
@@ -159,7 +167,7 @@ export class WorldView {
           const riser = this.scene.add.graphics();
           const cx = screen.x;
           const cy = screen.y - elev * 5;
-          riser.fillStyle(Palette.grassDeep, 0.95);
+          riser.fillStyle(GRASS_DEEP, 0.95);
           riser.beginPath();
           riser.moveTo(cx - 40, cy);
           riser.lineTo(cx, cy + 20);
@@ -191,7 +199,7 @@ export class WorldView {
     const elev = this.heightAt(x, y);
     const baseY = s.y - elev * 5;
     // Grounding shadow for props (trees, buildings, vehicles)
-    if (tex !== 'fence' && tex !== 'foam' && tex !== 'cloud' && tex !== 'bridge') {
+    if (tex !== 'fence' && tex !== 'foam' && tex !== 'cloud' && tex !== 'tile_bridge') {
       const sh = this.scene.add.image(s.x - 6, baseY + 8, 'shadow_blob');
       const treeish = tex.startsWith('tree') || tex === 'bush';
       sh.setScale(treeish ? 0.55 * scale : 0.85 * scale, treeish ? 0.35 * scale : 0.5 * scale);
@@ -212,7 +220,7 @@ export class WorldView {
     const g = this.scene.add.graphics();
     g.setDepth(depthFor(20, 4, 7));
     // Thin dark steel cables (concept: transmission spans)
-    g.lineStyle(1.25, Palette.steelDark, 0.92);
+    g.lineStyle(1.25, STEEL_DARK, 0.92);
 
     for (let i = 0; i < pylons.length - 1; i++) {
       const a = pylons[i];
@@ -243,25 +251,26 @@ export class WorldView {
     // Bridge across river on main road (y=6 crossing)
     {
       const s = isoToScreen(19, 6);
-      const bridge = this.scene.add.image(s.x, s.y - 10, 'bridge');
+      const bridge = this.scene.add.image(s.x, s.y - 8, 'tile_bridge');
       bridge.setDepth(depthFor(19, 6, 6));
       this.props.push(bridge);
     }
 
     // Transmission pylons + cables
     const pylons: Array<{ x: number; y: number; yOff: number; scale: number }> = [
-      { x: 10, y: 2, yOff: -40, scale: 0.95 },
-      { x: 14, y: 3, yOff: -40, scale: 1 },
-      { x: 22, y: 4, yOff: -40, scale: 0.9 },
-      { x: 28, y: 3, yOff: -40, scale: 0.85 },
+      { x: 10, y: 2, yOff: -50, scale: 0.55 },
+      { x: 14, y: 3, yOff: -50, scale: 0.6 },
+      { x: 22, y: 4, yOff: -50, scale: 0.55 },
+      { x: 28, y: 3, yOff: -50, scale: 0.5 },
     ];
     for (const p of pylons) {
-      this.addProp('pylon', p.x, p.y, p.yOff, 8, p.scale);
+      this.addProp('water_tower', p.x, p.y, p.yOff, 8, p.scale);
     }
     this.drawPowerLines(pylons);
 
     // Maintenance yard near office
-    this.addProp('yard', 5, 8, -18, 5);
+    this.addProp('yard', 5, 8, -24, 5, 0.85);
+    this.addProp('container', 6, 9, -18, 5, 0.7);
 
     // Decorative starter solar rows (visual density matching concept farm)
     const demoRows: Array<[number, number]> = [
@@ -272,7 +281,7 @@ export class WorldView {
       [12, 11],
     ];
     for (const [x, y] of demoRows) {
-      this.addProp('pv_row', x, y, -12, 5, 1.05);
+      this.addProp('pv_group', x, y, -20, 5, 0.55);
     }
 
     // Decorative vehicles — office / yard / substation / Site B access
@@ -324,7 +333,18 @@ export class WorldView {
       }
     }
     for (const [x, y, big] of pines) {
-      this.addProp(big ? 'tree_big' : 'tree', x, y, big ? -28 : -20, 3);
+      const h = hash(x, y);
+      const key =
+        h % 5 === 0
+          ? 'tree_deciduous'
+          : h % 4 === 0
+            ? 'tree_round'
+            : h % 3 === 0
+              ? 'tree_sm_0'
+              : big
+                ? 'tree_big'
+                : 'tree';
+      this.addProp(key, x, y, big ? -36 : -28, 3, big ? 1.05 : 0.95);
     }
 
     // Rocks along river banks + occasional props in the water edge
@@ -420,15 +440,13 @@ export class WorldView {
       c.x += 0.08 + i * 0.01;
       if (c.x > 1400) c.x = -400;
     }
-    // Animate river by cycling water tile variants + soft alpha pulse.
-    const frame = Math.floor(this.scene.time.now / 280) % 3;
+    // Soft alpha pulse on water / river tiles
     const pulse = 0.94 + Math.sin(this.scene.time.now / 700) * 0.06;
-    for (const [key, img] of this.ground) {
-      if (!img.texture.key.startsWith('tile_water')) continue;
-      const [xs, ys] = key.split(',');
-      const base = hash(Number(xs), Number(ys)) % 3;
-      img.setTexture(`tile_water_${(base + frame) % 3}`);
-      img.setAlpha(pulse);
+    for (const [, img] of this.ground) {
+      const k = img.texture.key;
+      if (k.startsWith('tile_water') || k.startsWith('tile_river')) {
+        img.setAlpha(pulse);
+      }
     }
     for (let i = 0; i < this.foam.length; i++) {
       const f = this.foam[i];

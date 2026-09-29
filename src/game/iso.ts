@@ -1,6 +1,6 @@
-/** 2:1 isometric helpers. Larger tiles for concept-art density. */
-export const TILE_W = 80;
-export const TILE_H = 40;
+/** 2:1 isometric helpers — matched to Kenney road tiles (~100×50 diamond). */
+export const TILE_W = 100;
+export const TILE_H = 50;
 
 export function isoToScreen(tileX: number, tileY: number): { x: number; y: number } {
   return {

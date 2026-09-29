@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GameSimulation } from '../simulation/GameSimulation';
 import { DomHud } from '../ui/DomHud';
-import { generateTextures } from './textures';
+import { generateOverlayTextures, preloadGameAssets } from './assets';
 import { WorldView } from './WorldView';
 
 export class GameScene extends Phaser.Scene {
@@ -15,8 +15,12 @@ export class GameScene extends Phaser.Scene {
     super('GameScene');
   }
 
+  preload(): void {
+    preloadGameAssets(this);
+  }
+
   create(): void {
-    generateTextures(this);
+    generateOverlayTextures(this);
     this.startNewGame();
 
     const cam = this.cameras.main;
@@ -73,40 +77,41 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
-      const next = Phaser.Math.Clamp(cam.zoom - dy * 0.0015, 0.55, 2.2);
+      const next = Phaser.Math.Clamp(cam.zoom - dy * 0.0015, 0.5, 2.4);
       cam.setZoom(next);
     });
 
     this.input.keyboard?.on('keydown-SPACE', () => {
-      this.sim.setSpeed(this.sim.speed === 0 ? 1 : 0);
+      const snap = this.sim.snapshot();
+      this.sim.setSpeed(snap.speed === 0 ? 1 : 0);
     });
-    this.input.keyboard?.on('keydown-ONE', () => this.sim.setSpeed(1));
-    this.input.keyboard?.on('keydown-TWO', () => this.sim.setSpeed(2));
-    this.input.keyboard?.on('keydown-FOUR', () => this.sim.setSpeed(4));
     this.input.keyboard?.on('keydown-R', () => {
-      const id = this.sim.selectedId;
-      if (id) this.sim.dispatchRepair(id);
+      const snap = this.sim.snapshot();
+      if (snap.selectedId) this.sim.dispatchRepair(snap.selectedId);
     });
     this.input.keyboard?.on('keydown-C', () => {
-      const id = this.sim.selectedId;
-      if (id) this.sim.dispatchClean(id);
+      const snap = this.sim.snapshot();
+      if (snap.selectedId) this.sim.dispatchClean(snap.selectedId);
     });
   }
 
   private startNewGame(): void {
-    this.children.removeAll();
+    // Destroy previous world display objects
+    this.children.removeAll(true);
+    generateOverlayTextures(this);
     this.sim = new GameSimulation();
     this.world = new WorldView(this, this.sim);
     this.hud = new DomHud(this.sim, () => this.startNewGame());
   }
 
-  update(_time: number, delta: number): void {
+  update(_t: number, delta: number): void {
+    if (!this.sim) return;
     this.sim.update(delta / 1000);
-    const snapshot = this.sim.snapshot();
-    this.world.sync(snapshot);
+    const snap = this.sim.snapshot();
+    this.world.sync(snap);
     const pointer = this.input.activePointer;
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    this.world.updateGhost(snapshot, worldPoint);
-    this.hud.render(snapshot);
+    this.world.updateGhost(snap, worldPoint);
+    this.hud.render(snap);
   }
 }
