@@ -1,290 +1,188 @@
-# Megawatt Valley — Technical Architecture v0.1
+# Megawatt Valley — Technical Architecture v2.0
 
-## Purpose
+## Status
 
-This document records the initial technical direction for Megawatt Valley. It is intentionally conservative. The project should optimise for a maintainable playable game, not architectural cleverness.
+**Approved primary architecture — 29 September 2026**
 
-## Engine and tools
+The previous Unity architecture is archived with the Unity prototype.
 
-Planned baseline:
+The active production architecture is browser-first and designed for maximum Cursor autonomy.
 
-- Unity **6000.6.0f1** (Unity 6.6) — locked at project creation from the locally installed editor
-- Universal Render Pipeline (URP)
-- C#
-- GameObject / MonoBehaviour-based implementation initially
-- ScriptableObjects for configurable game definitions where appropriate
-- UI Toolkit for management UI (built-in `modules.uielements` + `com.unity.ugui`) — OnGUI is acceptable only as a temporary prototype HUD
-- Cinemachine **6.6.0** (Unity 6.6 builtin) for tycoon camera behaviour
-- Unity Input System **1.20.0** (project Active Input Handling = Input System Package)
-- ProBuilder **6.1.2** for grey-box / level-blockout modelling
-- NavMesh for staff movement where appropriate
-- Git + GitHub + Git LFS
-- Cursor as the primary implementation assistant / IDE
-- Unity MCP integration may be used if stable and useful (Unity 6 AI open beta; project already Cloud-linked), but the project must not depend on it to function
-- EditMode tests (Unity Test Framework) for generation / revenue / degradation math once S6-05 is active
-- Optional small runtime assembly definition when introducing those tests — not a full Clean Architecture / DI stack
+## Primary stack
 
-## Asset pipeline stance
+- Phaser 4, latest stable unless a verified blocker requires Phaser 3
+- TypeScript with strict type checking
+- Vite
+- HTML/CSS for shell and management UI where appropriate
+- Git + GitHub
+- IndexedDB / browser-local persistence
+- JSON / TypeScript data definitions
+- Vitest for logic tests where useful
+- Playwright and/or Cursor browser tooling for end-to-end validation
+- free static web hosting for release
 
-Hybrid (see `Docs/PRACTICES_AND_PLANNING.md` §4 until formally locked):
+## Architecture objective
 
-- grey-box / ProBuilder first;
-- commercial-safe free or paid kits only for readability / hero experiments, logged and replaceable;
-- custom modular kits after V1 hero corner;
-- no proprietary reference-game art; no competing tycoon/RTS system templates.
+Optimise for:
 
-## Architectural principles
+1. AI maintainability;
+2. rapid autonomous implementation;
+3. easy automated/browser testing;
+4. zero paid runtime dependency;
+5. a finished playable game;
+6. future extensibility only where current gameplay justifies it.
 
-### 1. Build the playable loop before the framework
+Avoid building a generic game-engine framework inside Phaser.
 
-Do not generate a large generic architecture for systems that do not yet exist.
+## Suggested source structure
 
-Every major abstraction should justify itself through a real gameplay requirement.
+src/
+- main.ts
+- game/
+  - scenes/
+  - world/
+  - camera/
+  - input/
+  - rendering/
+- simulation/
+  - time/
+  - energy/
+  - economy/
+  - equipment/
+  - maintenance/
+  - staff/
+  - weather/
+  - events/
+  - objectives/
+  - progression/
+- content/
+  - equipment/
+  - buildables/
+  - events/
+  - capabilities/
+  - scenarios/
+  - weather/
+- ui/
+- persistence/
+- audio/
+- assets/
+- tests/
 
-The preferred sequence is:
+The exact structure may evolve, but responsibilities must stay clear.
 
-1. implement the smallest working version;
-2. test whether the gameplay is useful / enjoyable;
-3. identify repeated patterns;
-4. refactor deliberately;
-5. document significant architectural changes.
+## Core principles
 
-### 2. Separate simulation from presentation
+### Simulation separate from presentation
 
-Where practical, game simulation should not depend on individual visible scene objects.
+Simulation state must not depend on decorative world sprites.
 
-Example:
+Visual systems consume simulation state and display it.
 
-`SolarPlantSimulation` owns production, availability, condition, constraints, and operating state.
+This supports large solar fields without making every visible panel an expensive simulation object.
 
-`SolarPlantView` represents that state through prefabs, animation, materials, particles, UI, and staff activity.
+### Data-driven content
 
-This separation should make it possible to simulate larger portfolios without requiring every panel or prop to run meaningful simulation logic every frame.
+Balancing and content should be configurable without rewriting core systems.
 
-### 3. Data-driven game content
+Use stable IDs for equipment, events, objectives, capabilities and save-relevant entities.
 
-Equipment, events, staff definitions, research, level parameters, and similar content should be configurable without rewriting core systems.
+### Explicit game state
 
-Examples of data-driven definitions:
+Maintain an understandable authoritative game-state model.
 
-- EquipmentDefinition
-- StaffRoleDefinition
-- TraitDefinition
-- EventDefinition
-- ResearchDefinition
-- SiteDefinition
-- ScenarioDefinition
-- ObjectiveDefinition
-- WeatherProfile
-- MaintenanceProfile
+Avoid hidden state spread across unrelated Phaser objects.
 
-ScriptableObjects are the likely first implementation for much of this content, but the project should not force every type of data into ScriptableObjects if another representation is cleaner.
+### Deterministic or testable calculations
 
-### 4. Avoid premature DOTS / ECS
+Generation, revenue, degradation, event outcomes where deterministic, objective checks and capability requirements should be testable outside the rendering layer.
 
-Do not introduce DOTS / ECS because the final vision may eventually include many entities.
+### Minimal dependencies
 
-The initial solar vertical slice does not require it. Optimisation decisions should be driven by profiler evidence and actual scale problems.
+Every dependency increases autonomous-maintenance risk.
 
-### 5. Keep systems testable
+Use a third-party library only when it clearly saves substantial work and has a suitable licence.
 
-Important calculations should be separable from scene behaviour where practical.
+### No backend for v1
 
-Examples:
+The first release should function fully as a static web application.
 
-- generation calculations;
-- revenue calculations;
-- degradation;
-- maintenance scheduling;
-- event outcome logic;
-- objectives;
-- research unlock requirements.
+No user accounts, cloud database or paid service is required.
 
-Pure C# domain logic is preferred for calculations that do not require Unity-specific behaviour.
+### Save system
 
-### 6. No giant manager classes
+Use browser-local persistence.
 
-Avoid one `GameManager` accumulating unrelated responsibilities.
+Save data must include a schema/version field.
 
-Systems should have clear ownership. Cross-system communication should be understandable and documented.
+Provide reset/new-game capability.
 
-Do not introduce dependency-injection frameworks, service locators, event buses, or complex messaging infrastructure until there is a clear project need.
+Handle missing or invalid saves gracefully.
 
-### 7. Stable save-data boundary
+### Performance
 
-Save systems will be introduced after the first gameplay loop is working, but runtime state should not become unnecessarily tied to scene references.
+Prefer:
 
-Persistent IDs and serialisable state models should be considered when systems begin requiring saving.
+- lower-frequency simulation ticks;
+- object pooling where useful;
+- sprite batching/atlases;
+- culling/off-screen inactivity;
+- efficient tile / isometric rendering;
+- cached derived values.
 
-## Suggested project structure
+Profile before optimising.
 
-```text
-Assets/
-└── _MegawattValley/
-    ├── Art/
-    ├── Audio/
-    ├── Materials/
-    ├── Prefabs/
-    ├── Scenes/
-    ├── UI/
-    ├── Data/
-    │   ├── Equipment/
-    │   ├── Staff/
-    │   ├── Events/
-    │   ├── Research/
-    │   ├── Scenarios/
-    │   └── Weather/
-    └── Scripts/
-        ├── Core/
-        ├── Simulation/
-        ├── Economy/
-        ├── Construction/
-        ├── Energy/
-        ├── Staff/
-        ├── Weather/
-        ├── Events/
-        ├── Objectives/
-        ├── Progression/
-        ├── Camera/
-        └── UI/
+## Isometric representation
 
-Docs/
-.cursor/
-ProjectSettings/
-Packages/
-```
+Use a fixed 2:1 isometric projection.
 
-The exact structure may evolve as packages and first scenes are added. As of S0-02, this tree exists under `Assets/_MegawattValley/` with tracked placeholders so Git and the Project window share the same layout.
+World objects must share:
 
-## Early domain model
+- common projection;
+- common scale rules;
+- common lighting direction;
+- common ground-contact convention;
+- stable depth sorting.
 
-The first playable game will probably require concepts broadly equivalent to:
+Camera rotation is not required.
 
-### Time
+Pan and zoom are required.
 
-- game clock;
-- pause;
-- normal / faster simulation speeds;
-- day / night progression;
-- simulation tick independent of visual frame rate where appropriate.
+## UI architecture
 
-### Site
+Management UI may use DOM/CSS or Phaser-native UI depending on what produces the most reliable result.
 
-- buildable boundary;
-- site attributes;
-- solar resource;
-- grid connection point;
-- construction restrictions;
-- later: hidden risks revealed by studies.
+Requirements matter more than implementation purity:
 
-### Construction
+- crisp at common resolutions;
+- readable;
+- responsive;
+- accessible through mouse/touch where practical;
+- no broken overlap at ordinary desktop sizes;
+- consistent component language.
 
-- buildable definitions;
-- placement preview;
-- placement validation;
-- build cost;
-- construction state;
-- remove / move rules.
+## Build and release commands
 
-### Energy
+The repository should converge on predictable commands such as:
 
-Initial chain:
+- npm install
+- npm run dev
+- npm run build
+- npm test
+- npm run test:e2e
 
-`Solar generation → inverter / conversion → transformer / connection → grid → revenue`
-
-The first implementation may simplify this further to prove the loop before introducing detailed electrical topology.
-
-### Economy
-
-- available cash;
-- purchase costs;
-- operating costs;
-- generation revenue;
-- later: salaries, maintenance, finance, contracts, insurance, etc.
-
-### Equipment health
-
-- condition;
-- reliability;
-- failure state;
-- maintenance requirements;
-- repair state;
-- impact on generation.
-
-### Staff
-
-- role;
-- skill;
-- salary;
-- current assignment;
-- workload;
-- traits;
-- navigation / visual state.
-
-### Events
-
-Events should be data-driven where possible and support:
-
-- triggers;
-- conditions;
-- text;
-- choices;
-- costs;
-- effects;
-- weighted / probabilistic outcomes;
-- follow-up events where needed later.
-
-### Objectives
-
-Scenarios should support multiple objective tiers, broadly corresponding to 1-star, 2-star, and 3-star completion.
-
-### Progression / capabilities
-
-Progression design is governed by `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
-
-For the E1 proof, keep implementation deliberately small:
-
-- data-driven capability definitions / IDs where useful;
-- runtime / save state recording which capabilities are unlocked;
-- simple prerequisite metadata only when an active feature needs it;
-- gameplay systems query capability state to enable behaviour;
-- effects remain owned by the relevant gameplay system rather than building a generic reflection / modifier framework.
-
-Example first use:
-
-`Manual technician dispatch → unlock Radio Dispatch → enable existing automatic technician dispatch behaviour`
-
-Do not build the complete future research tree, research currency, department system, or generic effect engine during E1.
-
-Later research may add staff/time/cash requirements and persistent company-wide unlocks once the campaign needs them.
-
-## Performance philosophy
-
-Optimise based on profiling, not fear.
-
-Likely later optimisation areas include:
-
-- staff pathfinding;
-- large numbers of decorative objects;
-- world-space UI;
-- animation;
-- simulation frequency;
-- rendering large solar fields;
-- multiple off-screen sites.
-
-Large solar arrays should eventually render efficiently without requiring every panel to be a unique expensive runtime entity.
-
-## Version-control principles
-
-- GitHub repository is the source of truth.
-- Unity-generated folders such as `Library`, `Temp`, `Logs`, and build outputs must not be committed.
-- Large binary assets should use Git LFS where appropriate.
-- Project Settings and Packages should be versioned.
-- Prefer meaningful commits tied to defined tasks.
-- Large or risky work should eventually use branches / pull requests so ChatGPT and Rapha can review changes before they become the new baseline.
+Cursor may adjust exact scripts, but setup must remain conventional.
 
 ## Architecture change rule
 
-If Cursor introduces or materially changes a core architectural pattern, it should update this document or explicitly flag the change for review.
+Cursor may make ordinary reversible technical decisions autonomously.
 
-The game design owns the architecture, not the other way around.
+Escalate before introducing:
+
+- a paid dependency;
+- a required backend;
+- a different engine/framework;
+- an irreversible save-format change near release;
+- a major architecture that materially increases complexity;
+- a change that conflicts with the primary build specification.
+
+The product requirements own the architecture, not the other way around.
