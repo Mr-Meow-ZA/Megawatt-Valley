@@ -109,12 +109,14 @@ public/assets/sourced/kenney-rpg-urban-pack/Tiles/tile_0000.png
 ### Characters / workers
 
 ```
-public/assets/sourced/kenney-platformer-characters/PNG/Male/Poses/male_idle.png
-public/assets/sourced/kenney-platformer-characters/PNG/Male/Poses/male_walk1.png
+public/assets/sourced/kenney-platformer-characters/PNG/Player/Poses/player_idle.png
+public/assets/sourced/kenney-platformer-characters/PNG/Player/Poses/player_walk1.png
+public/assets/sourced/kenney-platformer-characters/PNG/Soldier/Poses/soldier_idle.png
+public/assets/sourced/kenney-platformer-characters/PNG/Adventurer/Poses/adventurer_idle.png
 public/assets/sourced/kenney-platformer-characters/PNG/Female/Poses/female_idle.png
 public/assets/sourced/kenney-new-platformer-pack/Sprites/Characters/Default/character_green_idle.png
 public/assets/sourced/kenney-new-platformer-pack/Sprites/Characters/Default/character_beige_walk_a.png
-public/assets/sourced/kenney-simplified-platformer/PNG/Characters/
+public/assets/sourced/kenney-simplified-platformer/PNG/Characters/platformChar_idle.png
 public/assets/sourced/kenney-roguelike-characters/Spritesheet/roguelikeChar_transparent.png
 ```
 
@@ -154,7 +156,7 @@ public/assets/sourced/kenney-board-game-icons/PNG/Default (64px)/timer_100.png
 public/assets/sourced/kenney-starter-kit-city-builder/Starter-Kit-City-Builder-main/sprites/coin.png
 public/assets/sourced/kenney-new-platformer-pack/Sprites/Tiles/Default/hud_coin.png
 public/assets/sourced/kenney-puzzle-pack-2/PNG/Coins/coin_01.png
-public/assets/sourced/kenney-medals/PNG/Medal/medal_01.png
+public/assets/sourced/kenney-medals/PNG/flat_medal1.png
 ```
 
 ---
