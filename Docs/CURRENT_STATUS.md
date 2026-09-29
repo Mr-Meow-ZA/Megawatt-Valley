@@ -22,3 +22,17 @@ Do not start Hero Corner until the Engagement Gate fully clears.
 - Community-first Level 1 assets (`Docs/ASSET_POLICY.md`).
 - Progression authority: `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
 - Cursor brief: `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`.
+
+
+## Parallel experiment — Pixel-isometric autonomous build
+
+A second implementation path is now approved for comparison:
+
+- **Visual style:** modern pixel-isometric
+- **Constraint:** no Unity / Godot
+- **Goal:** maximum autonomous AI implementation with minimal Rapha intervention
+- **Scope:** `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md`
+- **GitHub task:** issue **#6**
+- **First delivery benchmark:** complete Level 1 — *Here Comes the Sun*
+
+This is a parallel experiment and does not replace the existing Unity implementation unless Rapha later chooses that direction.
