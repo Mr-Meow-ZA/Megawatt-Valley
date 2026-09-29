@@ -71,3 +71,12 @@ CrashReports/
 
 # Cursor hook run logs (must stay ignored after the un-ignores above)
 .cursor/hooks/*.log
+
+# Node / Phaser web build
+node_modules/
+dist/
+.vite/
+*.local
+coverage/
+playwright-report/
+test-results/
