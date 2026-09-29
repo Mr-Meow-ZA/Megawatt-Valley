@@ -23,18 +23,18 @@ function weatherLabel(w: GameSnapshot['weather']): string {
   }
 }
 
-function weatherIcon(w: GameSnapshot['weather']): string {
+function weatherIconClass(w: GameSnapshot['weather']): string {
   switch (w) {
     case 'clear':
-      return '☀️';
+      return 'svg-sun';
     case 'partly_cloudy':
-      return '⛅';
+      return 'svg-cloud-sun';
     case 'overcast':
-      return '☁';
+      return 'svg-cloud';
     case 'rain':
-      return '🌧';
+      return 'svg-rain';
     case 'hail':
-      return '⛈';
+      return 'svg-storm';
   }
 }
 
@@ -82,7 +82,7 @@ export class DomHud {
         </div>
 
         <div class="chip cash" data-k="cash-chip">
-          <span class="chip-icon">💰</span>
+          <span class="chip-icon svg-coin" aria-hidden="true"></span>
           <div>
             <span class="chip-label">Cash</span>
             <strong data-k="cash-val">—</strong>
@@ -91,7 +91,7 @@ export class DomHud {
         </div>
 
         <div class="chip power" data-k="power-chip">
-          <span class="chip-icon">⚡</span>
+          <span class="chip-icon svg-bolt" aria-hidden="true"></span>
           <div class="chip-power">
             <span class="chip-label">Power output</span>
             <strong data-k="power-val">—</strong>
@@ -100,7 +100,7 @@ export class DomHud {
         </div>
 
         <div class="chip weather" data-k="weather-chip">
-          <span class="chip-icon" data-k="weather-icon">☀️</span>
+          <span class="chip-icon svg-sun" data-k="weather-icon" aria-hidden="true"></span>
           <div>
             <span class="chip-label">Weather</span>
             <strong data-k="weather-val">—</strong>
@@ -109,7 +109,7 @@ export class DomHud {
         </div>
 
         <div class="chip time" data-k="time-chip">
-          <span class="chip-icon">📅</span>
+          <span class="chip-icon svg-cal" aria-hidden="true"></span>
           <div>
             <span class="chip-label">Calendar</span>
             <strong data-k="time-val">—</strong>
@@ -317,7 +317,8 @@ export class DomHud {
     const bar = this.root.querySelector('[data-k="power-bar"]') as HTMLElement;
     bar.style.width = `${pct}%`;
 
-    setText('weather-icon', weatherIcon(snapshot.weather));
+    const weatherEl = this.root.querySelector('[data-k="weather-icon"]') as HTMLElement;
+    weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather)}`;
     setText('weather-val', weatherLabel(snapshot.weather));
     const mod = Math.round((snapshot.irradiance - 1) * 100);
     setText(

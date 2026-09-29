@@ -133,12 +133,49 @@ export class WorldView {
     return `tile_grass_${hash(x, y) % 4}`;
   }
 
+  /** Fake valley elevation: hills on far edges, lower near river. */
+  private heightAt(x: number, y: number): number {
+    if (isWater(x, y) || isBank(x, y)) return 0;
+    const edge =
+      Math.max(0, 3 - x) +
+      Math.max(0, 3 - y) +
+      Math.max(0, x - (WORLD_W - 4)) +
+      Math.max(0, y - (WORLD_H - 4));
+    const ridge = Math.max(0, 6 - Math.abs(y - 1)) * 0.35;
+    return Math.min(5, edge * 0.85 + ridge);
+  }
+
   private buildTerrain(): void {
     for (let y = 0; y < WORLD_H; y++) {
       for (let x = 0; x < WORLD_W; x++) {
         const screen = isoToScreen(x, y);
+        const elev = this.heightAt(x, y);
         const key = this.terrainKey(x, y);
-        const img = this.scene.add.image(screen.x, screen.y, key);
+        // cliff riser for elevated tiles
+        if (elev >= 1.2 && !key.startsWith('tile_water')) {
+          const riser = this.scene.add.graphics();
+          const cx = screen.x;
+          const cy = screen.y - elev * 5;
+          riser.fillStyle(Palette.grassDeep, 0.95);
+          riser.beginPath();
+          riser.moveTo(cx - 40, cy);
+          riser.lineTo(cx, cy + 20);
+          riser.lineTo(cx, cy + 20 + elev * 5);
+          riser.lineTo(cx - 40, cy + elev * 5);
+          riser.closePath();
+          riser.fillPath();
+          riser.fillStyle(0x2a5a1a, 0.95);
+          riser.beginPath();
+          riser.moveTo(cx + 40, cy);
+          riser.lineTo(cx, cy + 20);
+          riser.lineTo(cx, cy + 20 + elev * 5);
+          riser.lineTo(cx + 40, cy + elev * 5);
+          riser.closePath();
+          riser.fillPath();
+          riser.setDepth(depthFor(x, y, -6));
+          this.props.push(riser);
+        }
+        const img = this.scene.add.image(screen.x, screen.y - elev * 5, key);
         img.setDepth(depthFor(x, y, -5));
         this.ground.set(this.tileKey(x, y), img);
       }
@@ -148,7 +185,8 @@ export class WorldView {
 
   private addProp(tex: string, x: number, y: number, yOff = 0, depthBias = 2, scale = 1): void {
     const s = isoToScreen(x, y);
-    const img = this.scene.add.image(s.x, s.y + yOff, tex);
+    const elev = this.heightAt(x, y);
+    const img = this.scene.add.image(s.x, s.y + yOff - elev * 5, tex);
     img.setScale(scale);
     img.setDepth(depthFor(x, y, depthBias));
     this.props.push(img);

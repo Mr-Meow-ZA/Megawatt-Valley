@@ -7,14 +7,14 @@ describe('Level 1 playthrough smoke', () => {
     sim.cash = 200_000;
 
     const tiles = [
-      { x: 6, y: 8 },
-      { x: 8, y: 8 },
-      { x: 10, y: 8 },
-      { x: 6, y: 10 },
-      { x: 8, y: 10 },
-      { x: 10, y: 10 },
-      { x: 6, y: 12 },
-      { x: 8, y: 12 },
+      { x: 6, y: 9 },
+      { x: 8, y: 9 },
+      { x: 10, y: 9 },
+      { x: 6, y: 11 },
+      { x: 8, y: 11 },
+      { x: 10, y: 11 },
+      { x: 6, y: 13 },
+      { x: 8, y: 13 },
     ];
     for (let i = 0; i < tiles.length; i++) {
       const kind = i % 2 === 0 ? 'bargain_pv' : 'premium_pv';

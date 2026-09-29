@@ -104,8 +104,39 @@ html, body, #app {
 }
 
 .chip-icon {
-  font-size: 20px;
-  line-height: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex: 0 0 auto;
+  background-size: 70% 70%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: rgba(255,255,255,0.06);
+}
+
+.svg-coin {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%23f5c542'/%3E%3Ccircle cx='12' cy='12' r='7' fill='%23e0a820'/%3E%3Ctext x='12' y='16' text-anchor='middle' font-size='10' font-weight='700' fill='%23fff'%3E$%3C/text%3E%3C/svg%3E");
+}
+.svg-bolt {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2L4 14h7l-1 8 10-14h-7l0-6z' fill='%233ddc84'/%3E%3C/svg%3E");
+}
+.svg-sun {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='5' fill='%23f5c542'/%3E%3Cg stroke='%23f5c542' stroke-width='2'%3E%3Cpath d='M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2'/%3E%3C/g%3E%3C/svg%3E");
+}
+.svg-cloud-sun {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='8' cy='9' r='3' fill='%23f5c542'/%3E%3Cpath d='M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.5-1.5A3.5 3.5 0 0 0 7 18z' fill='%23c5d4e8'/%3E%3C/svg%3E");
+}
+.svg-cloud {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 18h10a4 4 0 0 0 0-8 5 5 0 0 0-9.5-1.5A3.5 3.5 0 0 0 7 18z' fill='%23c5d4e8'/%3E%3C/svg%3E");
+}
+.svg-rain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 14h10a4 4 0 0 0 0-8 5 5 0 0 0-9.5-1.5A3.5 3.5 0 0 0 7 14z' fill='%23c5d4e8'/%3E%3Cpath d='M9 16v3M12 17v3M15 16v3' stroke='%236ec8ff' stroke-width='2'/%3E%3C/svg%3E");
+}
+.svg-storm {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 13h10a4 4 0 0 0 0-8 5 5 0 0 0-9.5-1.5A3.5 3.5 0 0 0 7 13z' fill='%2390a4c0'/%3E%3Cpath d='M13 14l-3 5h3l-2 4 6-7h-3l2-2z' fill='%23f5c542'/%3E%3C/svg%3E");
+}
+.svg-cal {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='5' width='18' height='16' rx='2' fill='%234a7ab0'/%3E%3Crect x='3' y='5' width='18' height='5' fill='%233ddc84'/%3E%3Ccircle cx='8' cy='14' r='1.2' fill='%23fff'/%3E%3Ccircle cx='12' cy='14' r='1.2' fill='%23fff'/%3E%3Ccircle cx='16' cy='14' r='1.2' fill='%23fff'/%3E%3C/svg%3E");
 }
 
 .chip-label {

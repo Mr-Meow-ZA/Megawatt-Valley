@@ -102,6 +102,18 @@ export class GameSimulation {
       commissioned: true,
       constructionProgress: 1,
     });
+    // Starter fixed-tilt array so the site reads as a real solar campus from minute one.
+    this.equipment.push({
+      id: this.uid('eq'),
+      kind: 'bargain_pv',
+      plotId: 'site_a',
+      tile: { x: siteA.origin.x + 3, y: siteA.origin.y + 4 },
+      condition: 1,
+      soiling: 0.05,
+      faulted: false,
+      commissioned: true,
+      constructionProgress: 1,
+    });
     this.staff.push({
       id: this.uid('staff'),
       name: 'Tess Volt',
