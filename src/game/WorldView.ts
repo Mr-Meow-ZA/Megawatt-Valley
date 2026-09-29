@@ -453,7 +453,7 @@ export class WorldView {
       sprite.setTexture(textureFor(eq.kind));
       sprite.setPosition(anchor.x, anchor.y + yOff);
       sprite.setDepth(depthFor(eq.tile.x, eq.tile.y, 5));
-      sprite.setScale(isPv(eq.kind) ? 1.12 : 1);
+      sprite.setScale(isPv(eq.kind) ? 1.2 : 1);
       sprite.setAlpha(eq.commissioned ? 1 : 0.4 + eq.constructionProgress * 0.6);
       if (isPv(eq.kind)) {
         const dust = 1 - eq.soiling * 0.4;

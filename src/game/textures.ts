@@ -21,6 +21,11 @@ function drawGrassTile(g: G, w: number, h: number, variant: number): void {
   fillDiamond(g, cx, cy + 3, w - 2, TILE_H - 2, Palette.grassDeep, 0.55);
   fillDiamond(g, cx, cy, w - 2, TILE_H - 2, Palette.grassMid);
   fillDiamond(g, cx, cy - 1, w - 14, TILE_H - 10, Palette.grassLight, 0.55);
+  // tonal patches for meadow noise
+  g.fillStyle(Palette.grassDark, 0.25);
+  g.fillEllipse(cx - 12 + (variant % 3) * 4, cy + 2, 14, 7);
+  g.fillStyle(Palette.grassLight, 0.35);
+  g.fillEllipse(cx + 10 - (variant % 2) * 3, cy - 3, 12, 6);
   g.fillStyle(Palette.grassLight, 0.85);
   for (let i = 0; i < 14; i++) {
     const t = (i * 37 + variant * 13) % 100;
@@ -106,9 +111,9 @@ function isoPanel(
  */
 function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
   const cx = w / 2;
-  const baseY = h - 28;
-  const padW = 142;
-  const padH = 50;
+  const baseY = h - 32;
+  const padW = 160;
+  const padH = 56;
 
   groundShadow(g, cx - 3, baseY + 10, 146, 42, 0.42);
   gravelPad(g, cx, baseY, padW, padH, premium ? 3 : 1);
@@ -118,10 +123,10 @@ function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
   const edge = premium ? Palette.accentYellow : Palette.panelBlueLite;
   const cell = premium ? 0x5ab0ff : Palette.panelCell;
 
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 5; col++) {
-      const px = 28 + col * 24 + row * 3;
-      const py = 18 + row * 16;
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 6; col++) {
+      const px = 22 + col * 24 + row * 3;
+      const py = 14 + row * 18;
       g.lineStyle(2, Palette.steelDark, 1);
       g.lineBetween(px - 6, py + 6, px - 8, py + 16);
       g.lineBetween(px + 6, py + 6, px + 8, py + 16);
@@ -258,8 +263,8 @@ export function generateTextures(scene: Phaser.Scene): void {
   });
 
   // --- solar (larger, 4×5 detailed) ---
-  make('pv_bargain', 160, 120, (g, w, h) => drawSolarArray(g, w, h, false));
-  make('pv_premium', 160, 120, (g, w, h) => drawSolarArray(g, w, h, true));
+  make('pv_bargain', 180, 140, (g, w, h) => drawSolarArray(g, w, h, false));
+  make('pv_premium', 180, 140, (g, w, h) => drawSolarArray(g, w, h, true));
 
   // --- inverter ---
   make('inverter', 64, 72, (g, w, h) => {
