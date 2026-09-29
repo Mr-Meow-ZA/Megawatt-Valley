@@ -62,8 +62,6 @@ function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
 
   groundShadow(g, cx - 3, baseY + 10, 142, 40, 0.4);
   gravelPad(g, cx, baseY, padW, padH, premium ? 3 : 1);
-  // back fence behind panels
-  chainFence(g, cx, baseY, padW - 6, padH - 4, 14, 8, 'back');
 
   const panelColor = premium ? Palette.panelBlueDark : Palette.panelBlue;
   const cellColor = premium ? 0x5ab0ff : Palette.panelCell;
@@ -81,15 +79,17 @@ function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
     for (let col = 0; col < cols; col++) {
       const px = startX + col * gapX + row * 2;
       const py = startY + row * gapY;
-      // mounting rack legs (shadow side bottom-left)
+      // mounting rack legs (bottom-left bias for shadow side)
       g.lineStyle(2, Palette.steelDark, 1);
       g.lineBetween(px + 4, py + ph, px + 2, py + ph + 10);
       g.lineBetween(px + pw - 4, py + ph, px + pw - 2, py + ph + 10);
       g.lineStyle(1, Palette.steel, 0.9);
       g.lineBetween(px + 2, py + ph + 10, px + pw - 2, py + ph + 10);
+      // cross brace
       g.lineStyle(1, Palette.steelLite, 0.7);
       g.lineBetween(px + 6, py + ph + 2, px + pw - 6, py + ph + 8);
 
+      // panel body (tilted: taller left edge suggestion via shade)
       g.fillStyle(0x0a1a40, 0.45);
       g.fillRoundedRect(px - 1, py + 2, pw + 2, ph, 2);
       g.fillStyle(panelColor, 1);
@@ -97,6 +97,7 @@ function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
       g.lineStyle(1, frameColor, premium ? 0.95 : 0.85);
       g.strokeRoundedRect(px, py, pw, ph, 2);
 
+      // cell grid
       g.lineStyle(1, cellColor, 0.55);
       g.lineBetween(px + 7, py + 2, px + 7, py + ph - 2);
       g.lineBetween(px + 14, py + 2, px + 14, py + ph - 2);
@@ -112,7 +113,10 @@ function drawSolarArray(g: G, w: number, h: number, premium: boolean): void {
     }
   }
 
-  chainFence(g, cx, baseY, padW - 6, padH - 4, 14, 8, 'front');
+  // rear fence first (behind panels visually already drawn — draw full enclosure)
+  chainFence(g, cx, baseY, padW - 6, padH - 4, 14, 8);
+
+  // gate accent on front edge
   g.lineStyle(2, Palette.steelLite, 0.9);
   g.lineBetween(cx - 10, baseY + padH / 2 - 2, cx + 10, baseY + padH / 2 - 2);
   g.fillStyle(Palette.accentYellow, 0.85);
