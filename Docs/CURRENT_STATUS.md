@@ -2,37 +2,66 @@
 
 ## Status
 
-**E1-01…E1-05 playtest accepted (2026-09-19). Stopped between sessions.**
+**PRIMARY DIRECTION REBASELINED — 29 September 2026**
 
-Unity **6000.6.0f1** / URP. Functional L1 thin slice + engagement chain through E1-05 verified by Rapha.
+Megawatt Valley is now officially an **AI-autonomous Phaser / TypeScript production project**.
 
-Open and Play: `Assets/_MegawattValley/Scenes/Prototype_Valley.unity`  
-Checklist: `Docs/PLAYTEST_CHECKLIST.md`
+The previous Unity implementation is archived and is no longer the active development path.
 
-## Next action (when resuming)
+## Archive
 
-1. **E1-06** — first capability choice  
-2. **E1-07** — unlocks feel rewarding  
-3. Then **E1-09** engagement-gate polish if needed → **Growing Company** badge → Hero Corner
+Full pre-pivot Unity state preserved on:
 
-Do not start Hero Corner until the Engagement Gate fully clears.
+**archive/unity-prototype-2026-09-29**
 
-## Locked decisions (short)
+That branch is historical reference only.
 
-- Community-first Level 1 assets (`Docs/ASSET_POLICY.md`).
-- Progression authority: `Docs/PROGRESSION_AND_ENGAGEMENT.md`.
-- Cursor brief: `Docs/CURSOR_ENGAGEMENT_IMPLEMENTATION_BRIEF.md`.
+Do not continue Unity implementation unless Rapha explicitly changes the project direction.
 
+## Active goal
 
-## Parallel experiment — Pixel-isometric autonomous build
+Build and release:
 
-A second implementation path is now approved for comparison:
+# Megawatt Valley: Solar — Level 1: Here Comes the Sun
 
-- **Visual style:** modern pixel-isometric
-- **Constraint:** no Unity / Godot
-- **Goal:** maximum autonomous AI implementation with minimal Rapha intervention
-- **Scope:** `Docs/PIXEL_ISOMETRIC_AUTONOMOUS_BUILD_SCOPE.md`
-- **GitHub task:** issue **#6**
-- **First delivery benchmark:** complete Level 1 — *Here Comes the Sun*
+Primary constraints:
 
-This is a parallel experiment and does not replace the existing Unity implementation unless Rapha later chooses that direction.
+- minimal to no routine manual development work by Rapha;
+- zero additional paid development tooling beyond existing Cursor and ChatGPT subscriptions;
+- Phaser + TypeScript browser-first implementation;
+- free/open-source dependencies and assets by default;
+- high-resolution pixel-isometric / illustrated pixel visual direction;
+- complete playable game rather than prototype;
+- Cursor owns implementation, testing, debugging, integration and routine technical decisions.
+
+## Immediate Cursor action
+
+1. Read **Docs/CURSOR_PRIMARY_BUILD_SPEC.md**.
+2. Read the new architecture / visual / roadmap documents.
+3. Rebaseline the working tree for the Phaser implementation without touching the archived Unity branch.
+4. Establish the Phaser + TypeScript + Vite project.
+5. Create the first visual/gameplay slice using the approved pixel-isometric direction.
+6. Run it in-browser and validate it visually before expanding.
+7. Continue through the roadmap autonomously.
+
+## Product owner involvement
+
+Rapha should primarily:
+
+- set vision;
+- review major product decisions;
+- play builds;
+- give feedback on fun, presentation and priorities.
+
+Rapha should not become the routine coder, debugger, scene assembler or test runner.
+
+## Source of truth
+
+If older documents conflict with the following, the newer documents win:
+
+1. Docs/CURSOR_PRIMARY_BUILD_SPEC.md
+2. Docs/CURRENT_STATUS.md
+3. Docs/VISUAL_DIRECTION.md
+4. Docs/TECHNICAL_ARCHITECTURE.md
+5. Docs/ROADMAP.md
+6. Rapha's most recent explicit decision
