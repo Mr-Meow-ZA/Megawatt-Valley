@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap');
 
 :root {
   color-scheme: dark;
@@ -836,4 +835,26 @@ html, body, #app {
     max-height: 34%;
   }
   .chip.time { display: none; }
+}
+
+/* Release layout: every operation remains accessible at laptop sizes. */
+.sidebar-right { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; padding-right: 3px; }
+.sidebar-right .panel.build, .sidebar-right .panel.selection, .sidebar-right .panel.caps { flex: 0 0 auto; max-height: none; }
+.sidebar-right .panel.caps { display: block; }
+.sidebar-right small { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; margin: 5px 0 9px; }
+.sidebar-right button { margin-bottom: 4px; }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.hud-bottom { flex-wrap: wrap; }
+@media (max-width: 1000px) {
+  .hud-top { gap: 4px; }
+  .brand-block { display: none; }
+  .sidebar-right { width: 225px; bottom: 100px; }
+  .objectives { max-width: 210px; max-height: 38vh; overflow-y: auto; }
+  .minimap-panel { display: none; }
+  .hud-bottom .hint { display: none; }
+  .chip { min-width: 90px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

@@ -81,7 +81,8 @@ export type AssetKey = (typeof ASSET_KEYS)[number];
 
 export function preloadGameAssets(scene: Phaser.Scene): void {
   for (const key of ASSET_KEYS) {
-    scene.load.image(key, `/assets/game/${key}.png`);
+    const embedded = (window as Window & { __MW_ASSETS__?: Record<string, string> }).__MW_ASSETS__;
+    scene.load.image(key, embedded?.[key] ?? `/assets/game/${key}.png`);
   }
 }
 
