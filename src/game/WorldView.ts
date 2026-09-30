@@ -229,11 +229,11 @@ export class WorldView {
       const b = pylons[i + 1];
       const sa = isoToScreen(a.x, a.y);
       const sb = isoToScreen(b.x, b.y);
-      // Approximate cross-arm height relative to image anchor
+      // Approximate cross-arm height (pylon.png is 80×160, centre-anchored)
       const ax = sa.x;
-      const ay = sa.y + a.yOff - 52 * a.scale;
+      const ay = sa.y + a.yOff - 58 * a.scale;
       const bx = sb.x;
-      const by = sb.y + b.yOff - 52 * b.scale;
+      const by = sb.y + b.yOff - 58 * b.scale;
       const midX = (ax + bx) / 2;
       const midY = (ay + by) / 2 + 14; // slight sag
       // Three parallel conductors with small vertical offset
@@ -258,15 +258,15 @@ export class WorldView {
       this.props.push(bridge);
     }
 
-    // Tall industrial towers as stand-ins for transmission structures
+    // Lattice transmission pylons with sagging conductors
     const pylons: Array<{ x: number; y: number; yOff: number; scale: number }> = [
-      { x: 10, y: 2, yOff: -55, scale: 0.45 },
-      { x: 14, y: 3, yOff: -55, scale: 0.5 },
-      { x: 22, y: 4, yOff: -55, scale: 0.45 },
-      { x: 28, y: 3, yOff: -55, scale: 0.4 },
+      { x: 10, y: 2, yOff: -52, scale: 0.58 },
+      { x: 14, y: 3, yOff: -52, scale: 0.65 },
+      { x: 22, y: 4, yOff: -52, scale: 0.58 },
+      { x: 28, y: 3, yOff: -52, scale: 0.52 },
     ];
     for (const p of pylons) {
-      this.addProp('chimney', p.x, p.y, p.yOff, 8, p.scale);
+      this.addProp('pylon', p.x, p.y, p.yOff, 8, p.scale);
     }
     this.drawPowerLines(pylons);
     this.addProp('water_tower', 13, 4, -40, 7, 0.5);

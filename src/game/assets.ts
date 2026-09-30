@@ -36,6 +36,7 @@ export const ASSET_KEYS = [
   'bush',
   'rock',
   'fence',
+  'fence_short',
   'pv_bargain',
   'pv_premium',
   'pv_group',

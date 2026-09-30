@@ -38,6 +38,36 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Visual polish — Chain-link fence + lattice pylon sprites
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Added `Tools/rebuild_fence_pylon_sprites.py` (Pillow).
+- Replaced tubular/arch `fence.png` with isometric chain-link fence **120×50** (posts ~20px, rails, diamond mesh, soft shadow, transparent BG).
+- Added `fence_short.png` **80×40** shorter segment; registered in `assets.ts`.
+- Replaced cooling-tower `pylon.png` with steel lattice transmission tower **80×160** (A-frame legs, X braces, cross-arms + white insulator discs, soft base shadow).
+- `WorldView` now places `pylon` (not `chimney`) for the valley power-line run; cable attach height tweaked for new aspect.
+
+**Tested / Verified**
+- Script write + size/bbox checks; sanity copies at `/tmp/fence_check.png`, `/tmp/pylon_check.png`.
+- Visual QA of upscaled previews (chain-link vs handrail; lattice tower vs cooling tower).
+
+**Known issues / limitations**
+- Procedural pixel-drawn sprites, not photographic.
+- Fence segments are single-iso-direction strips; corners still use the same sprite rotated/scaled by placement.
+
+**Decisions / assumptions / recommendations**
+- Pylon is orthographic front A-frame (readable at game scale); fence is slight iso skew along the segment.
+
+**Next recommended step**
+- In-browser review of Site A perimeter fence + valley pylons/power lines.
+
+**Git / References**
+- Commit: pending
+- Branch / PR: `cursor/phaser-level1-build-5938` / #7
+
 ## 2026-09-30 — Visual polish — Procedural solar sprites + HUD
 
 **Agent:** Cursor
