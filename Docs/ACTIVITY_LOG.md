@@ -38,6 +38,39 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 9 — atmosphere + grid sparks toward 9.5
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Power-line spark flashes at cable midpoints when `exportedKw > 0.5`.
+- 16 screen-space dust motes (white/gold, scrollFactor 0, daytime only).
+- White dashed parking bay marks on office dirt pad (x 4–7, y 5–7).
+- Mountains scaled ~15% larger and lowered for fuller sky ridge.
+- Extra bank foam churn near bridge (y=6).
+- Confirmed `.svg-moon` in `styles.css`.
+- `Docs/PHASER_QUALITY_SCORECARD.md`: Loop 9 rescore (~9.3 avg).
+
+**Tested / Verified**
+- `tsc` + `vite build` clean; `npm test` 8/8 pass.
+
+**Known issues / limitations**
+- Props, placement feedback, and HUD still below 9.5.
+- Dust motes hidden during rain/hail (intentional).
+
+**Decisions / assumptions / recommendations**
+- Did not claim ≥9.5 average; Loop 10 should target remaining sub-9.5 categories.
+
+**Next recommended step**
+- Loop 10: HUD chrome + placement polish; hard visual review for props/foliage.
+
+**Git / References**
+- Commit: `9577962`
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Loop 7 polish — feedback + framing toward 9.5
 
 **Agent:** Cursor
