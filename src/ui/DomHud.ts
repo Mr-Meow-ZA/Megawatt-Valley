@@ -111,6 +111,7 @@ export class DomHud {
   private powerFloatUntil = 0;
   private powerFloatAmount = 0;
   private lastStars = 0;
+  private readonly completedObjectiveIds = new Set<string>();
 
   constructor(
     private readonly sim: GameSimulation,
@@ -544,6 +545,7 @@ export class DomHud {
     const doneCount = activeObjs.filter((o) => o.complete).length;
     const objectivesKey = `${doneCount}/${activeObjs.length}|` + activeObjs.map((o) => `${o.id}:${o.complete}:${o.active}`).join('|');
     if (objectivesKey !== this.lastObjectivesKey) {
+      const newlyDone = activeObjs.filter((o) => o.complete && !this.completedObjectiveIds.has(o.id));
       this.lastObjectivesKey = objectivesKey;
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
       const progressPct = activeObjs.length ? Math.round((doneCount / activeObjs.length) * 100) : 0;
@@ -553,12 +555,16 @@ export class DomHud {
           .slice(0, 6)
           .map((o) => {
             const mark = o.complete ? '✓' : '○';
+            const pulse = o.complete && newlyDone.some((n) => n.id === o.id) ? ' check-pulse' : '';
             return `<li class="${o.complete ? 'done' : 'active'}">
-            <span class="check">${mark}</span>
+            <span class="check${pulse}">${mark}</span>
             <div><strong>${o.title}</strong><span>${o.description}</span></div>
           </li>`;
           })
           .join('');
+      for (const o of activeObjs) {
+        if (o.complete) this.completedObjectiveIds.add(o.id);
+      }
     }
 
     const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}`;

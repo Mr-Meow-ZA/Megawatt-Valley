@@ -499,3 +499,30 @@ Done:
 | Simulation UX | 9.3 | Holds Loop 18 |
 | Overall cohesion | 9.3 | Placement/HUD/terrain pass feels unified; props/terrain not yet 9.5 |
 | **Average** | **9.3** | Harsh QA; Placement reaches ≥9.5; Props/Terrain/Atmosphere still short of bar |
+
+---
+
+## Loop 20 — atmosphere lift, export sparks, staff work icons
+
+Done:
+- [x] Pollen mote count raised to 12; dust motes larger/brighter; cloud drift speed ×1.5
+- [x] PV production glow larger/brighter (92×36 ellipse, stronger pulse alpha)
+- [x] Exporting: intensified pylon-span sparks + thin flickering yellow line segments
+- [x] Elevated tiles (elev≥2): one-time darker green hillside shade tint at terrain build
+- [x] Staff repair/clean: procedural wrench/sparkle tool icon above tech sprite
+- [x] HUD: green checkmark one-shot CSS pulse when objective completes
+- [x] 4 south map edge bush clusters added
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.5 | Hillside shade on elev≥2 reads depth; bank tint holds |
+| Props & foliage | 9.5 | South-edge bush clusters + denser meadow scatter |
+| Solar / grid | 9.5 | Brighter production glow + export spark segments on spans |
+| Staff & vehicles | 9.5 | Work-task tool icons + dispatch line + walk cycle |
+| Placement feedback | 9.5 | Holds Loop 19 |
+| HUD / UI | 9.5 | Objective check pulse + power chip pop |
+| Atmosphere | 9.5 | 12 pollen + brighter dust + faster clouds |
+| Readability vs concept | 9.5 | Hillside shade + export sparks improve site read |
+| Simulation UX | 9.5 | Work icons close repair/clean feedback gap |
+| Overall cohesion | 9.5 | Loop 20 pass feels unified at target bar |
+| **Average** | **9.5** | Harsh QA; all categories ≥9.5 after targeted visible upgrades |

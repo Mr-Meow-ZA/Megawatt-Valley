@@ -193,6 +193,7 @@ export class WorldView {
   private readonly staffFacing = new Map<string, number>();
   private readonly staffTrails = new Map<string, StaffTrailBlob[]>();
   private readonly staffTrailLastSpawn = new Map<string, number>();
+  private readonly staffToolIcons = new Map<string, Phaser.GameObjects.Graphics>();
   private readonly staffWalkTextures = ['tech_walk_0', 'tech_walk_1'] as const;
 
   constructor(
@@ -430,9 +431,15 @@ export class WorldView {
         } else if (key.startsWith('tile_grass_hd_')) {
           const h = hash(x, y);
           const gBoost = (h % 20) - 8;
-          img.setTint(
-            Phaser.Display.Color.GetColor(110 + gBoost, 170 + gBoost, 70 + (h % 12)),
-          );
+          let r = 110 + gBoost;
+          let g = 170 + gBoost;
+          let b = 70 + (h % 12);
+          if (elev >= 2) {
+            r = Math.max(72, r - 22);
+            g = Math.max(118, g - 28);
+            b = Math.max(48, b - 14);
+          }
+          img.setTint(Phaser.Display.Color.GetColor(r, g, b));
         } else if (isBank(x, y)) {
           const adjWater =
             isWater(x - 1, y) ||
@@ -683,6 +690,43 @@ export class WorldView {
     this.props.push(g);
   }
 
+  /** Procedural wrench (repair) or sparkle (clean) icon above tech during work tasks. */
+  private drawStaffToolIcon(
+    g: Phaser.GameObjects.Graphics,
+    taskType: 'repair' | 'clean',
+    t: number,
+  ): void {
+    g.clear();
+    const pulse = 0.85 + Math.sin(t / 180) * 0.15;
+    if (taskType === 'repair') {
+      g.fillStyle(0xffcc66, 0.92 * pulse);
+      g.fillCircle(0, 0, 5.5);
+      g.lineStyle(2, 0x8a5520, 0.95);
+      g.beginPath();
+      g.moveTo(-4, 2);
+      g.lineTo(2, -4);
+      g.lineTo(5, -1);
+      g.strokePath();
+      g.lineStyle(1.5, 0x5a3818, 0.9);
+      g.beginPath();
+      g.arc(4, -3, 2.2, Math.PI * 0.15, Math.PI * 1.35);
+      g.strokePath();
+    } else {
+      g.fillStyle(0xa8e8c8, 0.9 * pulse);
+      g.fillCircle(0, 0, 5);
+      g.lineStyle(1.4, 0xffffff, 0.85 * pulse);
+      for (let i = 0; i < 4; i++) {
+        const a = (Math.PI / 2) * i + t / 400;
+        g.beginPath();
+        g.moveTo(Math.cos(a) * 2.5, Math.sin(a) * 2.5);
+        g.lineTo(Math.cos(a) * 7, Math.sin(a) * 7);
+        g.strokePath();
+      }
+      g.fillStyle(0xffffff, 0.75);
+      g.fillCircle(0, 0, 2);
+    }
+  }
+
   /** Screen-space dust motes — visible in daylight only. */
   private spawnDustMotes(): void {
     const count = 16;
@@ -690,7 +734,7 @@ export class WorldView {
       const x = Phaser.Math.Between(60, 1180);
       const y = Phaser.Math.Between(80, 620);
       const gold = i % 3 === 0;
-      const dot = this.scene.add.circle(x, y, 1.2 + (i % 2) * 0.4, gold ? 0xffe8a0 : 0xffffff, 0.18);
+      const dot = this.scene.add.circle(x, y, 1.6 + (i % 2) * 0.55, gold ? 0xffe8a0 : 0xffffff, 0.28);
       dot.setDepth(880);
       dot.setScrollFactor(0);
       dot.setBlendMode(Phaser.BlendModes.ADD);
@@ -715,7 +759,7 @@ export class WorldView {
       }
     }
     const edges = this.forestEdgeTiles;
-    const count = Math.min(8, Math.max(6, edges.length > 0 ? 7 : 0));
+    const count = edges.length > 0 ? 12 : 0;
     if (count === 0) return;
     for (let i = 0; i < count; i++) {
       const pick = edges[(hash(i, 41) + i * 17) % edges.length];
@@ -1032,6 +1076,11 @@ export class WorldView {
       [9, 17],
       [1, 16],
       [37, 8],
+      // Loop 20 — south map edge bush clusters
+      [6, 27],
+      [18, 28],
+      [30, 27],
+      [39, 26],
     ];
     for (const [cx, cy] of clusters) {
       if (inRect(cx, cy, SITE_A) || inRect(cx, cy, SITE_B)) continue;
@@ -1398,7 +1447,7 @@ export class WorldView {
     // gentle cloud drift (parallax scrollFactor already set)
     for (let i = 0; i < this.clouds.length; i++) {
       const c = this.clouds[i];
-      c.x += 0.06 + i * 0.012;
+      c.x += (0.06 + i * 0.012) * 1.5;
       if (c.x > cam.width + 200) c.x = -220;
       c.setAlpha(
         night > 0.3
@@ -1454,9 +1503,9 @@ export class WorldView {
       }
     }
 
-    // Power-line sparks when generating (powerKw fallback when export capped / pre-inverter)
-    const sparking =
-      (snapshot.exportedKw > 0.05 || snapshot.powerKw > 1) && night < 0.25;
+    // Power-line sparks when exporting (powerKw fallback when export capped / pre-inverter)
+    const exporting = snapshot.exportedKw > 0.05;
+    const sparking = (exporting || snapshot.powerKw > 1) && night < 0.25;
     if (this.powerSparks) {
       this.powerSparks.clear();
       if (sparking) {
@@ -1465,13 +1514,25 @@ export class WorldView {
           const pt = this.powerLineSparkPoints[i];
           const flicker = Math.sin(now / 70 + i * 2.7);
           if (flicker < 0.05) continue;
-          const alpha = 0.55 + flicker * 0.4;
-          const r = 3.5 + flicker * 3.5;
+          const exportBoost = exporting ? 1.35 : 1;
+          const alpha = (0.55 + flicker * 0.4) * exportBoost;
+          const r = (3.5 + flicker * 3.5) * exportBoost;
           this.powerSparks.setDepth(pt.depth + 1);
-          this.powerSparks.fillStyle(0xffe44a, alpha);
+          this.powerSparks.fillStyle(0xffe44a, Math.min(1, alpha));
           this.powerSparks.fillCircle(pt.x, pt.y + (i % 3 - 1) * 3, r);
-          this.powerSparks.fillStyle(0xffffff, alpha * 0.75);
+          this.powerSparks.fillStyle(0xffffff, Math.min(1, alpha * 0.75));
           this.powerSparks.fillCircle(pt.x + 2, pt.y - 2, r * 0.55);
+          if (exporting) {
+            const segLen = 5 + flicker * 9;
+            const angle = now / 85 + i * 1.9;
+            const x2 = pt.x + Math.cos(angle) * segLen;
+            const y2 = pt.y + Math.sin(angle) * segLen;
+            this.powerSparks.lineStyle(1.6, 0xffe866, Math.min(1, alpha * 0.95));
+            this.powerSparks.beginPath();
+            this.powerSparks.moveTo(pt.x - 2, pt.y + (i % 3 - 1) * 2);
+            this.powerSparks.lineTo(x2, y2);
+            this.powerSparks.strokePath();
+          }
         }
       }
     }
@@ -1490,7 +1551,7 @@ export class WorldView {
       if (m.x < -20) m.x = camW + 10;
       if (m.y < 40) m.y = camH - 40;
       if (m.y > camH - 20) m.y = 50;
-      const twinkle = 0.12 + Math.sin(t / 1400 + m.phase) * 0.08;
+      const twinkle = 0.16 + Math.sin(t / 1400 + m.phase) * 0.1;
       m.dot.setPosition(m.x, m.y);
       m.dot.setAlpha(twinkle);
     }
@@ -1575,17 +1636,17 @@ export class WorldView {
             glow = this.scene.add.ellipse(
               anchor.x,
               anchor.y + 14 - elev * 5,
-              72,
-              28,
+              92,
+              36,
               0xffe066,
               0,
             );
             glow.setBlendMode(Phaser.BlendModes.ADD);
             this.productionGlows.set(eq.id, glow);
           }
-          const pulse = 0.22 + Math.sin(this.scene.time.now / 480 + hash(eq.tile.x, eq.tile.y)) * 0.08;
+          const pulse = 0.28 + Math.sin(this.scene.time.now / 480 + hash(eq.tile.x, eq.tile.y)) * 0.1;
           glow.setPosition(anchor.x, anchor.y + 14 - elev * 5);
-          glow.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.55 + 0.35);
+          glow.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.62 + 0.4);
           glow.setAlpha(pulse);
           glow.setDepth(depthFor(eq.tile.x, eq.tile.y, 3));
           glow.setVisible(true);
@@ -1796,6 +1857,22 @@ export class WorldView {
       if (!taskTinted) {
         this.applyDirectionalLight(sprite, snapshot.irradiance, night);
       }
+
+      if (staff.task.type === 'repair' || staff.task.type === 'clean') {
+        const workType = staff.task.type;
+        let toolIcon = this.staffToolIcons.get(staff.id);
+        if (!toolIcon) {
+          toolIcon = this.scene.add.graphics();
+          this.staffToolIcons.set(staff.id, toolIcon);
+        }
+        this.drawStaffToolIcon(toolIcon, workType, this.scene.time.now);
+        toolIcon.setPosition(pos.x, pos.y - 38 - elev * 5 + bob);
+        toolIcon.setDepth(depthFor(staff.tile.x, staff.tile.y, 10));
+        toolIcon.setVisible(true);
+      } else {
+        const toolIcon = this.staffToolIcons.get(staff.id);
+        toolIcon?.setVisible(false);
+      }
     }
 
     this.updateStaffTaskLines(snapshot);
@@ -1825,6 +1902,8 @@ export class WorldView {
         this.staffTrailLastSpawn.delete(id);
         this.staffLastTileX.delete(id);
         this.staffFacing.delete(id);
+        this.staffToolIcons.get(id)?.destroy();
+        this.staffToolIcons.delete(id);
       }
     }
 

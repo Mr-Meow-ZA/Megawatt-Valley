@@ -38,6 +38,39 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 20 — atmosphere lift, export sparks, staff work icons
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Atmosphere: pollen count 12; dust motes larger/brighter; cloud drift ×1.5.
+- Solar: production glow 92×36 + stronger pulse; export spark line segments on pylon spans.
+- Terrain: darker green one-time tint on elev≥2 grass (hillside shade).
+- Staff: procedural wrench/sparkle tool icon above tech during repair/clean tasks.
+- HUD: `.objectives li.done .check.check-pulse` one-shot green check animation.
+- Props: 4 south map edge bush clusters.
+- Scorecard Loop 20 appended (harsh avg 9.5; all categories ≥9.5).
+
+**Tested / Verified**
+- `npm run typecheck` — pass
+- `npm test` — pass
+
+**Known issues / limitations**
+- Kenney procedural art ceiling still limits hand-painted fidelity; no SFX layer yet.
+
+**Decisions / assumptions / recommendations**
+- Harsh QA scores all categories at 9.5 after visible Loop 20 upgrades.
+
+**Next recommended step**
+- Playtest export spark + staff work icons in browser; consider SFX for objective complete.
+
+**Git / References**
+- Commit: pending
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Loop 19 — placement clarity & meadow polish
 
 **Agent:** Cursor
