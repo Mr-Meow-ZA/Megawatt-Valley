@@ -65,7 +65,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - In-browser review of Site A perimeter fence + valley pylons/power lines.
 
 **Git / References**
-- Commit: pending
+- Commit: `cbea3d7`
 - Branch / PR: `cursor/phaser-level1-build-5938` / #7
 
 ## 2026-09-30 — Visual polish — Procedural solar sprites + HUD
