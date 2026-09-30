@@ -240,9 +240,9 @@ def draw_iso_panel(
 
     # Cell grid — CLEAR visible lines along both iso axes (high contrast on azure)
     frame_col = GOLD if premium else blend(PANEL_DEEP, PANEL_LITE, 0.55)
-    cell_a = (12, 48, 108, 255)       # dark grid line
-    cell_b = (8, 36, 92, 240)         # darker orthogonal
-    grid_w = 2 if premium else 2
+    cell_a = (8, 32, 80, 255)       # dark grid line
+    cell_b = (6, 28, 70, 255)         # darker orthogonal
+    grid_w = 3 if premium else 3
 
     def lerp_pt(a: tuple[float, float], b: tuple[float, float], t: float) -> tuple[float, float]:
         return (lerp(a[0], b[0], t), lerp(a[1], b[1], t))

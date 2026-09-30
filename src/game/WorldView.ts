@@ -609,11 +609,12 @@ export class WorldView {
   private spawnStaffTrailBlob(staffId: string, x: number, y: number, depth: number): void {
     const trail = this.staffTrails.get(staffId) ?? [];
     const img = this.scene.add.image(x, y, 'shadow_blob');
-    img.setScale(0.22, 0.12);
-    img.setAlpha(0.45);
+    img.setScale(0.38, 0.2);
+    img.setAlpha(0.7);
+    img.setTint(0xffcc66);
     img.setDepth(depth - 1);
     trail.push({ img, born: this.scene.time.now });
-    while (trail.length > 3) {
+    while (trail.length > 5) {
       const old = trail.shift();
       old?.img.destroy();
     }
@@ -626,13 +627,13 @@ export class WorldView {
       for (let i = trail.length - 1; i >= 0; i--) {
         const blob = trail[i];
         const age = now - blob.born;
-        if (age > 700) {
+        if (age > 1100) {
           blob.img.destroy();
           trail.splice(i, 1);
           continue;
         }
-        blob.img.setAlpha(0.45 * (1 - age / 700));
-        blob.img.setScale(0.22 + age / 7000, 0.12 + age / 12000);
+        blob.img.setAlpha(0.7 * (1 - age / 1100));
+        blob.img.setScale(0.38 + age / 5000, 0.2 + age / 9000);
       }
       if (trail.length === 0) this.staffTrails.delete(staffId);
     }
@@ -900,11 +901,12 @@ export class WorldView {
 
     // Far snow-capped ridge behind the valley (concept backdrop).
     const mounts = [
-      { key: 'mountain_0', x: 180, y: 82, scale: 1.55, a: 0.85 },
-      { key: 'mountain_1', x: 480, y: 66, scale: 1.78, a: 0.9 },
-      { key: 'mountain_2', x: 820, y: 76, scale: 1.61, a: 0.82 },
-      { key: 'mountain_1', x: 1100, y: 92, scale: 1.38, a: 0.75 },
-      { key: 'mountain_0', x: -40, y: 102, scale: 1.27, a: 0.7 },
+      // Cleaner rebuilt mountains — avoid extreme upscale that caused grey seams
+      { key: 'mountain_0', x: 200, y: 70, scale: 1.15, a: 0.92 },
+      { key: 'mountain_1', x: 520, y: 55, scale: 1.25, a: 0.95 },
+      { key: 'mountain_2', x: 860, y: 65, scale: 1.18, a: 0.9 },
+      { key: 'mountain_1', x: 1140, y: 80, scale: 1.05, a: 0.82 },
+      { key: 'mountain_0', x: -20, y: 88, scale: 1.0, a: 0.78 },
     ];
     for (let i = 0; i < mounts.length; i++) {
       const m = mounts[i];
@@ -1183,28 +1185,32 @@ export class WorldView {
     for (let i = 0; i < this.foam.length; i++) {
       const f = this.foam[i];
       f.x += Math.sin(this.scene.time.now / 800 + i) * 0.12;
-      f.setAlpha(0.4 + Math.sin(this.scene.time.now / 500 + i) * 0.18);
+      f.setAlpha(0.5 + Math.sin(this.scene.time.now / 500 + i) * 0.22);
+      // 3-frame foam cycle so river froth reads as animated, not static blocks
+      const frame = Math.floor(this.scene.time.now / 220 + i) % 3;
+      const foamKey = `foam_strip_${frame}`;
+      if (this.scene.textures.exists(foamKey) && f.texture.key !== foamKey) {
+        f.setTexture(foamKey);
+      }
     }
 
-    // Power-line sparks when exporting
-    const sparking = snapshot.exportedKw > 0.5 && night < 0.2;
+    // Power-line sparks when generating (use powerKw so daytime production shows even before export settles)
+    const sparking = (snapshot.exportedKw > 0.05 || snapshot.powerKw > 0.5) && night < 0.25;
     if (this.powerSparks) {
       this.powerSparks.clear();
       if (sparking) {
         const now = this.scene.time.now;
         for (let i = 0; i < this.powerLineMidpoints.length; i++) {
           const mid = this.powerLineMidpoints[i];
-          const flicker = Math.sin(now / 90 + i * 2.7);
-          if (flicker < 0.25) continue;
-          const alpha = 0.35 + flicker * 0.45;
-          const r = 2 + flicker * 2.5;
+          const flicker = Math.sin(now / 70 + i * 2.7);
+          if (flicker < 0.05) continue;
+          const alpha = 0.55 + flicker * 0.4;
+          const r = 3.5 + flicker * 3.5;
           this.powerSparks.setDepth(mid.depth + 1);
           this.powerSparks.fillStyle(0xffe44a, alpha);
           this.powerSparks.fillCircle(mid.x, mid.y + (i % 3 - 1) * 3, r);
-          if (flicker > 0.7) {
-            this.powerSparks.fillStyle(0xffffff, alpha * 0.6);
-            this.powerSparks.fillCircle(mid.x + 3, mid.y - 2, r * 0.5);
-          }
+          this.powerSparks.fillStyle(0xffffff, alpha * 0.75);
+          this.powerSparks.fillCircle(mid.x + 2, mid.y - 2, r * 0.55);
         }
       }
     }
@@ -1448,7 +1454,7 @@ export class WorldView {
       sprite.setScale(1.05 * face, squashY);
       if (traveling) {
         const lastSpawn = this.staffTrailLastSpawn.get(staff.id) ?? 0;
-        if (this.scene.time.now - lastSpawn > 110) {
+        if (this.scene.time.now - lastSpawn > 70) {
           this.spawnStaffTrailBlob(
             staff.id,
             pos.x - 4,
