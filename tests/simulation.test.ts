@@ -111,4 +111,24 @@ describe('GameSimulation', () => {
     sim.weather = 'clear';
     expect(sim.computePower().exportedKw).toBeGreaterThan(20);
   });
+
+  it('keeps export online for first hours without random faults', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.quickPlace('bargain_pv', 'site_a')).toBe(true);
+    sim.setSpeed(4);
+    for (let i = 0; i < 80; i++) {
+      sim.hour = 12;
+      sim.weather = 'clear';
+      if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[0].id);
+      sim.update(0.25);
+    }
+    sim.hour = 12;
+    sim.weather = 'clear';
+    const eq = sim.equipment.find((e) => e.kind === 'bargain_pv')!;
+    expect(eq.commissioned).toBe(true);
+    expect(eq.faulted).toBe(false);
+    expect(sim.computePower().exportedKw).toBeGreaterThan(20);
+    expect(sim.objectives.find((o) => o.id === 'first_power')?.complete).toBe(true);
+  });
 });
