@@ -361,6 +361,48 @@ html, body, #app {
   }
 }
 
+.ops-chip {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 72px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(255, 93, 108, 0.16);
+  border: 1px solid rgba(255, 93, 108, 0.45);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.ops-chip[hidden] {
+  display: none !important;
+}
+
+.ops-chip strong {
+  color: #ffb3bb;
+  font-size: 12px;
+}
+
+.ops-chip em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 10px;
+}
+
+.ops-chip.ops-alert {
+  animation: cash-pulse 1.4s ease-in-out infinite;
+  border-color: rgba(255, 93, 108, 0.75);
+}
+
+.ops-chip.ops-busy {
+  background: rgba(245, 197, 66, 0.14);
+  border-color: rgba(245, 197, 66, 0.5);
+}
+
+.ops-chip.ops-busy strong {
+  color: var(--warn);
+}
+
 .stars {
   font-size: 18px;
   color: var(--warn);
@@ -873,6 +915,8 @@ html, body, #app {
   font-weight: 700;
   padding: 10px 12px;
   border-radius: 10px;
+  min-height: 44px;
+  font-size: 14px;
 }
 /* Keep Place on Site A visible whenever the build panel is usable. */
 .panel.build.build-mode-active [data-action="cancel-build"] {
@@ -1234,6 +1278,16 @@ html, body, #app {
   .chip.power em,
   .chip.cash em { display: none; }
   .stars { font-size: 16px; }
+  .ops-chip { min-width: 64px; padding: 4px 6px; }
+  .quick-place-btn {
+    min-height: 48px;
+    font-size: 15px;
+    position: sticky;
+    bottom: 0;
+  }
+  .coach-actions button {
+    min-height: 44px;
+  }
   .panel.objectives {
     width: min(46vw, 160px);
     top: auto;

@@ -163,6 +163,10 @@ export interface GameSnapshot {
   onboardingStep: number;
   pendingCapabilityChoice: boolean;
   bargainDiscountCharges: number;
+  /** Currently faulted commissioned assets (ops pressure read). */
+  openFaults: number;
+  /** Hours remaining where auto-dispatch / manual help is delayed. */
+  staffBusyHours: number;
 }
 
 export interface SaveData {

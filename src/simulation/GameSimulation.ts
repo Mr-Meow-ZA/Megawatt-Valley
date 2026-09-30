@@ -1198,6 +1198,8 @@ export class GameSimulation {
       onboardingStep: this.onboardingStep,
       pendingCapabilityChoice: this.pendingCapabilityChoice,
       bargainDiscountCharges: this.bargainDiscountCharges,
+      openFaults: this.equipment.filter((e) => e.faulted && e.commissioned).length,
+      staffBusyHours: this.staffBusyHours,
     };
   }
 

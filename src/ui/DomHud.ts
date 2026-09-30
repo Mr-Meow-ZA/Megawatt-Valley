@@ -246,6 +246,10 @@ export class DomHud {
           <button data-speed="4" type="button" title="4x">▶▶▶</button>
         </div>
         <div class="stars" data-k="stars">☆☆☆</div>
+        <div class="ops-chip" data-k="ops-chip" hidden title="Open faults / crew status">
+          <strong data-k="ops-faults">0 faults</strong>
+          <em data-k="ops-busy"></em>
+        </div>
       </header>
 
       <aside class="panel objectives">
@@ -898,6 +902,25 @@ export class DomHud {
       const b = btn as HTMLElement;
       b.classList.toggle('active', Number(b.getAttribute('data-speed')) === snapshot.speed);
     });
+
+    const opsChip = this.root.querySelector('[data-k="ops-chip"]') as HTMLElement;
+    const busy = snapshot.staffBusyHours > 0.05;
+    const showOps = snapshot.openFaults > 0 || busy;
+    opsChip.hidden = this.showTitle || !showOps;
+    opsChip.classList.toggle('ops-alert', snapshot.openFaults >= 2);
+    opsChip.classList.toggle('ops-busy', busy);
+    setText(
+      'ops-faults',
+      snapshot.openFaults === 0
+        ? 'Clear'
+        : snapshot.openFaults === 1
+          ? '1 fault'
+          : `${snapshot.openFaults} faults`,
+    );
+    setText(
+      'ops-busy',
+      busy ? `Crew busy ${Math.ceil(snapshot.staffBusyHours)}h` : snapshot.openFaults > 0 ? 'Press R' : '',
+    );
 
     // Onboarding coach
     const coach = this.root.querySelector('[data-k="coach"]') as HTMLElement;
