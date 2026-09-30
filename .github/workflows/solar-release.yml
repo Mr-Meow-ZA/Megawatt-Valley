@@ -1,0 +1,28 @@
+name: Solar release checks
+on:
+  push:
+    branches: [codex/solar-release-hardening]
+  pull_request:
+    paths: ['src/**', 'tests/**', 'package*.json', 'vite.config.ts', '.github/workflows/solar-release.yml', 'scripts/**']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: megawatt-valley-solar
+          path: dist/
+          retention-days: 14
