@@ -20,34 +20,34 @@ Build and release:
 
 # Megawatt Valley: Solar — Level 1: Here Comes the Sun
 
-Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.
+Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.  
+Active PR: **#8** (`cursor/level1-steam-finish-5938`).
 
-## Progress (branch `cursor/level1-steam-finish-5938`)
+## Progress
 
 | Milestone | Status |
 |-----------|--------|
 | M0 Rebaseline (Phaser+Vite+TS) | Done |
-| M1 Visual proof + HUD/build | Done (Loops 1–21 visual polish) |
+| M1 Visual proof + HUD/build | Done |
 | M2 Core solar loop | Done |
-| M3 Ops / staff / automation | Done (fault→Radio Dispatch, soiling→Cleaning Kit) |
-| M4 Full Level 1 scenario | Done (objectives, Site B constraint, events, hail weather, capability fork, Growing Pains, 1★/2★/3★, save v2 + resume) |
-| M5–M6 Polish / deploy | In progress (title/onboarding/SFX/CI/Vercel config; live URL pending connect) |
+| M3 Ops / staff / automation | Done |
+| M4 Full Level 1 scenario | Done |
+| M5–M6 Polish / deploy | Polish done locally; **live URL blocked** (Vercel project create 403) |
 
 ## How to run
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test
-npm run build
-npm run preview  # production static build
+npm test         # 15 tests
+npm run build && npm run preview
 ```
 
-Title screen → Start / Continue. Esc or Cancel exits placement. R repairs, C cleans (no selection required). Mute in footer. Autosave ~45s.
+Title → Start → **Place on Site A** (or click bright meadow) → ▶▶ midday → export → R repair / C clean → expand → hail → stars.
 
 ## Product owner involvement
 
-Rapha should primarily set vision, review major decisions, play builds, and give feedback.
+Rapha should primarily set vision, review major decisions, play builds, and give feedback. Next owner step: connect free static hosting + play PR #8.
 
 ## Source of truth
 

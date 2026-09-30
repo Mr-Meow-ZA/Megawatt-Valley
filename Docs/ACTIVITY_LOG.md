@@ -41,6 +41,18 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 ## 2026-09-30 — Level 1 steam-finish — scenario + product shell
 
 **Agent:** Cursor
+**Status:** Partial (M4 + product shell done; live deploy URL pending — Vercel create 403)
+
+**Playtest root causes fixed**
+- 0 kW: faults during first commission — gated until First Power holds ~4h.
+- Placement misses: enlarge Site A, snap, Place on Site A + `window.__MV.quickPlace()`.
+- Title Start: Phaser canvas `pointer-events: none` while title is up.
+
+**Changed / Produced** (see earlier entry body below for full list)
+
+## 2026-09-30 — Level 1 steam-finish — detail
+
+**Agent:** Cursor
 **Status:** Partial (product shell + M4 complete; live deploy URL pending)
 
 **Changed / Produced**
