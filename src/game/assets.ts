@@ -346,6 +346,20 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     }
   }
 
+  // Soft red dim overlay for non-buildable tiles during build mode
+  make('tile_build_dim', 100, 65, (g) => {
+    g.fillStyle(0xff3344, 0.22);
+    g.beginPath();
+    g.moveTo(50, 5);
+    g.lineTo(95, 30);
+    g.lineTo(50, 55);
+    g.lineTo(5, 30);
+    g.closePath();
+    g.fillPath();
+    g.lineStyle(1, 0xff5566, 0.28);
+    g.strokePath();
+  });
+
   // Locked plot hatch overlay — sits on grass, not a flat replacement tile
   make('tile_locked_hatch', 100, 65, (g) => {
     g.fillStyle(0x5a6a58, 0.18);

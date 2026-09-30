@@ -38,6 +38,38 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 19 — placement clarity & meadow polish
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Build mode: `tile_build_dim` soft-red overlay on locked Site B, water/bank, and off-plot tiles; locked hatch reddens during build.
+- Valid ghost: silhouette alpha 0.7, scale pulse 1.0↔1.05, multi-tile `2×2` Phaser Text label.
+- Terrain: blue-green one-time tint on bank tiles adjacent to water.
+- Site A fence exterior wildflower density doubled (hash modulus halved).
+- HUD: brief CSS scale pop on `.chip.power` when `+kW` float appears.
+- Scorecard Loop 19 appended (harsh avg 9.3; Placement 9.5).
+
+**Tested / Verified**
+- `npm run build` (tsc + vite) — pass
+- `npm test` — 8/8 pass
+
+**Known issues / limitations**
+- Props, terrain, atmosphere still below 9.5 on harsh estimate; Kenney procedural art ceiling remains.
+
+**Decisions / assumptions / recommendations**
+- Scorecard claims Placement ≥9.5 only; other categories honestly held at 9.2–9.4.
+
+**Next recommended step**
+- Loop 20: hand-painted equipment accents or richer staff idle/work anims to lift Props/Staff toward 9.5.
+
+**Git / References**
+- Commit: pending
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Loop 18 — ops feedback polish
 
 **Agent:** Cursor

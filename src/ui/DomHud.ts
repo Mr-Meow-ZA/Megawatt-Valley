@@ -490,6 +490,7 @@ export class DomHud {
     cashChip?.classList.toggle('cash-low', snapshot.cash < cheapestBuild);
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
     const powerFloat = this.root.querySelector('[data-k="power-float"]') as HTMLElement;
+    const powerChip = this.root.querySelector('[data-k="power-chip"]') as HTMLElement | null;
     if (this.lastExportedKw >= 0 && snapshot.exportedKw > this.lastExportedKw + 0.2) {
       this.powerFloatAmount = snapshot.exportedKw - this.lastExportedKw;
       this.powerFloatUntil = performance.now() + 1100;
@@ -498,6 +499,9 @@ export class DomHud {
       powerFloat.classList.remove('power-float-animate');
       void powerFloat.offsetWidth;
       powerFloat.classList.add('power-float-animate');
+      powerChip?.classList.remove('power-chip-pop');
+      void powerChip?.offsetWidth;
+      powerChip?.classList.add('power-chip-pop');
     }
     this.lastExportedKw = snapshot.exportedKw;
     if (this.powerFloatUntil && performance.now() > this.powerFloatUntil) {

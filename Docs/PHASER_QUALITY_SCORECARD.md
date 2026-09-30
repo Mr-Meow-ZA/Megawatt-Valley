@@ -473,3 +473,29 @@ Done:
 | Simulation UX | 9.3 | Travel/repair line closes dispatch feedback gap |
 | Overall cohesion | 9.3 | Ops feedback layer (light, line, bar) feels unified |
 | **Average** | **9.2** | Harsh QA; meets ≥9.2 target; path to 9.5 = hand-painted equipment art, SFX, richer staff idle/work anims |
+
+---
+
+## Loop 19 — placement clarity & meadow polish
+
+Done:
+- [x] Build mode: soft red `tile_build_dim` overlay on locked Site B, water/bank, and off-plot tiles; locked hatch gains red tint
+- [x] Valid ghost silhouette alpha 0.7 + brief scale pulse (1.0↔1.05); white pulse ring + green pad hold
+- [x] Multi-tile footprint label (`2×2`) via Phaser Text near ghost pad
+- [x] Water-bank tiles adjacent to water: one-time blue-green tint at terrain build
+- [x] Site A fence exterior wildflower density doubled (hash modulus halved on N/S/W/E strips)
+- [x] Power chip brief CSS scale pop when `+kW` float appears
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.3 | Blue-green bank tint softens water edge; still procedural tile mix |
+| Props & foliage | 9.4 | Denser Site A fence flowers; Kenney scatter still not hand-painted |
+| Solar / grid | 9.2 | Holds Loop 18 |
+| Staff & vehicles | 9.3 | Holds Loop 18 |
+| Placement feedback | 9.5 | Build-dim overlays + stronger ghost + footprint label hit clarity bar |
+| HUD / UI | 9.4 | Power chip pop adds tactile feedback without SFX |
+| Atmosphere | 9.2 | Holds Loop 18 |
+| Readability vs concept | 9.3 | Build-mode red/green zoning improves site read |
+| Simulation UX | 9.3 | Holds Loop 18 |
+| Overall cohesion | 9.3 | Placement/HUD/terrain pass feels unified; props/terrain not yet 9.5 |
+| **Average** | **9.3** | Harsh QA; Placement reaches ≥9.5; Props/Terrain/Atmosphere still short of bar |

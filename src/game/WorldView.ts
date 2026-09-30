@@ -151,6 +151,7 @@ function isForestEdge(x: number, y: number): boolean {
 export class WorldView {
   private readonly ground = new Map<string, Phaser.GameObjects.Image>();
   private readonly lockedOverlays = new Map<string, Phaser.GameObjects.Image>();
+  private readonly buildDimOverlays = new Map<string, Phaser.GameObjects.Image>();
   private readonly props: Phaser.GameObjects.GameObject[] = [];
   private readonly entitySprites = new Map<string, Phaser.GameObjects.Image>();
   private readonly entityShadows = new Map<string, Phaser.GameObjects.Image>();
@@ -160,6 +161,7 @@ export class WorldView {
   private ghostInvalidX: Phaser.GameObjects.Graphics | null = null;
   private ghostRing: Phaser.GameObjects.Image | null = null;
   private readonly ghostFootprintPads: Phaser.GameObjects.Image[] = [];
+  private ghostFootprintLabel: Phaser.GameObjects.Text | null = null;
   private selectRing: Phaser.GameObjects.Image | null = null;
   private hoverHighlight: Phaser.GameObjects.Image | null = null;
   private hoverTile: Vec2 | null = null;
@@ -431,6 +433,22 @@ export class WorldView {
           img.setTint(
             Phaser.Display.Color.GetColor(110 + gBoost, 170 + gBoost, 70 + (h % 12)),
           );
+        } else if (isBank(x, y)) {
+          const adjWater =
+            isWater(x - 1, y) ||
+            isWater(x + 1, y) ||
+            isWater(x, y - 1) ||
+            isWater(x, y + 1);
+          if (adjWater) {
+            const h = hash(x, y);
+            img.setTint(
+              Phaser.Display.Color.GetColor(
+                92 + (h % 14),
+                168 + (h % 12),
+                136 + (h % 10),
+              ),
+            );
+          }
         }
         this.ground.set(this.tileKey(x, y), img);
       }
@@ -759,28 +777,40 @@ export class WorldView {
 
   /** Low-density wildflowers along meadow fence lines and sparse interior. */
   private scatterMeadowWildflowers(): void {
-    const sites = [SITE_A, SITE_B];
-    for (const site of sites) {
+    const scatterFenceExterior = (
+      site: { x0: number; x1: number; y0: number; y1: number },
+      dense: boolean,
+    ) => {
+      const nMod = dense ? 2 : 4;
+      const sMod = dense ? 2 : 5;
+      const wMod = dense ? 2 : 4;
+      const eMod = dense ? 2 : 5;
       for (let x = site.x0; x < site.x1; x++) {
         const hN = hash(x, site.y0 - 1);
-        if (hN % 4 === 0) {
+        if (hN % nMod === 0) {
           this.addProp(`flower_${hN % 2}`, x, site.y0 - 1, -5, 1, 0.5 + (hN % 3) * 0.06);
         }
         const hS = hash(x, site.y1);
-        if (hS % 5 === 0) {
+        if (hS % sMod === 0) {
           this.addProp(`flower_${hS % 2}`, x, site.y1, -5, 1, 0.48 + (hS % 3) * 0.06);
         }
       }
       for (let y = site.y0; y < site.y1; y++) {
         const hW = hash(site.x0 - 1, y);
-        if (hW % 4 === 0) {
+        if (hW % wMod === 0) {
           this.addProp(`flower_${hW % 2}`, site.x0 - 1, y, -5, 1, 0.52);
         }
         const hE = hash(site.x1, y);
-        if (hE % 5 === 0) {
+        if (hE % eMod === 0) {
           this.addProp(`flower_${hE % 2}`, site.x1, y, -5, 1, 0.5);
         }
       }
+    };
+
+    scatterFenceExterior(SITE_A, true);
+    scatterFenceExterior(SITE_B, false);
+
+    for (const site of [SITE_A, SITE_B]) {
       for (let y = site.y0 + 2; y < site.y1 - 2; y++) {
         for (let x = site.x0 + 2; x < site.x1 - 2; x++) {
           if (isMainRoad(x, y)) continue;
@@ -1185,6 +1215,7 @@ export class WorldView {
   refreshLockedTiles(): void {
     const snap = this.sim.snapshot();
     const siteB = snap.plots.find((p) => p.id === 'site_b');
+    const inBuildMode = !!snap.buildMode;
     for (const [key, img] of this.ground) {
       const [xs, ys] = key.split(',');
       const x = Number(xs);
@@ -1208,11 +1239,76 @@ export class WorldView {
           this.lockedOverlays.set(key, overlay);
         }
         overlay.setVisible(true);
+        if (inBuildMode) {
+          overlay.setTint(0xff8888);
+          overlay.setAlpha(0.88);
+        } else {
+          overlay.clearTint();
+          overlay.setAlpha(1);
+        }
       } else {
-        this.lockedOverlays.get(key)?.setVisible(false);
+        const lockedOverlay = this.lockedOverlays.get(key);
+        lockedOverlay?.setVisible(false);
+        lockedOverlay?.clearTint();
+        lockedOverlay?.setAlpha(1);
         if (img.texture.key === 'tile_locked') {
           img.setTexture(this.terrainKey(x, y));
         }
+      }
+    }
+  }
+
+  /** Dim non-buildable tiles while build mode is active. */
+  private refreshBuildDimTiles(snapshot: GameSnapshot): void {
+    const siteB = snapshot.plots.find((p) => p.id === 'site_b');
+    const inBuildMode = !!snapshot.buildMode;
+
+    for (const [key] of this.ground) {
+      const [xs, ys] = key.split(',');
+      const x = Number(xs);
+      const y = Number(ys);
+      const inSiteB = inRect(x, y, SITE_B);
+      const lockedSiteB = inSiteB && siteB && !siteB.unlocked;
+
+      let needsDim = false;
+      if (inBuildMode) {
+        if (lockedSiteB || isWater(x, y) || isBank(x, y)) {
+          needsDim = true;
+        } else {
+          let inUnlockedPlot = false;
+          for (const plot of snapshot.plots) {
+            if (!plot.unlocked) continue;
+            if (
+              x >= plot.origin.x &&
+              y >= plot.origin.y &&
+              x < plot.origin.x + plot.size.x &&
+              y < plot.origin.y + plot.size.y
+            ) {
+              inUnlockedPlot = true;
+              break;
+            }
+          }
+          if (!inUnlockedPlot) needsDim = true;
+        }
+      }
+
+      let overlay = this.buildDimOverlays.get(key);
+      if (needsDim) {
+        if (!overlay) {
+          const screen = isoToScreen(x, y);
+          const elev = this.heightAt(x, y);
+          const dimKey = this.scene.textures.exists('tile_build_dim')
+            ? 'tile_build_dim'
+            : 'ghost_bad';
+          overlay = this.scene.add.image(screen.x, screen.y - elev * 5, dimKey);
+          overlay.setDepth(depthFor(x, y, -2));
+          overlay.setAlpha(lockedSiteB ? 0.42 : 0.34);
+          this.buildDimOverlays.set(key, overlay);
+        }
+        overlay.setAlpha(lockedSiteB ? 0.42 : 0.34);
+        overlay.setVisible(true);
+      } else {
+        overlay?.setVisible(false);
       }
     }
   }
@@ -1756,6 +1852,7 @@ export class WorldView {
     }
 
     this.refreshLockedTiles();
+    this.refreshBuildDimTiles(snapshot);
   }
 
   setPointerInWorld(inside: boolean): void {
@@ -1798,6 +1895,7 @@ export class WorldView {
       this.ghostPad?.setVisible(false);
       this.ghostRing?.setVisible(false);
       this.ghostInvalidX?.setVisible(false);
+      this.ghostFootprintLabel?.setVisible(false);
       for (const pad of this.ghostFootprintPads) pad.setVisible(false);
       return;
     }
@@ -1903,10 +2001,35 @@ export class WorldView {
     this.ghost.setTexture(tex);
     this.ghost.setPosition(screen.x, screen.y + yOff);
     this.ghost.setDepth(depthFor(tile.x, tile.y, 15));
-    this.ghost.setAlpha(0.6);
-    this.ghost.setScale(isPv(snapshot.buildMode) ? 1.15 : 1);
+    this.ghost.setAlpha(0.7);
+    const baseScale = isPv(snapshot.buildMode) ? 1.15 : 1;
+    const scalePulse = ok ? 1 + 0.05 * (0.5 + 0.5 * Math.sin(t / 280)) : 1;
+    this.ghost.setScale(baseScale * scalePulse);
     this.ghost.setTint(ok ? 0x55ff99 : 0xff2244);
     this.ghost.setVisible(true);
+
+    const showFootprintLabel = cellCount > 1;
+    if (showFootprintLabel) {
+      if (!this.ghostFootprintLabel) {
+        this.ghostFootprintLabel = this.scene.add.text(0, 0, '', {
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: '13px',
+          fontStyle: 'bold',
+          color: ok ? '#ccffdd' : '#ffcccc',
+          stroke: '#1a2230',
+          strokeThickness: 3,
+        });
+        this.ghostFootprintLabel.setOrigin(0.5, 1);
+      }
+      this.ghostFootprintLabel.setText(`${fpX}×${fpY}`);
+      this.ghostFootprintLabel.setPosition(screen.x, padY - 8);
+      this.ghostFootprintLabel.setDepth(depthFor(tile.x, tile.y, 17));
+      this.ghostFootprintLabel.setAlpha(ok ? 0.92 : 0.78);
+      this.ghostFootprintLabel.setColor(ok ? '#ccffdd' : '#ffcccc');
+      this.ghostFootprintLabel.setVisible(true);
+    } else {
+      this.ghostFootprintLabel?.setVisible(false);
+    }
   }
 
   getHoverTile(): Vec2 | null {
