@@ -27,6 +27,9 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     generateOverlayTextures(this);
     this.bootGame(true);
+    // Immediate: don't wait for first update() or title clicks hit the canvas.
+    if (this.game.canvas) this.game.canvas.style.pointerEvents = 'none';
+    this.input.enabled = false;
 
     const cam = this.cameras.main;
     let pressWorld: { x: number; y: number } | null = null;
@@ -163,10 +166,14 @@ export class GameScene extends Phaser.Scene {
         () => this.rebuildWorld(),
       );
     } else {
-      this.hud.rebindingSim(this.sim, showTitle);
+      this.hud.rebindingSim(this.sim);
     }
     if (showTitle) this.hud.showTitleScreen();
     else this.hud.hideTitleScreen();
+    if (this.game.canvas) {
+      this.game.canvas.style.pointerEvents = showTitle ? 'none' : 'auto';
+    }
+    this.input.enabled = !showTitle;
   }
 
   update(_t: number, delta: number): void {
