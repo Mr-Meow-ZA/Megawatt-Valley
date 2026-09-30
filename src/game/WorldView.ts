@@ -4,8 +4,29 @@ import type { GameSimulation } from '../simulation/GameSimulation';
 import type { EquipmentKind, GameSnapshot, Vec2 } from '../simulation/types';
 import { depthFor, isoToScreen, screenToIso, TILE_H } from './iso';
 const SKY = 0x8ec8ef;
-const GRASS_DEEP = 0x2f6b1c;
 const STEEL_DARK = 0x5a6370;
+
+/** Earth-tone cliff faces — avoid bright green wedges that clash with grass tiles. */
+const CLIFF_FACE_W = 0x3d3428;
+const CLIFF_FACE_E = 0x4a4032;
+
+type AmbientMotion = {
+  sprite: Phaser.GameObjects.Image | Phaser.GameObjects.Graphics;
+  baseX: number;
+  baseY: number;
+  phase: number;
+  amp: number;
+  period: number;
+  drift?: number;
+};
+
+type SkyBird = {
+  g: Phaser.GameObjects.Graphics;
+  x: number;
+  y: number;
+  vx: number;
+  wing: number;
+};
 
 const WORLD_W = 42;
 const WORLD_H = 30;
@@ -78,6 +99,7 @@ function isMainRoad(x: number, y: number): boolean {
 
 export class WorldView {
   private readonly ground = new Map<string, Phaser.GameObjects.Image>();
+  private readonly lockedOverlays = new Map<string, Phaser.GameObjects.Image>();
   private readonly props: Phaser.GameObjects.GameObject[] = [];
   private readonly entitySprites = new Map<string, Phaser.GameObjects.Image>();
   private readonly entityShadows = new Map<string, Phaser.GameObjects.Image>();
@@ -85,11 +107,23 @@ export class WorldView {
   private ghost: Phaser.GameObjects.Image | null = null;
   private ghostPad: Phaser.GameObjects.Image | null = null;
   private selectRing: Phaser.GameObjects.Image | null = null;
+  private hoverHighlight: Phaser.GameObjects.Image | null = null;
   private hoverTile: Vec2 | null = null;
+  private pointerInWorld = true;
+  private readonly gravelPads = new Map<string, Phaser.GameObjects.Image>();
+  private readonly faultHalos = new Map<string, Phaser.GameObjects.Image>();
+  private readonly buildRings = new Map<string, Phaser.GameObjects.Image>();
+  private readonly commissionPuffs = new Map<string, Phaser.GameObjects.Graphics>();
+  private readonly prevConstruction = new Map<string, number>();
+  private readonly prevCommissioned = new Map<string, boolean>();
   private clouds: Phaser.GameObjects.Image[] = [];
   private foam: Phaser.GameObjects.Image[] = [];
   private weatherVeil: Phaser.GameObjects.Rectangle | null = null;
+  private sunGlare: Phaser.GameObjects.Ellipse | null = null;
+  private readonly windowGlows: Phaser.GameObjects.Rectangle[] = [];
   private rainDrops: Phaser.GameObjects.Rectangle[] = [];
+  private ambientMotion: AmbientMotion[] = [];
+  private birds: SkyBird[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -99,11 +133,19 @@ export class WorldView {
     this.buildTerrain();
     this.scatterEnvironment();
     this.spawnClouds();
+    this.spawnBirds();
     this.spawnFoam();
+    this.initWindowGlows();
     this.weatherVeil = scene.add.rectangle(0, 0, 4000, 3000, 0x0a1a30, 0);
     this.weatherVeil.setOrigin(0.5, 0.5);
     this.weatherVeil.setDepth(900);
     this.weatherVeil.setScrollFactor(0);
+    this.sunGlare = scene.add.ellipse(0, 0, 720, 520, 0xffe8a0, 0);
+    this.sunGlare.setOrigin(0.5, 0.5);
+    this.sunGlare.setDepth(895);
+    this.sunGlare.setScrollFactor(0);
+    this.sunGlare.setBlendMode(Phaser.BlendModes.ADD);
+    this.sunGlare.setVisible(false);
     // Seed a few rain streaks (hidden until wet weather)
     for (let i = 0; i < 36; i++) {
       const drop = scene.add.rectangle(
@@ -131,16 +173,39 @@ export class WorldView {
     return `${x},${y}`;
   }
 
+  /** Pick river/water tile variant from neighbor flow + meander tangent. */
+  private riverTileKey(x: number, y: number): string {
+    const h = hash(x, y);
+    const cx = riverCenterX(y);
+    const nearEdge = Math.abs(x - cx) > 0.55;
+    if (nearEdge && h % 3 === 0) return `tile_water_foam_${h % 3}`;
+
+    const wN = isWater(x, y - 1);
+    const wS = isWater(x, y + 1);
+    const wE = isWater(x + 1, y);
+    const wW = isWater(x - 1, y);
+    const ewCount = (wE ? 1 : 0) + (wW ? 1 : 0);
+    const nsCount = (wN ? 1 : 0) + (wS ? 1 : 0);
+    const meanderEw = Math.abs(riverCenterX(y + 1) - riverCenterX(y - 1)) > 0.25;
+    const runsEw = ewCount > nsCount || (ewCount === nsCount && meanderEw);
+
+    if (runsEw) {
+      if (h % 5 === 0) return 'tile_water_n';
+      if (h % 3 === 0) return 'tile_water';
+      return h % 2 === 0 ? 'tile_river_ew' : 'tile_water';
+    }
+    if (h % 5 === 0) return 'tile_river_ew';
+    if (h % 3 === 0) return 'tile_water_n';
+    return h % 2 === 0 ? 'tile_river' : 'tile_water';
+  }
+
+  private smallTreeKey(h: number): string {
+    return `tree_sm_${h % 4}`;
+  }
+
   private terrainKey(x: number, y: number): string {
     if (isWater(x, y)) {
-      const h = hash(x, y);
-      // Foam / rapids near banks and bridge; deeper water in the channel core.
-      const cx = riverCenterX(y);
-      const nearEdge = Math.abs(x - cx) > 0.55;
-      if (nearEdge && h % 3 === 0) return `tile_water_foam_${h % 3}`;
-      if (h % 5 === 0) return 'tile_river_ew';
-      if (h % 3 === 0) return 'tile_water_n';
-      return h % 2 === 0 ? 'tile_water' : 'tile_river';
+      return this.riverTileKey(x, y);
     }
 
     if (isBank(x, y)) {
@@ -163,6 +228,19 @@ export class WorldView {
     // Site B access
     if (y === 8 && x >= 21 && x <= 32) return 'tile_road_ew';
     if (x === 26 && y >= 8 && y <= 14) return 'tile_road_ns';
+
+    // Occasional dirt wear speckles beside main roads
+    if (
+      !inRect(x, y, SITE_A) &&
+      !inRect(x, y, SITE_B) &&
+      (isMainRoad(x - 1, y) ||
+        isMainRoad(x + 1, y) ||
+        isMainRoad(x, y - 1) ||
+        isMainRoad(x, y + 1))
+    ) {
+      const h = hash(x, y);
+      if (h % 9 === 0 || h % 13 === 0) return 'tile_dirt';
+    }
 
     // Service / dirt pads near office
     if (x >= 4 && x <= 7 && y >= 5 && y <= 7) return 'tile_dirt';
@@ -194,36 +272,53 @@ export class WorldView {
     return Math.min(5, edge * 0.85 + ridge);
   }
 
+  /** Draw cliff faces only where a neighbor drops — earth tones, not green wedges. */
+  private drawCliffRisers(x: number, y: number, elev: number, key: string): void {
+    if (elev < 1.0 || key.startsWith('tile_water') || key.startsWith('tile_river')) return;
+
+    const screen = isoToScreen(x, y);
+    const cx = screen.x;
+    const cy = screen.y - elev * 5;
+    const westDrop = elev - this.heightAt(x - 1, y);
+    const eastDrop = elev - this.heightAt(x + 1, y);
+    if (westDrop < 0.55 && eastDrop < 0.55) return;
+
+    const riser = this.scene.add.graphics();
+    if (westDrop >= 0.55) {
+      const h = Math.min(28, westDrop * 6);
+      riser.fillStyle(CLIFF_FACE_W, 0.88);
+      riser.beginPath();
+      riser.moveTo(cx - 40, cy);
+      riser.lineTo(cx, cy + 20);
+      riser.lineTo(cx, cy + 20 + h);
+      riser.lineTo(cx - 40, cy + h);
+      riser.closePath();
+      riser.fillPath();
+      riser.fillStyle(0x2e2820, 0.35);
+      riser.fillRect(cx - 38, cy + h - 4, 36, 3);
+    }
+    if (eastDrop >= 0.55) {
+      const h = Math.min(28, eastDrop * 6);
+      riser.fillStyle(CLIFF_FACE_E, 0.86);
+      riser.beginPath();
+      riser.moveTo(cx + 40, cy);
+      riser.lineTo(cx, cy + 20);
+      riser.lineTo(cx, cy + 20 + h);
+      riser.lineTo(cx + 40, cy + h);
+      riser.closePath();
+      riser.fillPath();
+    }
+    riser.setDepth(depthFor(x, y, -6));
+    this.props.push(riser);
+  }
+
   private buildTerrain(): void {
     for (let y = 0; y < WORLD_H; y++) {
       for (let x = 0; x < WORLD_W; x++) {
         const screen = isoToScreen(x, y);
         const elev = this.heightAt(x, y);
         const key = this.terrainKey(x, y);
-        // cliff riser for elevated tiles
-        if (elev >= 1.2 && !key.startsWith('tile_water')) {
-          const riser = this.scene.add.graphics();
-          const cx = screen.x;
-          const cy = screen.y - elev * 5;
-          riser.fillStyle(GRASS_DEEP, 0.95);
-          riser.beginPath();
-          riser.moveTo(cx - 40, cy);
-          riser.lineTo(cx, cy + 20);
-          riser.lineTo(cx, cy + 20 + elev * 5);
-          riser.lineTo(cx - 40, cy + elev * 5);
-          riser.closePath();
-          riser.fillPath();
-          riser.fillStyle(0x2a5a1a, 0.95);
-          riser.beginPath();
-          riser.moveTo(cx + 40, cy);
-          riser.lineTo(cx, cy + 20);
-          riser.lineTo(cx, cy + 20 + elev * 5);
-          riser.lineTo(cx + 40, cy + elev * 5);
-          riser.closePath();
-          riser.fillPath();
-          riser.setDepth(depthFor(x, y, -6));
-          this.props.push(riser);
-        }
+        this.drawCliffRisers(x, y, elev, key);
         const img = this.scene.add.image(screen.x, screen.y - elev * 5, key);
         img.setDepth(depthFor(x, y, -5));
         this.ground.set(this.tileKey(x, y), img);
@@ -232,7 +327,15 @@ export class WorldView {
     this.refreshLockedTiles();
   }
 
-  private addProp(tex: string, x: number, y: number, yOff = 0, depthBias = 2, scale = 1): void {
+  private addProp(
+    tex: string,
+    x: number,
+    y: number,
+    yOff = 0,
+    depthBias = 2,
+    scale = 1,
+    motion: 'bob' | 'sway' | null = null,
+  ): void {
     const s = isoToScreen(x, y);
     const elev = this.heightAt(x, y);
     const baseY = s.y - elev * 5;
@@ -255,30 +358,40 @@ export class WorldView {
     img.setScale(scale);
     img.setDepth(depthFor(x, y, depthBias));
     this.props.push(img);
+    if (motion) {
+      this.ambientMotion.push({
+        sprite: img,
+        baseX: s.x,
+        baseY: baseY + yOff,
+        phase: hash(x, y) * 0.01,
+        amp: motion === 'bob' ? 1.4 : 0.8,
+        period: motion === 'bob' ? 920 + (hash(x, y) % 400) : 1400,
+        drift: motion === 'sway' ? 0.15 : undefined,
+      });
+    }
   }
 
-  /** Draw sagging steel cables once between pylon tops. */
+  /** Draw sagging steel cables — each span depth matches its midpoint tile. */
   private drawPowerLines(
     pylons: Array<{ x: number; y: number; yOff: number; scale: number }>,
   ): void {
-    const g = this.scene.add.graphics();
-    g.setDepth(depthFor(20, 4, 7));
-    // Thin dark steel cables (concept: transmission spans)
-    g.lineStyle(1.25, STEEL_DARK, 0.92);
-
     for (let i = 0; i < pylons.length - 1; i++) {
       const a = pylons[i];
       const b = pylons[i + 1];
+      const midTileX = (a.x + b.x) / 2;
+      const midTileY = (a.y + b.y) / 2;
+      const g = this.scene.add.graphics();
+      g.setDepth(depthFor(midTileX, midTileY, 7));
+      g.lineStyle(1.25, STEEL_DARK, 0.92);
+
       const sa = isoToScreen(a.x, a.y);
       const sb = isoToScreen(b.x, b.y);
-      // Approximate cross-arm height (pylon.png is 80×160, centre-anchored)
       const ax = sa.x;
       const ay = sa.y + a.yOff - 58 * a.scale;
       const bx = sb.x;
       const by = sb.y + b.yOff - 58 * b.scale;
       const midX = (ax + bx) / 2;
-      const midY = (ay + by) / 2 + 14; // slight sag
-      // Three parallel conductors with small vertical offset
+      const midY = (ay + by) / 2 + 14;
       for (let c = 0; c < 3; c++) {
         const dy = (c - 1) * 4;
         g.beginPath();
@@ -287,8 +400,75 @@ export class WorldView {
         g.lineTo(bx - 8 + c * 8, by + dy);
         g.strokePath();
       }
+      this.props.push(g);
     }
+  }
+
+  /** Low-density wildflowers along meadow fence lines and sparse interior. */
+  private scatterMeadowWildflowers(): void {
+    const sites = [SITE_A, SITE_B];
+    for (const site of sites) {
+      for (let x = site.x0; x < site.x1; x++) {
+        const hN = hash(x, site.y0 - 1);
+        if (hN % 4 === 0) {
+          this.addProp(`flower_${hN % 2}`, x, site.y0 - 1, -5, 1, 0.5 + (hN % 3) * 0.06);
+        }
+        const hS = hash(x, site.y1);
+        if (hS % 5 === 0) {
+          this.addProp(`flower_${hS % 2}`, x, site.y1, -5, 1, 0.48 + (hS % 3) * 0.06);
+        }
+      }
+      for (let y = site.y0; y < site.y1; y++) {
+        const hW = hash(site.x0 - 1, y);
+        if (hW % 4 === 0) {
+          this.addProp(`flower_${hW % 2}`, site.x0 - 1, y, -5, 1, 0.52);
+        }
+        const hE = hash(site.x1, y);
+        if (hE % 5 === 0) {
+          this.addProp(`flower_${hE % 2}`, site.x1, y, -5, 1, 0.5);
+        }
+      }
+      for (let y = site.y0 + 2; y < site.y1 - 2; y++) {
+        for (let x = site.x0 + 2; x < site.x1 - 2; x++) {
+          if (isMainRoad(x, y)) continue;
+          const h = hash(x, y);
+          if (h % 53 !== 0) continue;
+          this.addProp(`flower_${h % 2}`, x, y, -4, 1, 0.42 + (h % 4) * 0.05);
+        }
+      }
+    }
+  }
+
+  private spawnCommissionPuff(x: number, y: number, elev: number): void {
+    const anchor = isoToScreen(x, y);
+    const g = this.scene.add.graphics();
+    g.setDepth(depthFor(x, y, 18));
     this.props.push(g);
+    const key = `puff_${x}_${y}_${this.scene.time.now}`;
+    this.commissionPuffs.set(key, g);
+    const baseY = anchor.y - elev * 5 - 20;
+    const born = this.scene.time.now;
+    const tick = () => {
+      const age = this.scene.time.now - born;
+      if (age > 900) {
+        g.destroy();
+        this.commissionPuffs.delete(key);
+        this.scene.events.off('update', tick);
+        return;
+      }
+      const t = age / 900;
+      g.clear();
+      const alpha = (1 - t) * 0.55;
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        const r = 8 + t * 22 + i * 2;
+        g.fillStyle(i % 2 === 0 ? 0xf5e6c8 : 0xffffff, alpha);
+        g.fillCircle(anchor.x + Math.cos(a) * r, baseY + Math.sin(a) * r * 0.4 - t * 8, 3 + t * 2);
+      }
+      g.fillStyle(0xffe88a, alpha * 0.7);
+      g.fillCircle(anchor.x, baseY - t * 6, 6 + t * 10);
+    };
+    this.scene.events.on('update', tick);
   }
 
   private scatterEnvironment(): void {
@@ -311,11 +491,13 @@ export class WorldView {
       this.addProp('pylon', p.x, p.y, p.yOff, 8, p.scale);
     }
     this.drawPowerLines(pylons);
+    this.scatterMeadowWildflowers();
     this.addProp('water_tower', 13, 4, -40, 7, 0.5);
     this.addProp('tank', 14, 5, -28, 6, 0.45);
 
-    // Maintenance yard near office — warehouse shed + container + yard kit
+    // Maintenance yard near office — warehouse shed + small office_kit + container + yard kit
     this.addProp('warehouse', 4, 8, -30, 6, 0.72);
+    this.addProp('office_kit', 3, 9, -20, 6, 0.52);
     this.addProp('yard', 5, 9, -24, 5, 0.85);
     this.addProp('container', 6, 9, -18, 5, 0.7);
 
@@ -342,17 +524,17 @@ export class WorldView {
       this.addProp('fence_short', 29, y, -4, 3, 0.68);
     }
 
-    // Decorative vehicles — sky-keyed vans; one delivery truck at the yard
-    this.addProp('van', 6, 6, -10, 7, 0.85);
-    this.addProp('truck_delivery', 5, 7, -12, 7, 0.78);
-    this.addProp('van', 7, 5, -10, 7, 0.8);
-    this.addProp('van', 14, 5, -10, 7, 0.82);
-    this.addProp('van', 27, 9, -10, 7, 0.8);
+    // Decorative vehicles — sky-keyed vans; subtle idle bob
+    this.addProp('van', 6, 6, -10, 7, 0.85, 'bob');
+    this.addProp('truck_delivery', 5, 7, -12, 7, 0.78, 'bob');
+    this.addProp('van', 7, 5, -10, 7, 0.8, 'bob');
+    this.addProp('van', 14, 5, -10, 7, 0.82, 'bob');
+    this.addProp('van', 27, 9, -10, 7, 0.8, 'bob');
 
     // Ambient techs near yard / substation only (sim staff are the interactive ones)
-    this.addProp('tech', 6, 8, -14, 9, 0.85);
-    this.addProp('tech', 13, 5, -14, 9, 0.88);
-    this.addProp('tech', 14, 6, -14, 9, 0.82);
+    this.addProp('tech', 6, 8, -14, 9, 0.85, 'sway');
+    this.addProp('tech', 13, 5, -14, 9, 0.88, 'sway');
+    this.addProp('tech', 14, 6, -14, 9, 0.82, 'sway');
 
     // Full fence perimeter around Site A meadow (tighter spacing)
     for (let x = SITE_A.x0; x < SITE_A.x1; x += 1) {
@@ -386,25 +568,35 @@ export class WorldView {
     for (const [x, y, big] of pines) {
       const h = hash(x, y);
       const key =
-        h % 5 === 0
+        h % 7 === 0
           ? 'tree_deciduous'
-          : h % 4 === 0
+          : h % 5 === 0
             ? 'tree_round'
-            : h % 3 === 0
-              ? 'tree_sm_0'
-              : big
-                ? 'tree_big'
-                : 'tree';
+            : h % 4 === 0
+              ? this.smallTreeKey(h)
+              : h % 3 === 0
+                ? this.smallTreeKey(h + 1)
+                : big
+                  ? 'tree_big'
+                  : h % 2 === 0
+                    ? this.smallTreeKey(h + 2)
+                    : 'tree';
       this.addProp(key, x, y, big ? -36 : -28, 3, big ? 1.05 : 0.95);
     }
 
-    // Rocks along river banks + occasional props in the water edge
+    // Rocks along river banks + bush/rock clusters at water edges
     for (let y = 1; y < WORLD_H; y++) {
       for (let x = 0; x < WORLD_W; x++) {
         if (!isBank(x, y) && !isWater(x, y)) continue;
         const h = hash(x, y);
         if (isBank(x, y) && h % 3 === 0) {
           this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
+        }
+        if (isBank(x, y) && h % 11 === 0) {
+          this.addProp('bush', x, y, -10, 3, 0.72 + (h % 4) * 0.06);
+          if (h % 2 === 0) {
+            this.addProp('rock', x + (h % 3 === 0 ? 1 : -1), y, -4, 2, 0.78);
+          }
         }
         // Occasional rocks sitting in shallow water / foam edge
         if (isWater(x, y) && h % 7 === 0 && y !== 6) {
@@ -443,15 +635,47 @@ export class WorldView {
   }
 
   private spawnClouds(): void {
-    for (let i = 0; i < 5; i++) {
-      const s = isoToScreen(6 + i * 7, 1 + (i % 2));
-      const cloud = this.scene.add.image(s.x, s.y - 120 - (i % 3) * 20, 'cloud');
-      cloud.setAlpha(0.55 + (i % 3) * 0.1);
-      cloud.setScale(0.8 + (i % 3) * 0.15);
-      cloud.setDepth(-100 + i);
+    const variants = ['cloud', 'cloud_soft', 'cloud_wide'] as const;
+    for (let i = 0; i < 7; i++) {
+      const s = isoToScreen(4 + i * 5, 0 + (i % 2));
+      const key = variants[i % variants.length];
+      const tex = this.scene.textures.exists(key) ? key : 'cloud';
+      const cloud = this.scene.add.image(s.x, s.y - 110 - (i % 4) * 18, tex);
+      cloud.setAlpha(0.38 + (i % 5) * 0.1 + (hash(i, 7) % 12) / 100);
+      cloud.setScale(0.62 + (i % 4) * 0.14 + (hash(i, 3) % 8) / 100);
+      cloud.setDepth(-120 + i);
+      cloud.setScrollFactor(0.15 + (i % 3) * 0.05);
       this.clouds.push(cloud);
       this.props.push(cloud);
     }
+  }
+
+  private spawnBirds(): void {
+    for (let i = 0; i < 5; i++) {
+      const g = this.scene.add.graphics();
+      g.setDepth(-90);
+      g.setScrollFactor(0.25);
+      this.birds.push({
+        g,
+        x: 180 + i * 140,
+        y: 60 + (i % 3) * 35,
+        vx: 0.35 + (i % 3) * 0.12,
+        wing: i * 1.7,
+      });
+      this.props.push(g);
+    }
+  }
+
+  private drawBird(b: SkyBird, night: number): void {
+    const flap = Math.sin(this.scene.time.now / 180 + b.wing) * 3;
+    const alpha = night > 0.35 ? 0.15 : 0.45;
+    b.g.clear();
+    b.g.lineStyle(1.6, 0x2a3548, alpha);
+    b.g.beginPath();
+    b.g.moveTo(-5, flap);
+    b.g.lineTo(0, -1);
+    b.g.lineTo(5, flap);
+    b.g.strokePath();
   }
 
   private spawnFoam(): void {
@@ -473,6 +697,24 @@ export class WorldView {
     }
   }
 
+  /** Warm window rectangles near office / maintenance yard — visible at night. */
+  private initWindowGlows(): void {
+    const spots: Array<[number, number]> = [
+      [5, 5],
+      [6, 5],
+      [4, 8],
+      [5, 9],
+    ];
+    for (const [x, y] of spots) {
+      const s = isoToScreen(x, y);
+      const elev = this.heightAt(x, y);
+      const glow = this.scene.add.rectangle(s.x + 6, s.y - elev * 5 - 26, 5, 7, 0xffe066, 0);
+      glow.setDepth(depthFor(x, y, 9));
+      this.windowGlows.push(glow);
+      this.props.push(glow);
+    }
+  }
+
   refreshLockedTiles(): void {
     const snap = this.sim.snapshot();
     const siteB = snap.plots.find((p) => p.id === 'site_b');
@@ -481,10 +723,29 @@ export class WorldView {
       const x = Number(xs);
       const y = Number(ys);
       const inSiteB = inRect(x, y, SITE_B);
-      if (inSiteB && siteB && !siteB.unlocked) {
-        img.setTexture('tile_locked');
-      } else if (img.texture.key === 'tile_locked') {
-        img.setTexture(this.terrainKey(x, y));
+      const locked = inSiteB && siteB && !siteB.unlocked;
+
+      if (locked) {
+        if (img.texture.key === 'tile_locked') {
+          img.setTexture(this.terrainKey(x, y));
+        }
+        let overlay = this.lockedOverlays.get(key);
+        if (!overlay) {
+          const screen = isoToScreen(x, y);
+          const elev = this.heightAt(x, y);
+          const hatchKey = this.scene.textures.exists('tile_locked_hatch')
+            ? 'tile_locked_hatch'
+            : 'tile_locked';
+          overlay = this.scene.add.image(screen.x, screen.y - elev * 5, hatchKey);
+          overlay.setDepth(depthFor(x, y, -3));
+          this.lockedOverlays.set(key, overlay);
+        }
+        overlay.setVisible(true);
+      } else {
+        this.lockedOverlays.get(key)?.setVisible(false);
+        if (img.texture.key === 'tile_locked') {
+          img.setTexture(this.terrainKey(x, y));
+        }
       }
     }
   }
@@ -494,11 +755,11 @@ export class WorldView {
     const hour = snapshot.hour;
     const night =
       hour < 5.5 || hour > 20.5
-        ? 0.55
+        ? 0.48
         : hour < 7
-          ? (7 - hour) / 1.5 * 0.45
+          ? (7 - hour) / 1.5 * 0.4
           : hour > 18.5
-            ? ((hour - 18.5) / 2) * 0.5
+            ? ((hour - 18.5) / 2) * 0.45
             : 0;
     let weatherAlpha = 0;
     let weatherColor = 0x0a1a30;
@@ -512,11 +773,33 @@ export class WorldView {
       weatherAlpha = 0.08;
       weatherColor = 0x4a6078;
     }
-    const veilAlpha = Math.min(0.72, night + weatherAlpha);
+    const nightCap = night > 0.25 ? 0.5 : 0.72;
+    const veilAlpha = Math.min(nightCap, night + weatherAlpha);
     if (this.weatherVeil) {
       this.weatherVeil.setFillStyle(weatherColor, veilAlpha);
       const cam = this.scene.cameras.main;
+      // Size to viewport each frame — fixed scrollFactor 0, screen-space centre.
+      const pad = 8;
+      this.weatherVeil.setSize(cam.width + pad * 2, cam.height + pad * 2);
       this.weatherVeil.setPosition(cam.width / 2, cam.height / 2);
+      this.weatherVeil.setVisible(veilAlpha > 0.02);
+    }
+    const peakSun =
+      snapshot.weather === 'clear' && snapshot.irradiance >= 0.88 && night < 0.08;
+    if (this.sunGlare) {
+      const cam = this.scene.cameras.main;
+      const glareAlpha = peakSun
+        ? 0.1 + Math.sin(this.scene.time.now / 2200) * 0.035
+        : 0;
+      this.sunGlare.setPosition(cam.width * 0.72, cam.height * 0.16);
+      this.sunGlare.setAlpha(glareAlpha);
+      this.sunGlare.setVisible(glareAlpha > 0.02);
+    }
+    const nightGlow = night > 0.32;
+    for (let i = 0; i < this.windowGlows.length; i++) {
+      const glow = this.windowGlows[i];
+      const pulse = 0.5 + Math.sin(this.scene.time.now / 850 + i * 1.4) * 0.22;
+      glow.setAlpha(nightGlow ? pulse * 0.8 : 0);
     }
     const wet = snapshot.weather === 'rain' || snapshot.weather === 'hail';
     for (let i = 0; i < this.rainDrops.length; i++) {
@@ -542,12 +825,34 @@ export class WorldView {
             : SKY;
     this.scene.cameras.main.setBackgroundColor(skyColor);
 
-    // gentle cloud drift
+    const cam = this.scene.cameras.main;
+    // gentle cloud drift (parallax scrollFactor already set)
     for (let i = 0; i < this.clouds.length; i++) {
       const c = this.clouds[i];
-      c.x += 0.08 + i * 0.01;
-      if (c.x > 1400) c.x = -400;
-      c.setAlpha(night > 0.3 ? 0.25 : 0.55 + (i % 3) * 0.1);
+      c.x += 0.06 + i * 0.012;
+      if (c.x > cam.width + 200) c.x = -220;
+      c.setAlpha(
+        night > 0.3
+          ? 0.16 + (i % 4) * 0.05
+          : 0.4 + (i % 5) * 0.09 + Math.sin(this.scene.time.now / 2800 + i) * 0.07,
+      );
+    }
+    for (const b of this.birds) {
+      b.x += b.vx;
+      if (b.x > cam.width + 40) {
+        b.x = -30;
+        b.y = 40 + (hash(Math.floor(b.x), Math.floor(b.y)) % 80);
+      }
+      b.g.setPosition(b.x, b.y);
+      this.drawBird(b, night);
+    }
+    for (const m of this.ambientMotion) {
+      const t = this.scene.time.now;
+      const bob = Math.sin(t / m.period + m.phase) * m.amp;
+      m.sprite.y = m.baseY + bob;
+      if (m.drift) {
+        m.sprite.x = m.baseX + Math.sin(t / (m.period * 1.3) + m.phase) * m.drift;
+      }
     }
     // Soft alpha pulse on water / river tiles
     const pulse = 0.94 + Math.sin(this.scene.time.now / 700) * 0.06;
@@ -573,6 +878,31 @@ export class WorldView {
       const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
       const anchor = isoToScreen(tx, ty);
       const yOff = (isPv(eq.kind) ? -36 : eq.kind === 'office' || eq.kind === 'substation' ? -40 : -18) - elev * 5;
+
+      const prevProg = this.prevConstruction.get(eq.id);
+      const prevComm = this.prevCommissioned.get(eq.id);
+      if (
+        (prevComm === false && eq.commissioned) ||
+        (prevProg !== undefined && prevProg < 1 && eq.constructionProgress >= 1)
+      ) {
+        this.spawnCommissionPuff(Math.floor(tx), Math.floor(ty), elev);
+      }
+      this.prevConstruction.set(eq.id, eq.constructionProgress);
+      this.prevCommissioned.set(eq.id, eq.commissioned);
+
+      if (isPv(eq.kind)) {
+        let pad = this.gravelPads.get(eq.id);
+        if (!pad) {
+          pad = this.scene.add.image(anchor.x, anchor.y + 10 - elev * 5, 'gravel_pad');
+          this.gravelPads.set(eq.id, pad);
+        }
+        pad.setPosition(anchor.x, anchor.y + 10 - elev * 5);
+        pad.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.62 + 0.25);
+        pad.setDepth(depthFor(eq.tile.x, eq.tile.y, 2));
+        pad.setAlpha(eq.commissioned ? 0.92 : 0.45 + eq.constructionProgress * 0.4);
+        pad.setVisible(true);
+      }
+
       let shadow = this.entityShadows.get(eq.id);
       if (!shadow) {
         shadow = this.scene.add.image(anchor.x - 6, anchor.y + 10 - elev * 5, 'shadow_blob');
@@ -608,8 +938,37 @@ export class WorldView {
         sprite.clearTint();
       }
 
+      const building = eq.constructionProgress < 1;
+      let buildRing = this.buildRings.get(eq.id);
+      if (building) {
+        if (!buildRing) {
+          buildRing = this.scene.add.image(anchor.x, anchor.y + 8 - elev * 5, 'build_ring');
+          this.buildRings.set(eq.id, buildRing);
+        }
+        const pulse = 0.85 + Math.sin(this.scene.time.now / 320) * 0.12;
+        buildRing.setPosition(anchor.x, anchor.y + 8 - elev * 5);
+        buildRing.setDepth(depthFor(eq.tile.x, eq.tile.y, 16));
+        buildRing.setVisible(true);
+        buildRing.setAlpha(0.35 + eq.constructionProgress * 0.45);
+        buildRing.setScale(pulse * (Math.max(def.footprint.x, def.footprint.y) * 0.22 + 0.55));
+      } else if (buildRing) {
+        buildRing.setVisible(false);
+      }
+
       let overlay = this.overlays.get(eq.id);
+      let halo = this.faultHalos.get(eq.id);
       if (eq.faulted) {
+        if (!halo) {
+          halo = this.scene.add.image(anchor.x, anchor.y - 48, 'fault_halo');
+          this.faultHalos.set(eq.id, halo);
+        }
+        const haloPulse = 1.15 + Math.sin(this.scene.time.now / 280) * 0.18;
+        halo.setPosition(anchor.x, anchor.y - 48);
+        halo.setDepth(depthFor(eq.tile.x, eq.tile.y, 19));
+        halo.setVisible(true);
+        halo.setScale(haloPulse);
+        halo.setAlpha(0.28 + Math.sin(this.scene.time.now / 220) * 0.12);
+
         if (!overlay) {
           overlay = this.scene.add.image(anchor.x, anchor.y - 48, 'fault_icon');
           this.overlays.set(eq.id, overlay);
@@ -618,8 +977,9 @@ export class WorldView {
         overlay.setDepth(depthFor(eq.tile.x, eq.tile.y, 20));
         overlay.setVisible(true);
         overlay.setScale(1 + Math.sin(this.scene.time.now / 200) * 0.08);
-      } else if (overlay) {
-        overlay.setVisible(false);
+      } else {
+        if (halo) halo.setVisible(false);
+        if (overlay) overlay.setVisible(false);
       }
     }
 
@@ -648,7 +1008,16 @@ export class WorldView {
           : Math.sin(this.scene.time.now / 110) * 2.5;
       sprite.setPosition(pos.x, pos.y - 18 - elev * 5 + bob);
       sprite.setDepth(depthFor(staff.tile.x, staff.tile.y, 8));
-      sprite.setScale(0.95);
+      sprite.setScale(1.05);
+      if (staff.task.type === 'idle') {
+        sprite.clearTint();
+      } else if (staff.task.type === 'repair') {
+        sprite.setTint(0xffaa66);
+      } else if (staff.task.type === 'clean') {
+        sprite.setTint(0x88ccaa);
+      } else {
+        sprite.setTint(0xffcc88);
+      }
     }
 
     for (const [id, sprite] of this.entitySprites) {
@@ -657,6 +1026,14 @@ export class WorldView {
         this.entitySprites.delete(id);
         this.overlays.get(id)?.destroy();
         this.overlays.delete(id);
+        this.faultHalos.get(id)?.destroy();
+        this.faultHalos.delete(id);
+        this.gravelPads.get(id)?.destroy();
+        this.gravelPads.delete(id);
+        this.buildRings.get(id)?.destroy();
+        this.buildRings.delete(id);
+        this.prevConstruction.delete(id);
+        this.prevCommissioned.delete(id);
         this.entityShadows.get(id)?.destroy();
         this.entityShadows.delete(id);
       }
@@ -685,13 +1062,47 @@ export class WorldView {
     this.refreshLockedTiles();
   }
 
+  setPointerInWorld(inside: boolean): void {
+    this.pointerInWorld = inside;
+    if (!inside) {
+      this.hoverTile = null;
+      this.hoverHighlight?.setVisible(false);
+    }
+  }
+
+  updateHoverTile(snapshot: GameSnapshot, pointerWorld: { x: number; y: number }): void {
+    if (snapshot.buildMode || !this.pointerInWorld) {
+      this.hoverHighlight?.setVisible(false);
+      if (snapshot.buildMode) this.hoverTile = null;
+      return;
+    }
+    const iso = screenToIso(pointerWorld.x, pointerWorld.y);
+    const tile = { x: Math.floor(iso.x), y: Math.floor(iso.y) };
+    if (tile.x < 0 || tile.y < 0 || tile.x >= WORLD_W || tile.y >= WORLD_H) {
+      this.hoverTile = null;
+      this.hoverHighlight?.setVisible(false);
+      return;
+    }
+    this.hoverTile = tile;
+    const elev = this.heightAt(tile.x, tile.y);
+    const screen = isoToScreen(tile.x + 0.5, tile.y + 0.5);
+    if (!this.hoverHighlight) {
+      this.hoverHighlight = this.scene.add.image(screen.x, screen.y - elev * 5 + 6, 'hover_tile');
+    }
+    this.hoverHighlight.setTexture('hover_tile');
+    this.hoverHighlight.setPosition(screen.x, screen.y - elev * 5 + 6);
+    this.hoverHighlight.setDepth(depthFor(tile.x, tile.y, 12));
+    this.hoverHighlight.setAlpha(0.55);
+    this.hoverHighlight.setVisible(true);
+  }
+
   updateGhost(snapshot: GameSnapshot, pointerWorld: { x: number; y: number }): void {
     if (!snapshot.buildMode) {
       this.ghost?.setVisible(false);
       this.ghostPad?.setVisible(false);
-      this.hoverTile = null;
       return;
     }
+    this.hoverHighlight?.setVisible(false);
     const iso = screenToIso(pointerWorld.x, pointerWorld.y);
     const tile = { x: Math.floor(iso.x), y: Math.floor(iso.y) };
     this.hoverTile = tile;

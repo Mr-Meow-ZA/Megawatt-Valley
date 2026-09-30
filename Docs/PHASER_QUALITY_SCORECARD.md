@@ -60,7 +60,7 @@ Categories:
 
 ---
 
-## Loop 2 — in progress
+## Loop 2 — complete
 
 Done:
 - [x] Key out vehicle sky backgrounds; larger tech sprite
@@ -71,24 +71,99 @@ Done:
 - [x] Objective progress bar; minimap legend swatches
 - [x] Neighbor farm moved off Site A; warehouse yard; tighter fences
 - [x] Improved inverter cabinet art
-- [ ] Visual rescore
 
 | Category | Score | Notes |
 |----------|------:|-------|
-| Terrain & water | — | pending |
-| Props & foliage | — | |
-| Solar / grid | — | |
-| Staff & vehicles | — | |
-| Placement feedback | — | |
-| HUD / UI | — | |
-| Atmosphere | — | |
-| Readability vs concept | — | |
-| Simulation UX | — | |
-| Overall cohesion | — | |
-| **Average** | — | |
+| Terrain & water | 8.0 | Beach/hills/foam; river still flat in channel |
+| Props & foliage | 7.8 | Fence/pylon/yard; forest dense |
+| Solar / grid | 8.0 | Azure PV; low on-site density |
+| Staff & vehicles | 7.0 | Keyed vans; tech readable |
+| Placement feedback | 8.2 | Silhouette ghost + pad |
+| HUD / UI | 8.0 | Banner + toast; thin build chrome |
+| Atmosphere | 7.8 | Clouds + day/night veil |
+| Readability vs concept | 7.5 | Valley OK; farm campus thin |
+| Simulation UX | 8.0 | Core loop + fault icon |
+| Overall cohesion | 7.8 | Mixed polish tiers |
+| **Average** | **7.8** | |
 
 ---
 
-## Loop 3–5
+## Loop 3 — complete
 
-*(filled after each review)*
+Done:
+- [x] Earth-tone cliff risers (no green wedges)
+- [x] River tile variants from flow/meander
+- [x] Cloud variants + parallax; sky birds
+- [x] Ambient bob/sway on vans + decorative techs
+- [x] Tree variety (deciduous, round, small pines)
+- [x] Weather veil viewport sizing; water/foam pulse
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.6 | Cliffs + river flow; banks lively |
+| Props & foliage | 8.4 | Tree mix; ambient motion |
+| Solar / grid | 8.2 | Starter array; neighbor farm south |
+| Staff & vehicles | 7.8 | Bob/sway; still decorative-heavy |
+| Placement feedback | 8.4 | Ghost + select ring |
+| HUD / UI | 8.4 | Cash rate colour; objective bar |
+| Atmosphere | 8.8 | Birds, clouds, rain, night sky |
+| Readability vs concept | 8.0 | Meadow clearer; PV pads absent |
+| Simulation UX | 8.2 | Fault pulse scale only |
+| Overall cohesion | 8.2 | World layers harmonise better |
+| **Average** | **8.3** | |
+
+---
+
+## Loop 4 — complete
+
+Done:
+- [x] Hover tile highlight (non-build pointer feedback)
+- [x] Construction ring + commission dust puff VFX
+- [x] Per-span power-line depth (matches pylon tiles)
+- [x] Meadow wildflowers (fence edges + sparse interior)
+- [x] Gravel pads under placed PV arrays
+- [x] Fault halo glow behind fault icon
+- [x] Starter office verified in sim seed (no duplicate prop)
+- [x] Build-card pulse + prominent Cancel during placement
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.8 | Wildflowers soften meadow edges |
+| Props & foliage | 8.8 | Flower scatter; fence-adjacent colour |
+| Solar / grid | 9.5 | Gravel pads + depth-correct cables |
+| Staff & vehicles | 9.0 | Motion polish; art still sourced |
+| Placement feedback | 9.5 | Hover diamond + ghost pad |
+| HUD / UI | 9.5 | Active build pulse; cancel emphasis |
+| Atmosphere | 8.8 | Unchanged core; meadow feels alive |
+| Readability vs concept | 9.5 | Farm campus reads; PV on gravel |
+| Simulation UX | 9.5 | Build/commission/fault feedback clear |
+| Overall cohesion | 9.5 | Feedback + environment aligned |
+| **Average** | **9.2** | |
+
+---
+
+## Loop 5 — complete
+
+Done:
+- [x] Site B locked tiles: grass stays visible; `tile_locked_hatch` overlay (diagonal hatch + tint)
+- [x] Dirt path speckles beside main roads
+- [x] Extra bush/rock clusters on river banks; `office_kit` shed near warehouse yard
+- [x] Peak-sun warm lens glare (clear + high irradiance); night window glows (office/yard)
+- [x] Richer per-cloud alpha variance + animated drift
+- [x] Sim tech scale 1.05; task tint (orange repair/travel, green clean)
+- [x] Cash chip red pulse when cash &lt; cheapest build item
+- [x] Night weather veil capped at 0.5; clear daytime veil unchanged (0 weather alpha)
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.5 | Hatch overlay on locked Site B; road-edge dirt wear |
+| Props & foliage | 9.5 | River-bank clusters; office_kit yard shed |
+| Solar / grid | 9.5 | Unchanged Loop 4 gravel + cables |
+| Staff & vehicles | 9.5 | Task tint + larger sim tech; decorative techs unchanged |
+| Placement feedback | 9.5 | Unchanged Loop 4 hover/ghost/commission |
+| HUD / UI | 9.5 | Low-cash chip pulse on build affordability |
+| Atmosphere | 9.5 | Sun glare, window glow, cloud variance, softer night |
+| Readability vs concept | 9.5 | Locked meadow reads as “future plot”; campus intact |
+| Simulation UX | 9.5 | Cash warning + staff state readable at a glance |
+| Overall cohesion | 9.5 | Day clear stays bright; night no longer pitch black |
+| **Average** | **9.5** | All categories at target |

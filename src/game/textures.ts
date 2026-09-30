@@ -242,14 +242,15 @@ export function generateTextures(scene: Phaser.Scene): void {
   make('tile_bank_1', TILE_W, TILE_H + 12, (g, w, h) => drawBank(g, w, h, 1));
   make('tile_bank_2', TILE_W, TILE_H + 12, (g, w, h) => drawBank(g, w, h, 2));
 
-  make('tile_locked', TILE_W, TILE_H + 12, (g, w, h) => {
+  make('tile_locked_hatch', TILE_W, TILE_H + 12, (g, w, h) => {
     const cx = w / 2;
     const cy = h / 2 - 2;
-    fillDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x3d4a3f, 0.75);
-    strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x243028, 1, 0.6);
-    g.lineStyle(1, 0x6a7a68, 0.35);
-    g.lineBetween(cx - 12, cy, cx + 12, cy);
-    g.lineBetween(cx, cy - 8, cx, cy + 8);
+    fillDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x5a6a58, 0.18);
+    g.lineStyle(1, 0x3a4a38, 0.32);
+    for (let i = -30; i < 60; i += 7) {
+      g.lineBetween(cx - 40 + i, cy - 14, cx + 10 + i, cy + 14);
+    }
+    strokeDiamond(g, cx, cy, w - 2, TILE_H - 2, 0x7a8a70, 1, 0.28);
   });
 
   make('ghost_ok', TILE_W, TILE_H + 12, (g, w, h) => {

@@ -167,6 +167,7 @@ export class DomHud {
         </div>
       </aside>
 
+      <div class="sidebar-right">
       <aside class="panel build">
         <h2>Build</h2>
         <div class="build-tabs">
@@ -189,6 +190,7 @@ export class DomHud {
         <h2>Capabilities</h2>
         <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
       </aside>
+      </div>
 
       <div class="toast" data-k="toast" hidden></div>
       <div class="build-banner" data-k="build-banner" hidden>
@@ -426,6 +428,9 @@ export class DomHud {
     setText('cash-rate', `${rate >= 0 ? '+' : '−'}${money(Math.abs(rate))}/h`);
     const cashRateEl = this.root.querySelector('[data-k="cash-rate"]') as HTMLElement | null;
     if (cashRateEl) cashRateEl.style.color = rate >= 0 ? 'var(--accent)' : 'var(--danger)';
+    const cheapestBuild = Math.min(...BUILD_MENU_ORDER.map((id) => EQUIPMENT[id].cost));
+    const cashChip = this.root.querySelector('[data-k="cash-chip"]') as HTMLElement | null;
+    cashChip?.classList.toggle('cash-low', snapshot.cash < cheapestBuild);
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
     const capacity = Math.max(100, snapshot.powerKw * 1.15, snapshot.exportedKw);
     const pct = Math.min(100, (snapshot.exportedKw / capacity) * 100);
@@ -499,13 +504,18 @@ export class DomHud {
       }
     }
 
+    const buildPanel = this.root.querySelector('.panel.build') as HTMLElement;
+    buildPanel?.classList.toggle('build-mode-active', !!snapshot.buildMode);
+
     const banner = this.root.querySelector('[data-k="build-banner"]') as HTMLElement;
     if (snapshot.buildMode) {
       banner.hidden = false;
+      banner.classList.add('active');
       const def = EQUIPMENT[snapshot.buildMode];
       setText('build-banner-label', `Placing ${def.name}`);
     } else {
       banner.hidden = true;
+      banner.classList.remove('active');
     }
 
     const capsKey = snapshot.capabilities.join(',');

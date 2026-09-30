@@ -81,6 +81,13 @@ export class GameScene extends Phaser.Scene {
       cam.setZoom(next);
     });
 
+    this.input.on('gameout', () => {
+      this.world?.setPointerInWorld(false);
+    });
+    this.input.on('gameover', () => {
+      this.world?.setPointerInWorld(true);
+    });
+
     this.input.keyboard?.on('keydown-SPACE', () => {
       const snap = this.sim.snapshot();
       this.sim.setSpeed(snap.speed === 0 ? 1 : 0);
@@ -111,6 +118,10 @@ export class GameScene extends Phaser.Scene {
     this.world.sync(snap);
     const pointer = this.input.activePointer;
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+    if (pointer.x >= 0 && pointer.y >= 0 && pointer.x <= this.scale.width && pointer.y <= this.scale.height) {
+      this.world.setPointerInWorld(true);
+    }
+    this.world.updateHoverTile(snap, worldPoint);
     this.world.updateGhost(snap, worldPoint);
     this.hud.render(snap);
   }
