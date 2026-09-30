@@ -80,8 +80,9 @@ export const ASSET_KEYS = [
 export type AssetKey = (typeof ASSET_KEYS)[number];
 
 export function preloadGameAssets(scene: Phaser.Scene): void {
+  const base = import.meta.env.BASE_URL ?? './';
   for (const key of ASSET_KEYS) {
-    scene.load.image(key, `/assets/game/${key}.png`);
+    scene.load.image(key, `${base}assets/game/${key}.png`);
   }
 }
 

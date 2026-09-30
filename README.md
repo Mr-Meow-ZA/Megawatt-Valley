@@ -121,12 +121,10 @@ The objective is a finished playable Megawatt Valley release, not an endless seq
 
 ```bash
 npm install
-npm run dev
-```
-
-Open the printed local URL (default `http://localhost:5173`).
-
-```bash
+npm run dev      # http://localhost:5173
 npm test
 npm run build
+npm run preview  # serve production dist/
 ```
+
+Title screen → **Start** or **Continue** (local save). Drag to pan, wheel to zoom, Esc cancels placement, **R** repairs, **C** cleans.

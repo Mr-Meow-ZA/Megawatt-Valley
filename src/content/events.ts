@@ -16,12 +16,12 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'sponsor',
         label: 'Sponsor tea & biscuits (−$2,000)',
-        description: 'Spend cash now for smoother relations.',
+        description: 'Lasting goodwill: +$0.01/kWh tariff for the run.',
       },
       {
         id: 'promise',
         label: 'Promise a public tour',
-        description: 'No cash cost, but staff stay busy next week.',
+        description: 'No cash cost, but Tess is busy ~18h (manual dispatch delayed).',
       },
     ],
   },
@@ -107,6 +107,57 @@ export const EVENTS: Record<EventId, EventDef> = {
         id: 'busy',
         label: 'Too busy generating megawatts',
         description: 'No change.',
+      },
+    ],
+  },
+  capability_choice: {
+    id: 'capability_choice',
+    title: 'Choose What to Improve',
+    body: 'The ops budget covers one lasting upgrade. Monitoring spots faults earlier; a cleaning rig eats dust for breakfast.',
+    choices: [
+      {
+        id: 'monitor',
+        label: 'Remote Monitoring (−$5,000)',
+        description: 'Faults hurt less; condition drains slower.',
+      },
+      {
+        id: 'rig',
+        label: 'Cleaning Rig (−$5,000)',
+        description: 'Auto-cleans heavily soiled arrays.',
+      },
+    ],
+  },
+  growing_pains: {
+    id: 'growing_pains',
+    title: 'Growing Pains',
+    body: 'Site B is online and the work queue is stacking. Tess cannot be everywhere.',
+    choices: [
+      {
+        id: 'hire',
+        label: 'Hire Pat Amp (−$8,000)',
+        description: 'Add a second technician permanently.',
+      },
+      {
+        id: 'stretch',
+        label: 'Stretch the roster',
+        description: 'Keep one tech. Expect longer queues.',
+      },
+    ],
+  },
+  ops_surge: {
+    id: 'ops_surge',
+    title: 'Ops Surge',
+    body: 'Automation is humming — then two sites cough at once. Radio queues only go so far.',
+    choices: [
+      {
+        id: 'prioritise',
+        label: 'Prioritise exports',
+        description: 'Clear one Site A fault now; Site B waits (extra dirt builds).',
+      },
+      {
+        id: 'split',
+        label: 'Split the crew thin',
+        description: 'Both sites get attention slowly; staff busy ~10h.',
       },
     ],
   },

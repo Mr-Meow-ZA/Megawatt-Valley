@@ -38,6 +38,141 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Declutter world map density
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Cut forest density (~620/280 → ~200/55) + wide clear apron around Site A/B.
+- Removed neighbor solar farm, extra vans/chimneys/containers/yard kit pile-up.
+- Site A fence every other post; sparse wildflowers/clusters/foam/particles.
+
+**Next recommended step**
+- Owner visual check after `npm run dev`; enable Pages if not already.
+
+## 2026-09-30 — gh-pages publish + playtest card
+
+**Agent:** Cursor
+**Status:** Partial (static site on `gh-pages`; Pages site enable is owner-only API 403)
+
+**Changed / Produced**
+- Force-published production `dist` to `origin/gh-pages` (+ `.nojekyll`).
+- Pages workflow now uses `peaceiris/actions-gh-pages` (branch publish).
+- `Docs/PLAYTEST.md` for tomorrow’s path; First Power camera zoom punch.
+
+**Next recommended step**
+- Owner: Settings → Pages → Deploy from branch `gh-pages` / root → open `https://mr-meow-za.github.io/Megawatt-Valley/`
+
+## 2026-09-30 — Reward theatre v2, mobile HUD, Pages deploy path
+
+**Agent:** Cursor
+**Status:** Partial (Vercel create still 403; GitHub Pages workflow added — needs Pages source enable)
+
+**Changed / Produced**
+- Confetti bursts on First Power / Site B / star ceremonies; win modal star stamp + confetti.
+- Larger readable staff sprites; warm vehicle tints; Site B unlock meadow pulse.
+- Compact tablet/phone HUD breakpoints (hide denser chrome, keep Build + Next objective).
+- `vite` `base: './'` + relative asset URLs for portable hosting.
+- `.github/workflows/pages.yml` — build/test/deploy to GitHub Pages on this branch + main.
+- Title screen brand hierarchy strengthened (Megawatt Valley as hero signal).
+
+**Tested / Verified**
+- `npm test` — 16/16
+- `npm run build` — dist OK; asset paths `./assets/game/…`
+
+**Known issues / limitations**
+- Vercel project create still 403 for this team.
+- GitHub Pages URL live only after owner enables **Settings → Pages → Source: GitHub Actions**.
+- Authored music/art still not shipped.
+
+**Next recommended step**
+- Enable GitHub Pages Actions source → share `https://mr-meow-za.github.io/Megawatt-Valley/` (or the Actions-reported URL).
+- Owner playtest tomorrow.
+
+**Git / References**
+- Branch / PR: `cursor/level1-steam-finish-5938` / #8
+
+## 2026-09-30 — Honest review pass + reward / first-5 / ops pressure
+
+**Agent:** Cursor
+**Status:** Partial (gaps closed in code; live URL + owner playtest still pending)
+
+**Changed / Produced**
+- In-depth honest review + peer benchmark in `Docs/HONEST_QUALITY_REVIEW.md` (overrides Loop 21 9.5 claims).
+- Ceremony banners (first power / unlock / Site B / star / hail) + camera flash/pan/shake.
+- Cash accrue floats; sun-wait hint; auto ▶▶ after first commission until First Power.
+- Objective `rewardText` shown in Next focus + complete toast.
+- `ops_surge` event; stronger Growing Pains stretch; dual-site fault pressure; cleaning rig off in hail.
+- Sunny motif ambience + weather noise bed + `first_power` stinger; deduped SFX.
+- Removed fake ambient techs; deciduous-led foliage; distinct hail particles.
+- HUD accent vars (`--vest`, `--panel-blue`).
+
+**Tested / Verified**
+- `npm test` — 16/16 pass (incl. first_power ceremony + rewardText).
+- `npm run build` — production dist OK.
+
+**Known issues / limitations**
+- Live hosting URL still blocked (Vercel create 403).
+- Music/art still procedural/Kenney collage — not authored Steam identity.
+- Human 30–60 min pacing not timed (owner playtest tomorrow).
+
+**Decisions / assumptions / recommendations**
+- Paid Steam recommend score held at **5.8**; treat as free demo / playtest until art pass + live URL.
+- Do not re-inflate scorecard to 9.5 without owner play confirmation.
+
+**Next recommended step**
+- Owner playtest Place on Site A → First Power → Radio → Site B → Hail → 1★; note pacing nits.
+- Connect static hosting for shareable URL.
+
+**Git / References**
+- Branch / PR: `cursor/level1-steam-finish-5938` / #8
+- Issue: #6
+
+## 2026-09-30 — Level 1 steam-finish — scenario + product shell
+
+**Agent:** Cursor
+**Status:** Partial (M4 + product shell done; live deploy URL pending — Vercel create 403)
+
+**Playtest root causes fixed**
+- 0 kW: faults during first commission — gated until First Power holds ~4h.
+- Placement misses: enlarge Site A, snap, Place on Site A + `window.__MV.quickPlace()`.
+- Title Start: Phaser canvas `pointer-events: none` while title is up.
+
+**Changed / Produced** (see earlier entry body below for full list)
+
+## 2026-09-30 — Level 1 steam-finish — detail
+
+**Agent:** Cursor
+**Status:** Partial (product shell + M4 complete; live deploy URL pending)
+
+**Changed / Produced**
+- Removed free starter PV so First Power is earned; Site B has weaker sun + export factor.
+- Hail climax sets `weather=hail` with hold timer; bargain batch grants lasting discounts.
+- New events: capability choice (Remote Monitoring vs Cleaning Rig), Growing Pains (hire Pat Amp).
+- Save schema v2 + migration; autosave; title Continue/New; onboarding coach; procedural SFX + mute.
+- Smart R/C without selection; Esc/right-click cancel placement; night weather labels fixed.
+- CI workflow + `vercel.json`; DomHud win modal for 1★/2★/3★.
+
+**Tested / Verified**
+- `npm test` — 12/12 pass (playthrough 1★, save round-trip, hail weather, smart repair).
+- `npm run build` — production dist OK.
+
+**Known issues / limitations**
+- Live free hosting URL not yet connected (Vercel project create/link still needed).
+- Ambient decorative techs are non-interactive (visual density only).
+- Full 30–60 min human pacing not timed in this session.
+
+**Decisions / assumptions / recommendations**
+- Steam-quality bar treated as: boot flow, complete scenario beats, lasting event stakes, deployable static build — not Unity-parity art polish.
+
+**Next recommended step**
+- Connect repo to Vercel/Pages, owner playtest Continue→1★ path, fix any remaining UX nits from play.
+
+**Git / References**
+- Branch: `cursor/level1-steam-finish-5938`
+- Issue: #6
+
 ## 2026-09-30 — Loop 21 — staff density and tool icons
 
 **Agent:** Cursor

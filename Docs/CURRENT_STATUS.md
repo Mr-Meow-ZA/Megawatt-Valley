@@ -2,7 +2,7 @@
 
 ## Status
 
-**PRIMARY DIRECTION — Phaser Level 1 in active autonomous build — 29 September 2026**
+**PRIMARY DIRECTION — Phaser Level 1 steam-finish pass — 30 September 2026**
 
 Megawatt Valley is an **AI-autonomous Phaser / TypeScript production project**.
 
@@ -20,31 +20,36 @@ Build and release:
 
 # Megawatt Valley: Solar — Level 1: Here Comes the Sun
 
-Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.
+Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.  
+Active PR: **#8** (`cursor/level1-steam-finish-5938`).
 
-## Progress (branch `cursor/phaser-level1-build-5938`, PR #7)
+## Progress
 
 | Milestone | Status |
 |-----------|--------|
 | M0 Rebaseline (Phaser+Vite+TS) | Done |
-| M1 Visual proof + HUD/build | Kenney + procedural polish through Loops 1–11; quality scorecard target ≥9.5/10 |
+| M1 Visual proof + HUD/build | Done |
 | M2 Core solar loop | Done |
-| M3 Ops / staff / automation | Done (fault→Radio Dispatch, soiling→Cleaning Kit) |
-| M4 Full Level 1 scenario | In progress (objectives, events, stars, hail; automated 1★ smoke passes) |
-| M5–M6 Polish / deploy | Not started |
+| M3 Ops / staff / automation | Done |
+| M4 Full Level 1 scenario | Done |
+| M5–M6 Polish / deploy | `gh-pages` branch published; **enable Pages → gh-pages/root** for live URL (Vercel create still 403). Honest: ~92% / **5.9** paid-slice |
 
 ## How to run
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test
-npm run build
+npm test         # 15 tests
+npm run build && npm run preview
 ```
+
+Title → Start → **Place on Site A** → auto midday nudge → First Power ceremony → R repair / C clean → Site B → Ops Surge → hail → stars.
+
+Honest scores: `Docs/HONEST_QUALITY_REVIEW.md` (do not trust Loop 21 “all 9.5”).
 
 ## Product owner involvement
 
-Rapha should primarily set vision, review major decisions, play builds, and give feedback.
+Rapha should primarily set vision, review major decisions, play builds, and give feedback. Next owner step: connect free static hosting + play PR #8.
 
 ## Source of truth
 

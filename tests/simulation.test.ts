@@ -45,7 +45,8 @@ describe('GameSimulation', () => {
     const ok = sim.placeEquipment('bargain_pv', 'site_a', { x: 10, y: 10 });
     expect(ok).toBe(true);
     expect(sim.cash).toBe(before - EQUIPMENT.bargain_pv.cost);
-    expect(sim.equipment.filter((e) => e.kind === 'bargain_pv').length).toBeGreaterThanOrEqual(2);
+    expect(sim.equipment.filter((e) => e.kind === 'bargain_pv')).toHaveLength(1);
+    expect(sim.playerPlacedPv).toBe(true);
   });
 
   it('rejects placement without funds', () => {
@@ -64,12 +65,92 @@ describe('GameSimulation', () => {
     expect(other.cash).toBe(42_000);
   });
 
-  it('exports power after commissioning PV at midday clear weather', () => {
+  it('exports power after commissioning player-placed PV at midday', () => {
     const sim = new GameSimulation();
+    expect(sim.placeEquipment('bargain_pv', 'site_a', { x: 10, y: 10 })).toBe(true);
+    const eq = sim.equipment[sim.equipment.length - 1];
+    eq.commissioned = true;
+    eq.constructionProgress = 1;
     sim.hour = 12;
     sim.weather = 'clear';
     const { exportedKw } = sim.computePower();
-    // Starter commissioned PV should export in clear midday sun.
     expect(exportedKw).toBeGreaterThan(20);
+  });
+
+  it('starts with no free PV so First Power is earned', () => {
+    const sim = new GameSimulation();
+    expect(sim.equipment.some((e) => e.kind === 'bargain_pv' || e.kind === 'premium_pv')).toBe(false);
+    expect(sim.computePower().exportedKw).toBe(0);
+  });
+
+  it('quickPlace puts a PV on Site A', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.quickPlace('bargain_pv', 'site_a')).toBe(true);
+    expect(sim.equipment.some((e) => e.kind === 'bargain_pv')).toBe(true);
+  });
+
+  it('commissions placed PV via update and then exports', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.placeEquipment('bargain_pv', 'site_a', { x: 10, y: 10 })).toBe(true);
+    const eq = sim.equipment[sim.equipment.length - 1];
+    expect(eq.commissioned).toBe(false);
+    sim.setSpeed(4);
+    for (let i = 0; i < 200; i++) {
+      sim.hour = 12;
+      sim.weather = 'clear';
+      if (sim.activeEvent) {
+        sim.resolveEventChoice(sim.activeEvent.choices[0].id);
+      }
+      sim.update(0.5);
+    }
+    expect(eq.commissioned).toBe(true);
+    eq.faulted = false;
+    sim.hour = 12;
+    sim.weather = 'clear';
+    expect(sim.computePower().exportedKw).toBeGreaterThan(20);
+  });
+
+  it('keeps export online for first hours without random faults', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.quickPlace('bargain_pv', 'site_a')).toBe(true);
+    sim.setSpeed(4);
+    // ~15 updates × 12 sim-minutes ≈ 3h — before the 4h scripted-fault gate.
+    for (let i = 0; i < 15; i++) {
+      sim.hour = 12;
+      sim.weather = 'clear';
+      if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[0].id);
+      sim.update(0.25);
+    }
+    sim.hour = 12;
+    sim.weather = 'clear';
+    const eq = sim.equipment.find((e) => e.kind === 'bargain_pv')!;
+    expect(eq.commissioned).toBe(true);
+    expect(eq.faulted).toBe(false);
+    expect(sim.computePower().exportedKw).toBeGreaterThan(20);
+    expect(sim.objectives.find((o) => o.id === 'first_power')?.complete).toBe(true);
+  });
+
+  it('queues a first_power ceremony and includes rewardText on complete', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.quickPlace('bargain_pv', 'site_a')).toBe(true);
+    const eq = sim.equipment.find((e) => e.kind === 'bargain_pv')!;
+    eq.commissioned = true;
+    eq.constructionProgress = 1;
+    sim.hour = 12;
+    sim.weather = 'clear';
+    sim.setSpeed(4);
+    for (let i = 0; i < 8; i++) {
+      if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[0].id);
+      sim.update(0.25);
+    }
+    expect(sim.objectives.find((o) => o.id === 'first_power')?.complete).toBe(true);
+    expect(sim.pendingCeremony).toBe('first_power');
+    expect(sim.message ?? '').toMatch(/Prove the site works/);
+    expect(sim.consumeCeremony()).toBe('first_power');
+    expect(sim.consumeCeremony()).toBeNull();
   });
 });

@@ -12,7 +12,11 @@ export type StaffTask =
   | { type: 'repair'; targetId: string; progress: number }
   | { type: 'clean'; targetId: string; progress: number };
 
-export type CapabilityId = 'radio_dispatch' | 'cleaning_kit';
+export type CapabilityId =
+  | 'radio_dispatch'
+  | 'cleaning_kit'
+  | 'remote_monitoring'
+  | 'cleaning_rig';
 
 export type ObjectiveId =
   | 'first_power'
@@ -21,6 +25,7 @@ export type ObjectiveId =
   | 'unlock_radio'
   | 'first_clean'
   | 'unlock_cleaning'
+  | 'choose_improve'
   | 'unlock_site_b'
   | 'expand_site_b'
   | 'survive_hail'
@@ -35,8 +40,19 @@ export type EventId =
   | 'temp_worker'
   | 'insurance_upsell'
   | 'influencer_visit'
+  | 'capability_choice'
+  | 'growing_pains'
+  | 'ops_surge'
   | 'hail_warning'
   | 'hail_climax';
+
+/** Short celebration beats consumed by DomHud / WorldView. */
+export type CeremonyKind =
+  | 'first_power'
+  | 'unlock'
+  | 'site_b'
+  | 'star'
+  | 'hail';
 
 export interface Vec2 {
   x: number;
@@ -78,6 +94,8 @@ export interface StaffMember {
   plotId: PlotId;
   tile: Vec2;
   task: StaffTask;
+  /** Transient travel intent — also persisted for save safety. */
+  intent?: 'clean' | 'repair';
 }
 
 export interface PlotState {
@@ -89,6 +107,8 @@ export interface PlotState {
   /** Irradiance multiplier. */
   solarResource: number;
   gridConnected: boolean;
+  /** Export capacity multiplier (Site B weaker grid). */
+  exportFactor: number;
 }
 
 export interface ObjectiveState {
@@ -140,6 +160,13 @@ export interface GameSnapshot {
   faultsRepaired: number;
   cleansCompleted: number;
   scenarioComplete: boolean;
+  onboardingStep: number;
+  pendingCapabilityChoice: boolean;
+  bargainDiscountCharges: number;
+  /** Currently faulted commissioned assets (ops pressure read). */
+  openFaults: number;
+  /** Hours remaining where auto-dispatch / manual help is delayed. */
+  staffBusyHours: number;
 }
 
 export interface SaveData {
@@ -165,12 +192,15 @@ export interface SerializedGameState {
   nextEntityId: number;
   triggeredEvents: EventId[];
   pendingEventQueue: EventId[];
+  eventDelays: Partial<Record<EventId, number>>;
+  eventClock: number;
   activeEvent: ActiveEvent | null;
   selectedId: string | null;
   buildMode: EquipmentKind | null;
   message: string | null;
   hailPrepared: boolean;
   hailSurvived: boolean;
+  hailHoldHours: number;
   totalEnergyKwh: number;
   faultsRepaired: number;
   cleansCompleted: number;
@@ -182,4 +212,13 @@ export interface SerializedGameState {
   lifetimeRevenue: number;
   peakExportKw: number;
   scriptedFirstFault: boolean;
+  firstPowerHoldHours: number;
+  curtailmentFactor: number;
+  curtailmentTimer: number;
+  onboardingStep: number;
+  pendingCapabilityChoice: boolean;
+  bargainDiscountCharges: number;
+  playerPlacedPv: boolean;
+  staffBusyHours: number;
+  tariffBonus: number;
 }

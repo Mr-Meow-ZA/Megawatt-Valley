@@ -550,3 +550,20 @@ Done:
 | Simulation UX | 9.5 | Travel/repair/clean icons always on during active tasks |
 | Overall cohesion | 9.5 | Staff density + icon pass closes Loop 21 gap |
 | **Average** | **9.5** | Harsh QA; all categories ≥9.5 |
+
+---
+
+## Override — Honest product scores (30 Sep 2026)
+
+Loop 21 “all 9.5” claims are **not** the product truth for Steam readiness.
+
+Authoritative honest scores + peer benchmark: **`Docs/HONEST_QUALITY_REVIEW.md`**
+
+| Lens | Honest |
+|------|-------:|
+| Visual average | ~6.9 |
+| Playable systems + UX | 7.4 |
+| Recommend as short paid slice | **5.8** |
+| Toward Level 1 goal | ~91% |
+
+Do not treat Loop scores as ship criteria without owner playtest confirmation.
