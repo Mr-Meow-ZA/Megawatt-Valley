@@ -53,7 +53,9 @@ html, body, #app {
 #ui-root .hud-top,
 #ui-root .hud-bottom,
 #ui-root .toast,
-#ui-root .build-banner {
+#ui-root .build-banner,
+#ui-root .title-screen,
+#ui-root .coach {
   pointer-events: auto;
 }
 
@@ -829,6 +831,132 @@ html, body, #app {
 
 .muted { color: var(--muted); }
 .ghost { width: 100%; }
+
+/* Title screen */
+.title-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(80, 140, 200, 0.45) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(6, 18, 36, 0.82) 0%, rgba(8, 28, 48, 0.92) 100%);
+  backdrop-filter: blur(6px);
+}
+.title-screen[hidden] { display: none !important; }
+.title-card {
+  width: min(440px, 92vw);
+  padding: 28px 28px 22px;
+  border-radius: 20px;
+  background: var(--panel-strong);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+.title-brand {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.title-card h1 {
+  font-family: var(--display);
+  font-size: 28px;
+  margin: 0 0 10px;
+  line-height: 1.15;
+}
+.title-blurb {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 0 0 18px;
+}
+.title-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.title-actions button {
+  width: 100%;
+  padding: 12px 14px;
+  font-weight: 700;
+  border-radius: 12px;
+}
+.title-actions button.primary {
+  background: linear-gradient(180deg, #4aef9a, #2bb86a);
+  color: #062016;
+  border: none;
+}
+.title-meta {
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Onboarding coach */
+.coach {
+  position: absolute;
+  left: 16px;
+  bottom: 72px;
+  z-index: 90;
+  width: min(340px, calc(100vw - 32px));
+}
+.coach[hidden] { display: none !important; }
+.coach-card {
+  background: var(--panel-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.coach-card h3 {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: 16px;
+}
+.coach-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.coach-actions {
+  display: flex;
+  gap: 8px;
+}
+.coach-actions button { flex: 1; }
+
+.mute-btn.muted-on {
+  opacity: 0.65;
+  text-decoration: line-through;
+}
+
+.site-b-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--warn);
+  font-weight: 700;
+}
+.minimap-legend .swatch.site-b {
+  background: #c9a227;
+}
+.panel.objectives li.pending {
+  opacity: 0.72;
+}
+[data-k="power-gen"] {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  font-style: normal;
+}
 
 @media (max-width: 1200px) {
   .sidebar-right .panel.caps { display: none; }

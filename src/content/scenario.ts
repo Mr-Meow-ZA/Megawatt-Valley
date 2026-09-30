@@ -2,7 +2,8 @@ import type { CapabilityId, ObjectiveId, ObjectiveState, PlotState } from '../si
 
 export const STARTING_CASH = 50_000;
 export const TARIFF_PER_KWH = 0.12;
-export const SAVE_VERSION = 1;
+/** Bump when SerializedGameState shape changes. */
+export const SAVE_VERSION = 2;
 export const SAVE_KEY = 'megawatt-valley-solar-v1';
 
 /** Simulation minutes per real second at speed 1. */
@@ -20,6 +21,14 @@ export const CAPABILITY_INFO: Record<
     name: 'Cleaning Kit',
     description: 'Faster cleaning and slower soiling build-up.',
   },
+  remote_monitoring: {
+    name: 'Remote Monitoring',
+    description: 'Faults are spotted earlier; condition drains slower.',
+  },
+  cleaning_rig: {
+    name: 'Cleaning Rig',
+    description: 'Auto-cleans heavily soiled arrays without a tech trip.',
+  },
 };
 
 export function createInitialPlots(): PlotState[] {
@@ -32,6 +41,7 @@ export function createInitialPlots(): PlotState[] {
       size: { x: 14, y: 12 },
       solarResource: 1,
       gridConnected: true,
+      exportFactor: 1,
     },
     {
       id: 'site_b',
@@ -39,8 +49,10 @@ export function createInitialPlots(): PlotState[] {
       unlocked: false,
       origin: { x: 22, y: 6 },
       size: { x: 12, y: 10 },
-      solarResource: 0.95,
+      // Weaker sun + congested spur — Growing Up reward with a real constraint.
+      solarResource: 0.88,
       gridConnected: true,
+      exportFactor: 0.78,
     },
   ];
 }
@@ -63,7 +75,7 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'first_repair',
       title: 'First Failure',
-      description: 'Manually dispatch your technician to repair a fault.',
+      description: 'Manually dispatch your technician to repair a fault (select array + R, or press R).',
       rewardText: 'Unlock Radio Dispatch',
     },
     {
@@ -75,7 +87,7 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'first_clean',
       title: 'Dust Happens',
-      description: 'Clean a soiled PV array.',
+      description: 'Clean a soiled PV array (select + C, or press C).',
       rewardText: 'Unlock Cleaning Kit',
     },
     {
@@ -85,10 +97,16 @@ export function createInitialObjectives(): ObjectiveState[] {
       rewardText: 'Faster cleaning',
     },
     {
+      id: 'choose_improve',
+      title: 'Choose What to Improve',
+      description: 'Pick a lasting upgrade: Remote Monitoring or Cleaning Rig.',
+      rewardText: 'Capability fork',
+    },
+    {
       id: 'unlock_site_b',
       title: 'Growing Up',
       description: 'Reach 120 kW peak export and hold $25,000 cash.',
-      rewardText: 'Unlock Site B',
+      rewardText: 'Unlock Site B (weaker grid)',
     },
     {
       id: 'expand_site_b',
@@ -138,3 +156,22 @@ export const STAR_THRESHOLDS = {
   star2PeakKw: 220,
   star3PeakKw: 300,
 };
+
+export const ONBOARDING_STEPS = [
+  {
+    title: 'Welcome to Site A',
+    body: 'You run a tiny solar company. Cash is limited — every array counts. Pan with drag, zoom with the wheel.',
+  },
+  {
+    title: 'Build your first array',
+    body: 'Open Build → Bargain or Premium PV, then click a meadow tile inside the Site A fence. Construction takes a short moment.',
+  },
+  {
+    title: 'Export and earn',
+    body: 'At midday, power flows through the grid connection and cash ticks up. Fast-forward with ▶▶ when waiting for sun.',
+  },
+  {
+    title: 'When things break',
+    body: 'Faults show a red !. Select the array and Dispatch Repair, or press R. Cleaning uses C when dust builds up.',
+  },
+];

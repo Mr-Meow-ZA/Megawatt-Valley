@@ -38,6 +38,38 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Level 1 steam-finish — scenario + product shell
+
+**Agent:** Cursor
+**Status:** Partial (product shell + M4 complete; live deploy URL pending)
+
+**Changed / Produced**
+- Removed free starter PV so First Power is earned; Site B has weaker sun + export factor.
+- Hail climax sets `weather=hail` with hold timer; bargain batch grants lasting discounts.
+- New events: capability choice (Remote Monitoring vs Cleaning Rig), Growing Pains (hire Pat Amp).
+- Save schema v2 + migration; autosave; title Continue/New; onboarding coach; procedural SFX + mute.
+- Smart R/C without selection; Esc/right-click cancel placement; night weather labels fixed.
+- CI workflow + `vercel.json`; DomHud win modal for 1★/2★/3★.
+
+**Tested / Verified**
+- `npm test` — 12/12 pass (playthrough 1★, save round-trip, hail weather, smart repair).
+- `npm run build` — production dist OK.
+
+**Known issues / limitations**
+- Live free hosting URL not yet connected (Vercel project create/link still needed).
+- Ambient decorative techs are non-interactive (visual density only).
+- Full 30–60 min human pacing not timed in this session.
+
+**Decisions / assumptions / recommendations**
+- Steam-quality bar treated as: boot flow, complete scenario beats, lasting event stakes, deployable static build — not Unity-parity art polish.
+
+**Next recommended step**
+- Connect repo to Vercel/Pages, owner playtest Continue→1★ path, fix any remaining UX nits from play.
+
+**Git / References**
+- Branch: `cursor/level1-steam-finish-5938`
+- Issue: #6
+
 ## 2026-09-30 — Loop 21 — staff density and tool icons
 
 **Agent:** Cursor

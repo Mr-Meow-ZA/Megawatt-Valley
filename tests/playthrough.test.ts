@@ -5,6 +5,7 @@ describe('Level 1 playthrough smoke', () => {
   it('can reach 1★ with automated build/operate loop', () => {
     const sim = new GameSimulation();
     sim.cash = 200_000;
+    sim.dismissOnboarding();
 
     const tiles = [
       { x: 6, y: 9 },
@@ -34,18 +35,28 @@ describe('Level 1 playthrough smoke', () => {
     sim.weather = 'clear';
     sim.setSpeed(4);
     expect(sim.computePower().exportedKw).toBeGreaterThan(120);
+    expect(sim.playerPlacedPv).toBe(true);
 
-    for (let i = 0; i < 30_000; i++) {
+    for (let i = 0; i < 40_000; i++) {
       if (sim.activeEvent) {
         const preferred =
-          sim.activeEvent.choices.find((c) => c.id === 'prepare' || c.id === 'buy' || c.id === 'sponsor')?.id ??
-          sim.activeEvent.choices[0]?.id;
+          sim.activeEvent.choices.find(
+            (c) =>
+              c.id === 'prepare' ||
+              c.id === 'buy' ||
+              c.id === 'sponsor' ||
+              c.id === 'monitor' ||
+              c.id === 'hire' ||
+              c.id === 'endure',
+          )?.id ?? sim.activeEvent.choices[0]?.id;
         if (preferred) sim.resolveEventChoice(preferred);
       }
 
       if (!sim.capabilities.includes('radio_dispatch')) {
         const fault = sim.equipment.find((e) => e.faulted);
         if (fault) sim.dispatchRepair(fault.id);
+      } else {
+        sim.dispatchRepair();
       }
 
       const dirty = sim.equipment.find(
@@ -64,11 +75,13 @@ describe('Level 1 playthrough smoke', () => {
         newest.constructionProgress = 1;
       }
 
-      // Keep midday hours so revenue accrues.
       if (sim.hour < 10 || sim.hour > 15) sim.hour = 12;
-      // Leave climax weather alone; otherwise prefer clear skies for the smoke test.
-      if (!sim.triggeredEvents.includes('hail_warning') && !sim.triggeredEvents.includes('hail_climax')) {
-        (sim as { weather: typeof sim.weather }).weather = 'clear';
+      if (
+        sim.hailHoldHours <= 0 &&
+        !sim.triggeredEvents.includes('hail_warning') &&
+        !sim.triggeredEvents.includes('hail_climax')
+      ) {
+        sim.weather = 'clear';
       }
 
       sim.update(0.5);
@@ -79,5 +92,52 @@ describe('Level 1 playthrough smoke', () => {
     expect(sim.lifetimeRevenue).toBeGreaterThanOrEqual(12_000);
     expect(sim.stars).toBeGreaterThanOrEqual(1);
     expect(sim.scenarioComplete).toBe(true);
+  });
+
+  it('save round-trip preserves event clock and curtailment', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.placeEquipment('bargain_pv', 'site_a', { x: 6, y: 9 })).toBe(true);
+    sim.equipment[sim.equipment.length - 1].commissioned = true;
+    sim.equipment[sim.equipment.length - 1].constructionProgress = 1;
+    sim.eventClock = 12.5;
+    sim.curtailmentFactor = 0.85;
+    sim.curtailmentTimer = 10;
+    sim.bargainDiscountCharges = 2;
+    const data = sim.serialize();
+    const loaded = new GameSimulation();
+    loaded.load(data);
+    expect(loaded.eventClock).toBe(12.5);
+    expect(loaded.curtailmentFactor).toBe(0.85);
+    expect(loaded.bargainDiscountCharges).toBe(2);
+    expect(loaded.playerPlacedPv).toBe(true);
+  });
+
+  it('hail climax sets hail weather', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    sim.activeEvent = {
+      id: 'hail_climax',
+      title: 'Hail',
+      body: 'test',
+      choices: [{ id: 'endure', label: 'Go', description: '' }],
+      paused: true,
+    };
+    sim.resolveEventChoice('endure');
+    expect(sim.weather).toBe('hail');
+    expect(sim.hailSurvived).toBe(true);
+    expect(sim.hailHoldHours).toBeGreaterThan(0);
+  });
+
+  it('R dispatches without selection when a fault exists', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.placeEquipment('bargain_pv', 'site_a', { x: 6, y: 9 })).toBe(true);
+    const eq = sim.equipment[sim.equipment.length - 1];
+    eq.commissioned = true;
+    eq.constructionProgress = 1;
+    eq.faulted = true;
+    expect(sim.dispatchRepair()).toBe(true);
+    expect(sim.staff[0].task.type).toBe('travel');
   });
 });

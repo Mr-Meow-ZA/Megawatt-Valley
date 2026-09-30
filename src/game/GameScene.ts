@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { initAudio, playSfx } from '../audio/Sfx';
+import { saveGame } from '../persistence/save';
 import { GameSimulation } from '../simulation/GameSimulation';
 import { DomHud } from '../ui/DomHud';
 import { generateOverlayTextures, preloadGameAssets } from './assets';
@@ -10,6 +12,9 @@ export class GameScene extends Phaser.Scene {
   private hud!: DomHud;
   private dragging = false;
   private dragLast = { x: 0, y: 0 };
+  private autosaveAcc = 0;
+  private lastStars = 0;
+  private lastMsg: string | null = null;
 
   constructor() {
     super('GameScene');
@@ -29,7 +34,16 @@ export class GameScene extends Phaser.Scene {
     let moved = false;
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (this.sim.snapshot().activeEvent) return;
+      initAudio();
+      if (this.hud.isTitleVisible() || this.sim.snapshot().activeEvent) return;
+      // Right-click cancels placement.
+      if (pointer.rightButtonDown() || pointer.button === 2) {
+        if (this.sim.snapshot().buildMode) {
+          this.sim.setBuildMode(null);
+          playSfx('click');
+        }
+        return;
+      }
       pressScreen = { x: pointer.x, y: pointer.y };
       pressWorld = cam.getWorldPoint(pointer.x, pointer.y);
       moved = false;
@@ -38,10 +52,11 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (this.sim.snapshot().activeEvent) {
+      if (this.hud.isTitleVisible() || this.sim.snapshot().activeEvent) {
         this.dragging = false;
         return;
       }
+      if (pointer.button === 2) return;
       const wasDragging = this.dragging || moved;
       this.dragging = false;
       if (wasDragging || !pressWorld) return;
@@ -53,16 +68,23 @@ export class GameScene extends Phaser.Scene {
         const tile = this.world.getHoverTile();
         if (tile) {
           const plotId = this.sim.plotAtTile(tile);
-          if (plotId) this.sim.placeEquipment(snapshot.buildMode, plotId, tile);
+          if (plotId) {
+            const ok = this.sim.placeEquipment(snapshot.buildMode, plotId, tile);
+            playSfx(ok ? 'place' : 'error');
+          } else {
+            this.sim.message = 'Build inside an unlocked site fence.';
+            playSfx('error');
+          }
         }
         return;
       }
       const id = this.world.pickEntity(snapshot, worldPoint.x, worldPoint.y);
       this.sim.selectEntity(id);
+      if (id) playSfx('click');
     });
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (!pointer.isDown || this.sim.snapshot().activeEvent) return;
+      if (!pointer.isDown || this.hud.isTitleVisible() || this.sim.snapshot().activeEvent) return;
       const dx = pointer.x - pressScreen.x;
       const dy = pointer.y - pressScreen.y;
       if (!moved && Math.hypot(dx, dy) > 6) {
@@ -77,6 +99,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
+      if (this.hud.isTitleVisible()) return;
       const next = Phaser.Math.Clamp(cam.zoom - dy * 0.0015, 0.5, 2.4);
       cam.setZoom(next);
     });
@@ -88,33 +111,87 @@ export class GameScene extends Phaser.Scene {
       this.world?.setPointerInWorld(true);
     });
 
+    // Disable browser context menu over the canvas so right-click cancel works.
+    this.game.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
     this.input.keyboard?.on('keydown-SPACE', () => {
+      if (this.hud.isTitleVisible()) return;
       const snap = this.sim.snapshot();
       this.sim.setSpeed(snap.speed === 0 ? 1 : 0);
     });
     this.input.keyboard?.on('keydown-R', () => {
-      const snap = this.sim.snapshot();
-      if (snap.selectedId) this.sim.dispatchRepair(snap.selectedId);
+      if (this.hud.isTitleVisible() || this.sim.activeEvent) return;
+      initAudio();
+      const ok = this.sim.dispatchRepair();
+      playSfx(ok ? 'repair' : 'error');
     });
     this.input.keyboard?.on('keydown-C', () => {
-      const snap = this.sim.snapshot();
-      if (snap.selectedId) this.sim.dispatchClean(snap.selectedId);
+      if (this.hud.isTitleVisible() || this.sim.activeEvent) return;
+      initAudio();
+      const ok = this.sim.dispatchClean();
+      playSfx(ok ? 'clean' : 'error');
+    });
+    this.input.keyboard?.on('keydown-ESC', () => {
+      if (this.sim.snapshot().buildMode) {
+        this.sim.setBuildMode(null);
+        playSfx('click');
+      }
     });
   }
 
+  private rebuildWorld(): void {
+    this.children.removeAll(true);
+    generateOverlayTextures(this);
+    this.world = new WorldView(this, this.sim);
+    this.lastStars = this.sim.stars;
+  }
+
   private startNewGame(): void {
-    // Destroy previous world display objects
     this.children.removeAll(true);
     generateOverlayTextures(this);
     this.sim = new GameSimulation();
     this.world = new WorldView(this, this.sim);
-    this.hud = new DomHud(this.sim, () => this.startNewGame());
+    this.lastStars = 0;
+    this.lastMsg = null;
+    this.autosaveAcc = 0;
+    this.hud = new DomHud(
+      this.sim,
+      () => this.startNewGame(),
+      () => this.rebuildWorld(),
+    );
   }
 
   update(_t: number, delta: number): void {
-    if (!this.sim) return;
-    this.sim.update(delta / 1000);
+    if (!this.sim || !this.hud) return;
+    // Pause sim while title is up.
+    if (!this.hud.isTitleVisible()) {
+      this.sim.update(delta / 1000);
+      this.autosaveAcc += delta / 1000;
+      if (this.autosaveAcc >= 45) {
+        this.autosaveAcc = 0;
+        saveGame(this.sim.serialize());
+      }
+    }
     const snap = this.sim.snapshot();
+
+    if (snap.stars > this.lastStars) {
+      playSfx('star');
+      this.lastStars = snap.stars;
+    }
+    const commissioned = this.sim.consumeCommissionFlag();
+    if (commissioned) playSfx('commission');
+    if (this.sim.consumeFaultToast()) playSfx('fault');
+    if (this.sim.consumeUnlockToast()) playSfx('unlock');
+    if (snap.activeEvent && snap.message !== this.lastMsg) {
+      /* event open sfx handled in HUD */
+    }
+    if (snap.message && snap.message !== this.lastMsg) {
+      const m = snap.message.toLowerCase();
+      if (m.includes('hail')) playSfx('hail');
+      else if (m.includes('event') || m.includes('meeting') || m.includes('warning')) playSfx('event');
+    }
+    this.lastMsg = snap.message;
+
     this.world.sync(snap);
     const pointer = this.input.activePointer;
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);

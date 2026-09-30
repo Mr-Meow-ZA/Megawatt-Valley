@@ -50,9 +50,11 @@ export class GameSimulation {
   activeEvent: ActiveEvent | null = null;
   selectedId: string | null = null;
   buildMode: EquipmentKind | null = null;
-  message: string | null = 'Welcome to Site A. Place solar and connect to the valley grid.';
+  message: string | null =
+    'Welcome to Site A. Place a PV array from the Build menu to get first power.';
   hailPrepared = false;
   hailSurvived = false;
+  hailHoldHours = 0;
   totalEnergyKwh = 0;
   lifetimeRevenue = 0;
   peakExportKw = 0;
@@ -67,6 +69,14 @@ export class GameSimulation {
   curtailmentTimer = 0;
   eventClock = 0;
   scriptedFirstFault = false;
+  onboardingStep = 0;
+  pendingCapabilityChoice = false;
+  bargainDiscountCharges = 0;
+  playerPlacedPv = false;
+  private eventDelays: Partial<Record<EventId, number>> = {};
+  private lastCommissionId: string | null = null;
+  private lastFaultToastId: string | null = null;
+  private lastUnlockToast = '';
 
   constructor() {
     this.seedWorld();
@@ -102,18 +112,7 @@ export class GameSimulation {
       commissioned: true,
       constructionProgress: 1,
     });
-    // Starter fixed-tilt array so the site reads as a real solar campus from minute one.
-    this.equipment.push({
-      id: this.uid('eq'),
-      kind: 'bargain_pv',
-      plotId: 'site_a',
-      tile: { x: siteA.origin.x + 8, y: siteA.origin.y + 3 },
-      condition: 1,
-      soiling: 0.05,
-      faulted: false,
-      commissioned: true,
-      constructionProgress: 1,
-    });
+    // No free starter PV — First Power must be earned by the player.
     this.staff.push({
       id: this.uid('staff'),
       name: 'Tess Volt',
@@ -163,8 +162,15 @@ export class GameSimulation {
       if (!plot?.unlocked) continue;
       const soilPenalty = 1 - eq.soiling * 0.45;
       generationKw +=
-        def.nameplateKw * def.efficiency * eq.condition * soilPenalty * irradiance * plot.solarResource;
+        def.nameplateKw *
+        def.efficiency *
+        eq.condition *
+        soilPenalty *
+        irradiance *
+        plot.solarResource *
+        (plot.exportFactor ?? 1);
     }
+    // Site export also limited by weakest plot factor on generation already applied per-array.
     const exportedKw = Math.min(generationKw, this.inverterCapacity());
     return { generationKw, exportedKw };
   }
@@ -175,7 +181,10 @@ export class GameSimulation {
 
   setBuildMode(kind: EquipmentKind | null): void {
     this.buildMode = kind;
-    if (kind) this.selectedId = null;
+    if (kind) {
+      this.selectedId = null;
+      if (this.onboardingStep === 1) this.onboardingStep = 2;
+    }
   }
 
   selectEntity(id: string | null): void {
@@ -183,12 +192,24 @@ export class GameSimulation {
     if (id) this.buildMode = null;
   }
 
+  advanceOnboarding(): void {
+    this.onboardingStep = Math.min(this.onboardingStep + 1, 4);
+  }
+
+  dismissOnboarding(): void {
+    this.onboardingStep = 4;
+  }
+
   canPlace(kind: EquipmentKind, plotId: PlotId, tile: Vec2): string | null {
     const def = EQUIPMENT[kind];
     if (!def.buildable) return 'Not buildable';
     const plot = this.plots.find((p) => p.id === plotId);
-    if (!plot?.unlocked) return 'Plot locked';
-    if (this.cash < def.cost) return 'Not enough cash';
+    if (!plot?.unlocked) return 'Plot locked — unlock Site B via Growing Up first';
+    let cost = def.cost;
+    if (kind === 'bargain_pv' && this.bargainDiscountCharges > 0) {
+      cost = Math.max(0, cost - 1500);
+    }
+    if (this.cash < cost) return 'Not enough cash';
     if (
       tile.x < plot.origin.x ||
       tile.y < plot.origin.y ||
@@ -216,7 +237,15 @@ export class GameSimulation {
       return false;
     }
     const def = EQUIPMENT[kind];
-    this.cash -= def.cost;
+    let cost = def.cost;
+    if (kind === 'bargain_pv' && this.bargainDiscountCharges > 0) {
+      cost = Math.max(0, cost - 1500);
+      this.bargainDiscountCharges -= 1;
+      this.message = `Building ${def.name} (−$1,500 batch discount)…`;
+    } else {
+      this.message = `Building ${def.name}…`;
+    }
+    this.cash -= cost;
     this.equipment.push({
       id: this.uid('eq'),
       kind,
@@ -228,36 +257,68 @@ export class GameSimulation {
       commissioned: false,
       constructionProgress: 0,
     });
-    this.message = `Building ${def.name}…`;
+    if (isPv(kind)) {
+      this.playerPlacedPv = true;
+      if (this.onboardingStep < 2) this.onboardingStep = 2;
+    }
     this.buildMode = null;
     this.activateObjective('choose_equipment');
     return true;
   }
 
-  dispatchRepair(equipmentId: string): boolean {
-    if (this.capabilities.includes('radio_dispatch')) {
-      this.message = 'Radio Dispatch handles routine faults automatically.';
+  /** Smart repair: selected fault, else nearest faulted asset. */
+  dispatchRepair(equipmentId?: string | null): boolean {
+    const targetId =
+      equipmentId ??
+      this.selectedId ??
+      this.equipment.find((e) => e.faulted && e.commissioned)?.id ??
+      null;
+    if (!targetId) {
+      this.message = 'No faults to repair right now.';
       return false;
     }
-    const eq = this.equipment.find((e) => e.id === equipmentId);
+    const eq = this.equipment.find((e) => e.id === targetId);
     if (!eq?.faulted) {
       this.message = 'Nothing to repair there.';
       return false;
     }
+    if (this.capabilities.includes('radio_dispatch')) {
+      const idle = this.staff.find((s) => s.task.type === 'idle');
+      if (!idle) {
+        this.message = 'Radio Dispatch queued — technicians busy.';
+        return false;
+      }
+      idle.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...idle.tile } };
+      idle.intent = 'repair';
+      this.message = `Radio Dispatch: ${idle.name} en route.`;
+      return true;
+    }
     const tech = this.staff.find((s) => s.task.type === 'idle');
     if (!tech) {
       this.message = 'Technician is busy.';
       return false;
     }
     tech.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...tech.tile } };
+    tech.intent = 'repair';
     this.message = `${tech.name} is on the way.`;
+    this.activateObjective('first_repair');
     return true;
   }
 
-  dispatchClean(equipmentId: string): boolean {
-    const eq = this.equipment.find((e) => e.id === equipmentId);
+  /** Smart clean: selected dirty PV, else dirtiest array. */
+  dispatchClean(equipmentId?: string | null): boolean {
+    let eq = equipmentId ? this.equipment.find((e) => e.id === equipmentId) : null;
+    if (!eq && this.selectedId) {
+      eq = this.equipment.find((e) => e.id === this.selectedId) ?? null;
+    }
     if (!eq || !isPv(eq.kind) || eq.soiling < 0.15) {
-      this.message = 'That array is clean enough.';
+      eq =
+        this.equipment
+          .filter((e) => isPv(e.kind) && e.commissioned && e.soiling >= 0.15)
+          .sort((a, b) => b.soiling - a.soiling)[0] ?? null;
+    }
+    if (!eq) {
+      this.message = 'Arrays look clean enough for now.';
       return false;
     }
     const tech = this.staff.find((s) => s.task.type === 'idle');
@@ -266,17 +327,21 @@ export class GameSimulation {
       return false;
     }
     tech.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...tech.tile } };
-    // Mark clean intent via soiling threshold; travel then clean.
-    (tech as StaffMember & { _intent?: 'clean' | 'repair' })._intent = 'clean';
+    tech.intent = 'clean';
     this.message = `${tech.name} heading out with a mop.`;
     this.activateObjective('first_clean');
     return true;
   }
 
   private staffIntent(staff: StaffMember): 'clean' | 'repair' {
-    const tagged = staff as StaffMember & { _intent?: 'clean' | 'repair' };
-    if (tagged._intent) return tagged._intent;
-    const target = this.equipment.find((e) => e.id === (staff.task.type === 'travel' || staff.task.type === 'repair' || staff.task.type === 'clean' ? staff.task.targetId : ''));
+    if (staff.intent) return staff.intent;
+    const target = this.equipment.find(
+      (e) =>
+        e.id ===
+        (staff.task.type === 'travel' || staff.task.type === 'repair' || staff.task.type === 'clean'
+          ? staff.task.targetId
+          : ''),
+    );
     if (target?.faulted) return 'repair';
     return 'clean';
   }
@@ -299,8 +364,8 @@ export class GameSimulation {
       case 'bargain_batch':
         if (choiceId === 'buy') {
           this.cash -= 5000;
-          this.cash += 7500;
-          this.message = 'Batch bought and flipped to a neighbour. Net +$2,500.';
+          this.bargainDiscountCharges += 2;
+          this.message = 'Batch secured: next 2 Bargain arrays get −$1,500 each.';
         } else {
           this.message = 'You kept your standards. And your cash.';
         }
@@ -350,6 +415,37 @@ export class GameSimulation {
           this.message = 'You stayed focused on electrons.';
         }
         break;
+      case 'capability_choice':
+        this.cash -= 5000;
+        if (choiceId === 'monitor') {
+          if (!this.capabilities.includes('remote_monitoring')) {
+            this.capabilities.push('remote_monitoring');
+          }
+          this.message = 'Remote Monitoring online — faults hurt less.';
+        } else {
+          if (!this.capabilities.includes('cleaning_rig')) {
+            this.capabilities.push('cleaning_rig');
+          }
+          this.message = 'Cleaning Rig deployed — dust stands little chance.';
+        }
+        this.completeObjective('choose_improve');
+        this.pendingCapabilityChoice = false;
+        break;
+      case 'growing_pains':
+        if (choiceId === 'hire') {
+          this.cash -= 8000;
+          this.hireSecondTech();
+          this.message = 'Pat Amp joins the crew. Queue pressure eases.';
+        } else {
+          this.message = 'One tech, two sites. Brace for juggling.';
+          // Spike a fault + dirt to make the stretch feel real.
+          const pv = this.equipment.find((e) => isPv(e.kind) && e.commissioned && !e.faulted);
+          if (pv) {
+            pv.faulted = true;
+            pv.soiling = Math.max(pv.soiling, 0.4);
+          }
+        }
+        break;
       case 'hail_warning':
         if (choiceId === 'prepare') {
           this.cash -= 2500;
@@ -358,20 +454,37 @@ export class GameSimulation {
         } else {
           this.message = 'You watch the radar and hope.';
         }
-        this.enqueueEvent('hail_climax', 8);
+        this.weather = 'overcast';
+        this.enqueueEvent('hail_climax', 6);
         break;
       case 'hail_climax':
+        this.weather = 'hail';
+        this.hailHoldHours = 2.5;
+        this.weatherTimer = 0;
         this.applyHailDamage();
         this.hailSurvived = true;
         this.completeObjective('survive_hail');
-        this.weather = 'partly_cloudy';
         this.message = this.hailPrepared
-          ? 'Hail passes. Prep paid off — damage is limited.'
+          ? 'Hail pounds the valley — prep paid off. Damage is limited.'
           : 'Hail smacks the arrays. Repairs ahead.';
         break;
       default:
         break;
     }
+  }
+
+  private hireSecondTech(): void {
+    if (this.staff.some((s) => s.name === 'Pat Amp')) return;
+    const siteB = this.plots.find((p) => p.id === 'site_b');
+    const origin = siteB?.unlocked ? siteB.origin : this.plots[0].origin;
+    this.staff.push({
+      id: this.uid('staff'),
+      name: 'Pat Amp',
+      role: 'technician',
+      plotId: siteB?.unlocked ? 'site_b' : 'site_a',
+      tile: { x: origin.x + 2, y: origin.y + 2 },
+      task: { type: 'idle' },
+    });
   }
 
   private applyHailDamage(): void {
@@ -391,17 +504,11 @@ export class GameSimulation {
 
   private enqueueEvent(id: EventId, delayHours = 0): void {
     if (this.triggeredEvents.includes(id) || this.pendingEventQueue.includes(id)) return;
-    if (delayHours <= 0) {
-      this.pendingEventQueue.push(id);
-    } else {
-      // Stash with delay using eventClock threshold encoded via repeated checks.
-      this.pendingEventQueue.push(id);
-      // delay handled by not opening until eventClock advances — store delay on side map
+    this.pendingEventQueue.push(id);
+    if (delayHours > 0) {
       this.eventDelays[id] = this.eventClock + delayHours;
     }
   }
-
-  private eventDelays: Partial<Record<EventId, number>> = {};
 
   private maybeOpenQueuedEvent(): void {
     if (this.activeEvent || this.pendingEventQueue.length === 0) return;
@@ -416,6 +523,7 @@ export class GameSimulation {
   private openEvent(id: EventId): void {
     if (this.triggeredEvents.includes(id)) return;
     const def = EVENTS[id];
+    if (!def) return;
     this.triggeredEvents.push(id);
     this.activeEvent = {
       id: def.id,
@@ -466,6 +574,14 @@ export class GameSimulation {
       this.curtailmentTimer -= 1 / 60;
       if (this.curtailmentTimer <= 0) this.curtailmentFactor = 1;
     }
+    if (this.hailHoldHours > 0) {
+      this.hailHoldHours -= 1 / 60;
+      if (this.hailHoldHours <= 0) {
+        this.hailHoldHours = 0;
+        this.weather = 'partly_cloudy';
+        this.weatherTimer = 0;
+      }
+    }
 
     this.advanceConstruction();
     this.advanceStaff(1 / 60);
@@ -492,9 +608,29 @@ export class GameSimulation {
       eq.constructionProgress = clamp(eq.constructionProgress + 0.04, 0, 1);
       if (eq.constructionProgress >= 1) {
         eq.commissioned = true;
+        this.lastCommissionId = eq.id;
         this.message = `${EQUIPMENT[eq.kind].name} commissioned.`;
+        if (isPv(eq.kind) && this.onboardingStep < 3) this.onboardingStep = 3;
       }
     }
+  }
+
+  consumeCommissionFlag(): string | null {
+    const id = this.lastCommissionId;
+    this.lastCommissionId = null;
+    return id;
+  }
+
+  consumeFaultToast(): string | null {
+    const id = this.lastFaultToastId;
+    this.lastFaultToastId = null;
+    return id;
+  }
+
+  consumeUnlockToast(): string {
+    const t = this.lastUnlockToast;
+    this.lastUnlockToast = '';
+    return t;
   }
 
   private advanceStaff(hours: number): void {
@@ -506,7 +642,6 @@ export class GameSimulation {
         const target = this.equipment.find((e) => e.id === task.targetId);
         if (target) {
           const t = Math.min(1, task.progress);
-          // Ease across the map so the player can see Tess walking.
           const ease = t * t * (3 - 2 * t);
           tech.tile = {
             x: task.from.x + (target.tile.x - task.from.x) * ease,
@@ -517,7 +652,7 @@ export class GameSimulation {
         if (task.progress >= 1 && target) {
           tech.tile = { ...target.tile };
           const intent = this.staffIntent(tech);
-          delete (tech as StaffMember & { _intent?: string })._intent;
+          delete tech.intent;
           if (intent === 'repair' && target.faulted) {
             tech.task = { type: 'repair', targetId: target.id, progress: 0 };
           } else if (intent === 'clean' || target.soiling > 0.1) {
@@ -540,7 +675,9 @@ export class GameSimulation {
             if (!this.capabilities.includes('radio_dispatch')) {
               this.capabilities.push('radio_dispatch');
               this.completeObjective('unlock_radio');
+              this.lastUnlockToast = 'radio';
               this.message = 'Radio Dispatch unlocked! Routine faults auto-assign.';
+              if (this.onboardingStep < 4) this.onboardingStep = 4;
             }
           }
           tech.task = { type: 'idle' };
@@ -557,6 +694,7 @@ export class GameSimulation {
             if (!this.capabilities.includes('cleaning_kit')) {
               this.capabilities.push('cleaning_kit');
               this.completeObjective('unlock_cleaning');
+              this.lastUnlockToast = 'cleaning';
               this.message = 'Cleaning Kit unlocked! Faster cleans, slower dust.';
             }
           }
@@ -567,7 +705,7 @@ export class GameSimulation {
   }
 
   private updateWeather(): void {
-    if (this.weather === 'hail') return;
+    if (this.hailHoldHours > 0 || this.weather === 'hail') return;
     if (this.weatherTimer < 4 + (this.day % 3)) return;
     this.weatherTimer = 0;
     const roll = Math.random();
@@ -589,14 +727,17 @@ export class GameSimulation {
   }
 
   private rollFaults(): void {
+    const monitor = this.capabilities.includes('remote_monitoring');
     if (!this.scriptedFirstFault && this.objectives.find((o) => o.id === 'first_power')?.complete) {
       const candidate = this.equipment.find((e) => isPv(e.kind) && e.commissioned && !e.faulted);
       if (candidate) {
         candidate.faulted = true;
-        candidate.condition = clamp(candidate.condition - 0.1, 0.25, 1);
+        candidate.condition = clamp(candidate.condition - (monitor ? 0.05 : 0.1), 0.25, 1);
         this.scriptedFirstFault = true;
-        this.message = `${EQUIPMENT[candidate.kind].name} faulted! Select it and dispatch Tess.`;
+        this.lastFaultToastId = candidate.id;
+        this.message = `${EQUIPMENT[candidate.kind].name} faulted! Press R or Dispatch Repair.`;
         this.activateObjective('first_repair');
+        if (this.onboardingStep < 4) this.onboardingStep = 3;
         return;
       }
     }
@@ -604,10 +745,11 @@ export class GameSimulation {
       if (!eq.commissioned || eq.faulted) continue;
       if (!isPv(eq.kind) && eq.kind !== 'inverter') continue;
       const reliability = EQUIPMENT[eq.kind].reliability;
-      const chance = (1 - reliability) * 0.08;
+      const chance = (1 - reliability) * (monitor ? 0.05 : 0.08);
       if (Math.random() < chance) {
         eq.faulted = true;
-        eq.condition = clamp(eq.condition - 0.08, 0.25, 1);
+        eq.condition = clamp(eq.condition - (monitor ? 0.04 : 0.08), 0.25, 1);
+        this.lastFaultToastId = eq.id;
         this.message = `${EQUIPMENT[eq.kind].name} faulted!`;
         this.activateObjective('first_repair');
       }
@@ -619,27 +761,41 @@ export class GameSimulation {
     const rate = kit ? 0.012 : 0.02;
     for (const eq of this.equipment) {
       if (!isPv(eq.kind) || !eq.commissioned) continue;
+      if (this.capabilities.includes('remote_monitoring')) {
+        // Slightly slower wear when monitored.
+        eq.condition = clamp(eq.condition + 0.0005, 0.2, 1);
+      }
       eq.soiling = clamp(eq.soiling + rate * (this.weather === 'rain' ? 0.3 : 1), 0, 1);
       if (eq.soiling > 0.35) this.activateObjective('first_clean');
     }
   }
 
   private autoDispatch(): void {
+    // Cleaning rig: auto-clear heavy soiling without travel.
+    if (this.capabilities.includes('cleaning_rig')) {
+      for (const eq of this.equipment) {
+        if (isPv(eq.kind) && eq.commissioned && eq.soiling > 0.6) {
+          eq.soiling = Math.max(0, eq.soiling - 0.35);
+          this.cleansCompleted += 1;
+        }
+      }
+    }
+
     if (!this.capabilities.includes('radio_dispatch')) return;
     const idle = this.staff.find((s) => s.task.type === 'idle');
     if (!idle) return;
     const fault = this.equipment.find((e) => e.faulted && e.commissioned);
     if (fault) {
       idle.task = { type: 'travel', targetId: fault.id, progress: 0, from: { ...idle.tile } };
-      (idle as StaffMember & { _intent?: string })._intent = 'repair';
+      idle.intent = 'repair';
       return;
     }
     const dirty = this.equipment
       .filter((e) => isPv(e.kind) && e.soiling > 0.55 && e.commissioned)
       .sort((a, b) => b.soiling - a.soiling)[0];
-    if (dirty) {
+    if (dirty && !this.capabilities.includes('cleaning_rig')) {
       idle.task = { type: 'travel', targetId: dirty.id, progress: 0, from: { ...idle.tile } };
-      (idle as StaffMember & { _intent?: string })._intent = 'clean';
+      idle.intent = 'clean';
     }
   }
 
@@ -648,18 +804,40 @@ export class GameSimulation {
     if (pvCount >= 2 && !this.triggeredEvents.includes('community_meeting')) {
       this.enqueueEvent('community_meeting');
     }
-    /* Delay bargain_batch until day 3 so early fault loop can be practiced. */
     if (this.day >= 3 && pvCount >= 1 && !this.triggeredEvents.includes('bargain_batch')) {
       this.enqueueEvent('bargain_batch');
     }
-    if (this.objectives.find((o) => o.id === 'first_repair')?.complete && !this.triggeredEvents.includes('grid_curtailment')) {
+    if (
+      this.objectives.find((o) => o.id === 'first_repair')?.complete &&
+      !this.triggeredEvents.includes('grid_curtailment')
+    ) {
       this.enqueueEvent('grid_curtailment');
     }
-    if (this.capabilities.includes('radio_dispatch') && this.day >= 2 && !this.triggeredEvents.includes('temp_worker')) {
+    if (
+      this.capabilities.includes('radio_dispatch') &&
+      this.day >= 2 &&
+      !this.triggeredEvents.includes('temp_worker')
+    ) {
       this.enqueueEvent('temp_worker');
+    }
+    if (
+      this.capabilities.includes('radio_dispatch') &&
+      this.capabilities.includes('cleaning_kit') &&
+      !this.triggeredEvents.includes('capability_choice') &&
+      !this.pendingCapabilityChoice
+    ) {
+      this.pendingCapabilityChoice = true;
+      this.activateObjective('choose_improve');
+      this.enqueueEvent('capability_choice', 2);
     }
     if (this.plots.find((p) => p.id === 'site_b')?.unlocked && !this.triggeredEvents.includes('insurance_upsell')) {
       this.enqueueEvent('insurance_upsell');
+    }
+    if (
+      this.equipment.some((e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned) &&
+      !this.triggeredEvents.includes('growing_pains')
+    ) {
+      this.enqueueEvent('growing_pains');
     }
     if (this.day >= 3 && this.lifetimeRevenue > 8000 && !this.triggeredEvents.includes('influencer_visit')) {
       this.enqueueEvent('influencer_visit');
@@ -676,8 +854,11 @@ export class GameSimulation {
 
   private updateObjectivesAndStars(): void {
     const { exportedKw } = this.computePower();
-    const pvCount = this.equipment.filter((e) => isPv(e.kind) && e.commissioned).length;
-    if (exportedKw > 1 && pvCount > 0) this.completeObjective('first_power');
+    const playerPv = this.equipment.filter((e) => isPv(e.kind) && e.commissioned && this.playerPlacedPv);
+    if (exportedKw > 1 && playerPv.length > 0) {
+      this.completeObjective('first_power');
+      if (this.onboardingStep < 3) this.onboardingStep = 3;
+    }
 
     const bargain = this.equipment.filter((e) => e.kind === 'bargain_pv').length;
     const premium = this.equipment.filter((e) => e.kind === 'premium_pv').length;
@@ -690,7 +871,8 @@ export class GameSimulation {
       const siteB = this.plots.find((p) => p.id === 'site_b');
       if (siteB && !siteB.unlocked) {
         siteB.unlocked = true;
-        this.message = 'Site B unlocked along the river bench!';
+        this.message =
+          'Site B unlocked — River Bench has weaker sun and a congested grid spur. Expand carefully!';
         this.activateObjective('expand_site_b');
       }
     }
@@ -728,7 +910,6 @@ export class GameSimulation {
       this.stars = Math.max(this.stars, 3) as 0 | 1 | 2 | 3;
     }
 
-    // Keep next incomplete objective active
     for (const obj of this.objectives) {
       if (!obj.complete) {
         obj.active = true;
@@ -786,6 +967,9 @@ export class GameSimulation {
       faultsRepaired: this.faultsRepaired,
       cleansCompleted: this.cleansCompleted,
       scenarioComplete: this.scenarioComplete,
+      onboardingStep: this.onboardingStep,
+      pendingCapabilityChoice: this.pendingCapabilityChoice,
+      bargainDiscountCharges: this.bargainDiscountCharges,
     };
   }
 
@@ -807,12 +991,15 @@ export class GameSimulation {
       nextEntityId: this.nextEntityId,
       triggeredEvents: this.triggeredEvents,
       pendingEventQueue: this.pendingEventQueue,
+      eventDelays: { ...this.eventDelays },
+      eventClock: this.eventClock,
       activeEvent: this.activeEvent,
       selectedId: this.selectedId,
       buildMode: this.buildMode,
       message: this.message,
       hailPrepared: this.hailPrepared,
       hailSurvived: this.hailSurvived,
+      hailHoldHours: this.hailHoldHours,
       totalEnergyKwh: this.totalEnergyKwh,
       faultsRepaired: this.faultsRepaired,
       cleansCompleted: this.cleansCompleted,
@@ -824,14 +1011,68 @@ export class GameSimulation {
       lifetimeRevenue: this.lifetimeRevenue,
       peakExportKw: this.peakExportKw,
       scriptedFirstFault: this.scriptedFirstFault,
+      curtailmentFactor: this.curtailmentFactor,
+      curtailmentTimer: this.curtailmentTimer,
+      onboardingStep: this.onboardingStep,
+      pendingCapabilityChoice: this.pendingCapabilityChoice,
+      bargainDiscountCharges: this.bargainDiscountCharges,
+      playerPlacedPv: this.playerPlacedPv,
     };
   }
 
   load(data: SerializedGameState): void {
-    Object.assign(this, data);
-    this.lifetimeRevenue = data.lifetimeRevenue ?? this.lifetimeRevenue;
-    this.peakExportKw = data.peakExportKw ?? this.peakExportKw;
+    this.cash = data.cash;
+    this.day = data.day;
+    this.hour = data.hour;
+    this.speed = data.speed;
+    this.weather = data.weather;
+    this.weatherTimer = data.weatherTimer ?? 0;
+    this.tariffPerKwh = data.tariffPerKwh;
+    this.plots = (data.plots ?? createInitialPlots()).map((p) => ({
+      ...p,
+      exportFactor: p.exportFactor ?? (p.id === 'site_b' ? 0.78 : 1),
+    }));
+    this.equipment = data.equipment ?? [];
+    this.staff = (data.staff ?? []).map((s) => ({ ...s, intent: s.intent }));
+    this.capabilities = data.capabilities ?? [];
+    // Merge objectives so new IDs appear after upgrades.
+    const fresh = createInitialObjectives();
+    const loaded = data.objectives ?? [];
+    this.objectives = fresh.map((f) => {
+      const old = loaded.find((o) => o.id === f.id);
+      return old ? { ...f, complete: old.complete, active: old.active } : f;
+    });
+    this.stars = data.stars ?? 0;
+    this.nextEntityId = data.nextEntityId ?? 1;
+    this.triggeredEvents = data.triggeredEvents ?? [];
+    this.pendingEventQueue = data.pendingEventQueue ?? [];
+    this.eventDelays = data.eventDelays ?? {};
+    this.eventClock = data.eventClock ?? 0;
+    this.activeEvent = data.activeEvent ?? null;
+    this.selectedId = data.selectedId ?? null;
+    this.buildMode = null;
+    this.message = data.message ?? 'Game loaded.';
+    this.hailPrepared = data.hailPrepared ?? false;
+    this.hailSurvived = data.hailSurvived ?? false;
+    this.hailHoldHours = data.hailHoldHours ?? 0;
+    this.totalEnergyKwh = data.totalEnergyKwh ?? 0;
+    this.faultsRepaired = data.faultsRepaired ?? 0;
+    this.cleansCompleted = data.cleansCompleted ?? 0;
+    this.scenarioComplete = data.scenarioComplete ?? false;
+    this.tickAccumulator = data.tickAccumulator ?? 0;
+    this.nextFaultCheck = data.nextFaultCheck ?? 8;
+    this.nextSoilTick = data.nextSoilTick ?? 5;
+    this.revenuePerHour = data.revenuePerHour ?? 0;
+    this.lifetimeRevenue = data.lifetimeRevenue ?? 0;
+    this.peakExportKw = data.peakExportKw ?? 0;
     this.scriptedFirstFault = data.scriptedFirstFault ?? false;
+    this.curtailmentFactor = data.curtailmentFactor ?? 1;
+    this.curtailmentTimer = data.curtailmentTimer ?? 0;
+    this.onboardingStep = data.onboardingStep ?? 4;
+    this.pendingCapabilityChoice = data.pendingCapabilityChoice ?? false;
+    this.bargainDiscountCharges = data.bargainDiscountCharges ?? 0;
+    this.playerPlacedPv =
+      data.playerPlacedPv ?? this.equipment.some((e) => isPv(e.kind));
   }
 }
 

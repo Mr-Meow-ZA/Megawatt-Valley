@@ -2,7 +2,7 @@
 
 ## Status
 
-**PRIMARY DIRECTION — Phaser Level 1 in active autonomous build — 29 September 2026**
+**PRIMARY DIRECTION — Phaser Level 1 steam-finish pass — 30 September 2026**
 
 Megawatt Valley is an **AI-autonomous Phaser / TypeScript production project**.
 
@@ -22,16 +22,16 @@ Build and release:
 
 Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION_PLAN.md`.
 
-## Progress (branch `cursor/phaser-level1-build-5938`, PR #7)
+## Progress (branch `cursor/level1-steam-finish-5938`)
 
 | Milestone | Status |
 |-----------|--------|
 | M0 Rebaseline (Phaser+Vite+TS) | Done |
-| M1 Visual proof + HUD/build | Kenney + procedural polish through Loops 1–11; quality scorecard target ≥9.5/10 |
+| M1 Visual proof + HUD/build | Done (Loops 1–21 visual polish) |
 | M2 Core solar loop | Done |
 | M3 Ops / staff / automation | Done (fault→Radio Dispatch, soiling→Cleaning Kit) |
-| M4 Full Level 1 scenario | In progress (objectives, events, stars, hail; automated 1★ smoke passes) |
-| M5–M6 Polish / deploy | Not started |
+| M4 Full Level 1 scenario | Done (objectives, Site B constraint, events, hail weather, capability fork, Growing Pains, 1★/2★/3★, save v2 + resume) |
+| M5–M6 Polish / deploy | In progress (title/onboarding/SFX/CI/Vercel config; live URL pending connect) |
 
 ## How to run
 
@@ -40,7 +40,10 @@ npm install
 npm run dev      # http://localhost:5173
 npm test
 npm run build
+npm run preview  # production static build
 ```
+
+Title screen → Start / Continue. Esc or Cancel exits placement. R repairs, C cleans (no selection required). Mute in footer. Autosave ~45s.
 
 ## Product owner involvement
 

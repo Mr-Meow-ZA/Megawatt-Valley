@@ -110,6 +110,40 @@ export const EVENTS: Record<EventId, EventDef> = {
       },
     ],
   },
+  capability_choice: {
+    id: 'capability_choice',
+    title: 'Choose What to Improve',
+    body: 'The ops budget covers one lasting upgrade. Monitoring spots faults earlier; a cleaning rig eats dust for breakfast.',
+    choices: [
+      {
+        id: 'monitor',
+        label: 'Remote Monitoring (−$5,000)',
+        description: 'Faults hurt less; condition drains slower.',
+      },
+      {
+        id: 'rig',
+        label: 'Cleaning Rig (−$5,000)',
+        description: 'Auto-cleans heavily soiled arrays.',
+      },
+    ],
+  },
+  growing_pains: {
+    id: 'growing_pains',
+    title: 'Growing Pains',
+    body: 'Site B is online and the work queue is stacking. Tess cannot be everywhere.',
+    choices: [
+      {
+        id: 'hire',
+        label: 'Hire Pat Amp (−$8,000)',
+        description: 'Add a second technician permanently.',
+      },
+      {
+        id: 'stretch',
+        label: 'Stretch the roster',
+        description: 'Keep one tech. Expect longer queues.',
+      },
+    ],
+  },
   hail_warning: {
     id: 'hail_warning',
     title: 'Severe Weather Warning',

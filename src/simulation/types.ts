@@ -12,7 +12,11 @@ export type StaffTask =
   | { type: 'repair'; targetId: string; progress: number }
   | { type: 'clean'; targetId: string; progress: number };
 
-export type CapabilityId = 'radio_dispatch' | 'cleaning_kit';
+export type CapabilityId =
+  | 'radio_dispatch'
+  | 'cleaning_kit'
+  | 'remote_monitoring'
+  | 'cleaning_rig';
 
 export type ObjectiveId =
   | 'first_power'
@@ -21,6 +25,7 @@ export type ObjectiveId =
   | 'unlock_radio'
   | 'first_clean'
   | 'unlock_cleaning'
+  | 'choose_improve'
   | 'unlock_site_b'
   | 'expand_site_b'
   | 'survive_hail'
@@ -35,6 +40,8 @@ export type EventId =
   | 'temp_worker'
   | 'insurance_upsell'
   | 'influencer_visit'
+  | 'capability_choice'
+  | 'growing_pains'
   | 'hail_warning'
   | 'hail_climax';
 
@@ -78,6 +85,8 @@ export interface StaffMember {
   plotId: PlotId;
   tile: Vec2;
   task: StaffTask;
+  /** Transient travel intent — also persisted for save safety. */
+  intent?: 'clean' | 'repair';
 }
 
 export interface PlotState {
@@ -89,6 +98,8 @@ export interface PlotState {
   /** Irradiance multiplier. */
   solarResource: number;
   gridConnected: boolean;
+  /** Export capacity multiplier (Site B weaker grid). */
+  exportFactor: number;
 }
 
 export interface ObjectiveState {
@@ -140,6 +151,9 @@ export interface GameSnapshot {
   faultsRepaired: number;
   cleansCompleted: number;
   scenarioComplete: boolean;
+  onboardingStep: number;
+  pendingCapabilityChoice: boolean;
+  bargainDiscountCharges: number;
 }
 
 export interface SaveData {
@@ -165,12 +179,15 @@ export interface SerializedGameState {
   nextEntityId: number;
   triggeredEvents: EventId[];
   pendingEventQueue: EventId[];
+  eventDelays: Partial<Record<EventId, number>>;
+  eventClock: number;
   activeEvent: ActiveEvent | null;
   selectedId: string | null;
   buildMode: EquipmentKind | null;
   message: string | null;
   hailPrepared: boolean;
   hailSurvived: boolean;
+  hailHoldHours: number;
   totalEnergyKwh: number;
   faultsRepaired: number;
   cleansCompleted: number;
@@ -182,4 +199,10 @@ export interface SerializedGameState {
   lifetimeRevenue: number;
   peakExportKw: number;
   scriptedFirstFault: boolean;
+  curtailmentFactor: number;
+  curtailmentTimer: number;
+  onboardingStep: number;
+  pendingCapabilityChoice: boolean;
+  bargainDiscountCharges: number;
+  playerPlacedPv: boolean;
 }

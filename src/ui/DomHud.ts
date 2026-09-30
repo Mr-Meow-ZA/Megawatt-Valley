@@ -1,14 +1,29 @@
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
-import { CAPABILITY_INFO } from '../content/scenario';
+import { CAPABILITY_INFO, ONBOARDING_STEPS } from '../content/scenario';
+import { initAudio, isMuted, playSfx, toggleMute } from '../audio/Sfx';
 import type { GameSimulation } from '../simulation/GameSimulation';
 import type { EquipmentKind, GameSnapshot } from '../simulation/types';
-import { clearSave, loadGame, saveGame } from '../persistence/save';
+import { clearSave, getSaveMeta, hasSave, loadGame, saveGame } from '../persistence/save';
 
 function money(n: number): string {
   return `$${Math.round(n).toLocaleString('en-US')}`;
 }
 
-function weatherLabel(w: GameSnapshot['weather']): string {
+function weatherLabel(w: GameSnapshot['weather'], irradiance: number): string {
+  if (irradiance < 0.05) {
+    switch (w) {
+      case 'clear':
+        return 'Clear night';
+      case 'partly_cloudy':
+        return 'Cloudy night';
+      case 'overcast':
+        return 'Overcast night';
+      case 'rain':
+        return 'Rainy night';
+      case 'hail':
+        return 'Stormy night';
+    }
+  }
   switch (w) {
     case 'clear':
       return 'Sunny';
@@ -39,10 +54,9 @@ function weatherIconClass(w: GameSnapshot['weather'], irradiance: number): strin
   }
 }
 
-/** Weather chip sub-label — never show nonsense like "-100% sun" when weather is Sunny. */
+/** Weather chip sub-label — never "Sunny" + "Night"; night is folded into weather-val. */
 function weatherModLabel(weather: GameSnapshot['weather'], irradiance: number): string {
-  // Combined irradiance includes daylight; near-zero means night regardless of sky label.
-  if (irradiance < 0.05) return 'Night';
+  if (irradiance < 0.05) return 'No generation';
 
   const weatherSun: Record<GameSnapshot['weather'], number> = {
     clear: 100,
@@ -56,7 +70,6 @@ function weatherModLabel(weather: GameSnapshot['weather'], irradiance: number): 
 
   if (weather === 'clear' && irradiance >= 0.95) return 'Peak sun';
   if (weather === 'clear') return `${now}% sun`;
-  // Cloudy / rain: show sky quality, not a negative delta from 100%.
   if (now >= sky - 5) return `${sky}% sun`;
   return `${now}% sun`;
 }
@@ -70,6 +83,22 @@ function clock(hour: number): string {
 function seasonForDay(day: number): string {
   const s = ['Spring', 'Summer', 'Autumn', 'Winter'];
   return s[Math.floor(((day - 1) % 120) / 30)];
+}
+
+function starWinTitle(stars: number): string {
+  if (stars >= 3) return '3★ Valley Pro!';
+  if (stars >= 2) return '2★ Strong Operator!';
+  return '1★ Complete!';
+}
+
+function starWinBody(stars: number): string {
+  if (stars >= 3) {
+    return 'Full mastery — Here Comes the Sun cleared at the highest tier. Keep tinkering in the sandbox.';
+  }
+  if (stars >= 2) {
+    return 'Strong Operator — scenario mastery unlocked. Push for 3★ Valley Pro.';
+  }
+  return 'Here Comes the Sun — scenario cleared. Keep playing for 2★ / 3★ mastery.';
 }
 
 const BUILD_ICONS: Record<string, string> = {
@@ -93,7 +122,11 @@ const BUILD_ICONS: Record<string, string> = {
 };
 
 export class DomHud {
+  /** When true, the next DomHud construct skips the title (New Game flow). */
+  private static skipTitleOnce = false;
+
   private root: HTMLElement;
+  private showTitle: boolean;
   private lastEventId: string | null = null;
   private lastObjectivesKey = '__uninit__';
   private lastBuildKey = '__uninit__';
@@ -101,6 +134,8 @@ export class DomHud {
   private lastSelectionKey = '__uninit__';
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
+  private lastCoachStep = -1;
+  private lastSiteBUnlocked: boolean | null = null;
   private toastClearAt = 0;
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'all';
   private minimapCtx: CanvasRenderingContext2D | null = null;
@@ -112,14 +147,19 @@ export class DomHud {
   private powerFloatAmount = 0;
   private lastStars = 0;
   private readonly completedObjectiveIds = new Set<string>();
+  private audioPrimed = false;
 
   constructor(
     private readonly sim: GameSimulation,
     private readonly onNewGame: () => void,
+    private readonly onHudReset?: () => void,
   ) {
     const el = document.getElementById('ui-root');
     if (!el) throw new Error('#ui-root missing');
     this.root = el;
+    this.showTitle = !DomHud.skipTitleOnce;
+    DomHud.skipTitleOnce = false;
+
     this.root.innerHTML = `
       <header class="hud-top">
         <div class="brand-block">
@@ -149,6 +189,7 @@ export class DomHud {
           <div class="chip-power">
             <span class="chip-label">Power output</span>
             <strong data-k="power-val">—</strong>
+            <em data-k="power-gen" hidden></em>
             <div class="bar"><i data-k="power-bar"></i></div>
           </div>
           <span class="power-float" data-k="power-float" hidden></span>
@@ -189,7 +230,7 @@ export class DomHud {
       <aside class="panel minimap-panel">
         <h2>Valley map</h2>
         <canvas data-k="minimap" width="220" height="120"></canvas>
-        <div class="minimap-legend">
+        <div class="minimap-legend" data-k="minimap-legend">
           <span><i class="swatch grass"></i>Terrain</span>
           <span><i class="swatch solar"></i>Solar</span>
           <span><i class="swatch grid"></i>Grid</span>
@@ -222,6 +263,17 @@ export class DomHud {
       </aside>
       </div>
 
+      <div class="coach" data-k="coach" hidden>
+        <div class="coach-card">
+          <h3 data-k="coach-title"></h3>
+          <p data-k="coach-body"></p>
+          <div class="coach-actions">
+            <button type="button" class="ghost" data-action="coach-skip">Skip</button>
+            <button type="button" data-action="coach-next">Next</button>
+          </div>
+        </div>
+      </div>
+
       <div class="toast" data-k="toast" hidden></div>
       <div class="build-banner" data-k="build-banner" hidden>
         <strong data-k="build-banner-label">Placing…</strong>
@@ -232,7 +284,8 @@ export class DomHud {
         <button type="button" data-action="save">Save</button>
         <button type="button" data-action="load">Load</button>
         <button type="button" data-action="new">New Game</button>
-        <span class="hint">Drag pan · Wheel zoom · 1/2 events · R repair · C clean</span>
+        <button type="button" class="mute-btn" data-action="mute" data-k="mute">Mute</button>
+        <span class="hint">Drag pan · Wheel zoom · Esc cancel · 1/2/3 events · R repair · C clean</span>
       </footer>
 
       <div class="modal" data-k="modal" hidden>
@@ -245,9 +298,19 @@ export class DomHud {
 
       <div class="win" data-k="win" hidden>
         <div class="modal-card">
-          <h2>1★ Complete!</h2>
-          <p>Here Comes the Sun — scenario cleared. Keep playing for 2★ / 3★ mastery.</p>
+          <h2 data-k="win-title">1★ Complete!</h2>
+          <p data-k="win-body">Here Comes the Sun — scenario cleared. Keep playing for 2★ / 3★ mastery.</p>
           <button type="button" data-action="dismiss-win">Continue</button>
+        </div>
+      </div>
+
+      <div class="title-screen" data-k="title" hidden>
+        <div class="title-card">
+          <div class="title-brand">Megawatt Valley</div>
+          <h1>Here Comes the Sun</h1>
+          <p class="title-blurb">Grow a tiny solar company on Site A. Export power, hire help, survive hail — earn your stars.</p>
+          <div class="title-actions" data-k="title-actions"></div>
+          <p class="title-meta" data-k="title-meta"></p>
         </div>
       </div>
     `;
@@ -255,7 +318,14 @@ export class DomHud {
     const canvas = this.root.querySelector('[data-k="minimap"]') as HTMLCanvasElement;
     this.minimapCtx = canvas.getContext('2d');
 
+    const primeAudio = () => {
+      if (this.audioPrimed) return;
+      this.audioPrimed = true;
+      initAudio();
+    };
+
     const handleUiAction = (ev: Event) => {
+      primeAudio();
       const t = (ev.target as HTMLElement).closest(
         '[data-speed],[data-build],[data-action],[data-cat]',
       ) as HTMLElement | null;
@@ -274,64 +344,213 @@ export class DomHud {
       const speed = t.getAttribute('data-speed');
       if (speed) {
         this.sim.setSpeed(Number(speed) as 0 | 1 | 2 | 4);
+        playSfx('click');
         return;
       }
       const build = t.getAttribute('data-build') as EquipmentKind | null;
       if (build) {
         this.sim.setBuildMode(build);
+        playSfx('click');
         return;
       }
       const action = t.getAttribute('data-action');
-      if (action === 'cancel-build') this.sim.setBuildMode(null);
+      if (action === 'cancel-build') {
+        this.sim.setBuildMode(null);
+        playSfx('click');
+      }
       if (action === 'save') {
         saveGame(this.sim.serialize());
+        playSfx('save');
         this.sim.message = 'Game saved.';
       }
       if (action === 'load') {
-        const data = loadGame();
-        if (data) {
-          this.sim.load(data);
-          this.sim.message = 'Game loaded.';
-        } else {
-          this.sim.message = 'No save found.';
-        }
+        this.applyLoad();
       }
       if (action === 'new') {
-        clearSave();
-        this.onNewGame();
+        this.beginNewGame();
+      }
+      if (action === 'mute') {
+        toggleMute();
+        this.syncMuteButton();
+        playSfx('click');
       }
       if (action === 'repair') {
         const id = t.getAttribute('data-id');
-        if (id) this.sim.dispatchRepair(id);
+        this.sim.dispatchRepair(id);
+        playSfx('repair');
       }
       if (action === 'clean') {
         const id = t.getAttribute('data-id');
-        if (id) this.sim.dispatchClean(id);
+        this.sim.dispatchClean(id);
+        playSfx('clean');
       }
       if (action === 'event-choice') {
         const id = t.getAttribute('data-id');
         if (id) this.sim.resolveEventChoice(id);
+        playSfx('click');
       }
       if (action === 'dismiss-win') {
         const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
         win.hidden = true;
+        playSfx('click');
+      }
+      if (action === 'coach-next') {
+        this.sim.advanceOnboarding();
+        playSfx('click');
+      }
+      if (action === 'coach-skip') {
+        this.sim.dismissOnboarding();
+        playSfx('click');
+      }
+      if (action === 'title-continue') {
+        this.applyLoadFromTitle();
+      }
+      if (action === 'title-new') {
+        this.beginNewGame();
       }
     };
     this.root.addEventListener('pointerdown', handleUiAction);
     this.root.addEventListener('click', handleUiAction);
 
     window.addEventListener('keydown', (ev) => {
+      primeAudio();
       if (ev.key === 'Escape' && this.sim.snapshot().buildMode) {
         this.sim.setBuildMode(null);
+        playSfx('click');
+        return;
+      }
+      const key = ev.key.toLowerCase();
+      if (key === 'r') {
+        this.sim.dispatchRepair();
+        playSfx('repair');
+        return;
+      }
+      if (key === 'c') {
+        this.sim.dispatchClean();
+        playSfx('clean');
         return;
       }
       if (!this.sim.activeEvent) return;
       if (ev.key === '1' || ev.key === '2' || ev.key === '3') {
         const idx = Number(ev.key) - 1;
         const choice = this.sim.activeEvent.choices[idx];
-        if (choice) this.sim.resolveEventChoice(choice.id);
+        if (choice) {
+          this.sim.resolveEventChoice(choice.id);
+          playSfx('click');
+        }
       }
     });
+
+    this.syncMuteButton();
+    this.refreshTitleActions();
+    if (this.showTitle) this.showTitleScreen();
+    else this.hideTitleScreen();
+  }
+
+  showTitleScreen(): void {
+    this.showTitle = true;
+    const title = this.root.querySelector('[data-k="title"]') as HTMLElement;
+    title.hidden = false;
+    this.refreshTitleActions();
+  }
+
+  hideTitleScreen(): void {
+    this.showTitle = false;
+    const title = this.root.querySelector('[data-k="title"]') as HTMLElement;
+    title.hidden = true;
+  }
+
+  isTitleVisible(): boolean {
+    return this.showTitle;
+  }
+
+  /** Reset internal HUD caches after load / world rebuild (callable from GameScene). */
+  resetCaches(): void {
+    this.lastObjectivesKey = '__uninit__';
+    this.completedObjectiveIds.clear();
+    this.lastEventId = null;
+    const win = this.root.querySelector('[data-k="win"]') as HTMLElement | null;
+    if (win) {
+      win.hidden = true;
+      delete win.dataset.shown;
+    }
+    this.lastStars = 0;
+    this.lastCash = -1;
+    this.lastExportedKw = -1;
+    this.lastCapsKey = '__uninit__';
+    this.lastBuildKey = '__uninit__';
+    this.lastSelectionKey = '__uninit__';
+    this.lastSelectionActionsKey = '__uninit__';
+    this.lastMessage = '__uninit__';
+    this.lastCoachStep = -1;
+    this.lastSiteBUnlocked = null;
+    this.toastClearAt = 0;
+    this.cashFloatUntil = 0;
+    this.powerFloatUntil = 0;
+  }
+
+  private beginNewGame(): void {
+    clearSave();
+    DomHud.skipTitleOnce = true;
+    this.hideTitleScreen();
+    this.onNewGame();
+    // Fresh DomHud from onNewGame starts with onboardingStep 0 and skipTitleOnce.
+  }
+
+  private applyLoad(): void {
+    const data = loadGame();
+    if (!data) {
+      this.sim.message = 'No save found.';
+      playSfx('error');
+      return;
+    }
+    this.sim.load(data);
+    this.resetCaches();
+    this.hideTitleScreen();
+    this.onHudReset?.();
+    playSfx('save');
+    this.sim.message = 'Game loaded.';
+  }
+
+  private applyLoadFromTitle(): void {
+    const data = loadGame();
+    if (!data) {
+      this.sim.message = 'No save found.';
+      playSfx('error');
+      return;
+    }
+    this.sim.load(data);
+    this.resetCaches();
+    this.hideTitleScreen();
+    this.onHudReset?.();
+    playSfx('save');
+    this.sim.message = 'Welcome back — save loaded.';
+  }
+
+  private refreshTitleActions(): void {
+    const actions = this.root.querySelector('[data-k="title-actions"]') as HTMLElement | null;
+    const meta = this.root.querySelector('[data-k="title-meta"]') as HTMLElement | null;
+    if (!actions) return;
+    const saved = hasSave();
+    const saveMeta = getSaveMeta();
+    let html = '';
+    if (saved) {
+      html += `<button type="button" data-action="title-continue">Continue</button>`;
+    }
+    html += `<button type="button" data-action="title-new">${saved ? 'New Game' : 'Start'}</button>`;
+    actions.innerHTML = html;
+    if (meta) {
+      meta.textContent = saveMeta
+        ? `Save from ${new Date(saveMeta.savedAt).toLocaleString()}`
+        : 'A solar management slice — Level 1';
+    }
+  }
+
+  private syncMuteButton(): void {
+    const btn = this.root.querySelector('[data-k="mute"]') as HTMLElement | null;
+    if (!btn) return;
+    btn.textContent = isMuted() ? 'Unmute' : 'Mute';
+    btn.classList.toggle('muted-on', isMuted());
   }
 
   private drawMinimap(snapshot: GameSnapshot): void {
@@ -343,7 +562,6 @@ export class DomHud {
     const sy = (ty: number) => 6 + ty * 3.5;
     ctx.clearRect(0, 0, w, h);
 
-    // Valley backdrop
     const grad = ctx.createLinearGradient(0, 0, 0, h);
     grad.addColorStop(0, '#7ec4ef');
     grad.addColorStop(0.28, '#6db848');
@@ -351,7 +569,6 @@ export class DomHud {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Soft meadow patches
     ctx.fillStyle = 'rgba(90, 170, 55, 0.35)';
     ctx.beginPath();
     ctx.ellipse(55, 48, 42, 28, 0, 0, Math.PI * 2);
@@ -360,7 +577,6 @@ export class DomHud {
     ctx.ellipse(155, 62, 48, 30, 0.1, 0, Math.PI * 2);
     ctx.fill();
 
-    // Meandering river (sine)
     ctx.beginPath();
     for (let y = 0; y <= h; y += 2) {
       const t = y / h;
@@ -377,18 +593,16 @@ export class DomHud {
     ctx.strokeStyle = '#4aade0';
     ctx.lineWidth = 5;
     ctx.stroke();
-    // Foam highlight
     ctx.strokeStyle = 'rgba(190, 230, 255, 0.45)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Road network (matches WorldView isMainRoad corridors)
     const roads: Array<[number, number, number, number]> = [
-      [3, 6, 34, 6], // main E–W
-      [11, 6, 11, 16], // site A spur
+      [3, 6, 34, 6],
+      [11, 6, 11, 16],
       [15, 6, 15, 12],
       [11, 12, 15, 12],
-      [21, 8, 32, 8], // site B
+      [21, 8, 32, 8],
       [26, 8, 26, 14],
     ];
     ctx.strokeStyle = '#4a4e56';
@@ -411,7 +625,6 @@ export class DomHud {
     }
     ctx.setLineDash([]);
 
-    // Plots
     for (const plot of snapshot.plots) {
       const px = sx(plot.origin.x);
       const py = sy(plot.origin.y);
@@ -423,7 +636,6 @@ export class DomHud {
       ctx.strokeRect(px, py, pw, ph);
     }
 
-    // Staff dots
     for (const member of snapshot.staff) {
       const px = sx(member.tile.x);
       const py = sy(member.tile.y);
@@ -436,7 +648,6 @@ export class DomHud {
       ctx.stroke();
     }
 
-    // Equipment dots
     for (const eq of snapshot.equipment) {
       const px = sx(eq.tile.x);
       const py = sy(eq.tile.y);
@@ -489,7 +700,20 @@ export class DomHud {
     const cheapestBuild = Math.min(...BUILD_MENU_ORDER.map((id) => EQUIPMENT[id].cost));
     const cashChip = this.root.querySelector('[data-k="cash-chip"]') as HTMLElement | null;
     cashChip?.classList.toggle('cash-low', snapshot.cash < cheapestBuild);
+
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
+    const powerGen = this.root.querySelector('[data-k="power-gen"]') as HTMLElement | null;
+    const genGap = Math.abs(snapshot.powerKw - snapshot.exportedKw);
+    if (powerGen) {
+      if (genGap >= 0.4) {
+        powerGen.hidden = false;
+        powerGen.textContent = `gen ${snapshot.powerKw.toFixed(1)} kW`;
+      } else {
+        powerGen.hidden = true;
+        powerGen.textContent = '';
+      }
+    }
+
     const powerFloat = this.root.querySelector('[data-k="power-float"]') as HTMLElement;
     const powerChip = this.root.querySelector('[data-k="power-chip"]') as HTMLElement | null;
     if (this.lastExportedKw >= 0 && snapshot.exportedKw > this.lastExportedKw + 0.2) {
@@ -517,8 +741,7 @@ export class DomHud {
 
     const weatherEl = this.root.querySelector('[data-k="weather-icon"]') as HTMLElement;
     weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather, snapshot.irradiance)}`;
-    setText('weather-val', weatherLabel(snapshot.weather));
-    // Irradiance folds in hour-of-day — don't show "-100% sun" at night while weather says Sunny.
+    setText('weather-val', weatherLabel(snapshot.weather, snapshot.irradiance));
     setText('weather-mod', weatherModLabel(snapshot.weather, snapshot.irradiance));
 
     setText('time-val', `Day ${snapshot.day}, ${seasonForDay(snapshot.day)}, Year 1`);
@@ -532,6 +755,7 @@ export class DomHud {
         stars.classList.remove('stars-fill-pop');
         void stars.offsetWidth;
         stars.classList.add('stars-fill-pop');
+        playSfx('star');
       }
     }
     this.lastStars = snapshot.stars;
@@ -541,29 +765,73 @@ export class DomHud {
       b.classList.toggle('active', Number(b.getAttribute('data-speed')) === snapshot.speed);
     });
 
-    const activeObjs = snapshot.objectives.filter((o) => o.active || o.complete);
-    const doneCount = activeObjs.filter((o) => o.complete).length;
-    const objectivesKey = `${doneCount}/${activeObjs.length}|` + activeObjs.map((o) => `${o.id}:${o.complete}:${o.active}`).join('|');
+    // Onboarding coach
+    const coach = this.root.querySelector('[data-k="coach"]') as HTMLElement;
+    const step = snapshot.onboardingStep;
+    if (!this.showTitle && step >= 0 && step < ONBOARDING_STEPS.length) {
+      coach.hidden = false;
+      if (step !== this.lastCoachStep) {
+        this.lastCoachStep = step;
+        const def = ONBOARDING_STEPS[step];
+        setText('coach-title', def.title);
+        setText('coach-body', def.body);
+        const nextBtn = this.root.querySelector('[data-action="coach-next"]') as HTMLElement | null;
+        if (nextBtn) {
+          nextBtn.textContent = step >= ONBOARDING_STEPS.length - 1 ? 'Got it' : 'Next';
+        }
+      }
+    } else {
+      coach.hidden = true;
+      this.lastCoachStep = -1;
+    }
+
+    // Objectives — incomplete first, then recent complete; count = completed / total
+    const totalObjectives = snapshot.objectives.length;
+    const completedCount = snapshot.objectives.filter((o) => o.complete).length;
+    const incompleteActive = snapshot.objectives.filter((o) => !o.complete && o.active);
+    const incompleteInactive = snapshot.objectives.filter((o) => !o.complete && !o.active);
+    const completeRecent = snapshot.objectives.filter((o) => o.complete);
+    const ordered = [...incompleteActive, ...incompleteInactive, ...completeRecent].slice(0, 6);
+    const objectivesKey =
+      `${completedCount}/${totalObjectives}|` +
+      ordered.map((o) => `${o.id}:${o.complete}:${o.active}`).join('|');
     if (objectivesKey !== this.lastObjectivesKey) {
-      const newlyDone = activeObjs.filter((o) => o.complete && !this.completedObjectiveIds.has(o.id));
+      const newlyDone = ordered.filter((o) => o.complete && !this.completedObjectiveIds.has(o.id));
       this.lastObjectivesKey = objectivesKey;
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
-      const progressPct = activeObjs.length ? Math.round((doneCount / activeObjs.length) * 100) : 0;
+      const progressPct = totalObjectives ? Math.round((completedCount / totalObjectives) * 100) : 0;
       objList.innerHTML =
-        `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${doneCount}/${activeObjs.length} complete</span></li>` +
-        activeObjs
-          .slice(0, 6)
+        `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${completedCount}/${totalObjectives} complete</span></li>` +
+        ordered
           .map((o) => {
             const mark = o.complete ? '✓' : '○';
             const pulse = o.complete && newlyDone.some((n) => n.id === o.id) ? ' check-pulse' : '';
-            return `<li class="${o.complete ? 'done' : 'active'}">
+            const cls = o.complete ? 'done' : o.active ? 'active' : 'pending';
+            return `<li class="${cls}">
             <span class="check${pulse}">${mark}</span>
             <div><strong>${o.title}</strong><span>${o.description}</span></div>
           </li>`;
           })
           .join('');
-      for (const o of activeObjs) {
+      for (const o of snapshot.objectives) {
         if (o.complete) this.completedObjectiveIds.add(o.id);
+      }
+    }
+
+    // Site B badge on minimap legend
+    const siteB = snapshot.plots.find((p) => p.id === 'site_b');
+    const siteBUnlocked = !!siteB?.unlocked;
+    if (siteBUnlocked !== this.lastSiteBUnlocked) {
+      this.lastSiteBUnlocked = siteBUnlocked;
+      const legend = this.root.querySelector('[data-k="minimap-legend"]') as HTMLElement;
+      const existing = legend.querySelector('.site-b-badge');
+      if (siteBUnlocked && !existing) {
+        const badge = document.createElement('span');
+        badge.className = 'site-b-badge';
+        badge.innerHTML = `<i class="swatch site-b"></i>Site B open`;
+        legend.appendChild(badge);
+      } else if (!siteBUnlocked && existing) {
+        existing.remove();
       }
     }
 
@@ -628,6 +896,7 @@ export class DomHud {
 
     const toast = this.root.querySelector('[data-k="toast"]') as HTMLElement;
     if (snapshot.message !== this.lastMessage) {
+      const prev = this.lastMessage;
       this.lastMessage = snapshot.message;
       if (snapshot.message) {
         toast.hidden = false;
@@ -636,6 +905,9 @@ export class DomHud {
         const isSuccess =
           msg.includes('complete') || msg.includes('unlocked') || msg.includes('commissioned');
         toast.classList.toggle('toast-success', isSuccess);
+        if (msg.includes('unlocked') && prev !== snapshot.message) {
+          playSfx('unlock');
+        }
         this.toastClearAt = performance.now() + 3500;
       } else {
         toast.hidden = true;
@@ -718,6 +990,7 @@ export class DomHud {
               `<button type="button" data-action="event-choice" data-id="${c.id}"><strong>${i + 1}. ${c.label}</strong><span>${c.description}</span></button>`,
           )
           .join('');
+        playSfx('event');
       }
     } else {
       modal.hidden = true;
@@ -728,6 +1001,15 @@ export class DomHud {
     if (snapshot.scenarioComplete && snapshot.stars >= 1 && !win.dataset.shown) {
       win.hidden = false;
       win.dataset.shown = '1';
+      setText('win-title', starWinTitle(snapshot.stars));
+      setText('win-body', starWinBody(snapshot.stars));
+    } else if (win.dataset.shown && snapshot.stars > 0) {
+      // Keep win card text current if stars climb while modal still open
+      const titleEl = this.root.querySelector('[data-k="win-title"]') as HTMLElement | null;
+      if (titleEl && !win.hidden) {
+        setText('win-title', starWinTitle(snapshot.stars));
+        setText('win-body', starWinBody(snapshot.stars));
+      }
     }
 
     this.drawMinimap(snapshot);
