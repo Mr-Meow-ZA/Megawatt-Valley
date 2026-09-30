@@ -549,7 +549,17 @@ export class GameSimulation {
   }
 
   update(dtSeconds: number): void {
-    if (this.speed === 0 || this.activeEvent) {
+    // Keep construction advancing while an event modal is open so builds don't soft-lock.
+    if (this.activeEvent) {
+      this.tickAccumulator += dtSeconds * 1 * SIM_MINUTES_PER_REAL_SECOND;
+      while (this.tickAccumulator >= 1) {
+        this.tickAccumulator -= 1;
+        this.advanceConstruction();
+      }
+      this.maybeOpenQueuedEvent();
+      return;
+    }
+    if (this.speed === 0) {
       this.maybeOpenQueuedEvent();
       return;
     }

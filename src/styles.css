@@ -748,6 +748,12 @@ html, body, #app {
   box-shadow: 0 0 20px rgba(61, 220, 132, 0.25), 0 8px 24px rgba(0, 20, 10, 0.35);
 }
 
+.cancel-build-btn {
+  pointer-events: auto !important;
+  cursor: pointer;
+  z-index: 5;
+  position: relative;
+}
 .panel.build.build-mode-active [data-action="cancel-build"] {
   background: rgba(255, 93, 108, 0.22);
   border-color: var(--danger);

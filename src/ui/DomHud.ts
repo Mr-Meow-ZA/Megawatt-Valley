@@ -245,7 +245,7 @@ export class DomHud {
           <button type="button" data-cat="support">Support</button>
         </div>
         <div class="build-grid" data-k="build"></div>
-        <button type="button" class="ghost" data-action="cancel-build">Cancel placement</button>
+        <button type="button" class="ghost cancel-build-btn" data-action="cancel-build" data-k="cancel-build">Cancel placement</button>
       </aside>
 
       <aside class="panel selection" data-k="selection">
@@ -482,12 +482,10 @@ export class DomHud {
   }
 
   /** Swap simulation without recreating DOM listeners. */
-  rebindingSim(sim: GameSimulation, keepTitleHidden: boolean): void {
+  rebindingSim(sim: GameSimulation): void {
     this.sim = sim;
     this._starting = false;
     this.resetCaches();
-    if (keepTitleHidden) this.hideTitleScreen();
-    else this.showTitleScreen();
     this.refreshTitleActions();
     this.syncMuteButton();
   }
