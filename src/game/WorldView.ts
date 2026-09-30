@@ -690,31 +690,32 @@ export class WorldView {
     this.props.push(g);
   }
 
-  /** Procedural wrench (repair) or sparkle (clean) icon above tech during work tasks. */
+  /** Procedural wrench (repair), sparkle (clean), or boot/arrow (travel) icon above tech. */
   private drawStaffToolIcon(
     g: Phaser.GameObjects.Graphics,
-    taskType: 'repair' | 'clean',
+    taskType: 'repair' | 'clean' | 'travel',
     t: number,
   ): void {
     g.clear();
+    g.setScale(1.6);
     const pulse = 0.85 + Math.sin(t / 180) * 0.15;
     if (taskType === 'repair') {
       g.fillStyle(0xffcc66, 0.92 * pulse);
       g.fillCircle(0, 0, 5.5);
-      g.lineStyle(2, 0x8a5520, 0.95);
+      g.lineStyle(2.2, 0x8a5520, 0.95);
       g.beginPath();
       g.moveTo(-4, 2);
       g.lineTo(2, -4);
       g.lineTo(5, -1);
       g.strokePath();
-      g.lineStyle(1.5, 0x5a3818, 0.9);
+      g.lineStyle(1.8, 0x5a3818, 0.9);
       g.beginPath();
       g.arc(4, -3, 2.2, Math.PI * 0.15, Math.PI * 1.35);
       g.strokePath();
-    } else {
+    } else if (taskType === 'clean') {
       g.fillStyle(0xa8e8c8, 0.9 * pulse);
       g.fillCircle(0, 0, 5);
-      g.lineStyle(1.4, 0xffffff, 0.85 * pulse);
+      g.lineStyle(1.6, 0xffffff, 0.85 * pulse);
       for (let i = 0; i < 4; i++) {
         const a = (Math.PI / 2) * i + t / 400;
         g.beginPath();
@@ -724,6 +725,19 @@ export class WorldView {
       }
       g.fillStyle(0xffffff, 0.75);
       g.fillCircle(0, 0, 2);
+    } else {
+      g.fillStyle(0xffcc88, 0.88 * pulse);
+      g.fillRoundedRect(-3.5, -1, 5, 7, 1.2);
+      g.fillStyle(0x8a5520, 0.9);
+      g.fillRect(-2.5, 4, 3.5, 2);
+      g.lineStyle(2, 0xffffff, 0.9 * pulse);
+      g.beginPath();
+      g.moveTo(4, 0);
+      g.lineTo(9, 0);
+      g.moveTo(7, -3);
+      g.lineTo(9, 0);
+      g.lineTo(7, 3);
+      g.strokePath();
     }
   }
 
@@ -966,6 +980,8 @@ export class WorldView {
     this.addProp('tech', 6, 8, -14, 9, 0.85, 'sway');
     this.addProp('tech', 13, 5, -14, 9, 0.88, 'sway');
     this.addProp('tech', 13, 7, -14, 9, 0.82, 'sway');
+    this.addProp('tech', 8, 6, -14, 9, 0.86, 'bob');
+    this.addProp('tech', 10, 9, -14, 9, 0.84, 'bob');
 
     // Full fence perimeter around Site A meadow — thick fence.png on all sides
     for (let x = SITE_A.x0; x < SITE_A.x1; x += 1) {
@@ -1858,7 +1874,11 @@ export class WorldView {
         this.applyDirectionalLight(sprite, snapshot.irradiance, night);
       }
 
-      if (staff.task.type === 'repair' || staff.task.type === 'clean') {
+      if (
+        staff.task.type === 'repair' ||
+        staff.task.type === 'clean' ||
+        staff.task.type === 'travel'
+      ) {
         const workType = staff.task.type;
         let toolIcon = this.staffToolIcons.get(staff.id);
         if (!toolIcon) {
@@ -1866,7 +1886,7 @@ export class WorldView {
           this.staffToolIcons.set(staff.id, toolIcon);
         }
         this.drawStaffToolIcon(toolIcon, workType, this.scene.time.now);
-        toolIcon.setPosition(pos.x, pos.y - 38 - elev * 5 + bob);
+        toolIcon.setPosition(pos.x, pos.y - 40 - elev * 5 + bob);
         toolIcon.setDepth(depthFor(staff.tile.x, staff.tile.y, 10));
         toolIcon.setVisible(true);
       } else {

@@ -38,6 +38,35 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 21 — staff density and tool icons
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Staff tool icons now show for repair, clean, and travel (boot+arrow for travel); graphics scaled ×1.6.
+- Two decorative ambient techs with bob motion added near yard at (8,6) and (10,9).
+- Walk trail blobs + walk-frame texture swap confirmed still fire during travel.
+
+**Tested / Verified**
+- `npm run typecheck` — pass
+- `npm test` — pass
+
+**Known issues / limitations**
+- Ambient techs are decorative only; sim staff count unchanged.
+
+**Decisions / assumptions / recommendations**
+- Travel icon uses boot silhouette + forward arrow for motion read at small scale.
+
+**Next recommended step**
+- Playtest dispatch cycle in browser; confirm tool icons visible on first fault dispatch.
+
+**Git / References**
+- Commit: `6727f9c`
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Loop 20 — atmosphere lift, export sparks, staff work icons
 
 **Agent:** Cursor

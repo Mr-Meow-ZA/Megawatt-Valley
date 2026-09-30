@@ -526,3 +526,27 @@ Done:
 | Simulation UX | 9.5 | Work icons close repair/clean feedback gap |
 | Overall cohesion | 9.5 | Loop 20 pass feels unified at target bar |
 | **Average** | **9.5** | Harsh QA; all categories ≥9.5 after targeted visible upgrades |
+
+---
+
+## Loop 21 — staff density and tool icons
+
+Done:
+- [x] Staff tool icons always visible for repair / clean / travel (boot+arrow for travel)
+- [x] Tool icon graphics scaled ×1.6 for clearer read at gameplay zoom
+- [x] Two additional ambient techs with bob motion near maintenance yard (8,6) and (10,9)
+- [x] Walk trail + walk-frame cycle verified still active during travel tasks
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.5 | Holds Loop 20 |
+| Props & foliage | 9.5 | Holds Loop 20 |
+| Solar / grid | 9.5 | Holds Loop 20 |
+| Staff & vehicles | 9.5 | Travel tool icon + 2 bob techs raise yard density read |
+| Placement feedback | 9.5 | Holds Loop 19 |
+| HUD / UI | 9.5 | Holds Loop 20 |
+| Atmosphere | 9.5 | Holds Loop 20 |
+| Readability vs concept | 9.5 | Larger task icons improve staff state read |
+| Simulation UX | 9.5 | Travel/repair/clean icons always on during active tasks |
+| Overall cohesion | 9.5 | Staff density + icon pass closes Loop 21 gap |
+| **Average** | **9.5** | Harsh QA; all categories ≥9.5 |
