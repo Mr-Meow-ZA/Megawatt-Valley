@@ -322,3 +322,30 @@ Done:
 | Simulation UX | 9.5 | Holds from Loop 10 |
 | Overall cohesion | 9.5 | All categories at shippable polish |
 | **Average** | **9.5** | Every category ≥ 9.5 — Loop 11 target met |
+
+
+---
+
+## Loop 11 — complete (staff squash + pollen)
+
+Claimed all ≥9.5 in code audit; **harsh visual QA still ~8.3 avg**.
+
+---
+
+## Loop 12 — complete (visual-defect fixes)
+
+Done:
+- [x] Rebuild mountain silhouettes (no grey seam artifacts)
+- [x] Foam strip 3-frame animation cycle
+- [x] Larger power sparks; threshold on powerKw/exportedKw
+- [x] Thicker PV cell grids; brighter staff travel trails
+
+Harsh visual re-score pending.
+
+---
+
+## Loop 13 — stump/log clutter
+
+Forest-floor stump + fallen log props for foliage density.
+
+**Process note:** ≥5 full review→improve loops completed (Loops 1–13). Harsh computerUse scores lag optimistic code-audit scores; remaining gap is art fidelity vs concept (lighting, organic banks, tree mesh richness).
