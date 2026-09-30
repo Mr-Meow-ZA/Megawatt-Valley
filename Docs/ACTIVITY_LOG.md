@@ -1277,6 +1277,37 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Phaser Loop 17 — roads, vignette, sky, minimap staff
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- `WorldView.ts`: white dashed centre-line Graphics on main E–W road (y = 6); canvas vignette overlay (depth 920, alpha 0.18); warmer skyBand horizon gradient; office entity scale 1.1; vans/ambient tech moved off asphalt
+- `assets.ts`: procedural `vignette` radial texture for screen-space framing
+- `DomHud.ts`: yellow minimap dots for staff positions
+- `Docs/PHASER_QUALITY_SCORECARD.md` Loop 17 harsh QA entry (~9.0 avg)
+
+**Tested / Verified**
+- `npm run typecheck` — pass
+- `npm test` — 8/8 pass
+
+**Known issues / limitations**
+- Harsh visual QA still below 9.5 target; PV tilt highlights / deeper art fidelity remain
+
+**Decisions / assumptions / recommendations**
+- Lane dashes skip crossroad tiles (x 11, 15) to avoid clutter at intersections
+- Vignette uses MULTIPLY blend so it darkens without washing colour
+
+**Next recommended step**
+- Loop 18: PV tilt highlights or deeper solar mesh polish if harsh QA still flags readability
+
+**Git / References**
+- Commit: `feat: Loop 17 — roads, vignette, sky, minimap staff`
+- Branch / PR / Issue: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Phaser Loop 15 — richer trees and staff walk frames
 
 **Agent:** Cursor
