@@ -246,6 +246,29 @@ export class GameSimulation {
     return null;
   }
 
+  /** Find a free tile on a plot that fits the footprint. */
+  findFreeTile(kind: EquipmentKind, plotId: PlotId): Vec2 | null {
+    const def = EQUIPMENT[kind];
+    const plot = this.plots.find((p) => p.id === plotId);
+    if (!plot?.unlocked) return null;
+    for (let y = plot.origin.y; y <= plot.origin.y + plot.size.y - def.footprint.y; y++) {
+      for (let x = plot.origin.x; x <= plot.origin.x + plot.size.x - def.footprint.x; x++) {
+        if (this.canPlace(kind, plotId, { x, y }) === null) return { x, y };
+      }
+    }
+    return null;
+  }
+
+  /** One-click place on Site A (or Site B if requested) for accessibility. */
+  quickPlace(kind: EquipmentKind, plotId: PlotId = 'site_a'): boolean {
+    const tile = this.findFreeTile(kind, plotId);
+    if (!tile) {
+      this.message = 'No free space on that site.';
+      return false;
+    }
+    return this.placeEquipment(kind, plotId, tile);
+  }
+
   placeEquipment(kind: EquipmentKind, plotId: PlotId, tile: Vec2): boolean {
     const err = this.canPlace(kind, plotId, tile);
     if (err) {

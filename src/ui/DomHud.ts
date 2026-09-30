@@ -245,6 +245,7 @@ export class DomHud {
           <button type="button" data-cat="support">Support</button>
         </div>
         <div class="build-grid" data-k="build"></div>
+        <button type="button" class="primary quick-place-btn" data-action="quick-place" data-k="quick-place">Place on Site A</button>
         <button type="button" class="ghost cancel-build-btn" data-action="cancel-build" data-k="cancel-build">Cancel placement</button>
       </aside>
 
@@ -274,7 +275,7 @@ export class DomHud {
       <div class="toast" data-k="toast" hidden></div>
       <div class="build-banner" data-k="build-banner" hidden>
         <strong data-k="build-banner-label">Placing…</strong>
-        <span>Click a valid meadow tile · Esc / Cancel to abort</span>
+        <span>Click a bright meadow tile · or use Place on Site A · Esc cancels</span>
       </div>
 
       <footer class="hud-bottom">
@@ -355,6 +356,14 @@ export class DomHud {
       if (action === 'cancel-build') {
         this.sim.setBuildMode(null);
         playSfx('click');
+        return;
+      }
+      if (action === 'quick-place') {
+        const kind = this.sim.buildMode;
+        if (kind) {
+          const ok = this.sim.quickPlace(kind, 'site_a');
+          playSfx(ok ? 'place' : 'error');
+        }
         return;
       }
       if (action === 'save') {
