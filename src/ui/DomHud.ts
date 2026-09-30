@@ -422,6 +422,19 @@ export class DomHud {
       ctx.strokeRect(px, py, pw, ph);
     }
 
+    // Staff dots
+    for (const member of snapshot.staff) {
+      const px = sx(member.tile.x);
+      const py = sy(member.tile.y);
+      ctx.beginPath();
+      ctx.fillStyle = '#f5d742';
+      ctx.arc(px + 2, py + 2, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(40, 30, 0, 0.45)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+
     // Equipment dots
     for (const eq of snapshot.equipment) {
       const px = sx(eq.tile.x);
