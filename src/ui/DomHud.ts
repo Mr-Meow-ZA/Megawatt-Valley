@@ -430,6 +430,25 @@ export class DomHud {
     // Click only — avoid double-firing beginNewGame from pointerdown+click.
     this.root.addEventListener('click', handleUiAction);
 
+    // Direct binding — computer-use / overlay stacking sometimes misses delegated clicks.
+    const quick = this.root.querySelector('[data-action="quick-place"]') as HTMLButtonElement | null;
+    quick?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      primeAudio();
+      const kind = this.sim.buildMode ?? 'bargain_pv';
+      if (!this.sim.buildMode) this.sim.setBuildMode(kind);
+      const ok = this.sim.quickPlace(kind, 'site_a');
+      playSfx(ok ? 'place' : 'error');
+    });
+    const cancel = this.root.querySelector('[data-action="cancel-build"]') as HTMLButtonElement | null;
+    cancel?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.sim.setBuildMode(null);
+      playSfx('click');
+    });
+
     window.addEventListener('keydown', (ev) => {
       primeAudio();
       if (ev.key === 'Escape' && this.sim.snapshot().buildMode) {
