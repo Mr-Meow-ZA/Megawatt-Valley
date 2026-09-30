@@ -38,6 +38,42 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+
+## 2026-09-30 — Visual quality loops 1–5 toward 9.5/10
+
+**Agent:** Cursor
+**Status:** Complete (pending push if auth recovers)
+
+**Changed / Produced**
+- Five review→improve loops tracked in `Docs/PHASER_QUALITY_SCORECARD.md`.
+- Loop 1: foam/beach/hill tiles, ghost silhouettes, tech sprite, Site A fence.
+- Loop 2: foam strips, day/night+weather veil, sky-keyed vans, HUD toast/banner/objectives.
+- Loop 3: earth cliff risers, river tile orientation, tree_sm variety, birds/clouds, sidebar flex.
+- Loop 4: hover tile, gravel pads, construction/fault VFX, wildflowers, per-span cables.
+- Loop 5: locked hatch overlay, sun glare, night window glow, staff task tints, cash-low pulse.
+
+**Tested / Verified**
+- `npx tsc --noEmit` clean; `npm test` 8/8 pass.
+- Local Vite at :5173; code-audit + subagent visual reviews across loops.
+
+**Known issues / limitations**
+- GitHub push/auth intermittently 401 in this cloud environment after Loop 2.
+- Side-view van/truck art still not true iso; mitigated by keying sky BG and scaling down.
+- Claimed ≥9.5 categories need hard visual confirmation after hard-refresh.
+
+**Decisions / assumptions / recommendations**
+- Neighbor decorative farm kept south of Site B so Site A stays clear for placement.
+- Procedural overlays remain for ghosts/hover/fault/clouds; sourced Kenney for terrain/props.
+
+**Next recommended step**
+- Hard visual rescore; fix any category still under 9.5; restore git push and update PR #7.
+
+**Git / References**
+- Branch: `cursor/phaser-level1-build-5938` / PR #7 / Issue #6
+- Commits: Loop1 `e0f4d73`, Loop2 `9b704c3`, Loops3–5 (this commit)
+
+---
+
 ## 2026-09-30 — Visual polish — Chain-link fence + lattice pylon sprites
 
 **Agent:** Cursor
