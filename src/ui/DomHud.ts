@@ -1,7 +1,8 @@
+import { sound } from '../audio/sound';
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
 import { CAPABILITY_INFO } from '../content/scenario';
 import type { GameSimulation } from '../simulation/GameSimulation';
-import type { EquipmentKind, GameSnapshot } from '../simulation/types';
+import type { CapabilityId, EquipmentKind, GameSnapshot, StaffMember } from '../simulation/types';
 import { clearSave, loadGame, saveGame } from '../persistence/save';
 
 function money(n: number): string {
@@ -94,6 +95,9 @@ const BUILD_ICONS: Record<string, string> = {
 
 export class DomHud {
   private root: HTMLElement;
+  private readonly listeners = new AbortController();
+  destroy(): void { this.listeners.abort(); }
+
   private lastEventId: string | null = null;
   private lastObjectivesKey = '__uninit__';
   private lastBuildKey = '__uninit__';
@@ -219,6 +223,17 @@ export class DomHud {
       <aside class="panel caps">
         <h2>Capabilities</h2>
         <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
+        <div data-k="capability-actions"></div>
+      </aside>
+      <aside class="panel"><h2>People & operations</h2><div data-k="roster"></div>
+        <button type="button" data-action="hire" data-id="technician">Technician · $1,500</button>
+        <button type="button" data-action="hire" data-id="cleaner">Cleaner · $1,500</button>
+        <button type="button" data-action="hire" data-id="engineer">Engineer · $1,500</button>
+        <button type="button" data-action="hire" data-id="manager">Site Manager · $1,500</button>
+        <small>Technicians repair; cleaners clean. Engineers reduce faults; managers speed up field work. Salaries $1–2/sim hour.</small>
+      </aside>
+      <aside class="panel"><h2>Finance & reports</h2><div data-k="finance"></div>
+        <small>1★ Complete all core lessons and the storm · 2★ 220 kW + Site B + Radio · 3★ 300 kW + prepared hail + Cleaning Kit. Scenario 2 unlock is recorded at 1★; its playable map is future content.</small>
       </aside>
       </div>
 
@@ -232,6 +247,9 @@ export class DomHud {
         <button type="button" data-action="save">Save</button>
         <button type="button" data-action="load">Load</button>
         <button type="button" data-action="new">New Game</button>
+        <button type="button" data-action="export-save">Export save</button>
+        <button type="button" data-action="import-save">Import save</button>
+        <button type="button" data-action="audio">Sound: off</button>
         <span class="hint">Drag pan · Wheel zoom · 1/2 events · R repair · C clean</span>
       </footer>
 
@@ -262,6 +280,7 @@ export class DomHud {
       if (!t) return;
       ev.preventDefault();
       ev.stopPropagation();
+      if ((t as HTMLButtonElement).disabled) return;
       const cat = t.getAttribute('data-cat') as typeof this.buildCategory | null;
       if (cat) {
         this.buildCategory = cat;
@@ -284,8 +303,7 @@ export class DomHud {
       const action = t.getAttribute('data-action');
       if (action === 'cancel-build') this.sim.setBuildMode(null);
       if (action === 'save') {
-        saveGame(this.sim.serialize());
-        this.sim.message = 'Game saved.';
+        this.sim.message = saveGame(this.sim.serialize()) ? 'Game saved.' : 'Could not save. Use Export save to keep your progress.';
       }
       if (action === 'load') {
         const data = loadGame();
@@ -297,9 +315,34 @@ export class DomHud {
         }
       }
       if (action === 'new') {
+        if (!window.confirm('Start a new company? This replaces the local save. Export first to keep a copy.')) return;
         clearSave();
         this.onNewGame();
       }
+      if (action === 'demolish') this.sim.demolish(t.getAttribute('data-id') ?? '');
+      if (action === 'capability') this.sim.buyCapability(t.getAttribute('data-id') as CapabilityId);
+      if (action === 'hire') this.sim.hireStaff(t.getAttribute('data-id') as StaffMember['role']);
+      if (action === 'train') this.sim.trainStaff(t.getAttribute('data-id') ?? '');
+      if (action === 'audio') {
+        sound.toggle(); t.textContent = sound.enabled ? 'Sound: on' : 'Sound: off';
+      }
+      if (action === 'export-save') {
+        const url = URL.createObjectURL(new Blob([JSON.stringify({ version: 1, savedAt: new Date().toISOString(), state: this.sim.serialize() })], { type: 'application/json' }));
+        const a = document.createElement('a'); a.href = url; a.download = 'megawatt-valley-save.json'; a.click(); URL.revokeObjectURL(url);
+      }
+      if (action === 'import-save') {
+        const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json';
+        input.onchange = async () => {
+          try {
+            const file = input.files?.[0]; if (!file || file.size > 2_000_000) throw Error();
+            const parsed = JSON.parse(await file.text());
+            if (parsed.version !== 1) throw Error();
+            this.sim.load(parsed.state); this.sim.message = 'Save imported.';
+          } catch { this.sim.message = 'Invalid save file; your company was not changed.'; }
+        };
+        input.click();
+      }
+      sound.note(440, 0.04);
       if (action === 'repair') {
         const id = t.getAttribute('data-id');
         if (id) this.sim.dispatchRepair(id);
@@ -317,10 +360,10 @@ export class DomHud {
         win.hidden = true;
       }
     };
-    this.root.addEventListener('pointerdown', handleUiAction);
-    this.root.addEventListener('click', handleUiAction);
+    this.root.addEventListener('click', handleUiAction, { signal: this.listeners.signal });
 
     window.addEventListener('keydown', (ev) => {
+      if (ev.repeat || (ev.target as HTMLElement)?.closest('input,textarea,button')) return;
       if (ev.key === 'Escape' && this.sim.snapshot().buildMode) {
         this.sim.setBuildMode(null);
         return;
@@ -331,7 +374,7 @@ export class DomHud {
         const choice = this.sim.activeEvent.choices[idx];
         if (choice) this.sim.resolveEventChoice(choice.id);
       }
-    });
+    }, { signal: this.listeners.signal });
   }
 
   private drawMinimap(snapshot: GameSnapshot): void {
@@ -552,6 +595,7 @@ export class DomHud {
       objList.innerHTML =
         `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${doneCount}/${activeObjs.length} complete</span></li>` +
         activeObjs
+          .sort((a, b) => Number(a.complete) - Number(b.complete))
           .slice(0, 6)
           .map((o) => {
             const mark = o.complete ? '✓' : '○';
@@ -610,7 +654,7 @@ export class DomHud {
       banner.classList.remove('active');
     }
 
-    const capsKey = snapshot.capabilities.join(',');
+    const capsKey = snapshot.capabilities.join(',') + '|' + snapshot.plots[1].unlocked;
     if (capsKey !== this.lastCapsKey) {
       this.lastCapsKey = capsKey;
       const caps = this.root.querySelector('[data-k="caps"]') as HTMLElement;
@@ -625,6 +669,20 @@ export class DomHud {
           .join('');
       }
     }
+
+    const capActions = this.root.querySelector('[data-k="capability-actions"]') as HTMLElement;
+    const capHtml = (['cleaning_rig','remote_monitoring','scheduled_cleaning'] as CapabilityId[]).map((id) => {
+      const owned = snapshot.capabilities.includes(id);
+      const locked = !snapshot.plots[1].unlocked || (id === 'scheduled_cleaning' && !snapshot.capabilities.includes('cleaning_rig'));
+      return '<button type="button" data-action="capability" data-id="' + id + '" ' + (owned || locked ? 'disabled' : '') + ' title="' + CAPABILITY_INFO[id].description + '">' + (owned ? '✓ ' : locked ? 'Locked · ' : '') + CAPABILITY_INFO[id].name + '</button><small>' + CAPABILITY_INFO[id].description + '</small>';
+    }).join('') + '<small>Future branches: Bifacial PV → Trackers · Reliability → Predictive Maintenance · Digital → SCADA → Robots · People → Regional O&M · Grid → BESS · Commercial → PPAs.</small>';
+    if (capActions.innerHTML !== capHtml) capActions.innerHTML = capHtml;
+    const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
+    const rosterHtml = snapshot.staff.map((s) => '<div><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '">Train · $800</button></div>').join('');
+    if (roster.innerHTML !== rosterHtml) roster.innerHTML = rosterHtml;
+    const finance = this.root.querySelector('[data-k="finance"]') as HTMLElement;
+    finance.textContent = 'Sales ' + money(this.sim.lifetimeRevenue) + ' · Operating expenses ' + money(this.sim.totalExpenses) + ' · Energy ' + Math.round(snapshot.totalEnergyKwh) + ' kWh · Peak ' + Math.round(this.sim.peakExportKw) + ' kW · Staff ' + snapshot.staff.length;
+    sound.update(snapshot.weather, snapshot.faultsRepaired, snapshot.cleansCompleted, snapshot.stars);
 
     const toast = this.root.querySelector('[data-k="toast"]') as HTMLElement;
     if (snapshot.message !== this.lastMessage) {
@@ -689,7 +747,7 @@ export class DomHud {
       this.lastSelectionActionsKey = selectionActionsKey;
       const selActions = this.root.querySelector('[data-k="selection-actions"]') as HTMLElement;
       if (selected) {
-        let actions = '';
+        let actions = EQUIPMENT[selected.kind].buildable ? '<button type="button" data-action="demolish" data-id="' + selected.id + '">Sell · 60% resale</button>' : '';
         if (selected.faulted && !snapshot.capabilities.includes('radio_dispatch')) {
           actions += `<button type="button" data-action="repair" data-id="${selected.id}">Dispatch Repair</button>`;
         }

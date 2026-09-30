@@ -12,7 +12,7 @@ export type StaffTask =
   | { type: 'repair'; targetId: string; progress: number }
   | { type: 'clean'; targetId: string; progress: number };
 
-export type CapabilityId = 'radio_dispatch' | 'cleaning_kit';
+export type CapabilityId = 'radio_dispatch' | 'cleaning_kit' | 'cleaning_rig' | 'remote_monitoring' | 'scheduled_cleaning';
 
 export type ObjectiveId =
   | 'first_power'
@@ -74,7 +74,10 @@ export interface PlacedEquipment {
 export interface StaffMember {
   id: string;
   name: string;
-  role: 'technician';
+  role: 'technician' | 'cleaner' | 'engineer' | 'manager';
+  skill?: number;
+  salary?: number;
+  trait?: string;
   plotId: PlotId;
   tile: Vec2;
   task: StaffTask;
@@ -182,4 +185,13 @@ export interface SerializedGameState {
   lifetimeRevenue: number;
   peakExportKw: number;
   scriptedFirstFault: boolean;
+  curtailmentFactor?: number;
+  curtailmentTimer?: number;
+  eventClock?: number;
+  eventDelays?: Partial<Record<EventId, number>>;
+  rngState?: number;
+  totalExpenses?: number;
+  manualRepairs?: number;
+  manualCleans?: number;
+  speedBeforeEvent?: 0 | 1 | 2 | 4;
 }

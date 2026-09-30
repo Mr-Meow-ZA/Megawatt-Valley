@@ -12,6 +12,9 @@ export const CAPABILITY_INFO: Record<
   CapabilityId,
   { name: string; description: string }
 > = {
+  cleaning_rig: { name: 'Mobile Cleaning Rig', description: 'Group cleaning: also cleans adjacent arrays. First expansion upgrade free; second $4,000.' },
+  remote_monitoring: { name: 'Remote Monitoring', description: 'Inspections halve random fault risk. First expansion upgrade free; second $4,000.' },
+  scheduled_cleaning: { name: 'Scheduled Cleaning', description: 'Automatically sends staff above 35% soiling. Requires Cleaning Rig; $3,000.' },
   radio_dispatch: {
     name: 'Radio Dispatch',
     description: 'Technicians auto-respond to routine faults.',
@@ -87,7 +90,7 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'unlock_site_b',
       title: 'Growing Up',
-      description: 'Reach 120 kW peak export and hold $25,000 cash.',
+      description: 'Reach 120 kW peak export and hold $5,000 cash.',
       rewardText: 'Unlock Site B',
     },
     {
@@ -105,7 +108,7 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'star_1',
       title: '1★ Here Comes the Sun',
-      description: 'Export 120 kW peak and earn $12,000 lifetime revenue.',
+      description: 'Export 120 kW peak and earn $4,500 lifetime revenue, repair and clean manually, expand Site B, choose an upgrade, and weather the hail.',
       rewardText: 'Scenario complete — continue for mastery',
     },
     {
@@ -134,7 +137,7 @@ export function createInitialObjectives(): ObjectiveState[] {
 
 export const STAR_THRESHOLDS = {
   star1PeakKw: 120,
-  star1Revenue: 12_000,
+  star1Revenue: 4_500,
   star2PeakKw: 220,
   star3PeakKw: 300,
 };

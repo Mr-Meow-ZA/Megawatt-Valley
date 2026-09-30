@@ -1,83 +1,52 @@
 import { describe, expect, it } from 'vitest';
 import { GameSimulation } from '../src/simulation/GameSimulation';
+import { STAR_THRESHOLDS } from '../src/content/scenario';
 
-describe('Level 1 playthrough smoke', () => {
-  it('can reach 1★ with automated build/operate loop', () => {
-    const sim = new GameSimulation();
-    sim.cash = 200_000;
-
-    const tiles = [
-      { x: 6, y: 9 },
-      { x: 8, y: 9 },
-      { x: 10, y: 9 },
-      { x: 6, y: 11 },
-      { x: 8, y: 11 },
-      { x: 10, y: 11 },
-      { x: 6, y: 13 },
-      { x: 8, y: 13 },
-    ];
-    for (let i = 0; i < tiles.length; i++) {
-      const kind = i % 2 === 0 ? 'bargain_pv' : 'premium_pv';
-      expect(sim.placeEquipment(kind, 'site_a', tiles[i])).toBe(true);
-    }
-    expect(sim.placeEquipment('inverter', 'site_a', { x: 13, y: 10 })).toBe(true);
-    expect(sim.placeEquipment('inverter', 'site_a', { x: 14, y: 10 })).toBe(true);
-
-    for (const eq of sim.equipment) {
-      if (eq.kind === 'bargain_pv' || eq.kind === 'premium_pv' || eq.kind === 'inverter') {
-        eq.commissioned = true;
-        eq.constructionProgress = 1;
-      }
-    }
-
-    sim.hour = 12;
-    sim.weather = 'clear';
-    sim.setSpeed(4);
-    expect(sim.computePower().exportedKw).toBeGreaterThan(120);
-
-    for (let i = 0; i < 30_000; i++) {
+describe('Level 1 with real starting budget and normal time', () => {
+  it('can finish through ordinary player actions, including mid-storm save/resume', () => {
+    let sim = new GameSimulation();
+    const slots = [{x:6,y:9},{x:8,y:9},{x:10,y:9},{x:6,y:13},{x:8,y:13},{x:10,y:13},{x:14,y:13},{x:16,y:13}];
+    let slot = 0, saved = false;
+    expect(sim.placeEquipment('premium_pv','site_a',slots[slot++])).toBe(true);
+    expect(sim.placeEquipment('bargain_pv','site_a',slots[slot++])).toBe(true);
+    expect(sim.placeEquipment('bargain_pv','site_a',slots[slot++])).toBe(true);
+    expect(sim.placeEquipment('inverter','site_a',{x:16,y:10})).toBe(true);
+    // No direct edits to cash, equipment, weather, hour, unlocks or objectives.
+    let seconds = 0;
+    for (; seconds < 7200; seconds++) {
       if (sim.activeEvent) {
-        const preferred =
-          sim.activeEvent.choices.find((c) => c.id === 'prepare' || c.id === 'buy' || c.id === 'sponsor')?.id ??
-          sim.activeEvent.choices[0]?.id;
-        if (preferred) sim.resolveEventChoice(preferred);
+        const event = sim.activeEvent;
+        const id = event.id === 'hail_warning' && sim.cash >= 2500 ? 'prepare'
+          : event.choices.find((c) => ['promise','pass','accept','decline','busy','hope','endure'].includes(c.id))?.id ?? event.choices[0].id;
+        sim.resolveEventChoice(id);
+        if (event.id === 'hail_warning' && !saved) {
+          const data = JSON.parse(JSON.stringify(sim.serialize()));
+          sim = new GameSimulation(); sim.load(data); saved = true;
+        }
       }
-
       if (!sim.capabilities.includes('radio_dispatch')) {
         const fault = sim.equipment.find((e) => e.faulted);
         if (fault) sim.dispatchRepair(fault.id);
       }
-
-      const dirty = sim.equipment.find(
-        (e) => (e.kind === 'bargain_pv' || e.kind === 'premium_pv') && e.soiling > 0.2,
-      );
-      if (dirty && sim.staff.some((s) => s.task.type === 'idle')) {
-        sim.dispatchClean(dirty.id);
+      const dirty = sim.equipment.filter((e) => e.kind.includes('pv') && e.soiling >= 0.2).sort((a,b)=>b.soiling-a.soiling)[0];
+      if (dirty) sim.dispatchClean(dirty.id);
+      if (sim.plots[1].unlocked) {
+        sim.buyCapability('cleaning_rig');
+        if (!sim.equipment.some((e) => e.plotId === 'site_b') && sim.cash >= 10500) sim.placeEquipment('bargain_pv','site_b',{x:24,y:10});
       }
-
-      const siteB = sim.plots.find((p) => p.id === 'site_b');
-      if (siteB?.unlocked && !sim.equipment.some((e) => e.plotId === 'site_b' && e.kind.includes('pv'))) {
-        sim.cash = Math.max(sim.cash, 20_000);
-        expect(sim.placeEquipment('premium_pv', 'site_b', { x: 24, y: 8 })).toBe(true);
-        const newest = sim.equipment[sim.equipment.length - 1];
-        newest.commissioned = true;
-        newest.constructionProgress = 1;
-      }
-
-      // Keep midday hours so revenue accrues.
-      if (sim.hour < 10 || sim.hour > 15) sim.hour = 12;
-      // Leave climax weather alone; otherwise prefer clear skies for the smoke test.
-      if (!sim.triggeredEvents.includes('hail_warning') && !sim.triggeredEvents.includes('hail_climax')) {
-        (sim as { weather: typeof sim.weather }).weather = 'clear';
-      }
-
-      sim.update(0.5);
-      if (sim.stars >= 1 && sim.scenarioComplete) break;
+      if (sim.cash >= 16000 && slot < slots.length) sim.placeEquipment('bargain_pv','site_a',slots[slot++]);
+      sim.update(1);
+      expect(Number.isFinite(sim.cash)).toBe(true); expect(sim.cash).toBeGreaterThanOrEqual(0);
+      if (sim.stars >= 1) break;
     }
-
-    expect(sim.peakExportKw).toBeGreaterThanOrEqual(120);
-    expect(sim.lifetimeRevenue).toBeGreaterThanOrEqual(12_000);
-    expect(sim.stars).toBeGreaterThanOrEqual(1);
+    console.log('Normal-economy completion at',seconds,'seconds at 1x; sales',sim.lifetimeRevenue);
+    expect(sim.manualRepairs).toBeGreaterThan(0);
+    expect(sim.manualCleans).toBeGreaterThan(0);
+    expect(saved).toBe(true);
+    expect(sim.hailSurvived).toBe(true);
+    expect(sim.lifetimeRevenue).toBeGreaterThanOrEqual(STAR_THRESHOLDS.star1Revenue);
     expect(sim.scenarioComplete).toBe(true);
+    expect(sim.stars).toBeGreaterThanOrEqual(1);
+    expect(seconds).toBeLessThan(3600);
   });
 });

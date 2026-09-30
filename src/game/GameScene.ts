@@ -1,3 +1,4 @@
+import { loadGame, saveGame } from '../persistence/save';
 import Phaser from 'phaser';
 import { GameSimulation } from '../simulation/GameSimulation';
 import { DomHud } from '../ui/DomHud';
@@ -9,6 +10,7 @@ export class GameScene extends Phaser.Scene {
   private world!: WorldView;
   private hud!: DomHud;
   private dragging = false;
+  private autosaveElapsed = 0;
   private dragLast = { x: 0, y: 0 };
 
   constructor() {
@@ -22,6 +24,11 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     generateOverlayTextures(this);
     this.startNewGame();
+    const saved = loadGame();
+    if (saved) { this.sim.load(saved); this.sim.speed = 0; this.sim.message = 'Company restored. Press Play when ready.'; }
+    const saveOnExit = () => { saveGame(this.sim.serialize()); };
+    window.addEventListener('pagehide', saveOnExit);
+    this.events.once('shutdown', () => { window.removeEventListener('pagehide', saveOnExit); this.hud.destroy(); });
 
     const cam = this.cameras.main;
     let pressWorld: { x: number; y: number } | null = null;
@@ -103,6 +110,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private startNewGame(): void {
+    this.hud?.destroy();
+    this.tweens.killAll();
+    this.time.removeAllEvents();
     // Destroy previous world display objects
     this.children.removeAll(true);
     generateOverlayTextures(this);
@@ -113,7 +123,9 @@ export class GameScene extends Phaser.Scene {
 
   update(_t: number, delta: number): void {
     if (!this.sim) return;
-    this.sim.update(delta / 1000);
+    this.sim.update(Math.min(delta / 1000, 0.25));
+    this.autosaveElapsed += delta;
+    if (this.autosaveElapsed >= 30000) { this.autosaveElapsed = 0; saveGame(this.sim.serialize()); }
     const snap = this.sim.snapshot();
     this.world.sync(snap);
     const pointer = this.input.activePointer;

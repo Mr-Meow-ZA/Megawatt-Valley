@@ -1,3 +1,4 @@
+import { validateState } from '../persistence/validate';
 import { EQUIPMENT } from '../content/equipment';
 import { EVENTS } from '../content/events';
 import {
@@ -67,6 +68,16 @@ export class GameSimulation {
   curtailmentTimer = 0;
   eventClock = 0;
   scriptedFirstFault = false;
+  rngState = 924817;
+  totalExpenses = 0;
+  manualRepairs = 0;
+  manualCleans = 0;
+  speedBeforeEvent: 0 | 1 | 2 | 4 = 1;
+
+  private random(): number {
+    this.rngState = (Math.imul(this.rngState, 1664525) + 1013904223) >>> 0;
+    return this.rngState / 4294967296;
+  }
 
   constructor() {
     this.seedWorld();
@@ -117,7 +128,7 @@ export class GameSimulation {
     this.staff.push({
       id: this.uid('staff'),
       name: 'Tess Volt',
-      role: 'technician',
+      role: 'technician', skill: 1, salary: 1, trait: 'Panel Whisperer',
       plotId: 'site_a',
       tile: { x: siteA.origin.x + 2, y: siteA.origin.y + 3 },
       task: { type: 'idle' },
@@ -160,7 +171,7 @@ export class GameSimulation {
       if (!isPv(eq.kind) || !eq.commissioned || eq.faulted) continue;
       const def = EQUIPMENT[eq.kind];
       const plot = this.plots.find((p) => p.id === eq.plotId);
-      if (!plot?.unlocked) continue;
+      if (!plot?.unlocked || !plot.gridConnected) continue;
       const soilPenalty = 1 - eq.soiling * 0.45;
       generationKw +=
         def.nameplateKw * def.efficiency * eq.condition * soilPenalty * irradiance * plot.solarResource;
@@ -185,7 +196,8 @@ export class GameSimulation {
 
   canPlace(kind: EquipmentKind, plotId: PlotId, tile: Vec2): string | null {
     const def = EQUIPMENT[kind];
-    if (!def.buildable) return 'Not buildable';
+    if (!def?.buildable) return 'Not buildable';
+    if (!Number.isInteger(tile.x) || !Number.isInteger(tile.y)) return 'Choose a whole tile';
     const plot = this.plots.find((p) => p.id === plotId);
     if (!plot?.unlocked) return 'Plot locked';
     if (this.cash < def.cost) return 'Not enough cash';
@@ -244,7 +256,7 @@ export class GameSimulation {
       this.message = 'Nothing to repair there.';
       return false;
     }
-    const tech = this.staff.find((s) => s.task.type === 'idle');
+    const tech = this.staff.find((s) => s.task.type === 'idle' && (s.role === 'technician' || s.role === 'engineer'));
     if (!tech) {
       this.message = 'Technician is busy.';
       return false;
@@ -260,7 +272,7 @@ export class GameSimulation {
       this.message = 'That array is clean enough.';
       return false;
     }
-    const tech = this.staff.find((s) => s.task.type === 'idle');
+    const tech = this.staff.find((s) => s.task.type === 'idle' && s.role !== 'manager');
     if (!tech) {
       this.message = 'Technician is busy.';
       return false;
@@ -284,8 +296,14 @@ export class GameSimulation {
   resolveEventChoice(choiceId: string): void {
     if (!this.activeEvent) return;
     const eventId = this.activeEvent.id;
+    if (!this.activeEvent.choices.some((choice) => choice.id === choiceId)) return;
+    const costs: Record<string, number> = { community_meeting_sponsor: 2000, bargain_batch_buy: 5000, grid_curtailment_upgrade_talk: 3000, temp_worker_hire: 4000, insurance_upsell_buy: 6000, influencer_visit_host: 1500, hail_warning_prepare: 2500 };
+    if (this.cash < (costs[eventId + '_' + choiceId] ?? 0)) {
+      this.message = 'Not enough cash for this choice. Choose the free option.';
+      return;
+    }
     this.activeEvent = null;
-    this.speed = this.speed === 0 ? 1 : this.speed;
+    this.speed = this.speedBeforeEvent;
 
     switch (eventId) {
       case 'community_meeting':
@@ -381,9 +399,9 @@ export class GameSimulation {
       const reliability = EQUIPMENT[eq.kind].reliability;
       const hit = base * (1.15 - reliability);
       eq.condition = clamp(eq.condition - hit, 0.2, 1);
-      if (!this.hailPrepared && Math.random() < 0.45) {
+      if (!this.hailPrepared && this.random() < 0.45) {
         eq.faulted = true;
-      } else if (this.hailPrepared && Math.random() < 0.15) {
+      } else if (this.hailPrepared && this.random() < 0.15) {
         eq.faulted = true;
       }
     }
@@ -424,7 +442,9 @@ export class GameSimulation {
       choices: def.choices,
       paused: true,
     };
+    this.speedBeforeEvent = this.speed;
     this.speed = 0;
+    if (id === 'hail_climax') this.weather = 'hail';
   }
 
   private activateObjective(id: (typeof this.objectives)[number]['id']): void {
@@ -441,15 +461,18 @@ export class GameSimulation {
   }
 
   update(dtSeconds: number): void {
+    if (!Number.isFinite(dtSeconds) || dtSeconds <= 0) return;
     if (this.speed === 0 || this.activeEvent) {
       this.maybeOpenQueuedEvent();
       return;
     }
 
-    this.tickAccumulator += dtSeconds * this.speed * SIM_MINUTES_PER_REAL_SECOND;
+    this.tickAccumulator += Math.min(dtSeconds, 5) * this.speed * SIM_MINUTES_PER_REAL_SECOND;
     while (this.tickAccumulator >= 1) {
       this.tickAccumulator -= 1;
       this.simulateMinute();
+      this.maybeOpenQueuedEvent();
+      if (this.activeEvent) break;
     }
     this.maybeOpenQueuedEvent();
   }
@@ -474,7 +497,7 @@ export class GameSimulation {
     this.nextFaultCheck -= 1 / 60;
     this.nextSoilTick -= 1 / 60;
     if (this.nextFaultCheck <= 0) {
-      this.nextFaultCheck = 10 + Math.random() * 8;
+      this.nextFaultCheck = 10 + this.random() * 8;
       this.rollFaults();
     }
     if (this.nextSoilTick <= 0) {
@@ -501,6 +524,8 @@ export class GameSimulation {
     for (const tech of this.staff) {
       if (tech.task.type === 'idle') continue;
       const task = tech.task;
+      if (!this.equipment.some((e) => e.id === task.targetId)) { tech.task = { type: 'idle' }; continue; }
+      const workRate = 1 + ((tech.skill ?? 1) - 1) * 0.2 + (this.staff.some((s) => s.role === 'manager') ? 0.2 : 0);
       if (task.type === 'travel') {
         task.progress += hours / 0.35;
         const target = this.equipment.find((e) => e.id === task.targetId);
@@ -529,13 +554,15 @@ export class GameSimulation {
           }
         }
       } else if (task.type === 'repair') {
-        task.progress += hours / 0.5;
+        task.progress += hours * workRate / 0.5;
         if (task.progress >= 1) {
           const target = this.equipment.find((e) => e.id === task.targetId);
           if (target) {
             target.faulted = false;
             target.condition = clamp(target.condition + 0.15, 0, 1);
             this.faultsRepaired += 1;
+            if (!this.capabilities.includes('radio_dispatch')) { this.manualRepairs += 1; this.cash += 2000; }
+            tech.skill = Math.min(5, (tech.skill ?? 1) + 0.04);
             this.completeObjective('first_repair');
             if (!this.capabilities.includes('radio_dispatch')) {
               this.capabilities.push('radio_dispatch');
@@ -547,12 +574,17 @@ export class GameSimulation {
         }
       } else if (task.type === 'clean') {
         const kit = this.capabilities.includes('cleaning_kit');
-        task.progress += hours / (kit ? 0.25 : 0.45);
+        task.progress += hours * workRate / (kit ? 0.25 : 0.45);
         if (task.progress >= 1) {
           const target = this.equipment.find((e) => e.id === task.targetId);
           if (target) {
             target.soiling = 0;
             this.cleansCompleted += 1;
+            if (!this.capabilities.includes('cleaning_kit')) { this.manualCleans += 1; this.cash += 2000; }
+            tech.skill = Math.min(5, (tech.skill ?? 1) + 0.04);
+            if (this.capabilities.includes('cleaning_rig')) for (const nearby of this.equipment) {
+              if (isPv(nearby.kind) && nearby.plotId === target.plotId && Math.hypot(nearby.tile.x - target.tile.x, nearby.tile.y - target.tile.y) <= 4) nearby.soiling = 0;
+            }
             this.completeObjective('first_clean');
             if (!this.capabilities.includes('cleaning_kit')) {
               this.capabilities.push('cleaning_kit');
@@ -570,7 +602,7 @@ export class GameSimulation {
     if (this.weather === 'hail') return;
     if (this.weatherTimer < 4 + (this.day % 3)) return;
     this.weatherTimer = 0;
-    const roll = Math.random();
+    const roll = this.random();
     if (roll < 0.45) this.weather = 'clear';
     else if (roll < 0.7) this.weather = 'partly_cloudy';
     else if (roll < 0.88) this.weather = 'overcast';
@@ -583,9 +615,13 @@ export class GameSimulation {
     const energy = exportedKw * hours;
     this.totalEnergyKwh += energy;
     const revenue = energy * this.tariffPerKwh;
-    this.cash += revenue;
+    const payroll = this.staff.reduce((sum, member) => sum + (member.salary ?? 1), 0);
+    const opex = this.equipment.filter((e) => isPv(e.kind) && e.commissioned).length * 0.12;
+    const expense = Math.min(this.cash + revenue, (payroll + opex) * hours);
+    this.cash += revenue - expense;
+    this.totalExpenses += expense;
     this.lifetimeRevenue += revenue;
-    this.revenuePerHour = exportedKw * this.tariffPerKwh;
+    this.revenuePerHour = exportedKw * this.tariffPerKwh - payroll - opex;
   }
 
   private rollFaults(): void {
@@ -604,8 +640,8 @@ export class GameSimulation {
       if (!eq.commissioned || eq.faulted) continue;
       if (!isPv(eq.kind) && eq.kind !== 'inverter') continue;
       const reliability = EQUIPMENT[eq.kind].reliability;
-      const chance = (1 - reliability) * 0.08;
-      if (Math.random() < chance) {
+      const chance = (1 - reliability) * 0.08 * (this.capabilities.includes('remote_monitoring') ? 0.5 : 1) * (this.staff.some((s) => s.role === 'engineer') ? 0.7 : 1);
+      if (this.random() < chance) {
         eq.faulted = true;
         eq.condition = clamp(eq.condition - 0.08, 0.25, 1);
         this.message = `${EQUIPMENT[eq.kind].name} faulted!`;
@@ -625,21 +661,18 @@ export class GameSimulation {
   }
 
   private autoDispatch(): void {
-    if (!this.capabilities.includes('radio_dispatch')) return;
-    const idle = this.staff.find((s) => s.task.type === 'idle');
-    if (!idle) return;
-    const fault = this.equipment.find((e) => e.faulted && e.commissioned);
-    if (fault) {
-      idle.task = { type: 'travel', targetId: fault.id, progress: 0, from: { ...idle.tile } };
-      (idle as StaffMember & { _intent?: string })._intent = 'repair';
-      return;
-    }
-    const dirty = this.equipment
-      .filter((e) => isPv(e.kind) && e.soiling > 0.55 && e.commissioned)
-      .sort((a, b) => b.soiling - a.soiling)[0];
-    if (dirty) {
-      idle.task = { type: 'travel', targetId: dirty.id, progress: 0, from: { ...idle.tile } };
-      (idle as StaffMember & { _intent?: string })._intent = 'clean';
+    const assigned = new Set(this.staff.flatMap((s) => s.task.type === 'idle' ? [] : [s.task.targetId]));
+    for (const member of this.staff) {
+      if (member.task.type !== 'idle' || member.role === 'manager') continue;
+      const fault = this.capabilities.includes('radio_dispatch') && member.role !== 'cleaner'
+        ? this.equipment.find((e) => e.faulted && e.commissioned && !assigned.has(e.id)) : undefined;
+      const dirty = this.capabilities.includes('scheduled_cleaning')
+        ? this.equipment.filter((e) => isPv(e.kind) && e.soiling > 0.35 && e.commissioned && !assigned.has(e.id)).sort((a, b) => b.soiling - a.soiling)[0] : undefined;
+      const target = fault ?? dirty;
+      if (!target) continue;
+      member.task = { type: 'travel', targetId: target.id, progress: 0, from: { ...member.tile } };
+      (member as StaffMember & { _intent?: string })._intent = fault ? 'repair' : 'clean';
+      assigned.add(target.id);
     }
   }
 
@@ -665,7 +698,9 @@ export class GameSimulation {
       this.enqueueEvent('influencer_visit');
     }
     if (
-      (this.stars >= 1 || this.peakExportKw >= 120) &&
+      this.objectives.find((o) => o.id === 'expand_site_b')?.complete &&
+      this.capabilities.some((c) => c === 'cleaning_rig' || c === 'remote_monitoring') &&
+      this.manualRepairs > 0 && this.manualCleans > 0 &&
       !this.triggeredEvents.includes('hail_warning') &&
       !this.pendingEventQueue.includes('hail_warning')
     ) {
@@ -677,7 +712,7 @@ export class GameSimulation {
   private updateObjectivesAndStars(): void {
     const { exportedKw } = this.computePower();
     const pvCount = this.equipment.filter((e) => isPv(e.kind) && e.commissioned).length;
-    if (exportedKw > 1 && pvCount > 0) this.completeObjective('first_power');
+    if (exportedKw > 1 && pvCount > 1) this.completeObjective('first_power');
 
     const bargain = this.equipment.filter((e) => e.kind === 'bargain_pv').length;
     const premium = this.equipment.filter((e) => e.kind === 'premium_pv').length;
@@ -685,7 +720,7 @@ export class GameSimulation {
       this.completeObjective('choose_equipment');
     }
 
-    if (this.peakExportKw >= 120 && this.cash >= 25_000) {
+    if (this.peakExportKw >= 120 && this.cash >= 5_000) {
       this.completeObjective('unlock_site_b');
       const siteB = this.plots.find((p) => p.id === 'site_b');
       if (siteB && !siteB.unlocked) {
@@ -701,7 +736,9 @@ export class GameSimulation {
 
     if (
       this.peakExportKw >= STAR_THRESHOLDS.star1PeakKw &&
-      this.lifetimeRevenue >= STAR_THRESHOLDS.star1Revenue
+      this.lifetimeRevenue >= STAR_THRESHOLDS.star1Revenue &&
+      this.hailSurvived && this.manualRepairs > 0 && this.manualCleans > 0 &&
+      this.objectives.find((o) => o.id === 'expand_site_b')?.complete
     ) {
       this.completeObjective('star_1');
       this.stars = Math.max(this.stars, 1) as 0 | 1 | 2 | 3;
@@ -710,7 +747,7 @@ export class GameSimulation {
 
     const siteBPv = this.equipment.some((e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned);
     if (
-      siteBPv &&
+      this.stars >= 1 && siteBPv &&
       this.capabilities.includes('radio_dispatch') &&
       this.peakExportKw >= STAR_THRESHOLDS.star2PeakKw
     ) {
@@ -719,7 +756,7 @@ export class GameSimulation {
     }
 
     if (
-      this.hailSurvived &&
+      this.stars >= 2 && this.hailSurvived &&
       this.hailPrepared &&
       this.capabilities.includes('cleaning_kit') &&
       this.peakExportKw >= STAR_THRESHOLDS.star3PeakKw
@@ -735,6 +772,52 @@ export class GameSimulation {
         break;
       }
     }
+  }
+
+
+  buyCapability(id: CapabilityId): boolean {
+    if (this.capabilities.includes(id)) return false;
+    const expanded = this.plots.some((p) => p.id === 'site_b' && p.unlocked);
+    const choice = id === 'cleaning_rig' || id === 'remote_monitoring';
+    if (!expanded || (!choice && id !== 'scheduled_cleaning')) return false;
+    if (id === 'scheduled_cleaning' && !this.capabilities.includes('cleaning_rig')) return false;
+    const cost = choice && !this.capabilities.some((c) => c === 'cleaning_rig' || c === 'remote_monitoring') ? 0 : id === 'scheduled_cleaning' ? 3000 : 4000;
+    if (this.cash < cost) { this.message = 'Not enough cash for this capability.'; return false; }
+    this.cash -= cost; this.capabilities.push(id);
+    this.message = 'Company capability unlocked! Your team has new tools.';
+    return true;
+  }
+
+  hireStaff(role: StaffMember['role']): boolean {
+    if (!['technician', 'cleaner', 'engineer', 'manager'].includes(role) || this.staff.length >= 5 || this.cash < 1500) return false;
+    this.cash -= 1500;
+    const names = { technician: 'Amir Watts', cleaner: 'Nia Shine', engineer: 'Morgan Ohm', manager: 'Sam Ledger' };
+    const traits = { technician: 'Safety First-ish', cleaner: 'Panel Whisperer', engineer: 'Weather Worrier', manager: 'Spreadsheet Enthusiast' };
+    this.staff.push({ id: this.uid('staff'), name: names[role], role, skill: 1, salary: role === 'engineer' ? 2 : 1,
+      trait: traits[role], plotId: 'site_a', tile: { x: 6, y: 7 }, task: { type: 'idle' } });
+    this.message = names[role] + ' joined the team.';
+    return true;
+  }
+
+  trainStaff(id: string): boolean {
+    const member = this.staff.find((s) => s.id === id);
+    if (!member || (member.skill ?? 1) >= 5 || this.cash < 800) return false;
+    this.cash -= 800; member.skill = Math.min(5, (member.skill ?? 1) + 1);
+    this.message = member.name + ' completed training. Faster field work unlocked.';
+    return true;
+  }
+
+  demolish(id: string): boolean {
+    const eq = this.equipment.find((e) => e.id === id);
+    if (!eq || !EQUIPMENT[eq.kind].buildable) return false;
+    if (isPv(eq.kind) && this.equipment.filter((e) => isPv(e.kind)).length <= 1) {
+      this.message = 'Keep one solar array so the company can recover.'; return false;
+    }
+    this.cash += Math.floor(EQUIPMENT[eq.kind].cost * 0.6 * eq.condition);
+    this.equipment = this.equipment.filter((e) => e.id !== id);
+    for (const member of this.staff) if (member.task.type !== 'idle' && member.task.targetId === id) member.task = { type: 'idle' };
+    this.selectedId = null; this.message = 'Equipment removed; 60% condition-adjusted resale returned.';
+    return true;
   }
 
   plotAtTile(tile: Vec2): PlotId | null {
@@ -824,11 +907,23 @@ export class GameSimulation {
       lifetimeRevenue: this.lifetimeRevenue,
       peakExportKw: this.peakExportKw,
       scriptedFirstFault: this.scriptedFirstFault,
+      curtailmentFactor: this.curtailmentFactor, curtailmentTimer: this.curtailmentTimer,
+      eventClock: this.eventClock, eventDelays: { ...this.eventDelays }, rngState: this.rngState,
+      totalExpenses: this.totalExpenses, manualRepairs: this.manualRepairs, manualCleans: this.manualCleans,
+      speedBeforeEvent: this.speedBeforeEvent,
     };
   }
 
   load(data: SerializedGameState): void {
-    Object.assign(this, data);
+    if (!validateState(data)) throw new Error('Invalid save data');
+    const copy = structuredClone(data);
+    // Reset optional fields when loading older saves into an existing session.
+    this.curtailmentFactor = 1; this.curtailmentTimer = 0; this.eventClock = 0;
+    this.eventDelays = {}; this.rngState = 924817; this.totalExpenses = 0;
+    this.manualRepairs = data.capabilities.includes('radio_dispatch') ? 1 : 0;
+    this.manualCleans = data.capabilities.includes('cleaning_kit') ? 1 : 0;
+    this.speedBeforeEvent = 1;
+    Object.assign(this, copy);
     this.lifetimeRevenue = data.lifetimeRevenue ?? this.lifetimeRevenue;
     this.peakExportKw = data.peakExportKw ?? this.peakExportKw;
     this.scriptedFirstFault = data.scriptedFirstFault ?? false;
