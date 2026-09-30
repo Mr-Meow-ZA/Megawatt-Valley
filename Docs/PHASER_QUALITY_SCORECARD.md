@@ -424,3 +424,28 @@ Done:
 | Simulation UX | 8.9 | Power float + production glow reinforce export feedback |
 | Overall cohesion | 8.8 | Placement/HUD/sim polish reads as one pass |
 | **Average** | **8.8** | Harsh QA; visible jump in weakest categories; still below 9.5 target |
+
+---
+
+## Loop 17 — composition & readability pass
+
+Done:
+- [x] White dashed centre-line overlays on main E–W asphalt (y = 6) via Graphics at build
+- [x] Full-screen cinematic vignette (scrollFactor 0, depth 920, alpha 0.18)
+- [x] Starter office entity scale 1.1; decorative vans/techs moved off main road
+- [x] Warmer skyBand horizon gradient (cyan aloft → pale yellow at ridge)
+- [x] Minimap yellow dots for staff positions
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.8 | Lane markings clarify main corridor |
+| Props & foliage | 9.0 | Yard vehicles off asphalt; office reads larger |
+| Solar / grid | 8.8 | Holds Loop 16 |
+| Staff & vehicles | 8.9 | Minimap staff dots + road clearance |
+| Placement feedback | 8.9 | Holds Loop 16 |
+| HUD / UI | 9.0 | Minimap staff layer adds ops awareness |
+| Atmosphere | 9.1 | Vignette framing + warmer horizon band |
+| Readability vs concept | 9.0 | Road lanes + office presence improve campus read |
+| Simulation UX | 8.9 | Holds Loop 16 |
+| Overall cohesion | 9.1 | Composition/readability pass feels unified |
+| **Average** | **9.0** | Harsh QA; ~0.2 lift from Loop 16; still below 9.5 target |
