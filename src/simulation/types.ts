@@ -42,8 +42,17 @@ export type EventId =
   | 'influencer_visit'
   | 'capability_choice'
   | 'growing_pains'
+  | 'ops_surge'
   | 'hail_warning'
   | 'hail_climax';
+
+/** Short celebration beats consumed by DomHud / WorldView. */
+export type CeremonyKind =
+  | 'first_power'
+  | 'unlock'
+  | 'site_b'
+  | 'star'
+  | 'hail';
 
 export interface Vec2 {
   x: number;

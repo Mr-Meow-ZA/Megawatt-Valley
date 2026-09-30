@@ -47,6 +47,7 @@ describe('Level 1 playthrough smoke', () => {
               c.id === 'sponsor' ||
               c.id === 'monitor' ||
               c.id === 'hire' ||
+              c.id === 'prioritise' ||
               c.id === 'endure',
           )?.id ?? sim.activeEvent.choices[0]?.id;
         if (preferred) sim.resolveEventChoice(preferred);

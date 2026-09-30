@@ -161,18 +161,18 @@ export const STAR_THRESHOLDS = {
 export const ONBOARDING_STEPS = [
   {
     title: 'Welcome to Site A',
-    body: 'You run a tiny solar company. Cash is limited — every array counts. Pan with drag, zoom with the wheel.',
+    body: 'You run a tiny solar company. Hit Place on Site A (or Build → Bargain PV) to drop your first array. Pan with drag, zoom with the wheel.',
   },
   {
     title: 'Build your first array',
-    body: 'Open Build → Bargain or Premium PV, then click a meadow tile inside the Site A fence. Construction takes a short moment.',
+    body: 'Use the green Place on Site A button for a sure hit, or click a bright meadow tile inside the fence. Construction finishes in moments.',
   },
   {
     title: 'Export and earn',
-    body: 'At midday, power flows through the grid connection and cash ticks up. Fast-forward with ▶▶ when waiting for sun.',
+    body: 'Watch Power output and +$/h. If the sky is dark, press ▶▶ to skip to midday — cash only ticks when you export.',
   },
   {
     title: 'When things break',
-    body: 'Faults show a red !. Select the array and Dispatch Repair, or press R. Cleaning uses C when dust builds up.',
+    body: 'Faults show a red !. Press R to dispatch Tess (no need to select). Clean dust with C. Radio Dispatch unlocks after your first manual repair.',
   },
 ];

@@ -8,6 +8,7 @@ export type SfxName =
   | 'repair'
   | 'clean'
   | 'unlock'
+  | 'first_power'
   | 'event'
   | 'hail'
   | 'star'
@@ -199,6 +200,14 @@ function playNamed(name: SfxName): void {
       tone(784, t + 0.14, 0.12, 'sine', 0.34);
       tone(1046, t + 0.22, 0.16, 'sine', 0.3);
       break;
+    case 'first_power':
+      // Longer sunny stinger — distinct from unlock arpeggio.
+      tone(392, t, 0.12, 'triangle', 0.32);
+      tone(494, t + 0.1, 0.12, 'triangle', 0.3);
+      tone(587, t + 0.2, 0.14, 'sine', 0.34);
+      tone(784, t + 0.32, 0.18, 'sine', 0.36);
+      tone(988, t + 0.48, 0.22, 'sine', 0.28);
+      break;
     case 'event':
       tone(392, t, 0.12, 'triangle', 0.3);
       tone(494, t + 0.1, 0.14, 'triangle', 0.28);
@@ -211,6 +220,7 @@ function playNamed(name: SfxName): void {
     case 'star':
       tone(880, t, 0.1, 'sine', 0.28, 1320);
       tone(1320, t + 0.08, 0.14, 'sine', 0.22);
+      tone(1760, t + 0.18, 0.16, 'sine', 0.18);
       break;
     case 'error':
       tone(180, t, 0.12, 'square', 0.28);
@@ -237,9 +247,23 @@ export function playSfx(name: SfxName): void {
   }
 }
 
-/** Soft looping valley pad — starts on first gesture; respects mute. */
+/** Soft looping valley pad + short sunny motif — starts on first gesture; respects mute. */
 let ambienceNodes: { osc: OscillatorNode; gain: GainNode }[] = [];
+let weatherNoise: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
 let ambienceOn = false;
+let motifHandle: ReturnType<typeof setInterval> | null = null;
+let weatherIntensity = 0;
+
+/** Sunny valley motif (Hz) — short earworm over the pad. */
+const MOTIF = [392, 494, 587, 659, 784, 659, 523, 392];
+
+function playMotifPhrase(): void {
+  if (!ambienceOn || muted || unavailable || !ctx || !master) return;
+  const t = now();
+  for (let i = 0; i < MOTIF.length; i++) {
+    tone(MOTIF[i], t + i * 0.22, 0.2, i % 2 === 0 ? 'triangle' : 'sine', 0.07);
+  }
+}
 
 export function startAmbience(): void {
   if (ambienceOn || unavailable) return;
@@ -247,22 +271,58 @@ export function startAmbience(): void {
   if (!c || !master) return;
   if (c.state === 'suspended') void c.resume().catch(() => undefined);
   ambienceOn = true;
-  const freqs = [110, 165, 220];
+  const freqs = [110, 165, 220, 330];
   for (const f of freqs) {
     const osc = c.createOscillator();
     const g = c.createGain();
-    osc.type = 'sine';
+    osc.type = f >= 300 ? 'triangle' : 'sine';
     osc.frequency.value = f;
-    g.gain.value = muted ? 0 : 0.018;
+    g.gain.value = muted ? 0 : f >= 300 ? 0.01 : 0.016;
     osc.connect(g);
     g.connect(master);
     osc.start();
     ambienceNodes.push({ osc, gain: g });
   }
+  // Soft looping noise bed (weather intensity modulates gain).
+  try {
+    const len = c.sampleRate * 2;
+    const buffer = c.createBuffer(1, len, c.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+    const src = c.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    const filter = c.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 800;
+    const g = c.createGain();
+    g.gain.value = muted ? 0 : 0.008;
+    src.connect(filter);
+    filter.connect(g);
+    g.connect(master);
+    src.start();
+    weatherNoise = { src, gain: g };
+  } catch {
+    weatherNoise = null;
+  }
+  playMotifPhrase();
+  if (motifHandle) clearInterval(motifHandle);
+  motifHandle = setInterval(playMotifPhrase, 14000);
+}
+
+export function setAmbienceWeather(weather: 'clear' | 'partly_cloudy' | 'overcast' | 'rain' | 'hail'): void {
+  weatherIntensity =
+    weather === 'hail' ? 1 : weather === 'rain' ? 0.65 : weather === 'overcast' ? 0.25 : 0.08;
+  syncAmbienceMute();
 }
 
 export function syncAmbienceMute(): void {
   for (const n of ambienceNodes) {
-    n.gain.gain.value = muted ? 0 : 0.018;
+    const base = n.osc.frequency.value >= 300 ? 0.01 : 0.016;
+    n.gain.gain.value = muted ? 0 : base;
+  }
+  if (weatherNoise) {
+    const bed = 0.008 + weatherIntensity * 0.045;
+    weatherNoise.gain.gain.value = muted ? 0 : bed;
   }
 }

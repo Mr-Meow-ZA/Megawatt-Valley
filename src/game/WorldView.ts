@@ -976,12 +976,8 @@ export class WorldView {
     this.addProp('van', 14, 5, -10, 7, 0.82, 'bob');
     this.addProp('van', 27, 9, -10, 7, 0.8, 'bob');
 
-    // Ambient techs near yard / substation only (sim staff are the interactive ones)
-    this.addProp('tech', 6, 8, -14, 9, 0.85, 'sway');
-    this.addProp('tech', 13, 5, -14, 9, 0.88, 'sway');
-    this.addProp('tech', 13, 7, -14, 9, 0.82, 'sway');
-    this.addProp('tech', 8, 6, -14, 9, 0.86, 'bob');
-    this.addProp('tech', 10, 9, -14, 9, 0.84, 'bob');
+    // No fake ambient techs — only simulated staff (Tess / Pat) count as people.
+    // Decorative vehicles stay on the yard pad for place-feel without false headcount.
 
     // Full fence perimeter around Site A meadow — thick fence.png on all sides
     for (let x = SITE_A.x0; x < SITE_A.x1; x += 1) {
@@ -1013,22 +1009,16 @@ export class WorldView {
         }
       }
     }
+    // Prefer one foliage language (deciduous + small variants) over mixed kit trees.
     for (const [x, y, big] of pines) {
       const h = hash(x, y);
-      const key =
-        h % 7 === 0
+      const key = big
+        ? h % 2 === 0
           ? 'tree_deciduous'
-          : h % 5 === 0
-            ? 'tree_round'
-            : h % 4 === 0
-              ? this.smallTreeKey(h)
-              : h % 3 === 0
-                ? this.smallTreeKey(h + 1)
-                : big
-                  ? 'tree_big'
-                  : h % 2 === 0
-                    ? this.smallTreeKey(h + 2)
-                    : 'tree';
+          : 'tree_big'
+        : h % 3 === 0
+          ? this.smallTreeKey(h)
+          : 'tree_deciduous';
       this.addProp(key, x, y, big ? -36 : -28, 3, big ? 1.05 : 0.95);
     }
 
@@ -1436,17 +1426,26 @@ export class WorldView {
       glow.setAlpha(nightGlow ? pulse * 0.8 : 0);
     }
     const wet = snapshot.weather === 'rain' || snapshot.weather === 'hail';
+    const isHail = snapshot.weather === 'hail';
     for (let i = 0; i < this.rainDrops.length; i++) {
       const d = this.rainDrops[i];
       d.setVisible(wet);
       if (!wet) continue;
-      d.y += 6 + (i % 4);
-      d.x -= 1.2;
+      d.y += isHail ? 9 + (i % 5) : 6 + (i % 4);
+      d.x -= isHail ? 0.4 : 1.2;
       if (d.y > 720) {
         d.y = -10;
         d.x = Phaser.Math.Between(20, 1260);
       }
-      d.setAlpha(snapshot.weather === 'hail' ? 0.75 : 0.45);
+      if (isHail) {
+        d.setFillStyle(0xf0f6ff, 0.9);
+        d.setSize(3, 7);
+        d.setAlpha(0.85);
+      } else {
+        d.setFillStyle(0xa8c8e8, 0.7);
+        d.setSize(2, 10);
+        d.setAlpha(0.45);
+      }
     }
     // Sky colour shifts with time of day
     const skyColor =

@@ -11,6 +11,7 @@ import {
 import type {
   ActiveEvent,
   CapabilityId,
+  CeremonyKind,
   EquipmentKind,
   EventId,
   GameSnapshot,
@@ -79,10 +80,14 @@ export class GameSimulation {
   staffBusyHours = 0;
   /** Small lasting tariff bonus from community goodwill. */
   tariffBonus = 0;
+  /** Brief celebration beat for HUD / world juice (consumed once). */
+  pendingCeremony: CeremonyKind | null = null;
   private eventDelays: Partial<Record<EventId, number>> = {};
   private lastCommissionId: string | null = null;
   private lastFaultToastId: string | null = null;
   private lastUnlockToast = '';
+  private autoFfUntilFirstPower = false;
+  private opsSurgeArmed = false;
 
   constructor() {
     this.seedWorld();
@@ -491,13 +496,47 @@ export class GameSimulation {
           this.hireSecondTech();
           this.message = 'Pat Amp joins the crew. Queue pressure eases.';
         } else {
-          this.message = 'One tech, two sites. Brace for juggling.';
-          // Spike a fault + dirt to make the stretch feel real.
-          const pv = this.equipment.find((e) => isPv(e.kind) && e.commissioned && !e.faulted);
-          if (pv) {
-            pv.faulted = true;
-            pv.soiling = Math.max(pv.soiling, 0.4);
+          this.message = 'One tech, two sites — the queue just doubled.';
+          // Concurrent Site A + Site B pressure so radio alone cannot erase the beat.
+          const siteA = this.equipment.filter(
+            (e) => e.plotId === 'site_a' && isPv(e.kind) && e.commissioned && !e.faulted,
+          );
+          const siteB = this.equipment.filter(
+            (e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned && !e.faulted,
+          );
+          const spike = (eq: PlacedEquipment | undefined, soil: number) => {
+            if (!eq) return;
+            eq.faulted = true;
+            eq.soiling = Math.max(eq.soiling, soil);
+            this.lastFaultToastId = eq.id;
+          };
+          spike(siteA[0], 0.55);
+          spike(siteB[0] ?? siteA[1], 0.7);
+          for (const eq of siteB.slice(0, 2)) {
+            eq.soiling = Math.max(eq.soiling, 0.65);
           }
+          this.staffBusyHours = Math.max(this.staffBusyHours, 8);
+        }
+        break;
+      case 'ops_surge':
+        if (choiceId === 'prioritise') {
+          const siteA = this.equipment.find(
+            (e) => e.plotId === 'site_a' && e.faulted && e.commissioned,
+          );
+          if (siteA) {
+            siteA.faulted = false;
+            siteA.condition = clamp(siteA.condition + 0.05, 0.2, 1);
+            this.faultsRepaired += 1;
+          }
+          for (const eq of this.equipment) {
+            if (eq.plotId === 'site_b' && isPv(eq.kind) && eq.commissioned) {
+              eq.soiling = clamp(eq.soiling + 0.25, 0, 1);
+            }
+          }
+          this.message = 'Site A kept exporting. Site B needs a clean pass soon.';
+        } else {
+          this.staffBusyHours = Math.max(this.staffBusyHours, 10);
+          this.message = 'Crew stretched thin — expect slower auto-dispatch for a while.';
         }
         break;
       case 'hail_warning':
@@ -518,6 +557,7 @@ export class GameSimulation {
         this.applyHailDamage();
         this.hailSurvived = true;
         this.completeObjective('survive_hail');
+        this.queueCeremony('hail');
         this.message = this.hailPrepared
           ? 'Hail pounds the valley — prep paid off. Damage is limited.'
           : 'Hail smacks the arrays. Repairs ahead.';
@@ -587,6 +627,23 @@ export class GameSimulation {
       paused: true,
     };
     this.speed = 0;
+    if (id === 'ops_surge') this.injectOpsSurgeFaults();
+  }
+
+  /** Concurrent Site A + Site B faults so the surge event has visible stakes. */
+  private injectOpsSurgeFaults(): void {
+    const pick = (plotId: PlotId) =>
+      this.equipment.find((e) => e.plotId === plotId && isPv(e.kind) && e.commissioned && !e.faulted) ??
+      this.equipment.find((e) => e.plotId === plotId && isPv(e.kind) && e.commissioned);
+    const a = pick('site_a');
+    const b = pick('site_b');
+    for (const eq of [a, b]) {
+      if (!eq) continue;
+      eq.faulted = true;
+      eq.soiling = Math.max(eq.soiling, 0.5);
+      eq.condition = clamp(eq.condition - 0.08, 0.25, 1);
+      this.lastFaultToastId = eq.id;
+    }
   }
 
   private activateObjective(id: (typeof this.objectives)[number]['id']): void {
@@ -599,7 +656,34 @@ export class GameSimulation {
     if (!obj || obj.complete) return;
     obj.complete = true;
     obj.active = false;
-    this.message = `Objective complete: ${obj.title}`;
+    const reward = obj.rewardText ? ` — ${obj.rewardText}` : '';
+    this.message = `Objective complete: ${obj.title}${reward}`;
+    if (id === 'first_power') this.queueCeremony('first_power');
+    if (id === 'unlock_radio' || id === 'unlock_cleaning' || id === 'choose_improve') {
+      this.queueCeremony('unlock');
+    }
+    if (id === 'unlock_site_b') this.queueCeremony('site_b');
+    if (id === 'star_1' || id === 'star_2' || id === 'star_3') this.queueCeremony('star');
+  }
+
+  private queueCeremony(kind: CeremonyKind): void {
+    // Prefer rarer beats over routine unlock spam if both land same frame.
+    const rank: Record<CeremonyKind, number> = {
+      first_power: 5,
+      hail: 4,
+      star: 3,
+      site_b: 2,
+      unlock: 1,
+    };
+    if (!this.pendingCeremony || rank[kind] >= rank[this.pendingCeremony]) {
+      this.pendingCeremony = kind;
+    }
+  }
+
+  consumeCeremony(): CeremonyKind | null {
+    const c = this.pendingCeremony;
+    this.pendingCeremony = null;
+    return c;
   }
 
   update(dtSeconds: number): void {
@@ -679,6 +763,16 @@ export class GameSimulation {
         this.lastCommissionId = eq.id;
         this.message = `${EQUIPMENT[eq.kind].name} commissioned.`;
         if (isPv(eq.kind) && this.onboardingStep < 3) this.onboardingStep = 3;
+        // Nudge past night/dawn so First Power is inevitable without coach babysitting.
+        if (
+          isPv(eq.kind) &&
+          !this.objectives.find((o) => o.id === 'first_power')?.complete &&
+          this.speed === 1
+        ) {
+          this.speed = 2;
+          this.autoFfUntilFirstPower = true;
+          this.message = `${EQUIPMENT[eq.kind].name} commissioned — speeding to midday sun. Watch export & +$/h.`;
+        }
       }
     }
   }
@@ -699,6 +793,11 @@ export class GameSimulation {
     const t = this.lastUnlockToast;
     this.lastUnlockToast = '';
     return t;
+  }
+
+  /** True when radio automation is paused by event busy time. */
+  isStaffBusy(): boolean {
+    return this.staffBusyHours > 0;
   }
 
   private advanceStaff(hours: number): void {
@@ -822,17 +921,44 @@ export class GameSimulation {
     if (!this.objectives.find((o) => o.id === 'first_power')?.complete) return;
     if (this.firstPowerHoldHours < 4) return;
 
+    const siteBOpen = !!this.plots.find((p) => p.id === 'site_b')?.unlocked;
+    const multiSitePressure =
+      this.capabilities.includes('radio_dispatch') &&
+      siteBOpen &&
+      this.equipment.some((e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned);
+    const pressureMult = multiSitePressure ? 1.55 : 1;
+
+    const faultedThisRoll: PlacedEquipment[] = [];
     for (const eq of this.equipment) {
       if (!eq.commissioned || eq.faulted) continue;
       if (!isPv(eq.kind) && eq.kind !== 'inverter') continue;
       const reliability = EQUIPMENT[eq.kind].reliability;
-      const chance = (1 - reliability) * (monitor ? 0.035 : 0.055);
+      const chance = (1 - reliability) * (monitor ? 0.035 : 0.055) * pressureMult;
       if (Math.random() < chance) {
         eq.faulted = true;
         eq.condition = clamp(eq.condition - (monitor ? 0.04 : 0.08), 0.25, 1);
         this.lastFaultToastId = eq.id;
         this.message = `${EQUIPMENT[eq.kind].name} faulted! Press R to dispatch.`;
         this.activateObjective('first_repair');
+        faultedThisRoll.push(eq);
+      }
+    }
+
+    // After automation + Site B, occasionally force a second concurrent fault on the other plot.
+    if (multiSitePressure && faultedThisRoll.length === 1 && Math.random() < 0.4) {
+      const first = faultedThisRoll[0];
+      const other = this.equipment.find(
+        (e) =>
+          e.commissioned &&
+          !e.faulted &&
+          isPv(e.kind) &&
+          e.plotId !== first.plotId,
+      );
+      if (other) {
+        other.faulted = true;
+        other.condition = clamp(other.condition - 0.06, 0.25, 1);
+        this.lastFaultToastId = other.id;
+        this.message = `Double fault! ${EQUIPMENT[first.kind].name} and ${EQUIPMENT[other.kind].name} need help.`;
       }
     }
   }
@@ -852,8 +978,12 @@ export class GameSimulation {
   }
 
   private autoDispatch(): void {
-    // Cleaning rig: auto-clear heavy soiling without travel.
-    if (this.capabilities.includes('cleaning_rig')) {
+    // Cleaning rig: auto-clear heavy soiling without travel — disabled in hail so manual ops return.
+    if (
+      this.capabilities.includes('cleaning_rig') &&
+      this.weather !== 'hail' &&
+      this.hailHoldHours <= 0
+    ) {
       for (const eq of this.equipment) {
         if (isPv(eq.kind) && eq.commissioned && eq.soiling > 0.6) {
           eq.soiling = Math.max(0, eq.soiling - 0.35);
@@ -863,6 +993,7 @@ export class GameSimulation {
     }
 
     if (!this.capabilities.includes('radio_dispatch')) return;
+    if (this.staffBusyHours > 0) return;
     const idle = this.staff.find((s) => s.task.type === 'idle');
     if (!idle) return;
     const fault = this.equipment.find((e) => e.faulted && e.commissioned);
@@ -920,6 +1051,17 @@ export class GameSimulation {
     ) {
       this.enqueueEvent('growing_pains');
     }
+    if (
+      this.capabilities.includes('radio_dispatch') &&
+      this.plots.find((p) => p.id === 'site_b')?.unlocked &&
+      this.equipment.some((e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned) &&
+      this.triggeredEvents.includes('growing_pains') &&
+      !this.triggeredEvents.includes('ops_surge') &&
+      !this.opsSurgeArmed
+    ) {
+      this.opsSurgeArmed = true;
+      this.enqueueEvent('ops_surge', 4);
+    }
     if (this.day >= 3 && this.lifetimeRevenue > 8000 && !this.triggeredEvents.includes('influencer_visit')) {
       this.enqueueEvent('influencer_visit');
     }
@@ -937,8 +1079,13 @@ export class GameSimulation {
     const { exportedKw } = this.computePower();
     const playerPv = this.equipment.filter((e) => isPv(e.kind) && e.commissioned && this.playerPlacedPv);
     if (exportedKw > 1 && playerPv.length > 0) {
+      const wasDone = this.objectives.find((o) => o.id === 'first_power')?.complete;
       this.completeObjective('first_power');
       if (this.onboardingStep < 3) this.onboardingStep = 3;
+      if (!wasDone && this.autoFfUntilFirstPower) {
+        this.autoFfUntilFirstPower = false;
+        if (this.speed === 2) this.speed = 1;
+      }
     }
 
     const bargain = this.equipment.filter((e) => e.kind === 'bargain_pv').length;

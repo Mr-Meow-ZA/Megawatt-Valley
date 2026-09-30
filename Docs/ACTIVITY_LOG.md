@@ -38,6 +38,42 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Honest review pass + reward / first-5 / ops pressure
+
+**Agent:** Cursor
+**Status:** Partial (gaps closed in code; live URL + owner playtest still pending)
+
+**Changed / Produced**
+- In-depth honest review + peer benchmark in `Docs/HONEST_QUALITY_REVIEW.md` (overrides Loop 21 9.5 claims).
+- Ceremony banners (first power / unlock / Site B / star / hail) + camera flash/pan/shake.
+- Cash accrue floats; sun-wait hint; auto ▶▶ after first commission until First Power.
+- Objective `rewardText` shown in Next focus + complete toast.
+- `ops_surge` event; stronger Growing Pains stretch; dual-site fault pressure; cleaning rig off in hail.
+- Sunny motif ambience + weather noise bed + `first_power` stinger; deduped SFX.
+- Removed fake ambient techs; deciduous-led foliage; distinct hail particles.
+- HUD accent vars (`--vest`, `--panel-blue`).
+
+**Tested / Verified**
+- `npm test` — 16/16 pass (incl. first_power ceremony + rewardText).
+- `npm run build` — production dist OK.
+
+**Known issues / limitations**
+- Live hosting URL still blocked (Vercel create 403).
+- Music/art still procedural/Kenney collage — not authored Steam identity.
+- Human 30–60 min pacing not timed (owner playtest tomorrow).
+
+**Decisions / assumptions / recommendations**
+- Paid Steam recommend score held at **5.8**; treat as free demo / playtest until art pass + live URL.
+- Do not re-inflate scorecard to 9.5 without owner play confirmation.
+
+**Next recommended step**
+- Owner playtest Place on Site A → First Power → Radio → Site B → Hail → 1★; note pacing nits.
+- Connect static hosting for shareable URL.
+
+**Git / References**
+- Branch / PR: `cursor/level1-steam-finish-5938` / #8
+- Issue: #6
+
 ## 2026-09-30 — Level 1 steam-finish — scenario + product shell
 
 **Agent:** Cursor

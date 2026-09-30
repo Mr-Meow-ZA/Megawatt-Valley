@@ -1,9 +1,32 @@
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
 import { CAPABILITY_INFO, ONBOARDING_STEPS } from '../content/scenario';
-import { initAudio, isMuted, playSfx, startAmbience, toggleMute } from '../audio/Sfx';
+import { initAudio, isMuted, playSfx, setAmbienceWeather, startAmbience, toggleMute } from '../audio/Sfx';
 import type { GameSimulation } from '../simulation/GameSimulation';
-import type { EquipmentKind, GameSnapshot } from '../simulation/types';
+import type { CeremonyKind, EquipmentKind, GameSnapshot } from '../simulation/types';
 import { clearSave, getSaveMeta, hasSave, loadGame, saveGame } from '../persistence/save';
+
+const CEREMONY_COPY: Record<CeremonyKind, { title: string; body: string }> = {
+  first_power: {
+    title: 'First Power!',
+    body: 'Electrons are leaving the valley. Watch export kW and +$/h climb in the sun.',
+  },
+  unlock: {
+    title: 'Capability Unlocked!',
+    body: 'A new management verb is yours — check Capabilities on the right.',
+  },
+  site_b: {
+    title: 'Site B Open!',
+    body: 'River Bench unlocked — weaker sun, congested spur. Expand carefully.',
+  },
+  star: {
+    title: 'Star Earned!',
+    body: 'Scenario progress stamped. Push for the next mastery tier.',
+  },
+  hail: {
+    title: 'Hailstorm!',
+    body: 'Ice on the arrays — assess damage and keep the crew moving.',
+  },
+};
 
 function money(n: number): string {
   return `$${Math.round(n).toLocaleString('en-US')}`;
@@ -138,12 +161,16 @@ export class DomHud {
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'all';
   private minimapCtx: CanvasRenderingContext2D | null = null;
   private lastCash = -1;
+  private cashAccrued = 0;
   private cashFloatUntil = 0;
   private cashFloatAmount = 0;
   private lastExportedKw = -1;
   private powerFloatUntil = 0;
   private powerFloatAmount = 0;
   private lastStars = 0;
+  private lastWeather: GameSnapshot['weather'] | null = null;
+  private ceremonyClearAt = 0;
+  private lastCeremonyShown: CeremonyKind | null = null;
   private readonly completedObjectiveIds = new Set<string>();
   private audioPrimed = false;
 
@@ -273,6 +300,14 @@ export class DomHud {
       </div>
 
       <div class="toast" data-k="toast" hidden></div>
+      <div class="ceremony" data-k="ceremony" hidden>
+        <div class="ceremony-card" data-k="ceremony-card">
+          <div class="ceremony-kicker" data-k="ceremony-kicker">Megawatt Valley</div>
+          <h2 data-k="ceremony-title"></h2>
+          <p data-k="ceremony-body"></p>
+        </div>
+      </div>
+      <div class="sun-hint" data-k="sun-hint" hidden>Waiting for sun — press ▶▶ for midday export</div>
       <div class="build-banner" data-k="build-banner" hidden>
         <strong data-k="build-banner-label">Placing…</strong>
         <span>Click a bright meadow tile · or use Place on Site A · Esc cancels</span>
@@ -306,7 +341,7 @@ export class DomHud {
         <div class="title-card">
           <div class="title-brand">Megawatt Valley</div>
           <h1>Here Comes the Sun</h1>
-          <p class="title-blurb">Grow a tiny solar company on Site A. Export power, hire help, survive hail — earn your stars.</p>
+          <p class="title-blurb">Place panels on Site A, export power, hire help, weather the hail — earn your stars.</p>
           <div class="title-actions" data-k="title-actions"></div>
           <p class="title-meta" data-k="title-meta"></p>
         </div>
@@ -754,9 +789,14 @@ export class DomHud {
 
     setText('cash-val', money(snapshot.cash));
     const cashFloat = this.root.querySelector('[data-k="cash-float"]') as HTMLElement;
-    if (this.lastCash >= 0 && snapshot.cash > this.lastCash + 1) {
-      this.cashFloatAmount = snapshot.cash - this.lastCash;
-      this.cashFloatUntil = performance.now() + 1100;
+    // Accumulate trickle revenue — per-frame +$1 rarely fires at early export rates.
+    if (this.lastCash >= 0 && snapshot.cash > this.lastCash) {
+      this.cashAccrued += snapshot.cash - this.lastCash;
+    }
+    if (this.cashAccrued >= 4) {
+      this.cashFloatAmount = this.cashAccrued;
+      this.cashAccrued = 0;
+      this.cashFloatUntil = performance.now() + 1200;
       cashFloat.textContent = `+${money(this.cashFloatAmount)}`;
       cashFloat.hidden = false;
       cashFloat.classList.remove('cash-float-animate');
@@ -775,6 +815,7 @@ export class DomHud {
     const cheapestBuild = Math.min(...BUILD_MENU_ORDER.map((id) => EQUIPMENT[id].cost));
     const cashChip = this.root.querySelector('[data-k="cash-chip"]') as HTMLElement | null;
     cashChip?.classList.toggle('cash-low', snapshot.cash < cheapestBuild);
+    cashChip?.classList.toggle('cash-earning', rate >= 2);
 
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
     const powerGen = this.root.querySelector('[data-k="power-gen"]') as HTMLElement | null;
@@ -818,9 +859,20 @@ export class DomHud {
     weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather, snapshot.irradiance)}`;
     setText('weather-val', weatherLabel(snapshot.weather, snapshot.irradiance));
     setText('weather-mod', weatherModLabel(snapshot.weather, snapshot.irradiance));
+    if (snapshot.weather !== this.lastWeather) {
+      this.lastWeather = snapshot.weather;
+      setAmbienceWeather(snapshot.weather);
+    }
 
     setText('time-val', `Day ${snapshot.day}, ${seasonForDay(snapshot.day)}, Year 1`);
     setText('time-clock', clock(snapshot.hour));
+
+    const hasPv = snapshot.equipment.some(
+      (e) => (e.kind === 'bargain_pv' || e.kind === 'premium_pv') && e.commissioned,
+    );
+    const sunHint = this.root.querySelector('[data-k="sun-hint"]') as HTMLElement;
+    const waitingForSun = hasPv && snapshot.irradiance < 0.35 && snapshot.exportedKw < 1;
+    sunHint.hidden = this.showTitle || !waitingForSun;
 
     const stars = this.root.querySelector('[data-k="stars"]') as HTMLElement;
     const starText = `${'★'.repeat(snapshot.stars)}${'☆'.repeat(3 - snapshot.stars)}`;
@@ -830,10 +882,12 @@ export class DomHud {
         stars.classList.remove('stars-fill-pop');
         void stars.offsetWidth;
         stars.classList.add('stars-fill-pop');
-        playSfx('star');
+        // SFX owned by GameScene.consumeCeremony / star path — avoid double play.
       }
     }
     this.lastStars = snapshot.stars;
+
+    this.renderCeremony();
 
     this.root.querySelectorAll('[data-speed]').forEach((btn) => {
       const b = btn as HTMLElement;
@@ -876,8 +930,11 @@ export class DomHud {
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
       const progressPct = totalObjectives ? Math.round((completedCount / totalObjectives) * 100) : 0;
       const focus = incompleteActive[0] ?? incompleteInactive[0];
+      const focusReward = focus?.rewardText
+        ? `<em class="focus-reward">${focus.rewardText}</em>`
+        : '';
       const focusHtml = focus
-        ? `<li class="obj-focus"><span class="focus-label">Next</span><strong>${focus.title}</strong><span>${focus.description}</span></li>`
+        ? `<li class="obj-focus"><span class="focus-label">Next</span><strong>${focus.title}</strong><span>${focus.description}</span>${focusReward}</li>`
         : '';
       objList.innerHTML =
         `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${completedCount}/${totalObjectives} complete</span></li>` +
@@ -887,16 +944,22 @@ export class DomHud {
             const mark = o.complete ? '✓' : '○';
             const pulse = o.complete && newlyDone.some((n) => n.id === o.id) ? ' check-pulse' : '';
             const cls = o.complete ? 'done' : o.active ? 'active' : 'pending';
+            const reward = o.rewardText && !o.complete
+              ? `<em class="obj-reward">${o.rewardText}</em>`
+              : o.complete && o.rewardText && newlyDone.some((n) => n.id === o.id)
+                ? `<em class="obj-reward done">${o.rewardText}</em>`
+                : '';
             return `<li class="${cls}">
             <span class="check${pulse}">${mark}</span>
-            <div><strong>${o.title}</strong><span>${o.description}</span></div>
+            <div><strong>${o.title}</strong><span>${o.description}</span>${reward}</div>
           </li>`;
           })
           .join('');
       for (const o of newlyDone) {
         if (o.id === 'first_power') {
-          playSfx('unlock');
-          this.sim.message = 'First Power! Electrons are leaving the valley — keep building.';
+          this.sim.message =
+            'First Power! Electrons are leaving the valley — watch +$/h and keep building.';
+          if (this.sim.onboardingStep < 4) this.sim.onboardingStep = 3;
         }
       }
       for (const o of snapshot.objectives) {
@@ -982,19 +1045,20 @@ export class DomHud {
 
     const toast = this.root.querySelector('[data-k="toast"]') as HTMLElement;
     if (snapshot.message !== this.lastMessage) {
-      const prev = this.lastMessage;
       this.lastMessage = snapshot.message;
       if (snapshot.message) {
         toast.hidden = false;
         toast.textContent = snapshot.message;
         const msg = snapshot.message.toLowerCase();
         const isSuccess =
-          msg.includes('complete') || msg.includes('unlocked') || msg.includes('commissioned');
+          msg.includes('complete') ||
+          msg.includes('unlocked') ||
+          msg.includes('commissioned') ||
+          msg.includes('first power') ||
+          msg.includes('—');
         toast.classList.toggle('toast-success', isSuccess);
-        if (msg.includes('unlocked') && prev !== snapshot.message) {
-          playSfx('unlock');
-        }
-        this.toastClearAt = performance.now() + 3500;
+        // Unlock / first-power / star SFX come from ceremony path — avoid doubles.
+        this.toastClearAt = performance.now() + (isSuccess ? 4200 : 3500);
       } else {
         toast.hidden = true;
         toast.classList.remove('toast-success');
@@ -1099,5 +1163,33 @@ export class DomHud {
     }
 
     this.drawMinimap(snapshot);
+  }
+
+  private renderCeremony(): void {
+    const el = this.root.querySelector('[data-k="ceremony"]') as HTMLElement;
+    // Peek only — GameScene consumes for camera / world FX after HUD render.
+    const kind = this.sim.pendingCeremony;
+    if (kind && kind !== this.lastCeremonyShown) {
+      this.lastCeremonyShown = kind;
+      const copy = CEREMONY_COPY[kind];
+      el.hidden = false;
+      el.dataset.kind = kind;
+      (this.root.querySelector('[data-k="ceremony-title"]') as HTMLElement).textContent = copy.title;
+      (this.root.querySelector('[data-k="ceremony-body"]') as HTMLElement).textContent = copy.body;
+      const card = this.root.querySelector('[data-k="ceremony-card"]') as HTMLElement;
+      card.classList.remove('ceremony-pop');
+      void card.offsetWidth;
+      card.classList.add('ceremony-pop');
+      if (kind === 'first_power') playSfx('first_power');
+      else if (kind === 'star') playSfx('star');
+      else if (kind === 'hail') playSfx('hail');
+      else playSfx('unlock');
+      this.ceremonyClearAt = performance.now() + (kind === 'first_power' || kind === 'hail' ? 4200 : 3200);
+    } else if (this.ceremonyClearAt && performance.now() > this.ceremonyClearAt) {
+      el.hidden = true;
+      el.removeAttribute('data-kind');
+      this.ceremonyClearAt = 0;
+      this.lastCeremonyShown = null;
+    }
   }
 }

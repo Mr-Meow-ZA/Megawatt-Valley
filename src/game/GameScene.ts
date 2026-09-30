@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { initAudio, playSfx } from '../audio/Sfx';
+import { initAudio, playSfx, setAmbienceWeather } from '../audio/Sfx';
 import { saveGame } from '../persistence/save';
 import { GameSimulation } from '../simulation/GameSimulation';
 import { DomHud } from '../ui/DomHud';
@@ -14,7 +14,6 @@ export class GameScene extends Phaser.Scene {
   private dragLast = { x: 0, y: 0 };
   private autosaveAcc = 0;
   private lastStars = 0;
-  private lastMsg: string | null = null;
   private lastBuildMode: string | null = null;
 
   constructor() {
@@ -174,7 +173,6 @@ export class GameScene extends Phaser.Scene {
     this.sim = new GameSimulation();
     this.world = new WorldView(this, this.sim);
     this.lastStars = 0;
-    this.lastMsg = null;
     this.autosaveAcc = 0;
     if (!this.hud) {
       this.hud = new DomHud(
@@ -230,18 +228,13 @@ export class GameScene extends Phaser.Scene {
     }
     this.lastBuildMode = snap.buildMode;
 
+    // Stars / unlock / hail SFX owned by ceremony path in DomHud — avoid doubles.
     if (snap.stars > this.lastStars) {
-      playSfx('star');
       this.lastStars = snap.stars;
     }
     if (this.sim.consumeCommissionFlag()) playSfx('commission');
     if (this.sim.consumeFaultToast()) playSfx('fault');
-    if (this.sim.consumeUnlockToast()) playSfx('unlock');
-    if (snap.message && snap.message !== this.lastMsg) {
-      const m = snap.message.toLowerCase();
-      if (m.includes('hail')) playSfx('hail');
-    }
-    this.lastMsg = snap.message;
+    this.sim.consumeUnlockToast(); // clear flag; ceremony banner plays unlock SFX
 
     this.world.sync(snap);
     const pointer = this.input.activePointer;
@@ -252,5 +245,22 @@ export class GameScene extends Phaser.Scene {
     this.world.updateHoverTile(snap, worldPoint);
     this.world.updateGhost(snap, worldPoint);
     this.hud.render(snap);
+
+    const ceremony = this.sim.consumeCeremony();
+    if (ceremony === 'hail') {
+      this.cameras.main.shake(420, 0.004);
+      setAmbienceWeather('hail');
+    } else if (ceremony === 'site_b') {
+      const siteB = snap.plots.find((p) => p.id === 'site_b');
+      if (siteB) {
+        const cx = siteB.origin.x + siteB.size.x / 2;
+        const cy = siteB.origin.y + siteB.size.y / 2;
+        const wx = (cx - cy) * 50;
+        const wy = (cx + cy) * 25;
+        this.cameras.main.pan(wx, wy, 700, 'Sine.easeInOut');
+      }
+    } else if (ceremony === 'first_power') {
+      this.cameras.main.flash(280, 180, 230, 160, false);
+    }
   }
 }

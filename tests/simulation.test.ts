@@ -132,4 +132,25 @@ describe('GameSimulation', () => {
     expect(sim.computePower().exportedKw).toBeGreaterThan(20);
     expect(sim.objectives.find((o) => o.id === 'first_power')?.complete).toBe(true);
   });
+
+  it('queues a first_power ceremony and includes rewardText on complete', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.quickPlace('bargain_pv', 'site_a')).toBe(true);
+    const eq = sim.equipment.find((e) => e.kind === 'bargain_pv')!;
+    eq.commissioned = true;
+    eq.constructionProgress = 1;
+    sim.hour = 12;
+    sim.weather = 'clear';
+    sim.setSpeed(4);
+    for (let i = 0; i < 8; i++) {
+      if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[0].id);
+      sim.update(0.25);
+    }
+    expect(sim.objectives.find((o) => o.id === 'first_power')?.complete).toBe(true);
+    expect(sim.pendingCeremony).toBe('first_power');
+    expect(sim.message ?? '').toMatch(/Prove the site works/);
+    expect(sim.consumeCeremony()).toBe('first_power');
+    expect(sim.consumeCeremony()).toBeNull();
+  });
 });

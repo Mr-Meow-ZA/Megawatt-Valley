@@ -144,6 +144,23 @@ export const EVENTS: Record<EventId, EventDef> = {
       },
     ],
   },
+  ops_surge: {
+    id: 'ops_surge',
+    title: 'Ops Surge',
+    body: 'Automation is humming — then two sites cough at once. Radio queues only go so far.',
+    choices: [
+      {
+        id: 'prioritise',
+        label: 'Prioritise exports',
+        description: 'Clear one Site A fault now; Site B waits (extra dirt builds).',
+      },
+      {
+        id: 'split',
+        label: 'Split the crew thin',
+        description: 'Both sites get attention slowly; staff busy ~10h.',
+      },
+    ],
+  },
   hail_warning: {
     id: 'hail_warning',
     title: 'Severe Weather Warning',

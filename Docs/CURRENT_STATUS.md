@@ -32,7 +32,7 @@ Active PR: **#8** (`cursor/level1-steam-finish-5938`).
 | M2 Core solar loop | Done |
 | M3 Ops / staff / automation | Done |
 | M4 Full Level 1 scenario | Done |
-| M5–M6 Polish / deploy | Polish done locally; **live URL blocked** (Vercel project create 403) |
+| M5–M6 Polish / deploy | Local polish + ceremony/ops pass; **live URL blocked** (Vercel create 403). Honest review: ~91% Level 1 / **5.8** paid-slice |
 
 ## How to run
 
@@ -43,7 +43,9 @@ npm test         # 15 tests
 npm run build && npm run preview
 ```
 
-Title → Start → **Place on Site A** (or click bright meadow) → ▶▶ midday → export → R repair / C clean → expand → hail → stars.
+Title → Start → **Place on Site A** → auto midday nudge → First Power ceremony → R repair / C clean → Site B → Ops Surge → hail → stars.
+
+Honest scores: `Docs/HONEST_QUALITY_REVIEW.md` (do not trust Loop 21 “all 9.5”).
 
 ## Product owner involvement
 
