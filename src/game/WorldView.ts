@@ -195,6 +195,8 @@ export class WorldView {
   private readonly staffTrailLastSpawn = new Map<string, number>();
   private readonly staffToolIcons = new Map<string, Phaser.GameObjects.Graphics>();
   private readonly staffWalkTextures = ['tech_walk_0', 'tech_walk_1'] as const;
+  private lastSiteBUnlocked = false;
+  private siteBUnlockPulseUntil = 0;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -471,6 +473,7 @@ export class WorldView {
     depthBias = 2,
     scale = 1,
     motion: 'bob' | 'sway' | null = null,
+    tint?: number,
   ): void {
     const s = isoToScreen(x, y);
     const elev = this.heightAt(x, y);
@@ -493,6 +496,7 @@ export class WorldView {
     const img = this.scene.add.image(s.x, baseY + yOff, tex);
     img.setScale(scale);
     img.setDepth(depthFor(x, y, depthBias));
+    if (tint !== undefined) img.setTint(tint);
     this.props.push(img);
     if (motion) {
       this.ambientMotion.push({
@@ -969,12 +973,12 @@ export class WorldView {
       this.addProp('fence_short', 29, y, -4, 3, 0.68);
     }
 
-    // Decorative vehicles — parking pad only; keep main E–W road (y = 6) clear
-    this.addProp('van', 4, 5, -10, 7, 0.85, 'bob');
-    this.addProp('truck_delivery', 5, 7, -12, 7, 0.78, 'bob');
-    this.addProp('van', 7, 5, -10, 7, 0.8, 'bob');
-    this.addProp('van', 14, 5, -10, 7, 0.82, 'bob');
-    this.addProp('van', 27, 9, -10, 7, 0.8, 'bob');
+    // Decorative vehicles — warm vest-orange / steel tints to glue kit art to HUD palette
+    this.addProp('van', 4, 5, -10, 7, 0.85, 'bob', 0xffc090);
+    this.addProp('truck_delivery', 5, 7, -12, 7, 0.78, 'bob', 0xd8e0ea);
+    this.addProp('van', 7, 5, -10, 7, 0.8, 'bob', 0xffb070);
+    this.addProp('van', 14, 5, -10, 7, 0.82, 'bob', 0xe8c8a0);
+    this.addProp('van', 27, 9, -10, 7, 0.8, 'bob', 0xffc090);
 
     // No fake ambient techs — only simulated staff (Tess / Pat) count as people.
     // Decorative vehicles stay on the yard pad for place-feel without false headcount.
@@ -1809,7 +1813,7 @@ export class WorldView {
 
       let sprite = this.entitySprites.get(staff.id);
       if (!sprite) {
-        sprite = this.scene.add.image(pos.x, pos.y - 18 - elev * 5, 'tech');
+        sprite = this.scene.add.image(pos.x, pos.y - 22 - elev * 5, 'tech');
         this.entitySprites.set(staff.id, sprite);
       }
       const traveling = staff.task.type === 'travel';
@@ -1821,7 +1825,9 @@ export class WorldView {
         staff.task.type === 'idle'
           ? Math.sin(this.scene.time.now / 280) * 1.5
           : Math.sin(this.scene.time.now / 95) * 4.2;
-      sprite.setPosition(pos.x, pos.y - 18 - elev * 5 + bob);
+      // Slightly larger staff so Tess/Pat read against the iso farm.
+      const staffScale = 1.38;
+      sprite.setPosition(pos.x, pos.y - 22 - elev * 5 + bob);
       sprite.setDepth(depthFor(staff.tile.x, staff.tile.y, 8));
       const prevX = this.staffLastTileX.get(staff.id);
       if (prevX !== undefined && staff.tile.x !== prevX) {
@@ -1838,9 +1844,9 @@ export class WorldView {
       this.staffLastTileX.set(staff.id, staff.tile.x);
       const face = this.staffFacing.get(staff.id) ?? 1;
       const squashY = traveling
-        ? 1.0 + Math.sin(this.scene.time.now / 95) * 0.05
-        : 1.05;
-      sprite.setScale(1.05 * face, squashY);
+        ? staffScale + Math.sin(this.scene.time.now / 95) * 0.06
+        : staffScale;
+      sprite.setScale(staffScale * face, squashY);
       if (traveling) {
         const walkFrame = Math.floor(this.scene.time.now / 120) % 2;
         sprite.setTexture(this.staffWalkTextures[walkFrame]);
@@ -1951,6 +1957,29 @@ export class WorldView {
 
     this.refreshLockedTiles();
     this.refreshBuildDimTiles(snapshot);
+
+    const siteBOpen = !!snapshot.plots.find((p) => p.id === 'site_b')?.unlocked;
+    if (siteBOpen && !this.lastSiteBUnlocked) {
+      this.siteBUnlockPulseUntil = this.scene.time.now + 2200;
+    }
+    this.lastSiteBUnlocked = siteBOpen;
+    if (this.siteBUnlockPulseUntil > 0) {
+      const active = this.siteBUnlockPulseUntil > this.scene.time.now;
+      const t = active ? 1 - (this.siteBUnlockPulseUntil - this.scene.time.now) / 2200 : 1;
+      const pulse = active ? 0.55 + Math.sin(this.scene.time.now / 120) * 0.25 * (1 - t) : 0;
+      for (const [key, img] of this.ground) {
+        const [xs, ys] = key.split(',');
+        const x = Number(xs);
+        const y = Number(ys);
+        if (!inRect(x, y, SITE_B)) continue;
+        if (active) {
+          img.setTint(Phaser.Display.Color.GetColor(140 + pulse * 80, 210 + pulse * 30, 120));
+        } else {
+          img.clearTint();
+        }
+      }
+      if (!active) this.siteBUnlockPulseUntil = 0;
+    }
   }
 
   setPointerInWorld(inside: boolean): void {

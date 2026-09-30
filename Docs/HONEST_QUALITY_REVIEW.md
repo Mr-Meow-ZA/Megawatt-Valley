@@ -14,9 +14,9 @@ This document **overrides** optimistic Loop 21 “all 9.5” claims in `PHASER_Q
 |------|------:|----------|
 | **Design / engagement thesis** | **7.8 / 10** | Strong Level 1 beat structure; ops surge + hail keep post-automation pressure |
 | **Playable systems + UX** | **7.4 / 10** | Core loop + ceremony banners + cash/sun hints; HUD covers the right channels |
-| **Visual / audio identity** | **6.3 / 10** | Cleaner foliage/staff read; motif + weather bed still procedural, not authored |
-| **Steam “recommend a friend for a few dollars”** | **5.8 / 10** | Stronger as free demo / playtest; still thin for paid short Steam release |
-| **Overall toward final Level 1 goal** | **~91%** | Content + shell + celebration beats; live URL + authored art/music left |
+| **Visual / audio identity** | **6.5 / 10** | Larger staff, tinted vans, Site B pulse; motif still procedural |
+| **Steam “recommend a friend for a few dollars”** | **5.9 / 10** | Confetti/stamp help; still thin for paid short Steam release |
+| **Overall toward final Level 1 goal** | **~92%** | Celebration + mobile chrome + Pages path; live URL needs Pages enable / Vercel |
 
 ---
 
@@ -29,14 +29,14 @@ Earlier Loop 21 scorecard claimed **9.5 every category**. Harsh audit of `public
 | Terrain & water | 9.5 | **6.5** | Kenney iso slabs + foam/HD grass; river still tiled |
 | Props & foliage | 9.5 | **6.3** | Deciduous-led forests; less kit clash than before |
 | Solar / grid | 9.5 | **7.0** | Best sprites; still industrial-kit DNA |
-| Staff & vehicles | 9.5 | **6.0** | Fake ambient techs removed; vans stay decorative |
+| Staff & vehicles | 9.5 | **6.4** | Larger Tess/Pat; warm van tints; no fake techs |
 | Placement feedback | 9.5 | **8.0** | Real strength (ghost, dim, Place on Site A) |
-| HUD / UI | 9.5 | **7.8** | Ceremony banners, Next+reward, sun hint; weak mobile |
-| Atmosphere | 9.5 | **7.2** | Hail flash/shake + distinct hail particles |
+| HUD / UI | 9.5 | **8.0** | Ceremonies + confetti/stamp; compact mobile breakpoints |
+| Atmosphere | 9.5 | **7.3** | Hail + Site B unlock pulse |
 | Concept match | 9.5 | **6.0** | Layout rhyme without concept fidelity |
 | Sim UX | 9.5 | **8.2** | Faults, floats, dispatch, objectives, ceremonies |
-| Cohesion | 9.5 | **5.8** | Still prototype collage; less false population |
-| **Average** | **9.5** | **~6.9** | |
+| Cohesion | 9.5 | **6.0** | Palette glue improving; still Kenney collage |
+| **Average** | **9.5** | **~7.0** | |
 
 **Asset inventory:** ~86 PNGs (~373 KB), mix of Kenney CC0 + rebuilt + runtime procedural overlays. LFS risk if clones skip `git lfs pull`. Dead `textures.ts` generator still in tree.
 
@@ -51,7 +51,7 @@ Earlier Loop 21 scorecard claimed **9.5 every category**. Harsh audit of `public
 | Progression / unlock cadence | **7.8** | Manual→auto, Site B, capability fork, ops surge, hail |
 | Level flow / pacing (30–60 min) | **6.5** | Designed + scripted pressure; human timing still unproven |
 | Event stakes | **7.2** | Dual-site stretch, ops_surge, tariff/busy, hail damage |
-| Juice / feedback | **7.2** | Ceremony banners, first_power stinger, motif, hail shake/flash |
+| Juice / feedback | **7.5** | Ceremonies + confetti + star stamp; first_power stinger; hail shake |
 | Content density (one level) | **7.2** | ~13 objectives, ~10 events, 2 sites, 3★ |
 
 ---
@@ -82,11 +82,11 @@ Earlier Loop 21 scorecard claimed **9.5 every category**. Harsh audit of `public
 
 ## Top gaps before “Steam-quality Level 1”
 
-1. **Public boot as a product** — live URL (Vercel project create 403 currently).
+1. **Public boot as a product** — enable GitHub Pages (Actions) or fix Vercel create 403.
 2. **Authored visual/audio identity** — one coherent art pass + memorable composed music (motif is still oscillators).
 3. **Human 30–60 min pacing** — owner playtest must validate timing after automation.
-4. **Deeper reward theatre** — ceremonies exist; still short of Two Point stamp/fireworks polish.
-5. **Mobile / small viewport** — HUD density remains desktop-first.
+4. **Deeper reward theatre** — confetti/stamp landed; still short of full Two Point fireworks polish.
+5. **Mobile** — compact breakpoints shipped; touch placement still desktop-mouse biased.
 
 ---
 

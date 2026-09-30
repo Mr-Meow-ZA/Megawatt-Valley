@@ -969,8 +969,10 @@ html, body, #app {
   justify-content: center;
   pointer-events: auto !important;
   background:
-    radial-gradient(ellipse at 50% 20%, rgba(80, 140, 200, 0.45) 0%, transparent 55%),
-    linear-gradient(180deg, rgba(6, 18, 36, 0.82) 0%, rgba(8, 28, 48, 0.92) 100%);
+    radial-gradient(ellipse at 70% 18%, rgba(245, 197, 66, 0.28) 0%, transparent 42%),
+    radial-gradient(ellipse at 30% 70%, rgba(61, 220, 132, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 20%, rgba(47, 111, 212, 0.4) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(6, 18, 36, 0.84) 0%, rgba(8, 32, 42, 0.94) 100%);
   backdrop-filter: blur(6px);
 }
 .title-screen[hidden] { display: none !important; }
@@ -994,17 +996,19 @@ html, body, #app {
 .title-brand {
   font-family: var(--display);
   font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.08em;
+  font-size: 18px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 6px;
+  color: var(--vest);
+  margin-bottom: 8px;
+  text-shadow: 0 0 24px rgba(232, 148, 58, 0.35);
 }
 .title-card h1 {
   font-family: var(--display);
-  font-size: 28px;
+  font-size: 30px;
   margin: 0 0 10px;
   line-height: 1.15;
+  color: #fff;
 }
 .title-blurb {
   color: var(--muted);
@@ -1129,10 +1133,131 @@ html, body, #app {
   font-style: normal;
 }
 
+.confetti,
+.confetti-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 90;
+}
+
+.confetti[hidden],
+.confetti-overlay[hidden] {
+  display: none !important;
+}
+
+.confetti i,
+.confetti-overlay i {
+  position: absolute;
+  top: -12px;
+  left: var(--x);
+  border-radius: 1px;
+  animation: confetti-fall var(--dur) ease-in var(--delay) forwards;
+  transform: rotate(var(--rot));
+  opacity: 0.95;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(var(--rot)); opacity: 0.15; }
+}
+
+.win-card {
+  position: relative;
+  text-align: center;
+  overflow: visible;
+}
+
+.star-stamp {
+  font-size: 42px;
+  line-height: 1;
+  color: var(--warn);
+  text-shadow: 0 0 18px rgba(245, 197, 66, 0.55);
+  margin-bottom: 6px;
+  letter-spacing: 0.08em;
+}
+
+.star-stamp.stamp-pop {
+  animation: stamp-pop 0.55s cubic-bezier(0.2, 1.4, 0.3, 1);
+}
+
+@keyframes stamp-pop {
+  0% { transform: scale(0.4) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(1.18) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
 @media (max-width: 1200px) {
   .sidebar-right .panel.caps { display: none; }
   .sidebar-right .panel.selection {
     max-height: 34%;
   }
   .chip.time { display: none; }
+}
+
+/* Compact / tablet */
+@media (max-width: 960px) {
+  .brand-sub,
+  .chip.weather,
+  .panel.minimap-panel,
+  .hud-bottom .hint {
+    display: none !important;
+  }
+  .hud-top {
+    gap: 4px;
+    padding: 4px 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    min-width: 0;
+    padding: 4px 6px;
+  }
+  .chip strong { font-size: 13px; }
+  .sidebar-right {
+    width: 200px;
+    top: 64px;
+    bottom: 48px;
+  }
+  .panel.objectives {
+    width: 180px;
+    max-height: 42vh;
+    font-size: 12px;
+  }
+  .ceremony-card h2 { font-size: 22px; }
+  .sun-hint { top: 70px; font-size: 11px; }
+}
+
+/* Phone / narrow — keep build + objectives usable, hide denser chrome */
+@media (max-width: 700px) {
+  .brand-block { display: none; }
+  .chip.power em,
+  .chip.cash em { display: none; }
+  .stars { font-size: 16px; }
+  .panel.objectives {
+    width: min(46vw, 160px);
+    top: auto;
+    bottom: 52px;
+    max-height: 28vh;
+  }
+  .panel.objectives li.pending,
+  .panel.objectives li.done:not(.check-pulse) {
+    display: none;
+  }
+  .sidebar-right {
+    width: min(48vw, 180px);
+    top: 58px;
+  }
+  .sidebar-right .panel.selection,
+  .sidebar-right .panel.caps {
+    display: none;
+  }
+  .sidebar-right .panel.build {
+    max-height: none;
+    flex: 1;
+  }
+  .build-tabs { display: none; }
+  .hud-bottom button { padding: 6px 8px; font-size: 11px; }
+  .coach-card { max-width: 92vw; }
+  .modal-card { width: min(96vw, 420px); padding: 14px; }
 }

@@ -124,9 +124,11 @@ function starWinBody(stars: number): string {
   return 'Here Comes the Sun — scenario cleared. Keep playing for 2★ / 3★ mastery.';
 }
 
+const ASSET_BASE = `${import.meta.env.BASE_URL ?? './'}assets/game/`;
+
 const BUILD_ICONS: Record<string, string> = {
-  bargain_pv: '<img src="/assets/game/pv_bargain.png" alt="" width="40" height="28"/>',
-  premium_pv: '<img src="/assets/game/pv_premium.png" alt="" width="40" height="28"/>',
+  bargain_pv: `<img src="${ASSET_BASE}pv_bargain.png" alt="" width="40" height="28"/>`,
+  premium_pv: `<img src="${ASSET_BASE}pv_premium.png" alt="" width="40" height="28"/>`,
   inverter:
     '<svg viewBox="0 0 36 36" width="36" height="28" aria-hidden="true" class="build-icon-inverter">' +
     '<ellipse cx="18" cy="30" rx="11" ry="3.5" fill="rgba(0,0,0,0.28)"/>' +
@@ -140,8 +142,8 @@ const BUILD_ICONS: Record<string, string> = {
     '<circle cx="18" cy="23.5" r="1.4" fill="#f5c542"/>' +
     '<circle cx="21.5" cy="23.5" r="1.4" fill="#6ec8ff"/>' +
     '</svg>',
-  office: '<img src="/assets/game/office.png" alt="" width="36" height="28"/>',
-  substation: '<img src="/assets/game/substation.png" alt="" width="36" height="28"/>',
+  office: `<img src="${ASSET_BASE}office.png" alt="" width="36" height="28"/>`,
+  substation: `<img src="${ASSET_BASE}substation.png" alt="" width="36" height="28"/>`,
 };
 
 export class DomHud {
@@ -199,7 +201,7 @@ export class DomHud {
         </div>
 
         <div class="chip cash" data-k="cash-chip">
-          <span class="chip-icon"><img src="/assets/game/icon_dollar.png" alt="" width="22" height="22"/></span>
+          <span class="chip-icon"><img src="${ASSET_BASE}icon_dollar.png" alt="" width="22" height="22"/></span>
           <div>
             <span class="chip-label">Cash</span>
             <strong data-k="cash-val">—</strong>
@@ -209,7 +211,7 @@ export class DomHud {
         </div>
 
         <div class="chip power" data-k="power-chip">
-          <span class="chip-icon"><img src="/assets/game/icon_power.png" alt="" width="22" height="22" style="filter:invert(1) sepia(1) saturate(5) hue-rotate(80deg)"/></span>
+          <span class="chip-icon"><img src="${ASSET_BASE}icon_power.png" alt="" width="22" height="22" style="filter:invert(1) sepia(1) saturate(5) hue-rotate(80deg)"/></span>
           <div class="chip-power">
             <span class="chip-label">Power output</span>
             <strong data-k="power-val">—</strong>
@@ -330,12 +332,15 @@ export class DomHud {
       </div>
 
       <div class="win" data-k="win" hidden>
-        <div class="modal-card">
+        <div class="confetti" data-k="win-confetti" aria-hidden="true"></div>
+        <div class="modal-card win-card">
+          <div class="star-stamp" data-k="star-stamp">★</div>
           <h2 data-k="win-title">1★ Complete!</h2>
           <p data-k="win-body">Here Comes the Sun — scenario cleared. Keep playing for 2★ / 3★ mastery.</p>
           <button type="button" data-action="dismiss-win">Continue</button>
         </div>
       </div>
+      <div class="confetti confetti-overlay" data-k="confetti" hidden aria-hidden="true"></div>
 
       <div class="title-screen" data-k="title" hidden>
         <div class="title-card">
@@ -1153,16 +1158,54 @@ export class DomHud {
       win.dataset.shown = '1';
       setText('win-title', starWinTitle(snapshot.stars));
       setText('win-body', starWinBody(snapshot.stars));
+      const stamp = this.root.querySelector('[data-k="star-stamp"]') as HTMLElement;
+      stamp.textContent = '★'.repeat(Math.max(1, snapshot.stars));
+      stamp.classList.remove('stamp-pop');
+      void stamp.offsetWidth;
+      stamp.classList.add('stamp-pop');
+      this.burstConfetti(this.root.querySelector('[data-k="win-confetti"]') as HTMLElement, 48);
+      // Star SFX already fired by ceremony banner when the star objective completed.
     } else if (win.dataset.shown && snapshot.stars > 0) {
       // Keep win card text current if stars climb while modal still open
       const titleEl = this.root.querySelector('[data-k="win-title"]') as HTMLElement | null;
       if (titleEl && !win.hidden) {
         setText('win-title', starWinTitle(snapshot.stars));
         setText('win-body', starWinBody(snapshot.stars));
+        const stamp = this.root.querySelector('[data-k="star-stamp"]') as HTMLElement;
+        const next = '★'.repeat(Math.max(1, snapshot.stars));
+        if (stamp.textContent !== next) {
+          stamp.textContent = next;
+          stamp.classList.remove('stamp-pop');
+          void stamp.offsetWidth;
+          stamp.classList.add('stamp-pop');
+          this.burstConfetti(this.root.querySelector('[data-k="win-confetti"]') as HTMLElement, 28);
+        }
       }
     }
 
     this.drawMinimap(snapshot);
+  }
+
+  private burstConfetti(host: HTMLElement | null, count: number): void {
+    if (!host) return;
+    host.hidden = false;
+    host.innerHTML = '';
+    const colors = ['#3ddc84', '#f5c542', '#2f6fd4', '#e8943a', '#f4f7ff', '#ff5d6c'];
+    for (let i = 0; i < count; i++) {
+      const bit = document.createElement('i');
+      bit.style.setProperty('--x', `${Math.random() * 100}%`);
+      bit.style.setProperty('--delay', `${Math.random() * 0.35}s`);
+      bit.style.setProperty('--dur', `${1.4 + Math.random() * 1.2}s`);
+      bit.style.setProperty('--rot', `${Math.random() * 720 - 360}deg`);
+      bit.style.background = colors[i % colors.length];
+      bit.style.width = `${4 + (i % 4)}px`;
+      bit.style.height = `${6 + (i % 5)}px`;
+      host.appendChild(bit);
+    }
+    window.setTimeout(() => {
+      host.innerHTML = '';
+      if (host.dataset.persist !== '1') host.hidden = true;
+    }, 2800);
   }
 
   private renderCeremony(): void {
@@ -1184,6 +1227,9 @@ export class DomHud {
       else if (kind === 'star') playSfx('star');
       else if (kind === 'hail') playSfx('hail');
       else playSfx('unlock');
+      if (kind === 'first_power' || kind === 'star' || kind === 'site_b') {
+        this.burstConfetti(this.root.querySelector('[data-k="confetti"]') as HTMLElement, kind === 'star' ? 40 : 26);
+      }
       this.ceremonyClearAt = performance.now() + (kind === 'first_power' || kind === 'hail' ? 4200 : 3200);
     } else if (this.ceremonyClearAt && performance.now() > this.ceremonyClearAt) {
       el.hidden = true;

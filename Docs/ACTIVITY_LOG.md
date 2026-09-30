@@ -38,6 +38,35 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Reward theatre v2, mobile HUD, Pages deploy path
+
+**Agent:** Cursor
+**Status:** Partial (Vercel create still 403; GitHub Pages workflow added — needs Pages source = Actions)
+
+**Changed / Produced**
+- Confetti bursts on First Power / Site B / star ceremonies; win modal star stamp + confetti.
+- Larger readable staff sprites; warm vehicle tints; Site B unlock meadow pulse.
+- Compact tablet/phone HUD breakpoints (hide denser chrome, keep Build + Next objective).
+- `vite` `base: './'` + relative asset URLs for portable hosting.
+- `.github/workflows/pages.yml` — build/test/deploy to GitHub Pages on this branch + main.
+- Title screen brand hierarchy strengthened (Megawatt Valley as hero signal).
+
+**Tested / Verified**
+- `npm test` — 16/16
+- `npm run build` — dist OK; asset paths `./assets/game/…`
+
+**Known issues / limitations**
+- Vercel project create still 403 for this team.
+- GitHub Pages URL live only after owner enables **Settings → Pages → Source: GitHub Actions**.
+- Authored music/art still not shipped.
+
+**Next recommended step**
+- Enable GitHub Pages Actions source → share `https://mr-meow-za.github.io/Megawatt-Valley/` (or the Actions-reported URL).
+- Owner playtest tomorrow.
+
+**Git / References**
+- Branch / PR: `cursor/level1-steam-finish-5938` / #8
+
 ## 2026-09-30 — Honest review pass + reward / first-5 / ops pressure
 
 **Agent:** Cursor
