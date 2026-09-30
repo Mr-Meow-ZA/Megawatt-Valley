@@ -124,6 +124,8 @@ export class WorldView {
   private rainDrops: Phaser.GameObjects.Rectangle[] = [];
   private ambientMotion: AmbientMotion[] = [];
   private birds: SkyBird[] = [];
+  private readonly staffLastTileX = new Map<string, number>();
+  private readonly staffFacing = new Map<string, number>();
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -165,7 +167,8 @@ export class WorldView {
     const cam = scene.cameras.main;
     // Pull back slightly so more of the valley reads like the concept target.
     const center = isoToScreen(18, 12);
-    cam.centerOn(center.x, center.y - 10);
+    // Frame slightly higher so snow-capped mountains read in the opening viewport.
+    cam.centerOn(center.x, center.y - 38);
     cam.setZoom(0.82);
     cam.setBounds(-200, -200, 2200, 1600);
   }
@@ -591,17 +594,17 @@ export class WorldView {
       for (let x = 0; x < WORLD_W; x++) {
         if (!isBank(x, y) && !isWater(x, y)) continue;
         const h = hash(x, y);
-        if (isBank(x, y) && h % 3 === 0) {
+        if (isBank(x, y) && h % 2 === 0) {
           this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
         }
-        if (isBank(x, y) && h % 11 === 0) {
+        if (isBank(x, y) && (h % 6 === 0 || h % 7 === 1)) {
           this.addProp('bush', x, y, -10, 3, 0.72 + (h % 4) * 0.06);
           if (h % 2 === 0) {
             this.addProp('rock', x + (h % 3 === 0 ? 1 : -1), y, -4, 2, 0.78);
           }
         }
         // Occasional rocks sitting in shallow water / foam edge
-        if (isWater(x, y) && h % 7 === 0 && y !== 6) {
+        if (isWater(x, y) && (h % 4 === 0 || h % 9 === 2) && y !== 6) {
           this.addProp('rock', x, y, -2, 1, 0.7 + (h % 2) * 0.1);
         }
       }
@@ -1069,13 +1072,31 @@ export class WorldView {
         sprite = this.scene.add.image(pos.x, pos.y - 18 - elev * 5, 'tech');
         this.entitySprites.set(staff.id, sprite);
       }
+      const moving =
+        staff.task.type === 'travel' ||
+        staff.task.type === 'repair' ||
+        staff.task.type === 'clean';
       const bob =
         staff.task.type === 'idle'
           ? Math.sin(this.scene.time.now / 280) * 1.5
-          : Math.sin(this.scene.time.now / 110) * 2.5;
+          : Math.sin(this.scene.time.now / 95) * 4.2;
       sprite.setPosition(pos.x, pos.y - 18 - elev * 5 + bob);
       sprite.setDepth(depthFor(staff.tile.x, staff.tile.y, 8));
-      sprite.setScale(1.05);
+      const prevX = this.staffLastTileX.get(staff.id);
+      if (prevX !== undefined && staff.tile.x !== prevX) {
+        this.staffFacing.set(staff.id, staff.tile.x > prevX ? 1 : -1);
+      } else if (moving) {
+        const task = staff.task;
+        if (task.type === 'travel' || task.type === 'repair' || task.type === 'clean') {
+          const target = snapshot.equipment.find((e) => e.id === task.targetId);
+          if (target && prevX !== undefined) {
+            this.staffFacing.set(staff.id, target.tile.x >= prevX ? 1 : -1);
+          }
+        }
+      }
+      this.staffLastTileX.set(staff.id, staff.tile.x);
+      const face = this.staffFacing.get(staff.id) ?? 1;
+      sprite.setScale(1.05 * face, 1.05);
       if (staff.task.type === 'idle') {
         sprite.clearTint();
       } else if (staff.task.type === 'repair') {
@@ -1117,9 +1138,12 @@ export class WorldView {
         if (!this.selectRing) {
           this.selectRing = this.scene.add.image(anchor.x, anchor.y + 10 - elev * 5, 'select_ring');
         }
+        const ringBase = Math.max(def.footprint.x, def.footprint.y) * 0.55 + 0.5;
+        const ringPulse = 0.92 + Math.sin(this.scene.time.now / 380) * 0.1;
         this.selectRing.setVisible(true);
         this.selectRing.setPosition(anchor.x, anchor.y + 10 - elev * 5);
-        this.selectRing.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.55 + 0.5);
+        this.selectRing.setScale(ringBase * ringPulse);
+        this.selectRing.setAlpha(0.72 + Math.sin(this.scene.time.now / 420) * 0.18);
         this.selectRing.setDepth(depthFor(eq.tile.x, eq.tile.y, 4));
       }
     } else if (this.selectRing) {
@@ -1191,6 +1215,7 @@ export class WorldView {
     this.ghostPad.setPosition(screen.x, padY);
     this.ghostPad.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.7 + 0.35);
     this.ghostPad.setDepth(depthFor(tile.x, tile.y, 14));
+    this.ghostPad.setAlpha(ok ? 0.88 : 0.92);
     this.ghostPad.setVisible(true);
 
     const tex = textureFor(snapshot.buildMode);
@@ -1200,9 +1225,9 @@ export class WorldView {
     this.ghost.setTexture(tex);
     this.ghost.setPosition(screen.x, screen.y + yOff);
     this.ghost.setDepth(depthFor(tile.x, tile.y, 15));
-    this.ghost.setAlpha(0.55);
+    this.ghost.setAlpha(ok ? 0.62 : 0.68);
     this.ghost.setScale(isPv(snapshot.buildMode) ? 1.15 : 1);
-    this.ghost.setTint(ok ? 0x66ff99 : 0xff6677);
+    this.ghost.setTint(ok ? 0x33ff88 : 0xff2244);
     this.ghost.setVisible(true);
   }
 

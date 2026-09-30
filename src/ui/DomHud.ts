@@ -23,7 +23,8 @@ function weatherLabel(w: GameSnapshot['weather']): string {
   }
 }
 
-function weatherIconClass(w: GameSnapshot['weather']): string {
+function weatherIconClass(w: GameSnapshot['weather'], irradiance: number): string {
+  if (irradiance < 0.05) return 'svg-moon';
   switch (w) {
     case 'clear':
       return 'svg-sun';
@@ -91,6 +92,9 @@ export class DomHud {
   private toastClearAt = 0;
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'all';
   private minimapCtx: CanvasRenderingContext2D | null = null;
+  private lastCash = -1;
+  private cashFloatUntil = 0;
+  private cashFloatAmount = 0;
 
   constructor(
     private readonly sim: GameSimulation,
@@ -113,6 +117,7 @@ export class DomHud {
             <strong data-k="cash-val">—</strong>
             <em data-k="cash-rate">—</em>
           </div>
+          <span class="cash-float" data-k="cash-float" hidden></span>
         </div>
 
         <div class="chip power" data-k="power-chip">
@@ -424,6 +429,21 @@ export class DomHud {
     };
 
     setText('cash-val', money(snapshot.cash));
+    const cashFloat = this.root.querySelector('[data-k="cash-float"]') as HTMLElement;
+    if (this.lastCash >= 0 && snapshot.cash > this.lastCash + 1) {
+      this.cashFloatAmount = snapshot.cash - this.lastCash;
+      this.cashFloatUntil = performance.now() + 1100;
+      cashFloat.textContent = `+${money(this.cashFloatAmount)}`;
+      cashFloat.hidden = false;
+      cashFloat.classList.remove('cash-float-animate');
+      void cashFloat.offsetWidth;
+      cashFloat.classList.add('cash-float-animate');
+    }
+    this.lastCash = snapshot.cash;
+    if (this.cashFloatUntil && performance.now() > this.cashFloatUntil) {
+      cashFloat.hidden = true;
+      this.cashFloatUntil = 0;
+    }
     const rate = snapshot.revenuePerHour || 0;
     setText('cash-rate', `${rate >= 0 ? '+' : '−'}${money(Math.abs(rate))}/h`);
     const cashRateEl = this.root.querySelector('[data-k="cash-rate"]') as HTMLElement | null;
@@ -438,7 +458,7 @@ export class DomHud {
     bar.style.width = `${pct}%`;
 
     const weatherEl = this.root.querySelector('[data-k="weather-icon"]') as HTMLElement;
-    weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather)}`;
+    weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather, snapshot.irradiance)}`;
     setText('weather-val', weatherLabel(snapshot.weather));
     // Irradiance folds in hour-of-day — don't show "-100% sun" at night while weather says Sunny.
     setText('weather-mod', weatherModLabel(snapshot.weather, snapshot.irradiance));

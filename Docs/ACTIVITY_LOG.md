@@ -38,6 +38,39 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 7 polish — feedback + framing toward 9.5
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Stronger build ghost valid/invalid colours (ghost_ok / ghost_bad pad + vivid green/red silhouette).
+- Pulsing select ring on selected equipment.
+- Night weather chip uses moon icon when irradiance &lt; 0.05.
+- Denser river rocks and bank bushes.
+- Staff walk bob (higher amplitude) + scaleX flip by movement direction.
+- Brief “+$N” float near cash chip when revenue ticks.
+- Camera framed higher so mountain backdrop visible on load.
+- `Docs/PHASER_QUALITY_SCORECARD.md`: honest Loop 5 rescore (~7.5 avg), Loop 6 (~8.4), Loop 7 (~8.6).
+
+**Tested / Verified**
+- `npm run typecheck` clean; `npm test` 8/8 pass.
+
+**Known issues / limitations**
+- Staff travel still teleports tile-to-tile (no path animation).
+- Side-view vans unchanged; not true iso.
+- Average ~8.6 — placement feedback strongest; vehicles/travel still below 9.5.
+
+**Decisions / assumptions / recommendations**
+- Did not claim ≥9.5 overall; next loop should target vehicle art + interpolated staff travel.
+
+**Next recommended step**
+- Loop 8: iso vehicle sprites or path tween for staff; rescore after hard visual review.
+
+**Git / References**
+- Branch: `cursor/phaser-level1-build-5938` / PR #7 / Issue #6
+
+---
 
 ## 2026-09-30 — Visual quality loops 1–5 toward 9.5/10
 
