@@ -122,11 +122,9 @@ const BUILD_ICONS: Record<string, string> = {
 };
 
 export class DomHud {
-  /** When true, the next DomHud construct skips the title (New Game flow). */
-  private static skipTitleOnce = false;
-
   private root: HTMLElement;
   private showTitle: boolean;
+  private _starting = false;
   private lastEventId: string | null = null;
   private lastObjectivesKey = '__uninit__';
   private lastBuildKey = '__uninit__';
@@ -150,15 +148,14 @@ export class DomHud {
   private audioPrimed = false;
 
   constructor(
-    private readonly sim: GameSimulation,
+    private sim: GameSimulation,
     private readonly onNewGame: () => void,
     private readonly onHudReset?: () => void,
   ) {
     const el = document.getElementById('ui-root');
     if (!el) throw new Error('#ui-root missing');
     this.root = el;
-    this.showTitle = !DomHud.skipTitleOnce;
-    DomHud.skipTitleOnce = false;
+    this.showTitle = true;
 
     this.root.innerHTML = `
       <header class="hud-top">
@@ -354,62 +351,75 @@ export class DomHud {
         return;
       }
       const action = t.getAttribute('data-action');
+      if (!action) return;
       if (action === 'cancel-build') {
         this.sim.setBuildMode(null);
         playSfx('click');
+        return;
       }
       if (action === 'save') {
         saveGame(this.sim.serialize());
         playSfx('save');
         this.sim.message = 'Game saved.';
+        return;
       }
       if (action === 'load') {
         this.applyLoad();
+        return;
       }
       if (action === 'new') {
         this.beginNewGame();
+        return;
       }
       if (action === 'mute') {
         toggleMute();
         this.syncMuteButton();
         playSfx('click');
+        return;
       }
       if (action === 'repair') {
         const id = t.getAttribute('data-id');
         this.sim.dispatchRepair(id);
         playSfx('repair');
+        return;
       }
       if (action === 'clean') {
         const id = t.getAttribute('data-id');
         this.sim.dispatchClean(id);
         playSfx('clean');
+        return;
       }
       if (action === 'event-choice') {
         const id = t.getAttribute('data-id');
         if (id) this.sim.resolveEventChoice(id);
         playSfx('click');
+        return;
       }
       if (action === 'dismiss-win') {
         const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
         win.hidden = true;
         playSfx('click');
+        return;
       }
       if (action === 'coach-next') {
         this.sim.advanceOnboarding();
         playSfx('click');
+        return;
       }
       if (action === 'coach-skip') {
         this.sim.dismissOnboarding();
         playSfx('click');
+        return;
       }
       if (action === 'title-continue') {
         this.applyLoadFromTitle();
+        return;
       }
       if (action === 'title-new') {
         this.beginNewGame();
       }
     };
-    this.root.addEventListener('pointerdown', handleUiAction);
+    // Click only — avoid double-firing beginNewGame from pointerdown+click.
     this.root.addEventListener('click', handleUiAction);
 
     window.addEventListener('keydown', (ev) => {
@@ -464,6 +474,24 @@ export class DomHud {
     return this.showTitle;
   }
 
+  /** Enter key / external start from title. */
+  startFromTitle(): void {
+    if (!this.showTitle) return;
+    if (hasSave()) this.applyLoadFromTitle();
+    else this.beginNewGame();
+  }
+
+  /** Swap simulation without recreating DOM listeners. */
+  rebindingSim(sim: GameSimulation, keepTitleHidden: boolean): void {
+    this.sim = sim;
+    this._starting = false;
+    this.resetCaches();
+    if (keepTitleHidden) this.hideTitleScreen();
+    else this.showTitleScreen();
+    this.refreshTitleActions();
+    this.syncMuteButton();
+  }
+
   /** Reset internal HUD caches after load / world rebuild (callable from GameScene). */
   resetCaches(): void {
     this.lastObjectivesKey = '__uninit__';
@@ -490,11 +518,13 @@ export class DomHud {
   }
 
   private beginNewGame(): void {
+    if (this._starting) return;
+    this._starting = true;
     clearSave();
-    DomHud.skipTitleOnce = true;
     this.hideTitleScreen();
+    playSfx('click');
     this.onNewGame();
-    // Fresh DomHud from onNewGame starts with onboardingStep 0 and skipTitleOnce.
+    this._starting = false;
   }
 
   private applyLoad(): void {
@@ -533,12 +563,31 @@ export class DomHud {
     if (!actions) return;
     const saved = hasSave();
     const saveMeta = getSaveMeta();
-    let html = '';
+    actions.replaceChildren();
     if (saved) {
-      html += `<button type="button" data-action="title-continue">Continue</button>`;
+      const cont = document.createElement('button');
+      cont.type = 'button';
+      cont.className = 'primary';
+      cont.dataset.action = 'title-continue';
+      cont.textContent = 'Continue';
+      cont.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.applyLoadFromTitle();
+      });
+      actions.appendChild(cont);
     }
-    html += `<button type="button" data-action="title-new">${saved ? 'New Game' : 'Start'}</button>`;
-    actions.innerHTML = html;
+    const start = document.createElement('button');
+    start.type = 'button';
+    start.className = saved ? '' : 'primary';
+    start.dataset.action = 'title-new';
+    start.textContent = saved ? 'New Game' : 'Start';
+    start.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.beginNewGame();
+    });
+    actions.appendChild(start);
     if (meta) {
       meta.textContent = saveMeta
         ? `Save from ${new Date(saveMeta.savedAt).toLocaleString()}`

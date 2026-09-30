@@ -26,7 +26,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     generateOverlayTextures(this);
-    this.startNewGame();
+    this.bootGame(true);
 
     const cam = this.cameras.main;
     let pressWorld: { x: number; y: number } | null = null;
@@ -36,7 +36,6 @@ export class GameScene extends Phaser.Scene {
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       initAudio();
       if (this.hud.isTitleVisible() || this.sim.snapshot().activeEvent) return;
-      // Right-click cancels placement.
       if (pointer.rightButtonDown() || pointer.button === 2) {
         if (this.sim.snapshot().buildMode) {
           this.sim.setBuildMode(null);
@@ -111,7 +110,6 @@ export class GameScene extends Phaser.Scene {
       this.world?.setPointerInWorld(true);
     });
 
-    // Disable browser context menu over the canvas so right-click cancel works.
     this.game.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
     this.input.keyboard?.on('keydown-SPACE', () => {
@@ -137,6 +135,9 @@ export class GameScene extends Phaser.Scene {
         playSfx('click');
       }
     });
+    this.input.keyboard?.on('keydown-ENTER', () => {
+      if (this.hud.isTitleVisible()) this.hud.startFromTitle();
+    });
   }
 
   private rebuildWorld(): void {
@@ -146,7 +147,8 @@ export class GameScene extends Phaser.Scene {
     this.lastStars = this.sim.stars;
   }
 
-  private startNewGame(): void {
+  /** Fresh sim + world. First boot shows title; New Game skips title via DomHud. */
+  private bootGame(showTitle: boolean): void {
     this.children.removeAll(true);
     generateOverlayTextures(this);
     this.sim = new GameSimulation();
@@ -154,17 +156,27 @@ export class GameScene extends Phaser.Scene {
     this.lastStars = 0;
     this.lastMsg = null;
     this.autosaveAcc = 0;
-    this.hud = new DomHud(
-      this.sim,
-      () => this.startNewGame(),
-      () => this.rebuildWorld(),
-    );
+    if (!this.hud) {
+      this.hud = new DomHud(
+        this.sim,
+        () => this.bootGame(false),
+        () => this.rebuildWorld(),
+      );
+    } else {
+      this.hud.rebindingSim(this.sim, showTitle);
+    }
+    if (showTitle) this.hud.showTitleScreen();
+    else this.hud.hideTitleScreen();
   }
 
   update(_t: number, delta: number): void {
     if (!this.sim || !this.hud) return;
-    // Pause sim while title is up.
-    if (!this.hud.isTitleVisible()) {
+    const titleUp = this.hud.isTitleVisible();
+    if (this.game.canvas) {
+      this.game.canvas.style.pointerEvents = titleUp ? 'none' : 'auto';
+    }
+    this.input.enabled = !titleUp;
+    if (!titleUp) {
       this.sim.update(delta / 1000);
       this.autosaveAcc += delta / 1000;
       if (this.autosaveAcc >= 45) {
@@ -178,17 +190,12 @@ export class GameScene extends Phaser.Scene {
       playSfx('star');
       this.lastStars = snap.stars;
     }
-    const commissioned = this.sim.consumeCommissionFlag();
-    if (commissioned) playSfx('commission');
+    if (this.sim.consumeCommissionFlag()) playSfx('commission');
     if (this.sim.consumeFaultToast()) playSfx('fault');
     if (this.sim.consumeUnlockToast()) playSfx('unlock');
-    if (snap.activeEvent && snap.message !== this.lastMsg) {
-      /* event open sfx handled in HUD */
-    }
     if (snap.message && snap.message !== this.lastMsg) {
       const m = snap.message.toLowerCase();
       if (m.includes('hail')) playSfx('hail');
-      else if (m.includes('event') || m.includes('meeting') || m.includes('warning')) playSfx('event');
     }
     this.lastMsg = snap.message;
 
