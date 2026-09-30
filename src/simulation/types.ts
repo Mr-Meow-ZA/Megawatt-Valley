@@ -1,6 +1,6 @@
 /** Shared simulation types for Megawatt Valley: Solar Level 1. */
 
-export type EquipmentKind = 'bargain_pv' | 'premium_pv' | 'inverter' | 'office' | 'substation';
+export type EquipmentKind = 'bargain_pv' | 'premium_pv' | 'inverter' | 'office' | 'substation' | 'road' | 'fence' | 'gate' | 'tree' | 'workshop' | 'sign';
 
 export type PlotId = 'site_a' | 'site_b';
 

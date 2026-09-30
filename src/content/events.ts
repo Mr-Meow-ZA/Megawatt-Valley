@@ -21,7 +21,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'promise',
         label: 'Promise a public tour',
-        description: 'No cash cost, but staff stay busy next week.',
+        description: 'No cash cost. A public tour is promised; no operational modifier.',
       },
     ],
   },
@@ -33,7 +33,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'buy',
         label: 'Buy the batch (−$5,000, +cash cushion later)',
-        description: 'Immediate discount voucher equivalent.',
+        description: 'Pay $5,000 and immediately resell for $7,500; net +$2,500.',
       },
       {
         id: 'pass',
@@ -50,7 +50,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'accept',
         label: 'Accept temporary curtailment',
-        description: 'Irradiance effective −15% for a while.',
+        description: 'Grid export −15% for 36 simulation hours; sunlight and generation are unchanged.',
       },
       {
         id: 'upgrade_talk',
@@ -101,7 +101,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'host',
         label: 'Host the shoot (−$1,500)',
-        description: '+$4,000 sponsorship lands after the edit.',
+        description: 'Receive $4,000 sponsorship immediately; net +$2,500.',
       },
       {
         id: 'busy',

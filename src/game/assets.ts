@@ -96,6 +96,12 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.destroy();
   };
 
+  make('safety_sign', 64, 64, (g) => {
+    g.fillStyle(0x5a4936,1); g.fillRect(28,24,5,38);
+    g.fillStyle(0xffd968,1); g.fillRect(6,3,52,28);
+    g.lineStyle(2,0x503a28,1); g.strokeRect(6,3,52,28);
+    g.fillStyle(0x503a28,1); g.fillRect(13,10,36,3); g.fillRect(16,17,30,2); g.fillRect(20,23,22,2);
+  });
   make('ghost_ok', 100, 60, (g) => {
     g.fillStyle(0x44ff88, 0.35);
     g.beginPath();

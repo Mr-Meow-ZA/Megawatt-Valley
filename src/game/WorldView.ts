@@ -64,6 +64,12 @@ const SITE_B = { x0: 22, x1: 34, y0: 6, y1: 16 };
 
 function textureFor(kind: EquipmentKind): string {
   switch (kind) {
+    case 'road': return 'tile_road_ew';
+    case 'fence': return 'fence';
+    case 'gate': return 'fence_short';
+    case 'tree': return 'tree_sm_0';
+    case 'workshop': return 'warehouse';
+    case 'sign': return 'safety_sign';
     case 'bargain_pv':
       return 'pv_bargain';
     case 'premium_pv':

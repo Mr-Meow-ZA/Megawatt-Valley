@@ -858,3 +858,5 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+.build-card.active { animation: none; box-shadow: 0 0 0 1px var(--accent) inset, 0 0 10px rgba(61,220,132,.2); }

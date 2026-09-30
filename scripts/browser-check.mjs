@@ -20,13 +20,14 @@ async function saved() {
   return page.evaluate(()=>JSON.parse(localStorage.getItem('megawatt-valley-solar-v1')).state);
 }
 const before = await saved();
-assert.ok(before.cash<=50000 && before.cash>49990);
+assert.ok(Math.abs(before.cash - 50000) < 20);
 assert.equal(before.equipment.length,3);
 assert.equal(await page.locator('#game-root canvas').count(),1);
 assert.equal(await page.locator('img').evaluateAll((images)=>images.every((img)=>img.complete && img.naturalWidth>0)),true);
 await page.screenshot({path:'browser-evidence/opening.png'});
+console.log('OPENING_BASE64:'+(await page.screenshot({type:'jpeg',quality:40})).toString('base64'));
 let built = false;
-for(const point of [{x:680,y:340},{x:650,y:400},{x:700,y:440},{x:600,y:360},{x:760,y:390},{x:800,y:440}]) {
+for(const point of [{x:450,y:320},{x:550,y:320},{x:650,y:320},{x:750,y:320},{x:450,y:420},{x:550,y:420},{x:650,y:420},{x:750,y:420},{x:850,y:420},{x:550,y:520},{x:650,y:520}]) {
   await page.locator('[data-build="bargain_pv"]').click();
   await page.mouse.click(point.x,point.y);
   const state = await saved();

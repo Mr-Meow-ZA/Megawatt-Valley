@@ -144,7 +144,7 @@ export class GameSimulation {
       rain: 0.3,
       hail: 0.15,
     };
-    return hourFactor * weatherFactor[this.weather] * this.curtailmentFactor;
+    return hourFactor * weatherFactor[this.weather];
   }
 
   private daylightFactor(hour: number): number {
@@ -176,7 +176,7 @@ export class GameSimulation {
       generationKw +=
         def.nameplateKw * def.efficiency * eq.condition * soilPenalty * irradiance * plot.solarResource;
     }
-    const exportedKw = Math.min(generationKw, this.inverterCapacity());
+    const exportedKw = Math.min(generationKw, this.inverterCapacity()) * this.curtailmentFactor;
     return { generationKw, exportedKw };
   }
 
@@ -197,6 +197,7 @@ export class GameSimulation {
   canPlace(kind: EquipmentKind, plotId: PlotId, tile: Vec2): string | null {
     const def = EQUIPMENT[kind];
     if (!def?.buildable) return 'Not buildable';
+    if (kind === 'workshop' && !this.capabilities.includes('radio_dispatch')) return 'Unlock workshop with your first repair';
     if (!Number.isInteger(tile.x) || !Number.isInteger(tile.y)) return 'Choose a whole tile';
     const plot = this.plots.find((p) => p.id === plotId);
     if (!plot?.unlocked) return 'Plot locked';
@@ -382,7 +383,8 @@ export class GameSimulation {
         this.applyHailDamage();
         this.hailSurvived = true;
         this.completeObjective('survive_hail');
-        this.weather = 'partly_cloudy';
+        this.weather = 'hail';
+        this.weatherTimer = 0;
         this.message = this.hailPrepared
           ? 'Hail passes. Prep paid off — damage is limited.'
           : 'Hail smacks the arrays. Repairs ahead.';
@@ -554,7 +556,7 @@ export class GameSimulation {
           }
         }
       } else if (task.type === 'repair') {
-        task.progress += hours * workRate / 0.5;
+        task.progress += hours * workRate / (this.equipment.some((e) => e.kind === 'workshop' && e.commissioned) ? 0.33 : 0.5);
         if (task.progress >= 1) {
           const target = this.equipment.find((e) => e.id === task.targetId);
           if (target) {
@@ -574,7 +576,7 @@ export class GameSimulation {
         }
       } else if (task.type === 'clean') {
         const kit = this.capabilities.includes('cleaning_kit');
-        task.progress += hours * workRate / (kit ? 0.25 : 0.45);
+        task.progress += hours * workRate * (tech.trait === 'Panel Whisperer' ? 1.15 : 1) / (kit ? 0.25 : 0.45);
         if (task.progress >= 1) {
           const target = this.equipment.find((e) => e.id === task.targetId);
           if (target) {
@@ -599,7 +601,10 @@ export class GameSimulation {
   }
 
   private updateWeather(): void {
-    if (this.weather === 'hail') return;
+    if (this.weather === 'hail') {
+      if (this.weatherTimer < 2) return;
+      this.weather = 'partly_cloudy'; this.weatherTimer = 0; return;
+    }
     if (this.weatherTimer < 4 + (this.day % 3)) return;
     this.weatherTimer = 0;
     const roll = this.random();

@@ -106,7 +106,7 @@ export class DomHud {
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
   private toastClearAt = 0;
-  private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'all';
+  private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'generation';
   private minimapCtx: CanvasRenderingContext2D | null = null;
   private lastCash = -1;
   private cashFloatUntil = 0;
@@ -205,8 +205,8 @@ export class DomHud {
       <aside class="panel build">
         <h2>Build</h2>
         <div class="build-tabs">
-          <button type="button" data-cat="all" class="active">All</button>
-          <button type="button" data-cat="generation">Generation</button>
+          <button type="button" data-cat="all">All</button>
+          <button type="button" data-cat="generation" class="active">Generation</button>
           <button type="button" data-cat="grid">Grid</button>
           <button type="button" data-cat="support">Support</button>
         </div>
@@ -529,7 +529,7 @@ export class DomHud {
     setText('cash-rate', `${rate >= 0 ? '+' : '−'}${money(Math.abs(rate))}/h`);
     const cashRateEl = this.root.querySelector('[data-k="cash-rate"]') as HTMLElement | null;
     if (cashRateEl) cashRateEl.style.color = rate >= 0 ? 'var(--accent)' : 'var(--danger)';
-    const cheapestBuild = Math.min(...BUILD_MENU_ORDER.map((id) => EQUIPMENT[id].cost));
+    const cheapestBuild = EQUIPMENT.bargain_pv.cost;
     const cashChip = this.root.querySelector('[data-k="cash-chip"]') as HTMLElement | null;
     cashChip?.classList.toggle('cash-low', snapshot.cash < cheapestBuild);
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
@@ -631,7 +631,7 @@ export class DomHud {
           return `<button type="button" class="build-card ${active}" data-build="${id}" title="${tip.replace(/"/g, '&quot;')}">
             <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
             <strong>${def.name}</strong>
-            <span class="price">${money(def.cost)}</span>
+            <span class="price">${money(def.cost)}</span><small>${def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% reliability" : "Site improvement"}</small><small>${def.description}</small>
           </button>`;
         })
         .join('');
@@ -675,7 +675,7 @@ export class DomHud {
       const owned = snapshot.capabilities.includes(id);
       const locked = !snapshot.plots[1].unlocked || (id === 'scheduled_cleaning' && !snapshot.capabilities.includes('cleaning_rig'));
       return '<button type="button" data-action="capability" data-id="' + id + '" ' + (owned || locked ? 'disabled' : '') + ' title="' + CAPABILITY_INFO[id].description + '">' + (owned ? '✓ ' : locked ? 'Locked · ' : '') + CAPABILITY_INFO[id].name + '</button><small>' + CAPABILITY_INFO[id].description + '</small>';
-    }).join('') + '<small>Future branches: Bifacial PV → Trackers · Reliability → Predictive Maintenance · Digital → SCADA → Robots · People → Regional O&M · Grid → BESS · Commercial → PPAs.</small>';
+    }).join('') + '<details><summary>Company capability tree</summary><h3>Generation technology</h3><small>✓ Fixed tilt → ✓ Premium PV → 🔒 Bifacial → 🔒 Trackers → 🔒 Wind</small><h3>Operations & reliability</h3><small>✓ Manual repairs → Earn Radio Dispatch + Workshop → Cleaning Kit → Cleaning Rig → Scheduled Cleaning → 🔒 Predictive Maintenance</small><h3>Digital & automation</h3><small>✓ Basic monitoring → Radio Dispatch → Remote Monitoring → 🔒 SCADA → 🔒 Robots → 🔒 Command Centre</small><h3>People & organisation</h3><small>✓ Technician → Hire Cleaner / Engineer / Manager → Train skills → 🔒 Regional O&M</small><h3>Grid & flexibility</h3><small>✓ Basic grid → Build Inverter → 🔒 BESS → 🔒 Hybrid systems</small><h3>Development & commercial</h3><small>✓ Site A → Earn Site B → 🔒 Site studies → 🔒 PPAs → 🔒 Multi-project finance</small><small>Locked future nodes are previews for later scenarios.</small></details>';
     if (capActions.innerHTML !== capHtml) capActions.innerHTML = capHtml;
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
     const rosterHtml = snapshot.staff.map((s) => '<div><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '">Train · $800</button></div>').join('');
