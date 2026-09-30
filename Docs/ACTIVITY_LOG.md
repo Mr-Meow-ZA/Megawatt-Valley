@@ -38,7 +38,37 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
-## 2026-09-29 — Support — Rebuild curated game sprites (Pillow)
+## 2026-09-30 — Visual polish — Procedural solar sprites + HUD
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Added `Tools/rebuild_solar_sprites.py`: Pillow-drawn isometric azure PV farms (cell grid, steel racks, gravel diamond, soft shadow, chain-link fence). Outputs `pv_bargain.png` / `pv_premium.png` (280×200) and `pv_group.png` (160×120). Premium uses gold frames.
+- Extracted `tech.png` idle frame from `worker_sheet.png` (white keyed → alpha, ~2× nearest).
+- HUD: BUILD_ICONS point at bargain/premium/office/substation game sprites; inverter uses `icon_power`. Minimap gains sine meander river + road lines. Weather chip shows Night / Peak sun / % sun instead of “-100% sun” at night.
+- `assets.ts` preloads `tech`.
+
+**Tested / Verified**
+- `npm run typecheck` + `npm test` (8/8 pass).
+- Visual QA of rebuilt PNGs on green checker.
+
+**Known issues / limitations**
+- `pv_single` / `pv_portrait` Kenney leftovers remain unused by farm builders.
+- Procedural panels are stylised pixel-drawings, not photographic.
+
+**Decisions / assumptions / recommendations**
+- Do not re-composite Kenney industrial solar arches into farm sprites.
+- Weather mod label uses combined irradiance for night detection; sky quality for daytime %.
+
+**Next recommended step**
+- In-browser visual review of Level 1 solar farms + tech props; then M5 polish / deploy track.
+
+**Git / References**
+- Commit: `0284ef9`
+- Branch / PR: `cursor/phaser-level1-build-5938` / #7
+
+---
 
 **Agent:** Cursor
 **Status:** Complete
