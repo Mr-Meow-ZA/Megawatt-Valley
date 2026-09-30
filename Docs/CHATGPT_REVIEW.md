@@ -1,71 +1,51 @@
 # Megawatt Valley — ChatGPT Review State
 
 ## Latest review
+**Review date:** 2026-09-30
 
-**Review date:** 2026-09-20
+**Repository state reviewed:** main after the 29 September Phaser pivot, plus open PR #7.
 
-**Repository state reviewed:** `main` through `a770461`
+**Alignment status:** Healthy major rebaseline. Phaser / TypeScript is now the approved primary path; the Unity build is archived. PR #7 contains a substantial autonomous Level 1 implementation and now needs product-owner acceptance rather than more feature expansion.
 
-**Alignment status:** Healthy. Rapha accepted the E1-01…E1-05 engagement chain in human playtest; the next single implementation goal is E1-06 — First capability choice.
-
-## What changed since the previous review
-
-The meaningful change since the 2026-09-19 ChatGPT review is **playtest acceptance**, not additional gameplay implementation.
-
-- Rapha completed the E1 focus playtest and reported the checklist passed.
-- `E1-08 — Rapha engagement playtest` is recorded complete.
-- `CURRENT_STATUS.md` now correctly pauses development between sessions and points to E1-06, then E1-07.
-- Cursor added a concise activity-log handoff recording successful human verification of Radio Dispatch, soiling/cleaning, NEXT/capabilities HUD, stars/Site B and paused events.
-- No later gameplay commit was found after the accepted E1-01…E1-05 implementation; the latest commits are documentation/handoff commits (`d4fd4f2`, `a770461`).
+## Meaningful changes
+- Pixel-isometric autonomous development was promoted from experiment to the official production direction.
+- The Unity implementation was preserved on `archive/unity-prototype-2026-09-29`.
+- Current status, primary build spec, architecture, visual direction and roadmap were rebaselined for Phaser + TypeScript + Vite.
+- `SESSION_GOALS.md` is now explicitly an archived Unity-era tracker.
+- Issue #6 became the primary Level 1 production tracker.
+- PR #7 reports a playable Level 1 including isometric world/building, solar/economy, staff operations, Radio Dispatch and Cleaning Kit capabilities, events, stars, hail climax and save/load, plus automated tests and repeated visual QA.
 
 ## Alignment review
+**Game vision:** aligned. The renewable-energy tycoon loop and “realism in cause and effect, abstraction in execution” remain intact.
 
-### Active goal / progression design
+**Progression:** aligned. The Management Abstraction Ladder remains central, and PR #7 reports the Level 1 manual-to-automation proof systems.
 
-Aligned. The playtest result clears the specific blocker from the previous review: the implemented manual → earned automation progression has now been verified by Rapha rather than only by automated tests/code review.
+**Visual direction:** aligned conceptually. The active target is polished high-resolution pixel-isometric / illustrated pixel art with a crisp modern UI. Cursor's self-reported visual score is useful internal QA, but not product acceptance.
 
-The next smallest goal should remain **E1-06 — First capability choice**. It should introduce one genuine player choice between two useful capability directions without expanding into the full future Company Capability Tree, research currency or R&D system.
+**Architecture:** aligned. Browser-first Phaser/TypeScript, simulation separated from presentation, data-driven content, versioned local saves, no required backend and minimal dependencies fit the autonomy requirement well.
 
-### Game vision
+## Drift / risks
+- The old recommendation to implement Unity E1-06 is obsolete after Rapha's explicit production pivot.
+- Fast autonomous batching is now intentional, but human acceptance gates still matter.
+- Do not treat PR #7's self-scored 9.5/10 as proof that the visual or gameplay target has been met.
+- Old Unity-era issues/PRs are historical context, not active instructions. PR #4 is obsolete against the new primary direction.
+- Do not expand into wind, BESS or the broader campaign before the solar Level 1 is accepted.
 
-Aligned. The accepted chain reinforces the intended renewable-energy tycoon identity: operational problems are experienced, learned and then progressively delegated/automated. No unrelated simulation depth or content expansion has appeared since the previous review.
-
-### Technical architecture
-
-No new architecture change occurred after the previous review. The existing small capability-state model remains appropriate. E1-06 should reuse that model and avoid introducing a generic effect engine or large research framework.
-
-### Visual direction / asset policy
-
-No visual-production drift occurred. Hero Corner has not started early. Community-first, custom-by-exception remains the approved Level 1 asset policy.
-
-## Process / scope review
-
-The previous concern remains useful as a guardrail: Cursor implemented E1-01…E1-05 in one batch despite a one-goal handoff. The resulting work passed Rapha's playtest, so there is nothing to undo. Resume the normal discipline now: **implement E1-06 only, test/commit/handoff, then stop before E1-07 unless Rapha explicitly authorises continuation.**
-
-## Housekeeping
-
-- GitHub issue **#5** is still open even though E1-01 is complete and accepted. It is stale and should be closed/updated during repository housekeeping.
-- Draft PR **#4** remains based on an obsolete pre-Level-1/S6 timeline. Do not merge it as-is; refresh it against the current E1 state or close it as redundant.
-- Neither housekeeping item blocks E1-06.
+## Blocker
+No architecture blocker is visible. The practical gate is Rapha playing the PR #7 build from a fresh start and judging fun, pacing, clarity, visual quality and progression.
 
 ## Recommended next smallest useful goal
+**Acceptance pass for PR #7 — first complete autonomous Level 1 build.**
 
-**E1-06 — First capability choice.**
+1. Make the PR build straightforward to launch/play.
+2. Play fresh new game through at least 1★.
+3. Pay particular attention to the first 15–20 minutes.
+4. Record confusing UI, dead time, weak rewards, visual inconsistencies and bugs.
+5. Fix only the issues exposed by that acceptance pass.
+6. Re-run tests/build/playthrough.
+7. Merge once the experience is genuinely acceptable.
 
-Implement one clear two-option capability decision using the existing capability model. The purpose is to prove that progression can involve player agency rather than only predetermined unlocks.
-
-Acceptance intent:
-
-1. A clear progression beat offers two materially useful capability options.
-2. The player understands the practical difference before choosing.
-3. Choosing one unlocks it and creates a visible/playable effect.
-4. The other option remains visibly unavailable/deferred rather than silently disappearing.
-5. Save/load preserves the choice.
-6. Reuse `CompanyCapabilities`; do not create the full tech tree, research currency, R&D department or generic modifier framework.
-7. Update tests/docs and stop after E1-06 for review/playtest.
-
-After E1-06 is accepted, the next goal is **E1-07 — Unlocks feel rewarding**. Then perform only the smallest E1-09 engagement-gate fixes actually indicated by play before moving to Hero Corner.
+After acceptance, choose the next roadmap item from playtest evidence rather than automatically adding future systems.
 
 ## Current project question
-
-> Can the first player-selected capability make company progression feel meaningfully *chosen*, not merely awarded, while keeping the capability architecture deliberately small?
+> Does PR #7 already feel like a coherent, fun, polished first Megawatt Valley level when Rapha plays it, or has implementation moved faster than player experience?
