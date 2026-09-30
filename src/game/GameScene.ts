@@ -261,6 +261,10 @@ export class GameScene extends Phaser.Scene {
       }
     } else if (ceremony === 'first_power') {
       this.cameras.main.flash(280, 180, 230, 160, false);
+      const z = this.cameras.main.zoom;
+      this.cameras.main.zoomTo(Math.min(1.35, z * 1.12), 420, 'Sine.easeOut', true, (_cam, progress) => {
+        if (progress >= 1) this.cameras.main.zoomTo(z, 500, 'Sine.easeInOut');
+      });
     }
   }
 }
