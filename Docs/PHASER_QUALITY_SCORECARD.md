@@ -449,3 +449,27 @@ Done:
 | Simulation UX | 8.9 | Holds Loop 16 |
 | Overall cohesion | 9.1 | Composition/readability pass feels unified |
 | **Average** | **9.0** | Harsh QA; ~0.2 lift from Loop 16; still below 9.5 target |
+
+---
+
+## Loop 18 — ops feedback polish
+
+Done:
+- [x] Pulsing amber ops beacon ellipse on commissioned substation sprite
+- [x] Yellow dashed Graphics line from staff to target during travel/repair tasks
+- [x] HUD power bar green glow (`box-shadow`) when fill > 40%
+- [x] 40% chance small `rock` prop on each `tile_beach` terrain tile
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.1 | Beach rock scatter adds south-shore detail |
+| Props & foliage | 9.2 | Coastal clutter; still procedural Kenney mix |
+| Solar / grid | 9.2 | Substation amber beacon reads "live yard" |
+| Staff & vehicles | 9.3 | Dashed dispatch line makes repair routing obvious |
+| Placement feedback | 8.9 | Holds Loop 16 |
+| HUD / UI | 9.3 | Power bar glow reinforces export headroom |
+| Atmosphere | 9.2 | Beach rocks + substation beacon add daytime life |
+| Readability vs concept | 9.2 | Ops indicators improve campus/site read |
+| Simulation UX | 9.3 | Travel/repair line closes dispatch feedback gap |
+| Overall cohesion | 9.3 | Ops feedback layer (light, line, bar) feels unified |
+| **Average** | **9.2** | Harsh QA; meets ≥9.2 target; path to 9.5 = hand-painted equipment art, SFX, richer staff idle/work anims |

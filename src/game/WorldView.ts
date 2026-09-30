@@ -166,6 +166,7 @@ export class WorldView {
   private pointerInWorld = true;
   private readonly gravelPads = new Map<string, Phaser.GameObjects.Image>();
   private readonly productionGlows = new Map<string, Phaser.GameObjects.Ellipse>();
+  private readonly substationLights = new Map<string, Phaser.GameObjects.Ellipse>();
   private readonly faultHalos = new Map<string, Phaser.GameObjects.Image>();
   private readonly buildRings = new Map<string, Phaser.GameObjects.Image>();
   private readonly commissionPuffs = new Map<string, Phaser.GameObjects.Graphics>();
@@ -182,6 +183,7 @@ export class WorldView {
   private birds: SkyBird[] = [];
   private readonly powerLineSparkPoints: PowerLineSpark[] = [];
   private powerSparks: Phaser.GameObjects.Graphics | null = null;
+  private staffTaskLines: Phaser.GameObjects.Graphics | null = null;
   private dustMotes: DustMote[] = [];
   private pollenMotles: PollenMote[] = [];
   private forestEdgeTiles: Array<[number, number]> = [];
@@ -417,6 +419,12 @@ export class WorldView {
           img.setTint(
             Phaser.Display.Color.GetColor(255, Math.floor(228 + (hash(x, y) % 8)), Math.floor(175 + (hash(x, y) % 12))),
           );
+          const h = hash(x, y);
+          if (h % 10 < 4) {
+            const jx = 0.25 + (h % 7) * 0.08;
+            const jy = 0.2 + ((h >> 2) % 6) * 0.07;
+            this.addProp('rock', x + jx, y + jy, -3, 1, 0.38 + (h % 3) * 0.05);
+          }
         } else if (key.startsWith('tile_grass_hd_')) {
           const h = hash(x, y);
           const gBoost = (h % 20) - 8;
@@ -571,6 +579,67 @@ export class WorldView {
       g.strokePath();
     }
     this.props.push(g);
+  }
+
+  /** Yellow dashed segment between two screen points (staff dispatch indicator). */
+  private drawDashedLine(
+    g: Phaser.GameObjects.Graphics,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    dash = 7,
+    gap = 5,
+  ): void {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    if (len < 2) return;
+    const ux = dx / len;
+    const uy = dy / len;
+    let t = 0;
+    while (t < len) {
+      const tEnd = Math.min(t + dash, len);
+      g.beginPath();
+      g.moveTo(x1 + ux * t, y1 + uy * t);
+      g.lineTo(x1 + ux * tEnd, y1 + uy * tEnd);
+      g.strokePath();
+      t += dash + gap;
+    }
+  }
+
+  private updateStaffTaskLines(snapshot: GameSnapshot): void {
+    if (!this.staffTaskLines) {
+      this.staffTaskLines = this.scene.add.graphics();
+      this.staffTaskLines.setDepth(848);
+    }
+    const g = this.staffTaskLines;
+    g.clear();
+    let any = false;
+    for (const staff of snapshot.staff) {
+      const task = staff.task;
+      if (task.type !== 'travel' && task.type !== 'repair') continue;
+      const target = snapshot.equipment.find((e) => e.id === task.targetId);
+      if (!target) continue;
+      any = true;
+      const staffPos = isoToScreen(staff.tile.x, staff.tile.y);
+      const staffElev = this.heightAt(Math.floor(staff.tile.x), Math.floor(staff.tile.y));
+      const sx = staffPos.x;
+      const sy = staffPos.y - 18 - staffElev * 5;
+      const def = EQUIPMENT[target.kind];
+      const tx = target.tile.x + def.footprint.x / 2 - 0.5;
+      const ty = target.tile.y + def.footprint.y / 2 - 0.5;
+      const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
+      const anchor = isoToScreen(tx, ty);
+      const yOff =
+        (isPv(target.kind) ? -36 : target.kind === 'office' || target.kind === 'substation' ? -40 : -18) -
+        elev * 5;
+      const ex = anchor.x;
+      const ey = anchor.y + yOff + 14;
+      g.lineStyle(2.2, 0xffdd44, 0.88);
+      this.drawDashedLine(g, sx, sy, ex, ey);
+    }
+    g.setVisible(any);
   }
 
   /** Thin white dashed centre line on the main E–W asphalt corridor (y = 6). */
@@ -1488,6 +1557,25 @@ export class WorldView {
         this.applyDirectionalLight(sprite, snapshot.irradiance, night);
       }
 
+      if (eq.kind === 'substation') {
+        let opsLight = this.substationLights.get(eq.id);
+        if (eq.commissioned) {
+          if (!opsLight) {
+            opsLight = this.scene.add.ellipse(anchor.x, anchor.y + yOff - 52, 12, 9, 0xffaa22, 0);
+            opsLight.setBlendMode(Phaser.BlendModes.ADD);
+            this.substationLights.set(eq.id, opsLight);
+          }
+          const pulse = 0.5 + Math.sin(this.scene.time.now / 380 + hash(eq.tile.x, eq.tile.y)) * 0.28;
+          opsLight.setPosition(anchor.x + 18, anchor.y + yOff - 54);
+          opsLight.setScale(0.9 + Math.sin(this.scene.time.now / 520) * 0.12);
+          opsLight.setAlpha(pulse);
+          opsLight.setDepth(depthFor(eq.tile.x, eq.tile.y, 18));
+          opsLight.setVisible(true);
+        } else if (opsLight) {
+          opsLight.setVisible(false);
+        }
+      }
+
       const building = eq.constructionProgress < 1;
       let buildRing = this.buildRings.get(eq.id);
       if (building) {
@@ -1614,6 +1702,8 @@ export class WorldView {
       }
     }
 
+    this.updateStaffTaskLines(snapshot);
+
     for (const [id, sprite] of this.entitySprites) {
       if (!seen.has(id)) {
         sprite.destroy();
@@ -1626,6 +1716,8 @@ export class WorldView {
         this.gravelPads.delete(id);
         this.productionGlows.get(id)?.destroy();
         this.productionGlows.delete(id);
+        this.substationLights.get(id)?.destroy();
+        this.substationLights.delete(id);
         this.buildRings.get(id)?.destroy();
         this.buildRings.delete(id);
         this.prevConstruction.delete(id);

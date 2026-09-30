@@ -508,6 +508,7 @@ export class DomHud {
     const pct = Math.min(100, (snapshot.exportedKw / capacity) * 100);
     const bar = this.root.querySelector('[data-k="power-bar"]') as HTMLElement;
     bar.style.width = `${pct}%`;
+    bar.classList.toggle('bar-glow', pct > 40);
 
     const weatherEl = this.root.querySelector('[data-k="weather-icon"]') as HTMLElement;
     weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather, snapshot.irradiance)}`;

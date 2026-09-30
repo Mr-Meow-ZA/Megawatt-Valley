@@ -277,6 +277,13 @@ html, body, #app {
   transition: width 0.2s ease;
 }
 
+.bar i.bar-glow {
+  box-shadow:
+    0 0 5px rgba(125, 255, 176, 0.85),
+    0 0 10px rgba(47, 191, 113, 0.55),
+    0 0 16px rgba(47, 191, 113, 0.25);
+}
+
 .speed-group {
   display: flex;
   gap: 4px;
