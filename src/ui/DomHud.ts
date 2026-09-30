@@ -75,7 +75,19 @@ function seasonForDay(day: number): string {
 const BUILD_ICONS: Record<string, string> = {
   bargain_pv: '<img src="/assets/game/pv_bargain.png" alt="" width="40" height="28"/>',
   premium_pv: '<img src="/assets/game/pv_premium.png" alt="" width="40" height="28"/>',
-  inverter: '<img src="/assets/game/icon_power.png" alt="" width="28" height="28" style="filter:invert(1) sepia(1) saturate(5) hue-rotate(80deg)"/>',
+  inverter:
+    '<svg viewBox="0 0 36 36" width="36" height="28" aria-hidden="true" class="build-icon-inverter">' +
+    '<ellipse cx="18" cy="30" rx="11" ry="3.5" fill="rgba(0,0,0,0.28)"/>' +
+    '<rect x="10" y="8" width="16" height="18" rx="3" fill="#3a4454"/>' +
+    '<rect x="12" y="10" width="12" height="10" rx="1.5" fill="#2a3344"/>' +
+    '<line x1="13" y1="12" x2="23" y2="12" stroke="#5a6a7a" stroke-width="0.9"/>' +
+    '<line x1="13" y1="15" x2="23" y2="15" stroke="#5a6a7a" stroke-width="0.9"/>' +
+    '<line x1="13" y1="18" x2="23" y2="18" stroke="#5a6a7a" stroke-width="0.9"/>' +
+    '<rect x="12" y="21" width="12" height="5" rx="1.5" fill="#1a2230"/>' +
+    '<circle cx="14.5" cy="23.5" r="1.4" fill="#3ddc84"/>' +
+    '<circle cx="18" cy="23.5" r="1.4" fill="#f5c542"/>' +
+    '<circle cx="21.5" cy="23.5" r="1.4" fill="#6ec8ff"/>' +
+    '</svg>',
   office: '<img src="/assets/game/office.png" alt="" width="36" height="28"/>',
   substation: '<img src="/assets/game/substation.png" alt="" width="36" height="28"/>',
 };
@@ -95,6 +107,10 @@ export class DomHud {
   private lastCash = -1;
   private cashFloatUntil = 0;
   private cashFloatAmount = 0;
+  private lastExportedKw = -1;
+  private powerFloatUntil = 0;
+  private powerFloatAmount = 0;
+  private lastStars = 0;
 
   constructor(
     private readonly sim: GameSimulation,
@@ -134,6 +150,7 @@ export class DomHud {
             <strong data-k="power-val">—</strong>
             <div class="bar"><i data-k="power-bar"></i></div>
           </div>
+          <span class="power-float" data-k="power-float" hidden></span>
         </div>
 
         <div class="chip weather" data-k="weather-chip">
@@ -459,6 +476,21 @@ export class DomHud {
     const cashChip = this.root.querySelector('[data-k="cash-chip"]') as HTMLElement | null;
     cashChip?.classList.toggle('cash-low', snapshot.cash < cheapestBuild);
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
+    const powerFloat = this.root.querySelector('[data-k="power-float"]') as HTMLElement;
+    if (this.lastExportedKw >= 0 && snapshot.exportedKw > this.lastExportedKw + 0.2) {
+      this.powerFloatAmount = snapshot.exportedKw - this.lastExportedKw;
+      this.powerFloatUntil = performance.now() + 1100;
+      powerFloat.textContent = `+${this.powerFloatAmount.toFixed(1)} kW`;
+      powerFloat.hidden = false;
+      powerFloat.classList.remove('power-float-animate');
+      void powerFloat.offsetWidth;
+      powerFloat.classList.add('power-float-animate');
+    }
+    this.lastExportedKw = snapshot.exportedKw;
+    if (this.powerFloatUntil && performance.now() > this.powerFloatUntil) {
+      powerFloat.hidden = true;
+      this.powerFloatUntil = 0;
+    }
     const capacity = Math.max(100, snapshot.powerKw * 1.15, snapshot.exportedKw);
     const pct = Math.min(100, (snapshot.exportedKw / capacity) * 100);
     const bar = this.root.querySelector('[data-k="power-bar"]') as HTMLElement;
@@ -475,7 +507,15 @@ export class DomHud {
 
     const stars = this.root.querySelector('[data-k="stars"]') as HTMLElement;
     const starText = `${'★'.repeat(snapshot.stars)}${'☆'.repeat(3 - snapshot.stars)}`;
-    if (stars.textContent !== starText) stars.textContent = starText;
+    if (stars.textContent !== starText) {
+      stars.textContent = starText;
+      if (snapshot.stars > this.lastStars) {
+        stars.classList.remove('stars-fill-pop');
+        void stars.offsetWidth;
+        stars.classList.add('stars-fill-pop');
+      }
+    }
+    this.lastStars = snapshot.stars;
 
     this.root.querySelectorAll('[data-speed]').forEach((btn) => {
       const b = btn as HTMLElement;

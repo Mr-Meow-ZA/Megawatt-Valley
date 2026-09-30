@@ -397,3 +397,30 @@ Done:
 | Simulation UX | 8.5 | Holds |
 | Overall cohesion | 8.7 | Visible jump in organic props; cliffs less intrusive |
 | **Average** | **8.7** | Harsh QA; trees landed well; still below 9.5 target |
+
+---
+
+## Loop 16 — placement pulse, production glow, power float
+
+Done:
+- [x] Ghost uses actual equipment texture at 0.6 alpha with strong green/red tint
+- [x] Pulsing white `select_ring` under valid ghost footprint
+- [x] Larger, brighter invalid placement X (22px, thicker stroke)
+- [x] Inverter build card: canvas-style SVG cabinet icon (replaces flat power bolt)
+- [x] Build card prices in accent green; star fill pop animation on star gain
+- [x] ADD yellow production glow ellipse under commissioned PV when irradiance > 0.3
+- [x] Floaty `+kW` near power chip when export jumps > 0.2 kW
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.7 | Holds Loop 15 |
+| Props & foliage | 9.0 | Holds Loop 15 |
+| Solar / grid | 8.8 | Production glow under live PV arrays |
+| Staff & vehicles | 8.8 | Holds Loop 15 |
+| Placement feedback | 8.9 | Equipment ghost + pulsing ring + brighter invalid X |
+| HUD / UI | 8.9 | Inverter SVG icon, accent prices, star pop |
+| Atmosphere | 8.8 | Warm production glow adds daytime life |
+| Readability vs concept | 8.6 | Holds |
+| Simulation UX | 8.9 | Power float + production glow reinforce export feedback |
+| Overall cohesion | 8.8 | Placement/HUD/sim polish reads as one pass |
+| **Average** | **8.8** | Harsh QA; visible jump in weakest categories; still below 9.5 target |

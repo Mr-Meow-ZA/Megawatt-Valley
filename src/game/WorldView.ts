@@ -158,12 +158,14 @@ export class WorldView {
   private ghost: Phaser.GameObjects.Image | null = null;
   private ghostPad: Phaser.GameObjects.Image | null = null;
   private ghostInvalidX: Phaser.GameObjects.Graphics | null = null;
+  private ghostRing: Phaser.GameObjects.Image | null = null;
   private readonly ghostFootprintPads: Phaser.GameObjects.Image[] = [];
   private selectRing: Phaser.GameObjects.Image | null = null;
   private hoverHighlight: Phaser.GameObjects.Image | null = null;
   private hoverTile: Vec2 | null = null;
   private pointerInWorld = true;
   private readonly gravelPads = new Map<string, Phaser.GameObjects.Image>();
+  private readonly productionGlows = new Map<string, Phaser.GameObjects.Ellipse>();
   private readonly faultHalos = new Map<string, Phaser.GameObjects.Image>();
   private readonly buildRings = new Map<string, Phaser.GameObjects.Image>();
   private readonly commissionPuffs = new Map<string, Phaser.GameObjects.Graphics>();
@@ -1359,6 +1361,32 @@ export class WorldView {
         pad.setDepth(depthFor(eq.tile.x, eq.tile.y, 2));
         pad.setAlpha(eq.commissioned ? 0.92 : 0.45 + eq.constructionProgress * 0.4);
         pad.setVisible(true);
+
+        const producing =
+          eq.commissioned && !eq.faulted && snapshot.irradiance > 0.3;
+        let glow = this.productionGlows.get(eq.id);
+        if (producing) {
+          if (!glow) {
+            glow = this.scene.add.ellipse(
+              anchor.x,
+              anchor.y + 14 - elev * 5,
+              72,
+              28,
+              0xffe066,
+              0,
+            );
+            glow.setBlendMode(Phaser.BlendModes.ADD);
+            this.productionGlows.set(eq.id, glow);
+          }
+          const pulse = 0.22 + Math.sin(this.scene.time.now / 480 + hash(eq.tile.x, eq.tile.y)) * 0.08;
+          glow.setPosition(anchor.x, anchor.y + 14 - elev * 5);
+          glow.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.55 + 0.35);
+          glow.setAlpha(pulse);
+          glow.setDepth(depthFor(eq.tile.x, eq.tile.y, 3));
+          glow.setVisible(true);
+        } else if (glow) {
+          glow.setVisible(false);
+        }
       }
 
       let shadow = this.entityShadows.get(eq.id);
@@ -1556,6 +1584,8 @@ export class WorldView {
         this.faultHalos.delete(id);
         this.gravelPads.get(id)?.destroy();
         this.gravelPads.delete(id);
+        this.productionGlows.get(id)?.destroy();
+        this.productionGlows.delete(id);
         this.buildRings.get(id)?.destroy();
         this.buildRings.delete(id);
         this.prevConstruction.delete(id);
@@ -1634,6 +1664,7 @@ export class WorldView {
     if (!snapshot.buildMode) {
       this.ghost?.setVisible(false);
       this.ghostPad?.setVisible(false);
+      this.ghostRing?.setVisible(false);
       this.ghostInvalidX?.setVisible(false);
       for (const pad of this.ghostFootprintPads) pad.setVisible(false);
       return;
@@ -1676,10 +1707,10 @@ export class WorldView {
       this.ghostInvalidX = this.scene.add.graphics();
     }
     if (!ok) {
-      const xFlash = 0.55 + Math.sin(t / 120) * 0.4;
+      const xFlash = 0.72 + Math.sin(t / 100) * 0.28;
       this.ghostInvalidX.clear();
-      this.ghostInvalidX.lineStyle(3.5, 0xff1122, xFlash);
-      const sz = 14;
+      this.ghostInvalidX.lineStyle(5.5, 0xff2244, xFlash);
+      const sz = 22;
       this.ghostInvalidX.beginPath();
       this.ghostInvalidX.moveTo(screen.x - sz, padY - sz * 0.5);
       this.ghostInvalidX.lineTo(screen.x + sz, padY + sz * 0.5);
@@ -1688,8 +1719,20 @@ export class WorldView {
       this.ghostInvalidX.strokePath();
       this.ghostInvalidX.setDepth(depthFor(tile.x, tile.y, 16));
       this.ghostInvalidX.setVisible(true);
+      this.ghostRing?.setVisible(false);
     } else {
       this.ghostInvalidX.setVisible(false);
+      if (!this.ghostRing) {
+        this.ghostRing = this.scene.add.image(screen.x, padY, 'select_ring');
+        this.ghostRing.setTint(0xffffff);
+      }
+      const ringPulse = 0.92 + Math.sin(t / 340) * 0.1;
+      const ringAlpha = 0.22 + Math.sin(t / 380) * 0.1;
+      this.ghostRing.setPosition(screen.x, padY);
+      this.ghostRing.setScale((Math.max(def.footprint.x, def.footprint.y) * 0.55 + 0.45) * ringPulse);
+      this.ghostRing.setAlpha(ringAlpha);
+      this.ghostRing.setDepth(depthFor(tile.x, tile.y, 13));
+      this.ghostRing.setVisible(true);
     }
 
     // Multi-tile footprint — faint per-cell diamond pads (2×2 PV)
@@ -1728,13 +1771,9 @@ export class WorldView {
     this.ghost.setTexture(tex);
     this.ghost.setPosition(screen.x, screen.y + yOff);
     this.ghost.setDepth(depthFor(tile.x, tile.y, 15));
-    if (ok) {
-      this.ghost.setAlpha(0.52 + Math.sin(t / 320) * 0.12);
-    } else {
-      this.ghost.setAlpha(0.62 + Math.sin(t / 160) * 0.1);
-    }
+    this.ghost.setAlpha(0.6);
     this.ghost.setScale(isPv(snapshot.buildMode) ? 1.15 : 1);
-    this.ghost.setTint(ok ? 0x33ff88 : 0xff2244);
+    this.ghost.setTint(ok ? 0x55ff99 : 0xff2244);
     this.ghost.setVisible(true);
   }
 

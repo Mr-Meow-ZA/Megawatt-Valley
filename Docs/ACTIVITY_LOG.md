@@ -1246,6 +1246,37 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Phaser Loop 16 — placement pulse, production glow, power float
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- `WorldView.ts`: ghost at 0.6 alpha with strong tint; pulsing white `select_ring` under valid ghost; larger/brighter invalid X; ADD yellow production glow ellipses under live PV (Map like gravelPads)
+- `DomHud.ts`: inverter SVG build icon; `+kW` power float when export jumps > 0.2; star fill pop animation
+- `styles.css`: accent-green build prices; power-float + stars-fill-pop animations
+- `Docs/PHASER_QUALITY_SCORECARD.md` Loop 16 harsh QA entry (~8.8 avg)
+
+**Tested / Verified**
+- `npx tsc --noEmit` — pass
+- `npm test` — pass
+
+**Known issues / limitations**
+- Harsh visual QA still below 9.5 target; minimap / PV mesh polish remain
+
+**Decisions / assumptions / recommendations**
+- Production glow threshold 0.3 irradiance (not 0.35 glint) per Loop 16 brief
+- Power float mirrors cash float pattern for consistent sim UX
+
+**Next recommended step**
+- Loop 17: minimap polish or PV tilt highlights if harsh QA still flags solar/readability
+
+**Git / References**
+- Commit: `feat: Loop 16 — placement pulse, production glow, power float`
+- Branch / PR / Issue: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Phaser Loop 15 — richer trees and staff walk frames
 
 **Agent:** Cursor
