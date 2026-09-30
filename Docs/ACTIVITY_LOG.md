@@ -66,7 +66,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Playtest export spark + staff work icons in browser; consider SFX for objective complete.
 
 **Git / References**
-- Commit: pending
+- Commit: `46e023a`
 - Branch: `cursor/phaser-level1-build-5938`
 
 ---
