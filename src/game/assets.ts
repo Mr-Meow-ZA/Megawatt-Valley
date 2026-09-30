@@ -321,6 +321,31 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     });
   }
 
+  // Screen-space cinematic vignette — radial darkening at edges
+  if (!scene.textures.exists('vignette')) {
+    const size = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const grd = ctx.createRadialGradient(
+        size / 2,
+        size / 2,
+        size * 0.22,
+        size / 2,
+        size / 2,
+        size * 0.52,
+      );
+      grd.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      grd.addColorStop(0.62, 'rgba(0, 0, 0, 0)');
+      grd.addColorStop(1, 'rgba(0, 0, 0, 1)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, size, size);
+      scene.textures.addCanvas('vignette', canvas);
+    }
+  }
+
   // Locked plot hatch overlay — sits on grass, not a flat replacement tile
   make('tile_locked_hatch', 100, 65, (g) => {
     g.fillStyle(0x5a6a58, 0.18);
