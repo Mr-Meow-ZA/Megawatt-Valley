@@ -222,3 +222,52 @@ Done:
 | Simulation UX | 8.6 | Income flash + stronger build feedback |
 | Overall cohesion | 8.6 | Feedback + world more aligned |
 | **Average** | **8.6** | Approaching target; vehicles + travel anim still gap |
+
+---
+
+## Loop 8 — complete
+
+Done:
+- [x] Rebuild `van` / `truck` / `truck_delivery` as isometric prism sprites (no side-view clash)
+- [x] Staff travel stores `from` tile and eases across map to target
+- [x] Fractional tile position used for staff sprites during travel
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.7 | Unchanged; awaiting visual confirm |
+| Props & foliage | 8.8 | Unchanged |
+| Solar / grid | 8.9 | Unchanged |
+| Staff & vehicles | 9.2 | Iso vans + visible walk path |
+| Placement feedback | 9.0 | Holds |
+| HUD / UI | 8.9 | Holds |
+| Atmosphere | 8.7 | Holds |
+| Readability vs concept | 8.8 | Vehicles match iso language |
+| Simulation UX | 9.0 | Visible dispatch walk |
+| Overall cohesion | 8.9 | Art languages converging |
+| **Average** | **8.9** | Closing on 9.5 — Loop 9 targets remaining &lt;9.5 |
+
+---
+
+## Loop 9 — complete
+
+Done:
+- [x] Power-line spark flashes at cable midpoints when `exportedKw > 0.5`
+- [x] 16 screen-space dust motes (white/gold, scrollFactor 0, daytime only)
+- [x] White dashed parking bay marks on office dirt pad (x 4–7, y 5–7)
+- [x] Mountains scaled ~15% larger and lowered for fuller sky ridge
+- [x] Extra bank foam churn near bridge (y=6)
+- [x] Confirmed `.svg-moon` in `styles.css` (Loop 7 HUD)
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.2 | Bridge foam churn; parking pad detail |
+| Props & foliage | 8.9 | Parking lines; unchanged forest density |
+| Solar / grid | 9.4 | Live power sparks when exporting |
+| Staff & vehicles | 9.2 | Holds from Loop 8 |
+| Placement feedback | 9.0 | Holds |
+| HUD / UI | 9.0 | Moon icon confirmed; cash float holds |
+| Atmosphere | 9.3 | Dust motes + stronger ridge + sparks |
+| Readability vs concept | 9.2 | Mountains fill sky; yard reads as campus |
+| Simulation UX | 9.3 | Export tied to visible grid activity |
+| Overall cohesion | 9.2 | World detail layers converging |
+| **Average** | **9.3** | Close to 9.5 target; props/placement/HUD still sub-9.5 |

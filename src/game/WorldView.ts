@@ -28,6 +28,17 @@ type SkyBird = {
   wing: number;
 };
 
+type PowerLineMid = { x: number; y: number; depth: number };
+
+type DustMote = {
+  dot: Phaser.GameObjects.Arc;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  phase: number;
+};
+
 const WORLD_W = 42;
 const WORLD_H = 30;
 
@@ -124,6 +135,9 @@ export class WorldView {
   private rainDrops: Phaser.GameObjects.Rectangle[] = [];
   private ambientMotion: AmbientMotion[] = [];
   private birds: SkyBird[] = [];
+  private readonly powerLineMidpoints: PowerLineMid[] = [];
+  private powerSparks: Phaser.GameObjects.Graphics | null = null;
+  private dustMotes: DustMote[] = [];
   private readonly staffLastTileX = new Map<string, number>();
   private readonly staffFacing = new Map<string, number>();
 
@@ -138,6 +152,10 @@ export class WorldView {
     this.spawnClouds();
     this.spawnBirds();
     this.spawnFoam();
+    this.drawParkingMarks();
+    this.spawnDustMotes();
+    this.powerSparks = scene.add.graphics();
+    this.powerSparks.setDepth(850);
     this.initWindowGlows();
     this.weatherVeil = scene.add.rectangle(0, 0, 4000, 3000, 0x0a1a30, 0);
     this.weatherVeil.setOrigin(0.5, 0.5);
@@ -396,6 +414,11 @@ export class WorldView {
       const by = sb.y + b.yOff - 58 * b.scale;
       const midX = (ax + bx) / 2;
       const midY = (ay + by) / 2 + 14;
+      this.powerLineMidpoints.push({
+        x: midX,
+        y: midY,
+        depth: depthFor(midTileX, midTileY, 7),
+      });
       for (let c = 0; c < 3; c++) {
         const dy = (c - 1) * 4;
         g.beginPath();
@@ -405,6 +428,86 @@ export class WorldView {
         g.strokePath();
       }
       this.props.push(g);
+    }
+  }
+
+  /** White dashed parking bays on the office dirt pad. */
+  private drawParkingMarks(): void {
+    const g = this.scene.add.graphics();
+    g.setDepth(depthFor(5, 6, 1));
+    const bays: Array<[number, number]> = [
+      [4.3, 5.4],
+      [5.3, 5.7],
+      [6.3, 6.0],
+    ];
+    for (const [tx, ty] of bays) {
+      const s = isoToScreen(tx, ty);
+      const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
+      const cx = s.x;
+      const cy = s.y - elev * 5 + 4;
+      // Iso-aligned bay rectangle (diamond-ish footprint)
+      const w = 22;
+      const h = 14;
+      g.lineStyle(1.2, 0xffffff, 0.72);
+      for (let dash = 0; dash < 4; dash++) {
+        const t0 = dash / 4;
+        const t1 = (dash + 0.55) / 4;
+        const x0 = cx - w / 2 + (w * t0);
+        const x1 = cx - w / 2 + (w * t1);
+        g.beginPath();
+        g.moveTo(x0, cy - h / 2);
+        g.lineTo(x1, cy - h / 2);
+        g.strokePath();
+        g.beginPath();
+        g.moveTo(x0, cy + h / 2);
+        g.lineTo(x1, cy + h / 2);
+        g.strokePath();
+      }
+      // Side lines (dashed)
+      for (let dash = 0; dash < 3; dash++) {
+        const t0 = dash / 3;
+        const t1 = (dash + 0.5) / 3;
+        const y0 = cy - h / 2 + h * t0;
+        const y1 = cy - h / 2 + h * t1;
+        g.beginPath();
+        g.moveTo(cx - w / 2, y0);
+        g.lineTo(cx - w / 2, y1);
+        g.strokePath();
+        g.beginPath();
+        g.moveTo(cx + w / 2, y0);
+        g.lineTo(cx + w / 2, y1);
+        g.strokePath();
+      }
+      // Centre divider tick
+      g.lineStyle(1, 0xffffff, 0.45);
+      g.beginPath();
+      g.moveTo(cx, cy - h / 2 + 2);
+      g.lineTo(cx, cy + h / 2 - 2);
+      g.strokePath();
+    }
+    this.props.push(g);
+  }
+
+  /** Screen-space dust motes — visible in daylight only. */
+  private spawnDustMotes(): void {
+    const count = 16;
+    for (let i = 0; i < count; i++) {
+      const x = Phaser.Math.Between(60, 1180);
+      const y = Phaser.Math.Between(80, 620);
+      const gold = i % 3 === 0;
+      const dot = this.scene.add.circle(x, y, 1.2 + (i % 2) * 0.4, gold ? 0xffe8a0 : 0xffffff, 0.18);
+      dot.setDepth(880);
+      dot.setScrollFactor(0);
+      dot.setBlendMode(Phaser.BlendModes.ADD);
+      this.dustMotes.push({
+        dot,
+        x,
+        y,
+        vx: 0.04 + (i % 5) * 0.012,
+        vy: -0.02 - (i % 4) * 0.008,
+        phase: i * 2.1,
+      });
+      this.props.push(dot);
     }
   }
 
@@ -650,11 +753,11 @@ export class WorldView {
 
     // Far snow-capped ridge behind the valley (concept backdrop).
     const mounts = [
-      { key: 'mountain_0', x: 180, y: 70, scale: 1.35, a: 0.85 },
-      { key: 'mountain_1', x: 480, y: 55, scale: 1.55, a: 0.9 },
-      { key: 'mountain_2', x: 820, y: 65, scale: 1.4, a: 0.82 },
-      { key: 'mountain_1', x: 1100, y: 80, scale: 1.2, a: 0.75 },
-      { key: 'mountain_0', x: -40, y: 90, scale: 1.1, a: 0.7 },
+      { key: 'mountain_0', x: 180, y: 82, scale: 1.55, a: 0.85 },
+      { key: 'mountain_1', x: 480, y: 66, scale: 1.78, a: 0.9 },
+      { key: 'mountain_2', x: 820, y: 76, scale: 1.61, a: 0.82 },
+      { key: 'mountain_1', x: 1100, y: 92, scale: 1.38, a: 0.75 },
+      { key: 'mountain_0', x: -40, y: 102, scale: 1.27, a: 0.7 },
     ];
     for (let i = 0; i < mounts.length; i++) {
       const m = mounts[i];
@@ -728,6 +831,21 @@ export class WorldView {
         this.foam.push(foam);
         this.props.push(foam);
       }
+    }
+    // Extra froth churn near the bridge crossing (y=6).
+    const bridgeY = 6;
+    const bridgeCx = riverCenterX(bridgeY);
+    const bridgeOffsets = [-0.6, 0, 0.6, -1.2, 1.2];
+    for (let i = 0; i < bridgeOffsets.length; i++) {
+      const fx = bridgeCx + bridgeOffsets[i];
+      const s = isoToScreen(fx, bridgeY);
+      const key = `foam_strip_${i % 3}`;
+      const foam = this.scene.add.image(s.x, s.y - 2, this.scene.textures.exists(key) ? key : 'foam');
+      foam.setDepth(depthFor(Math.floor(fx), bridgeY, 2));
+      foam.setAlpha(0.62);
+      foam.setScale(0.95 + (i % 3) * 0.08);
+      this.foam.push(foam);
+      this.props.push(foam);
     }
   }
 
@@ -919,6 +1037,48 @@ export class WorldView {
       const f = this.foam[i];
       f.x += Math.sin(this.scene.time.now / 800 + i) * 0.12;
       f.setAlpha(0.4 + Math.sin(this.scene.time.now / 500 + i) * 0.18);
+    }
+
+    // Power-line sparks when exporting
+    const sparking = snapshot.exportedKw > 0.5 && night < 0.2;
+    if (this.powerSparks) {
+      this.powerSparks.clear();
+      if (sparking) {
+        const now = this.scene.time.now;
+        for (let i = 0; i < this.powerLineMidpoints.length; i++) {
+          const mid = this.powerLineMidpoints[i];
+          const flicker = Math.sin(now / 90 + i * 2.7);
+          if (flicker < 0.25) continue;
+          const alpha = 0.35 + flicker * 0.45;
+          const r = 2 + flicker * 2.5;
+          this.powerSparks.setDepth(mid.depth + 1);
+          this.powerSparks.fillStyle(0xffe44a, alpha);
+          this.powerSparks.fillCircle(mid.x, mid.y + (i % 3 - 1) * 3, r);
+          if (flicker > 0.7) {
+            this.powerSparks.fillStyle(0xffffff, alpha * 0.6);
+            this.powerSparks.fillCircle(mid.x + 3, mid.y - 2, r * 0.5);
+          }
+        }
+      }
+    }
+
+    // Ambient dust motes — daytime only
+    const daytime = night < 0.12;
+    const camW = cam.width;
+    const camH = cam.height;
+    for (let i = 0; i < this.dustMotes.length; i++) {
+      const m = this.dustMotes[i];
+      m.dot.setVisible(daytime && snapshot.weather !== 'rain' && snapshot.weather !== 'hail');
+      if (!daytime) continue;
+      m.x += m.vx;
+      m.y += m.vy;
+      if (m.x > camW + 20) m.x = -10;
+      if (m.x < -20) m.x = camW + 10;
+      if (m.y < 40) m.y = camH - 40;
+      if (m.y > camH - 20) m.y = 50;
+      const twinkle = 0.12 + Math.sin(t / 1400 + m.phase) * 0.08;
+      m.dot.setPosition(m.x, m.y);
+      m.dot.setAlpha(twinkle);
     }
 
     const seen = new Set<string>();
