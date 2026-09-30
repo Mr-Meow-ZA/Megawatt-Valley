@@ -887,6 +887,17 @@ export class WorldView {
       if (h % 3 === 0) this.addProp(`flower_${(h + 1) % 2}`, cx, cy + 1, -5, 1, 0.44);
       if (h % 4 === 0) this.addProp('rock', cx + 1, cy, -4, 2, 0.78);
       if (h % 5 === 0) this.addProp('bush', cx - 1, cy + 1, -10, 3, 0.65);
+      if (h % 4 === 1) this.addProp('stump', cx + 1, cy + 1, -6, 2, 0.85);
+      if (h % 6 === 0) this.addProp('log', cx - 1, cy, -4, 2, 0.8);
+    }
+    // Forest-floor clutter on north hills
+    for (let x = 1; x < WORLD_W - 1; x++) {
+      for (let y = 0; y < 4; y++) {
+        if (isWater(x, y) || isMainRoad(x, y)) continue;
+        const h = hash(x, y + 99);
+        if (h % 7 === 0) this.addProp('stump', x, y, -6, 2, 0.75 + (h % 3) * 0.05);
+        if (h % 11 === 0) this.addProp('log', x, y, -4, 2, 0.7);
+      }
     }
   }
 
