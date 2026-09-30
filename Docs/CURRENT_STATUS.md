@@ -27,7 +27,7 @@ Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION
 | Milestone | Status |
 |-----------|--------|
 | M0 Rebaseline (Phaser+Vite+TS) | Done |
-| M1 Visual proof + HUD/build | Kenney CC0 sprites integrated; review ~90%+ vs concept; polish continues |
+| M1 Visual proof + HUD/build | Kenney + procedural polish through Loops 1–11; quality scorecard target ≥9.5/10 |
 | M2 Core solar loop | Done |
 | M3 Ops / staff / automation | Done (fault→Radio Dispatch, soiling→Cleaning Kit) |
 | M4 Full Level 1 scenario | In progress (objectives, events, stars, hail; automated 1★ smoke passes) |
