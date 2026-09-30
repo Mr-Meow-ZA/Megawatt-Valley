@@ -117,7 +117,8 @@ describe('GameSimulation', () => {
     sim.dismissOnboarding();
     expect(sim.quickPlace('bargain_pv', 'site_a')).toBe(true);
     sim.setSpeed(4);
-    for (let i = 0; i < 80; i++) {
+    // ~15 updates × 12 sim-minutes ≈ 3h — before the 4h scripted-fault gate.
+    for (let i = 0; i < 15; i++) {
       sim.hour = 12;
       sim.weather = 'clear';
       if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[0].id);
