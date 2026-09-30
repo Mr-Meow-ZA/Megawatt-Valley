@@ -40,4 +40,7 @@ Footer: Save / Load / New / Mute. Autosave ~45s. Save schema v2.
 ## Live URL
 
 - Vercel project create is **blocked** (403) for this agent.
-- GitHub Pages workflow is on the branch — enable **Settings → Pages → Source: GitHub Actions**, then use the Actions “Deploy Pages” URL.
+- Static build is already on branch **`gh-pages`**.
+- One-time: **Settings → Pages → Deploy from a branch → `gh-pages` / `/ (root)` → Save**.
+- Expected URL after enable: `https://mr-meow-za.github.io/Megawatt-Valley/`
+- Workflow `Deploy Pages` republishes `gh-pages` on each push to this PR branch / `main`.

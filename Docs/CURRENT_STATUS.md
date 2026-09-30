@@ -32,7 +32,7 @@ Active PR: **#8** (`cursor/level1-steam-finish-5938`).
 | M2 Core solar loop | Done |
 | M3 Ops / staff / automation | Done |
 | M4 Full Level 1 scenario | Done |
-| M5–M6 Polish / deploy | Local polish + Pages workflow ready; **live URL** needs Pages enable (Vercel create still 403). Honest: ~92% / **5.9** paid-slice |
+| M5–M6 Polish / deploy | `gh-pages` branch published; **enable Pages → gh-pages/root** for live URL (Vercel create still 403). Honest: ~92% / **5.9** paid-slice |
 
 ## How to run
 

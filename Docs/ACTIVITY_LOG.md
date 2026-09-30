@@ -38,10 +38,23 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — gh-pages publish + playtest card
+
+**Agent:** Cursor
+**Status:** Partial (static site on `gh-pages`; Pages site enable is owner-only API 403)
+
+**Changed / Produced**
+- Force-published production `dist` to `origin/gh-pages` (+ `.nojekyll`).
+- Pages workflow now uses `peaceiris/actions-gh-pages` (branch publish).
+- `Docs/PLAYTEST.md` for tomorrow’s path; First Power camera zoom punch.
+
+**Next recommended step**
+- Owner: Settings → Pages → Deploy from branch `gh-pages` / root → open `https://mr-meow-za.github.io/Megawatt-Valley/`
+
 ## 2026-09-30 — Reward theatre v2, mobile HUD, Pages deploy path
 
 **Agent:** Cursor
-**Status:** Partial (Vercel create still 403; GitHub Pages workflow added — needs Pages source = Actions)
+**Status:** Partial (Vercel create still 403; GitHub Pages workflow added — needs Pages source enable)
 
 **Changed / Produced**
 - Confetti bursts on First Power / Site B / star ceremonies; win modal star stamp + confetti.

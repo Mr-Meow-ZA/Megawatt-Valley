@@ -1,5 +1,6 @@
-# Deploy static Phaser build to GitHub Pages (shareable playtest URL).
-# Requires repo Settings → Pages → Source: GitHub Actions.
+# Publish static Phaser build to the `gh-pages` branch for GitHub Pages.
+# One-time owner setup: Settings → Pages → Deploy from branch → `gh-pages` / root.
+# (actions/deploy-pages requires Pages already enabled; branch publish works first.)
 name: Deploy Pages
 
 on:
@@ -8,16 +9,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,16 +29,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
+      - run: touch dist/.nojekyll
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
+          commit_message: 'chore: publish playtest build'
