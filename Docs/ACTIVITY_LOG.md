@@ -38,6 +38,37 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 11 — staff walk cycle + pollen drift
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Staff travel squash-stretch step cycle (Y-scale 0.95 ↔ 1.05) while keeping bob.
+- Fading shadow-blob trail (max 3) behind traveling staff.
+- 7 world-space pollen/leaf ellipses drifting from forest edges with wind.
+- Birds increased to 13 with thicker wing strokes (2.2px).
+- `Docs/PHASER_QUALITY_SCORECARD.md`: Loop 11 rescore — all categories ≥ 9.5.
+
+**Tested / Verified**
+- `npm run typecheck` clean; `npm test` 8/8 pass.
+
+**Known issues / limitations**
+- Walk cycle applies during travel only (repair/clean are on-site).
+- Polaris sync script unavailable in cloud VM (Windows path).
+
+**Decisions / assumptions / recommendations**
+- Forest-edge tile list cached at init for pollen respawn performance.
+
+**Next recommended step**
+- Browser playtest; merge PR when Rapha approves visual pass.
+
+**Git / References**
+- Commit: pending
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Loop 10 — final polish pass toward 9.5
 
 **Agent:** Cursor

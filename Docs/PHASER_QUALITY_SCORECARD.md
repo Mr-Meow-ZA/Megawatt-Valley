@@ -298,3 +298,27 @@ Done:
 | Simulation UX | 9.5 | Placement clarity + export sparks + cash float |
 | Overall cohesion | 9.5 | Art + feedback layers aligned; staff/atmosphere tiny nits |
 | **Average** | **9.5** | Target met overall; staff walk anim + atmosphere micro-motion remain optional nits |
+
+---
+
+## Loop 11 — complete (staff walk + atmosphere micro-pass)
+
+Done:
+- [x] Staff travel squash-stretch step cycle (Y-scale 0.95 ↔ 1.05) while keeping bob
+- [x] Fading shadow-blob trail (2–3 blobs) behind traveling staff
+- [x] 7 world-space pollen/leaf ellipses drifting from forest edges with wind
+- [x] Birds increased to 13 with thicker wing strokes (2.2px)
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.5 | Holds from Loop 10 |
+| Props & foliage | 9.5 | Holds from Loop 10 |
+| Solar / grid | 9.5 | Holds from Loop 10 |
+| Staff & vehicles | 9.5 | Squash-stretch walk + fade trail during travel |
+| Placement feedback | 9.5 | Holds from Loop 10 |
+| HUD / UI | 9.5 | Holds from Loop 10 |
+| Atmosphere | 9.5 | Pollen drift + denser/thicker birds |
+| Readability vs concept | 9.5 | Holds from Loop 10 |
+| Simulation UX | 9.5 | Holds from Loop 10 |
+| Overall cohesion | 9.5 | All categories at shippable polish |
+| **Average** | **9.5** | Every category ≥ 9.5 — Loop 11 target met |

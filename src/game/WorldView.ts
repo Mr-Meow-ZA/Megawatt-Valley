@@ -39,6 +39,21 @@ type DustMote = {
   phase: number;
 };
 
+type PollenMote = {
+  shape: Phaser.GameObjects.Ellipse;
+  worldX: number;
+  worldY: number;
+  vx: number;
+  vy: number;
+  phase: number;
+  spin: number;
+};
+
+type StaffTrailBlob = {
+  img: Phaser.GameObjects.Image;
+  born: number;
+};
+
 const WORLD_W = 42;
 const WORLD_H = 30;
 
@@ -108,6 +123,31 @@ function isMainRoad(x: number, y: number): boolean {
   return false;
 }
 
+/** Matches scatterEnvironment forest density — used for pollen spawn at edges. */
+function isForestTile(x: number, y: number): boolean {
+  if (isWater(x, y) || isBank(x, y)) return false;
+  if (isMainRoad(x, y)) return false;
+  if (inRect(x, y, SITE_A) || inRect(x, y, SITE_B)) return false;
+  if (x >= SITE_A.x0 - 1 && x <= SITE_A.x1 && y >= SITE_A.y0 - 1 && y <= SITE_A.y1) {
+    return false;
+  }
+  const h = hash(x, y);
+  const edge = x < 3 || y < 3 || x > 36 || y > 24;
+  const threshold = edge ? 620 : 280;
+  return h % 1000 < threshold;
+}
+
+function isForestEdge(x: number, y: number): boolean {
+  if (!isForestTile(x, y)) return false;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) continue;
+      if (!isForestTile(x + dx, y + dy)) return true;
+    }
+  }
+  return false;
+}
+
 export class WorldView {
   private readonly ground = new Map<string, Phaser.GameObjects.Image>();
   private readonly lockedOverlays = new Map<string, Phaser.GameObjects.Image>();
@@ -140,8 +180,12 @@ export class WorldView {
   private readonly powerLineMidpoints: PowerLineMid[] = [];
   private powerSparks: Phaser.GameObjects.Graphics | null = null;
   private dustMotes: DustMote[] = [];
+  private pollenMotles: PollenMote[] = [];
+  private forestEdgeTiles: Array<[number, number]> = [];
   private readonly staffLastTileX = new Map<string, number>();
   private readonly staffFacing = new Map<string, number>();
+  private readonly staffTrails = new Map<string, StaffTrailBlob[]>();
+  private readonly staffTrailLastSpawn = new Map<string, number>();
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -156,6 +200,7 @@ export class WorldView {
     this.spawnFoam();
     this.drawParkingMarks();
     this.spawnDustMotes();
+    this.spawnPollenDrift();
     this.powerSparks = scene.add.graphics();
     this.powerSparks.setDepth(850);
     this.initWindowGlows();
@@ -525,6 +570,74 @@ export class WorldView {
     }
   }
 
+  /** World-space leaf/pollen motes drifting from forest edges. */
+  private spawnPollenDrift(): void {
+    this.forestEdgeTiles = [];
+    for (let x = 0; x < WORLD_W; x++) {
+      for (let y = 0; y < WORLD_H; y++) {
+        if (isForestEdge(x, y)) this.forestEdgeTiles.push([x, y]);
+      }
+    }
+    const edges = this.forestEdgeTiles;
+    const count = Math.min(8, Math.max(6, edges.length > 0 ? 7 : 0));
+    if (count === 0) return;
+    for (let i = 0; i < count; i++) {
+      const pick = edges[(hash(i, 41) + i * 17) % edges.length];
+      const [tx, ty] = pick;
+      const elev = this.heightAt(tx, ty);
+      const base = isoToScreen(tx + 0.5, ty + 0.5);
+      const worldX = base.x + (hash(tx, ty + i) % 20) - 10;
+      const worldY = base.y - elev * 5 - 8 + (hash(ty, tx + i) % 14) - 7;
+      const greenish = i % 3 !== 0;
+      const color = greenish ? 0x7ab84a : 0xc8d84a;
+      const shape = this.scene.add.ellipse(worldX, worldY, 3.2, 2.1, color, 0.32);
+      shape.setDepth(depthFor(tx, ty, 4));
+      shape.setAngle(hash(tx, ty) % 90);
+      this.pollenMotles.push({
+        shape,
+        worldX,
+        worldY,
+        vx: 0.14 + (i % 4) * 0.04,
+        vy: -0.03 - (i % 3) * 0.015,
+        phase: i * 1.9,
+        spin: (hash(i, tx) % 40) - 20,
+      });
+      this.props.push(shape);
+    }
+  }
+
+  private spawnStaffTrailBlob(staffId: string, x: number, y: number, depth: number): void {
+    const trail = this.staffTrails.get(staffId) ?? [];
+    const img = this.scene.add.image(x, y, 'shadow_blob');
+    img.setScale(0.22, 0.12);
+    img.setAlpha(0.45);
+    img.setDepth(depth - 1);
+    trail.push({ img, born: this.scene.time.now });
+    while (trail.length > 3) {
+      const old = trail.shift();
+      old?.img.destroy();
+    }
+    this.staffTrails.set(staffId, trail);
+  }
+
+  private updateStaffTrails(): void {
+    const now = this.scene.time.now;
+    for (const [staffId, trail] of this.staffTrails) {
+      for (let i = trail.length - 1; i >= 0; i--) {
+        const blob = trail[i];
+        const age = now - blob.born;
+        if (age > 700) {
+          blob.img.destroy();
+          trail.splice(i, 1);
+          continue;
+        }
+        blob.img.setAlpha(0.45 * (1 - age / 700));
+        blob.img.setScale(0.22 + age / 7000, 0.12 + age / 12000);
+      }
+      if (trail.length === 0) this.staffTrails.delete(staffId);
+    }
+  }
+
   /** Low-density wildflowers along meadow fence lines and sparse interior. */
   private scatterMeadowWildflowers(): void {
     const sites = [SITE_A, SITE_B];
@@ -822,14 +935,14 @@ export class WorldView {
   }
 
   private spawnBirds(): void {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 13; i++) {
       const g = this.scene.add.graphics();
       g.setDepth(-90);
       g.setScrollFactor(0.25);
       this.birds.push({
         g,
-        x: 120 + i * 110,
-        y: 50 + (i % 4) * 28,
+        x: 100 + i * 92,
+        y: 42 + (i % 5) * 24,
         vx: 0.35 + (i % 3) * 0.14,
         wing: i * 1.7,
       });
@@ -839,9 +952,9 @@ export class WorldView {
 
   private drawBird(b: SkyBird, night: number): void {
     const flap = Math.sin(this.scene.time.now / 180 + b.wing) * 3;
-    const alpha = night > 0.35 ? 0.15 : 0.45;
+    const alpha = night > 0.35 ? 0.15 : 0.48;
     b.g.clear();
-    b.g.lineStyle(1.6, 0x2a3548, alpha);
+    b.g.lineStyle(2.2, 0x2a3548, alpha);
     b.g.beginPath();
     b.g.moveTo(-5, flap);
     b.g.lineTo(0, -1);
@@ -1115,6 +1228,44 @@ export class WorldView {
       m.dot.setAlpha(twinkle);
     }
 
+    // Forest-edge pollen / leaf drift — world space, daytime only
+    const pollenVisible = daytime && snapshot.weather !== 'rain' && snapshot.weather !== 'hail';
+    const windBoost =
+      snapshot.weather === 'clear' || snapshot.weather === 'partly_cloudy' ? 1 : 0.65;
+    for (let i = 0; i < this.pollenMotles.length; i++) {
+      const p = this.pollenMotles[i];
+      p.shape.setVisible(pollenVisible);
+      if (!pollenVisible) continue;
+      p.worldX += p.vx * windBoost;
+      p.worldY += p.vy + Math.sin(t / 2200 + p.phase) * 0.04;
+      p.shape.setPosition(p.worldX, p.worldY);
+      p.shape.setAlpha(0.22 + Math.sin(t / 1600 + p.phase) * 0.1);
+      p.shape.setAngle(p.spin + Math.sin(t / 3000 + p.phase) * 12);
+      const camLeft = cam.scrollX - 40;
+      const camRight = cam.scrollX + camW + 40;
+      const camTop = cam.scrollY - 40;
+      const camBottom = cam.scrollY + camH + 40;
+      if (
+        p.worldX < camLeft ||
+        p.worldX > camRight ||
+        p.worldY < camTop ||
+        p.worldY > camBottom
+      ) {
+        if (this.forestEdgeTiles.length > 0) {
+          const pick =
+            this.forestEdgeTiles[
+              (hash(Math.floor(p.worldX), i) + i) % this.forestEdgeTiles.length
+            ];
+          const elev = this.heightAt(pick[0], pick[1]);
+          const base = isoToScreen(pick[0] + 0.5, pick[1] + 0.5);
+          p.worldX = base.x + (hash(pick[0], pick[1]) % 16) - 8;
+          p.worldY = base.y - elev * 5 - 8 + (hash(pick[1], pick[0]) % 12) - 6;
+        }
+      }
+    }
+
+    this.updateStaffTrails();
+
     const seen = new Set<string>();
 
     for (const eq of snapshot.equipment) {
@@ -1266,8 +1417,9 @@ export class WorldView {
         sprite = this.scene.add.image(pos.x, pos.y - 18 - elev * 5, 'tech');
         this.entitySprites.set(staff.id, sprite);
       }
+      const traveling = staff.task.type === 'travel';
       const moving =
-        staff.task.type === 'travel' ||
+        traveling ||
         staff.task.type === 'repair' ||
         staff.task.type === 'clean';
       const bob =
@@ -1290,7 +1442,22 @@ export class WorldView {
       }
       this.staffLastTileX.set(staff.id, staff.tile.x);
       const face = this.staffFacing.get(staff.id) ?? 1;
-      sprite.setScale(1.05 * face, 1.05);
+      const squashY = traveling
+        ? 1.0 + Math.sin(this.scene.time.now / 95) * 0.05
+        : 1.05;
+      sprite.setScale(1.05 * face, squashY);
+      if (traveling) {
+        const lastSpawn = this.staffTrailLastSpawn.get(staff.id) ?? 0;
+        if (this.scene.time.now - lastSpawn > 110) {
+          this.spawnStaffTrailBlob(
+            staff.id,
+            pos.x - 4,
+            pos.y + 6 - elev * 5,
+            depthFor(staff.tile.x, staff.tile.y, 6),
+          );
+          this.staffTrailLastSpawn.set(staff.id, this.scene.time.now);
+        }
+      }
       if (staff.task.type === 'idle') {
         sprite.clearTint();
       } else if (staff.task.type === 'repair') {
@@ -1318,6 +1485,11 @@ export class WorldView {
         this.prevCommissioned.delete(id);
         this.entityShadows.get(id)?.destroy();
         this.entityShadows.delete(id);
+        this.staffTrails.get(id)?.forEach((b) => b.img.destroy());
+        this.staffTrails.delete(id);
+        this.staffTrailLastSpawn.delete(id);
+        this.staffLastTileX.delete(id);
+        this.staffFacing.delete(id);
       }
     }
 
