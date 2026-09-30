@@ -67,7 +67,7 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 - Playtest in browser; merge PR when Rapha approves visual pass.
 
 **Git / References**
-- Commit: pending
+- Commit: `45c54d7`
 - Branch: `cursor/phaser-level1-build-5938`
 
 ---
