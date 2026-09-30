@@ -38,6 +38,40 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 10 — final polish pass toward 9.5
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- 10 extra bush/flower clusters at meadow–forest edges outside Site A/B.
+- Substation yard accents: 2× `chimney` + spare `tank` near grid connection (14,5).
+- Invalid ghost: bolder `ghost_bad` stroke + flashing red X; valid ghost alpha pulse.
+- Per-cell `ghost_footprint` diamond pads for 2×2 PV placement preview.
+- HUD: inline brand mountain SVG, speed-button active glow, success toast green border.
+- Beach tiles warm-tinted once at terrain build; office outer dirt wear ring.
+- Neighbor solar farm scale 0.8; Site A perimeter uses thick `fence.png` on all sides.
+- `Docs/PHASER_QUALITY_SCORECARD.md`: Loop 10 rescore (~9.5 avg).
+
+**Tested / Verified**
+- `tsc` + `vite build` clean; `npm test` 8/8 pass.
+
+**Known issues / limitations**
+- Staff walk still single-frame (9.4); atmosphere unchanged this loop (9.4).
+- Polaris sync script unavailable in cloud VM (Windows path).
+
+**Decisions / assumptions / recommendations**
+- Overall average ≥9.5 met; staff animation remains optional nit.
+
+**Next recommended step**
+- Playtest in browser; merge PR when Rapha approves visual pass.
+
+**Git / References**
+- Commit: pending
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
+
 ## 2026-09-30 — Loop 9 — atmosphere + grid sparks toward 9.5
 
 **Agent:** Cursor

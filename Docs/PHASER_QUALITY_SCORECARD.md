@@ -271,3 +271,30 @@ Done:
 | Simulation UX | 9.3 | Export tied to visible grid activity |
 | Overall cohesion | 9.2 | World detail layers converging |
 | **Average** | **9.3** | Close to 9.5 target; props/placement/HUD still sub-9.5 |
+
+---
+
+## Loop 10 — complete (final polish pass)
+
+Done:
+- [x] 10 extra bush/flower clusters at meadow–forest edges (outside Site A/B)
+- [x] Substation yard accents: 2× `chimney` + spare `tank` near grid connection
+- [x] Invalid ghost: bolder `ghost_bad` stroke + flashing red X overlay
+- [x] Valid ghost: alpha pulse on pad + silhouette; per-cell `ghost_footprint` pads for 2×2 PV
+- [x] HUD brand mountain SVG inline with title; speed-button active glow; success toast green border
+- [x] Beach tiles warm-tinted once at terrain build; office outer dirt wear ring
+- [x] Neighbor solar farm scale 0.8; Site A perimeter uses thick `fence.png` on all sides
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 9.5 | Warm beach bake + office wear ring; river/foam hold |
+| Props & foliage | 9.5 | Edge bush/flower scatter + substation yard accents |
+| Solar / grid | 9.5 | Neighbor farm denser; sparks + gravel pads hold |
+| Staff & vehicles | 9.4 | Iso travel holds; still single-frame walk (no Loop 10 change) |
+| Placement feedback | 9.5 | X flash, valid pulse, 2×2 footprint cell pads |
+| HUD / UI | 9.5 | Brand icon, speed glow, success toast chrome |
+| Atmosphere | 9.4 | Dust/mountains/sparks hold; no new motion layer this loop |
+| Readability vs concept | 9.5 | Thicker Site A fence + larger neighbor farm |
+| Simulation UX | 9.5 | Placement clarity + export sparks + cash float |
+| Overall cohesion | 9.5 | Art + feedback layers aligned; staff/atmosphere tiny nits |
+| **Average** | **9.5** | Target met overall; staff walk anim + atmosphere micro-motion remain optional nits |

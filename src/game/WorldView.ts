@@ -117,6 +117,8 @@ export class WorldView {
   private readonly overlays = new Map<string, Phaser.GameObjects.Image>();
   private ghost: Phaser.GameObjects.Image | null = null;
   private ghostPad: Phaser.GameObjects.Image | null = null;
+  private ghostInvalidX: Phaser.GameObjects.Graphics | null = null;
+  private readonly ghostFootprintPads: Phaser.GameObjects.Image[] = [];
   private selectRing: Phaser.GameObjects.Image | null = null;
   private hoverHighlight: Phaser.GameObjects.Image | null = null;
   private hoverTile: Vec2 | null = null;
@@ -264,8 +266,15 @@ export class WorldView {
       if (h % 9 === 0 || h % 13 === 0) return 'tile_dirt';
     }
 
-    // Service / dirt pads near office
+    // Service / dirt pads near office + outer wear ring
     if (x >= 4 && x <= 7 && y >= 5 && y <= 7) return 'tile_dirt';
+    if (
+      (x >= 3 && x <= 8 && y >= 4 && y <= 8) &&
+      !(x >= 4 && x <= 7 && y >= 5 && y <= 7)
+    ) {
+      const h = hash(x, y);
+      if (h % 3 !== 0) return 'tile_dirt';
+    }
 
     // Rolling hill crowns on elevated far edges
     const elev = this.heightAt(x, y);
@@ -343,6 +352,11 @@ export class WorldView {
         this.drawCliffRisers(x, y, elev, key);
         const img = this.scene.add.image(screen.x, screen.y - elev * 5, key);
         img.setDepth(depthFor(x, y, -5));
+        if (key === 'tile_beach') {
+          img.setTint(
+            Phaser.Display.Color.GetColor(255, Math.floor(228 + (hash(x, y) % 8)), Math.floor(175 + (hash(x, y) % 12))),
+          );
+        }
         this.ground.set(this.tileKey(x, y), img);
       }
     }
@@ -601,6 +615,10 @@ export class WorldView {
     this.scatterMeadowWildflowers();
     this.addProp('water_tower', 13, 4, -40, 7, 0.5);
     this.addProp('tank', 14, 5, -28, 6, 0.45);
+    // Substation yard accents — chimney + spare tank near grid connection (14,5)
+    this.addProp('chimney', 15, 4, -32, 7, 0.48);
+    this.addProp('chimney', 13, 6, -28, 6, 0.42);
+    this.addProp('tank', 15, 6, -24, 6, 0.4);
 
     // Maintenance yard near office — warehouse shed + small office_kit + container + yard kit
     this.addProp('warehouse', 4, 8, -30, 6, 0.72);
@@ -620,7 +638,7 @@ export class WorldView {
       [26, 21],
     ];
     for (const [x, y] of neighborRows) {
-      this.addProp('pv_group', x, y, -22, 5, 0.72);
+      this.addProp('pv_group', x, y, -22, 5, 0.8);
     }
     for (let x = 22; x <= 29; x += 1) {
       this.addProp('fence_short', x, 17, -4, 3, 0.72);
@@ -643,14 +661,14 @@ export class WorldView {
     this.addProp('tech', 13, 5, -14, 9, 0.88, 'sway');
     this.addProp('tech', 14, 6, -14, 9, 0.82, 'sway');
 
-    // Full fence perimeter around Site A meadow (tighter spacing)
+    // Full fence perimeter around Site A meadow — thick fence.png on all sides
     for (let x = SITE_A.x0; x < SITE_A.x1; x += 1) {
-      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.86);
-      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.86);
+      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.98);
+      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.98);
     }
     for (let y = SITE_A.y0 + 1; y < SITE_A.y1 - 1; y += 1) {
-      this.addProp('fence_short', SITE_A.x0, y, -4, 3, 0.8);
-      this.addProp('fence_short', SITE_A.x1 - 1, y, -4, 3, 0.8);
+      this.addProp('fence', SITE_A.x0, y, -6, 3, 0.94);
+      this.addProp('fence', SITE_A.x1 - 1, y, -6, 3, 0.94);
     }
 
     // Dense pine forests — north hills and river sides (Site A stays clear)
@@ -713,7 +731,7 @@ export class WorldView {
       }
     }
 
-    // Bush / rock clusters at meadow–forest transitions
+    // Bush / flower clusters at meadow–forest transitions (outside build sites)
     const clusters: Array<[number, number]> = [
       [3, 4],
       [3, 10],
@@ -731,14 +749,30 @@ export class WorldView {
       [10, 18],
       [24, 18],
       [36, 12],
+      // Loop 10 — extra meadow–forest edge scatter
+      [2, 8],
+      [2, 13],
+      [19, 3],
+      [19, 15],
+      [20, 10],
+      [35, 5],
+      [35, 11],
+      [31, 16],
+      [9, 17],
+      [1, 16],
+      [37, 8],
     ];
     for (const [cx, cy] of clusters) {
-      if (inRect(cx, cy, SITE_A)) continue;
+      if (inRect(cx, cy, SITE_A) || inRect(cx, cy, SITE_B)) continue;
       const h = hash(cx, cy);
-      this.addProp('tree_round', cx, cy, -12, 3, 0.85 + (h % 3) * 0.08);
-      if (h % 2 === 0) this.addProp('rock', cx + 1, cy, -4, 2, 0.8);
-      if (h % 3 === 0) this.addProp('bush', cx, cy + 1, -10, 3, 0.75);
-      if (h % 5 === 0) this.addProp('tree_round', cx - 1, cy + 1, -12, 3, 0.7);
+      if (h % 3 !== 0) {
+        this.addProp(`flower_${h % 2}`, cx, cy, -5, 1, 0.48 + (h % 3) * 0.06);
+      }
+      this.addProp('bush', cx, cy, -10, 3, 0.72 + (h % 4) * 0.06);
+      if (h % 2 === 0) this.addProp('bush', cx + 1, cy, -10, 3, 0.68);
+      if (h % 3 === 0) this.addProp(`flower_${(h + 1) % 2}`, cx, cy + 1, -5, 1, 0.44);
+      if (h % 4 === 0) this.addProp('rock', cx + 1, cy, -4, 2, 0.78);
+      if (h % 5 === 0) this.addProp('bush', cx - 1, cy + 1, -10, 3, 0.65);
     }
   }
 
@@ -1351,6 +1385,8 @@ export class WorldView {
     if (!snapshot.buildMode) {
       this.ghost?.setVisible(false);
       this.ghostPad?.setVisible(false);
+      this.ghostInvalidX?.setVisible(false);
+      for (const pad of this.ghostFootprintPads) pad.setVisible(false);
       return;
     }
     this.hoverHighlight?.setVisible(false);
@@ -1367,6 +1403,8 @@ export class WorldView {
     );
     const padY = screen.y - elev * 5 + 8;
     const yOff = (isPv(snapshot.buildMode) ? -36 : snapshot.buildMode === 'office' || snapshot.buildMode === 'substation' ? -40 : -18) - elev * 5;
+    const t = this.scene.time.now;
+
     // Footprint pad + building silhouette tinted green/red.
     if (!this.ghostPad) {
       this.ghostPad = this.scene.add.image(screen.x, padY, ok ? 'ghost_ok' : 'ghost_bad');
@@ -1375,8 +1413,64 @@ export class WorldView {
     this.ghostPad.setPosition(screen.x, padY);
     this.ghostPad.setScale(Math.max(def.footprint.x, def.footprint.y) * 0.7 + 0.35);
     this.ghostPad.setDepth(depthFor(tile.x, tile.y, 14));
-    this.ghostPad.setAlpha(ok ? 0.88 : 0.92);
+    if (ok) {
+      const pulse = 0.78 + Math.sin(t / 320) * 0.12;
+      this.ghostPad.setAlpha(pulse);
+    } else {
+      const flash = 0.82 + Math.sin(t / 140) * 0.14;
+      this.ghostPad.setAlpha(flash);
+    }
     this.ghostPad.setVisible(true);
+
+    // Invalid placement — flashing X mark over ghost
+    if (!this.ghostInvalidX) {
+      this.ghostInvalidX = this.scene.add.graphics();
+    }
+    if (!ok) {
+      const xFlash = 0.55 + Math.sin(t / 120) * 0.4;
+      this.ghostInvalidX.clear();
+      this.ghostInvalidX.lineStyle(3.5, 0xff1122, xFlash);
+      const sz = 14;
+      this.ghostInvalidX.beginPath();
+      this.ghostInvalidX.moveTo(screen.x - sz, padY - sz * 0.5);
+      this.ghostInvalidX.lineTo(screen.x + sz, padY + sz * 0.5);
+      this.ghostInvalidX.moveTo(screen.x + sz, padY - sz * 0.5);
+      this.ghostInvalidX.lineTo(screen.x - sz, padY + sz * 0.5);
+      this.ghostInvalidX.strokePath();
+      this.ghostInvalidX.setDepth(depthFor(tile.x, tile.y, 16));
+      this.ghostInvalidX.setVisible(true);
+    } else {
+      this.ghostInvalidX.setVisible(false);
+    }
+
+    // Multi-tile footprint — faint per-cell diamond pads (2×2 PV)
+    const fpX = def.footprint.x;
+    const fpY = def.footprint.y;
+    const cellCount = fpX * fpY;
+    while (this.ghostFootprintPads.length < cellCount) {
+      const pad = this.scene.add.image(0, 0, 'ghost_footprint');
+      this.ghostFootprintPads.push(pad);
+    }
+    let cellIdx = 0;
+    for (let dy = 0; dy < fpY; dy++) {
+      for (let dx = 0; dx < fpX; dx++) {
+        const cx = tile.x + dx + 0.5;
+        const cy = tile.y + dy + 0.5;
+        const cellElev = this.heightAt(Math.floor(cx), Math.floor(cy));
+        const cellScreen = isoToScreen(cx, cy);
+        const pad = this.ghostFootprintPads[cellIdx];
+        pad.setPosition(cellScreen.x, cellScreen.y - cellElev * 5 + 8);
+        pad.setScale(0.55);
+        pad.setDepth(depthFor(tile.x + dx, tile.y + dy, 13));
+        pad.setAlpha(ok ? 0.28 + Math.sin(t / 400 + cellIdx) * 0.08 : 0.18);
+        pad.setTint(ok ? 0x88ffbb : 0xff8899);
+        pad.setVisible(cellCount > 1);
+        cellIdx++;
+      }
+    }
+    for (let i = cellCount; i < this.ghostFootprintPads.length; i++) {
+      this.ghostFootprintPads[i].setVisible(false);
+    }
 
     const tex = textureFor(snapshot.buildMode);
     if (!this.ghost) {
@@ -1385,7 +1479,11 @@ export class WorldView {
     this.ghost.setTexture(tex);
     this.ghost.setPosition(screen.x, screen.y + yOff);
     this.ghost.setDepth(depthFor(tile.x, tile.y, 15));
-    this.ghost.setAlpha(ok ? 0.62 : 0.68);
+    if (ok) {
+      this.ghost.setAlpha(0.52 + Math.sin(t / 320) * 0.12);
+    } else {
+      this.ghost.setAlpha(0.62 + Math.sin(t / 160) * 0.1);
+    }
     this.ghost.setScale(isPv(snapshot.buildMode) ? 1.15 : 1);
     this.ghost.setTint(ok ? 0x33ff88 : 0xff2244);
     this.ghost.setVisible(true);

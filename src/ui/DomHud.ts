@@ -106,7 +106,14 @@ export class DomHud {
     this.root.innerHTML = `
       <header class="hud-top">
         <div class="brand-block">
-          <div class="brand">Megawatt Valley</div>
+          <div class="brand">
+            <svg class="brand-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M2 20h20" stroke="#c5e4ff" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M4 18l6-10 4 6 3-4 5 8" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M10 8l2-3 2 3" fill="#fff" opacity="0.95"/>
+            </svg>
+            Megawatt Valley
+          </div>
           <div class="brand-sub">Solar · Here Comes the Sun</div>
         </div>
 
@@ -560,13 +567,19 @@ export class DomHud {
       if (snapshot.message) {
         toast.hidden = false;
         toast.textContent = snapshot.message;
+        const msg = snapshot.message.toLowerCase();
+        const isSuccess =
+          msg.includes('complete') || msg.includes('unlocked') || msg.includes('commissioned');
+        toast.classList.toggle('toast-success', isSuccess);
         this.toastClearAt = performance.now() + 3500;
       } else {
         toast.hidden = true;
+        toast.classList.remove('toast-success');
         this.toastClearAt = 0;
       }
     } else if (this.toastClearAt && performance.now() > this.toastClearAt) {
       toast.hidden = true;
+      toast.classList.remove('toast-success');
       this.toastClearAt = 0;
       if (this.sim.message === snapshot.message) {
         this.sim.message = null;

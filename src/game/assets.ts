@@ -105,7 +105,7 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
   });
 
   make('ghost_bad', 100, 60, (g) => {
-    g.fillStyle(0xff4455, 0.35);
+    g.fillStyle(0xff4455, 0.42);
     g.beginPath();
     g.moveTo(50, 5);
     g.lineTo(95, 30);
@@ -113,7 +113,25 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.lineTo(5, 30);
     g.closePath();
     g.fillPath();
-    g.lineStyle(2, 0xff2233, 0.95);
+    g.lineStyle(3.5, 0xff1122, 1);
+    g.strokePath();
+    g.lineStyle(2, 0xff6677, 0.75);
+    g.beginPath();
+    g.moveTo(50, 10);
+    g.lineTo(50, 50);
+    g.strokePath();
+  });
+
+  make('ghost_footprint', 100, 60, (g) => {
+    g.fillStyle(0x44ff88, 0.08);
+    g.beginPath();
+    g.moveTo(50, 5);
+    g.lineTo(95, 30);
+    g.lineTo(50, 55);
+    g.lineTo(5, 30);
+    g.closePath();
+    g.fillPath();
+    g.lineStyle(1, 0x88ffbb, 0.35);
     g.strokePath();
   });
 
