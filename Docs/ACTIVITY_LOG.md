@@ -38,6 +38,19 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Declutter world map density
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Cut forest density (~620/280 → ~200/55) + wide clear apron around Site A/B.
+- Removed neighbor solar farm, extra vans/chimneys/containers/yard kit pile-up.
+- Site A fence every other post; sparse wildflowers/clusters/foam/particles.
+
+**Next recommended step**
+- Owner visual check after `npm run dev`; enable Pages if not already.
+
 ## 2026-09-30 — gh-pages publish + playtest card
 
 **Agent:** Cursor

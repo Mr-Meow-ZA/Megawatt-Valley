@@ -128,12 +128,17 @@ function isForestTile(x: number, y: number): boolean {
   if (isWater(x, y) || isBank(x, y)) return false;
   if (isMainRoad(x, y)) return false;
   if (inRect(x, y, SITE_A) || inRect(x, y, SITE_B)) return false;
-  if (x >= SITE_A.x0 - 1 && x <= SITE_A.x1 && y >= SITE_A.y0 - 1 && y <= SITE_A.y1) {
+  // Wide clear apron around both sites so the farm reads as open meadow.
+  if (x >= SITE_A.x0 - 3 && x <= SITE_A.x1 + 2 && y >= SITE_A.y0 - 3 && y <= SITE_A.y1 + 2) {
+    return false;
+  }
+  if (x >= SITE_B.x0 - 2 && x <= SITE_B.x1 + 2 && y >= SITE_B.y0 - 2 && y <= SITE_B.y1 + 2) {
     return false;
   }
   const h = hash(x, y);
   const edge = x < 3 || y < 3 || x > 36 || y > 24;
-  const threshold = edge ? 620 : 280;
+  // Sparse tree belts — previous 620/280 filled the valley and drowned Site A.
+  const threshold = edge ? 200 : 55;
   return h % 1000 < threshold;
 }
 
@@ -235,7 +240,7 @@ export class WorldView {
       this.vignette.setBlendMode(Phaser.BlendModes.MULTIPLY);
     }
     // Seed a few rain streaks (hidden until wet weather)
-    for (let i = 0; i < 36; i++) {
+    for (let i = 0; i < 18; i++) {
       const drop = scene.add.rectangle(
         Phaser.Math.Between(40, 1220),
         Phaser.Math.Between(20, 700),
@@ -425,7 +430,7 @@ export class WorldView {
             Phaser.Display.Color.GetColor(255, Math.floor(228 + (hash(x, y) % 8)), Math.floor(175 + (hash(x, y) % 12))),
           );
           const h = hash(x, y);
-          if (h % 10 < 4) {
+          if (h % 10 === 0) {
             const jx = 0.25 + (h % 7) * 0.08;
             const jy = 0.2 + ((h >> 2) % 6) * 0.07;
             this.addProp('rock', x + jx, y + jy, -3, 1, 0.38 + (h % 3) * 0.05);
@@ -557,11 +562,7 @@ export class WorldView {
   private drawParkingMarks(): void {
     const g = this.scene.add.graphics();
     g.setDepth(depthFor(5, 6, 1));
-    const bays: Array<[number, number]> = [
-      [4.3, 5.4],
-      [5.3, 5.7],
-      [6.3, 6.0],
-    ];
+    const bays: Array<[number, number]> = [[5.3, 5.7]];
     for (const [tx, ty] of bays) {
       const s = isoToScreen(tx, ty);
       const elev = this.heightAt(Math.floor(tx), Math.floor(ty));
@@ -747,7 +748,7 @@ export class WorldView {
 
   /** Screen-space dust motes — visible in daylight only. */
   private spawnDustMotes(): void {
-    const count = 16;
+    const count = 6;
     for (let i = 0; i < count; i++) {
       const x = Phaser.Math.Between(60, 1180);
       const y = Phaser.Math.Between(80, 620);
@@ -777,7 +778,7 @@ export class WorldView {
       }
     }
     const edges = this.forestEdgeTiles;
-    const count = edges.length > 0 ? 12 : 0;
+    const count = edges.length > 0 ? 4 : 0;
     if (count === 0) return;
     for (let i = 0; i < count; i++) {
       const pick = edges[(hash(i, 41) + i * 17) % edges.length];
@@ -837,50 +838,17 @@ export class WorldView {
     }
   }
 
-  /** Low-density wildflowers along meadow fence lines and sparse interior. */
+  /** Sparse wildflowers on Site A fence corners only — keep meadows open. */
   private scatterMeadowWildflowers(): void {
-    const scatterFenceExterior = (
-      site: { x0: number; x1: number; y0: number; y1: number },
-      dense: boolean,
-    ) => {
-      const nMod = dense ? 2 : 4;
-      const sMod = dense ? 2 : 5;
-      const wMod = dense ? 2 : 4;
-      const eMod = dense ? 2 : 5;
-      for (let x = site.x0; x < site.x1; x++) {
-        const hN = hash(x, site.y0 - 1);
-        if (hN % nMod === 0) {
-          this.addProp(`flower_${hN % 2}`, x, site.y0 - 1, -5, 1, 0.5 + (hN % 3) * 0.06);
-        }
-        const hS = hash(x, site.y1);
-        if (hS % sMod === 0) {
-          this.addProp(`flower_${hS % 2}`, x, site.y1, -5, 1, 0.48 + (hS % 3) * 0.06);
-        }
-      }
-      for (let y = site.y0; y < site.y1; y++) {
-        const hW = hash(site.x0 - 1, y);
-        if (hW % wMod === 0) {
-          this.addProp(`flower_${hW % 2}`, site.x0 - 1, y, -5, 1, 0.52);
-        }
-        const hE = hash(site.x1, y);
-        if (hE % eMod === 0) {
-          this.addProp(`flower_${hE % 2}`, site.x1, y, -5, 1, 0.5);
-        }
-      }
-    };
-
-    scatterFenceExterior(SITE_A, true);
-    scatterFenceExterior(SITE_B, false);
-
-    for (const site of [SITE_A, SITE_B]) {
-      for (let y = site.y0 + 2; y < site.y1 - 2; y++) {
-        for (let x = site.x0 + 2; x < site.x1 - 2; x++) {
-          if (isMainRoad(x, y)) continue;
-          const h = hash(x, y);
-          if (h % 29 !== 0) continue;
-          this.addProp(`flower_${h % 2}`, x, y, -4, 1, 0.42 + (h % 4) * 0.05);
-        }
-      }
+    const corners: Array<[number, number]> = [
+      [SITE_A.x0 - 1, SITE_A.y0 - 1],
+      [SITE_A.x1, SITE_A.y0 - 1],
+      [SITE_A.x0 - 1, SITE_A.y1],
+      [SITE_A.x1, SITE_A.y1],
+    ];
+    for (const [x, y] of corners) {
+      const h = hash(x, y);
+      this.addProp(`flower_${h % 2}`, x, y, -5, 1, 0.5);
     }
   }
 
@@ -925,195 +893,80 @@ export class WorldView {
       this.props.push(bridge);
     }
 
-    // Lattice transmission pylons with sagging conductors
+    // Few pylons — enough to sell the grid without a forest of steel.
     const pylons: Array<{ x: number; y: number; yOff: number; scale: number }> = [
-      { x: 10, y: 2, yOff: -52, scale: 0.58 },
-      { x: 14, y: 3, yOff: -52, scale: 0.65 },
-      { x: 22, y: 4, yOff: -52, scale: 0.58 },
-      { x: 28, y: 3, yOff: -52, scale: 0.52 },
+      { x: 14, y: 3, yOff: -52, scale: 0.62 },
+      { x: 24, y: 3, yOff: -52, scale: 0.55 },
     ];
     for (const p of pylons) {
       this.addProp('pylon', p.x, p.y, p.yOff, 8, p.scale);
     }
     this.drawPowerLines(pylons);
     this.scatterMeadowWildflowers();
-    this.addProp('water_tower', 13, 4, -40, 7, 0.5);
-    this.addProp('tank', 14, 5, -28, 6, 0.45);
-    // Substation yard accents — chimney + spare tank near grid connection (14,5)
-    this.addProp('chimney', 15, 4, -32, 7, 0.48);
-    this.addProp('chimney', 13, 6, -28, 6, 0.42);
-    this.addProp('tank', 15, 6, -24, 6, 0.4);
-
-    // Maintenance yard near office — warehouse shed + small office_kit + container + yard kit
+    // One yard landmark + one spare tank — no chimney/container pile-up.
     this.addProp('warehouse', 4, 8, -30, 6, 0.72);
-    this.addProp('office_kit', 3, 9, -20, 6, 0.52);
-    this.addProp('yard', 5, 9, -24, 5, 0.85);
-    this.addProp('container', 6, 9, -18, 5, 0.7);
+    this.addProp('tank', 14, 5, -28, 6, 0.45);
+    this.addProp('van', 5, 7, -10, 7, 0.82, 'bob', 0xffc090);
 
-    // Neighbor solar farm south of Site B (scenery only — keeps Site A clear for placement)
-    const neighborRows: Array<[number, number]> = [
-      [23, 18],
-      [24, 19],
-      [25, 20],
-      [26, 18],
-      [27, 19],
-      [28, 20],
-      [24, 21],
-      [26, 21],
-    ];
-    for (const [x, y] of neighborRows) {
-      this.addProp('pv_group', x, y, -22, 5, 0.8);
-    }
-    for (let x = 22; x <= 29; x += 1) {
-      this.addProp('fence_short', x, 17, -4, 3, 0.72);
-      this.addProp('fence_short', x, 22, -4, 3, 0.72);
-    }
-    for (let y = 18; y <= 21; y += 1) {
-      this.addProp('fence_short', 22, y, -4, 3, 0.68);
-      this.addProp('fence_short', 29, y, -4, 3, 0.68);
-    }
-
-    // Decorative vehicles — warm vest-orange / steel tints to glue kit art to HUD palette
-    this.addProp('van', 4, 5, -10, 7, 0.85, 'bob', 0xffc090);
-    this.addProp('truck_delivery', 5, 7, -12, 7, 0.78, 'bob', 0xd8e0ea);
-    this.addProp('van', 7, 5, -10, 7, 0.8, 'bob', 0xffb070);
-    this.addProp('van', 14, 5, -10, 7, 0.82, 'bob', 0xe8c8a0);
-    this.addProp('van', 27, 9, -10, 7, 0.8, 'bob', 0xffc090);
-
-    // No fake ambient techs — only simulated staff (Tess / Pat) count as people.
-    // Decorative vehicles stay on the yard pad for place-feel without false headcount.
-
-    // Full fence perimeter around Site A meadow — thick fence.png on all sides
-    for (let x = SITE_A.x0; x < SITE_A.x1; x += 1) {
+    // Site A fence — every other post so the meadow still has an edge without a solid wall.
+    for (let x = SITE_A.x0; x < SITE_A.x1; x += 2) {
       this.addProp('fence', x, SITE_A.y0, -6, 3, 0.98);
       this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.98);
     }
-    for (let y = SITE_A.y0 + 1; y < SITE_A.y1 - 1; y += 1) {
+    for (let y = SITE_A.y0 + 1; y < SITE_A.y1 - 1; y += 2) {
       this.addProp('fence', SITE_A.x0, y, -6, 3, 0.94);
       this.addProp('fence', SITE_A.x1 - 1, y, -6, 3, 0.94);
     }
 
-    // Dense pine forests — north hills and river sides (Site A stays clear)
-    const pines: Array<[number, number, boolean]> = [];
+    // Sparse tree belts on map edges only (shared density with isForestTile).
     for (let x = 0; x < WORLD_W; x++) {
       for (let y = 0; y < WORLD_H; y++) {
-        if (isWater(x, y) || isBank(x, y)) continue;
-        if (isMainRoad(x, y)) continue;
-        if (inRect(x, y, SITE_A) || inRect(x, y, SITE_B)) continue;
-        // Keep a thin clear strip beside Site A fence for readability
-        if (x >= SITE_A.x0 - 1 && x <= SITE_A.x1 && y >= SITE_A.y0 - 1 && y <= SITE_A.y1) {
-          continue;
-        }
+        if (!isForestTile(x, y)) continue;
         const h = hash(x, y);
-        const edge = x < 3 || y < 3 || x > 36 || y > 24;
-        // Dense concept-style forests on hills; still leave meadow interiors clear.
-        const threshold = edge ? 620 : 280;
-        if (h % 1000 < threshold) {
-          pines.push([x, y, h % 3 === 0]);
-        }
+        const big = h % 3 === 0;
+        const key = big
+          ? h % 2 === 0
+            ? 'tree_deciduous'
+            : 'tree_big'
+          : h % 3 === 0
+            ? this.smallTreeKey(h)
+            : 'tree_deciduous';
+        this.addProp(key, x, y, big ? -36 : -28, 3, big ? 1.05 : 0.95);
       }
     }
-    // Prefer one foliage language (deciduous + small variants) over mixed kit trees.
-    for (const [x, y, big] of pines) {
-      const h = hash(x, y);
-      const key = big
-        ? h % 2 === 0
-          ? 'tree_deciduous'
-          : 'tree_big'
-        : h % 3 === 0
-          ? this.smallTreeKey(h)
-          : 'tree_deciduous';
-      this.addProp(key, x, y, big ? -36 : -28, 3, big ? 1.05 : 0.95);
-    }
 
-    // Rocks along river banks + bush/rock clusters at water edges
+    // Light riverbank accents — foam + rare rock/bush, not a rockery.
     for (let y = 1; y < WORLD_H; y++) {
       for (let x = 0; x < WORLD_W; x++) {
-        if (!isBank(x, y) && !isWater(x, y)) continue;
+        if (!isBank(x, y)) continue;
         const h = hash(x, y);
-        if (isBank(x, y) && h % 2 === 0) {
-          this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
-        }
-        if (isBank(x, y) && h % 7 === 2) {
+        if (h % 11 === 2) {
           const cx = riverCenterX(y);
           const towardWater = x > cx ? -0.18 : 0.18;
-          const edgeX = x + towardWater;
-          for (let f = 0; f < 2; f++) {
-            const fx = edgeX + (f === 0 ? -0.1 : 0.1) * (x > cx ? 1 : -1);
-            this.addBankFoamStrip(fx, y + (f === 0 ? -0.08 : 0.08), h + f);
-          }
+          this.addBankFoamStrip(x + towardWater, y, h);
         }
-        if (isBank(x, y) && (h % 6 === 0 || h % 7 === 1)) {
-          this.addProp('bush', x, y, -10, 3, 0.72 + (h % 4) * 0.06);
-          if (h % 2 === 0) {
-            this.addProp('rock', x + (h % 3 === 0 ? 1 : -1), y, -4, 2, 0.78);
-          }
-        }
-        // Occasional rocks sitting in shallow water / foam edge
-        if (isWater(x, y) && (h % 4 === 0 || h % 9 === 2) && y !== 6) {
-          this.addProp('rock', x, y, -2, 1, 0.7 + (h % 2) * 0.1);
+        if (h % 9 === 0) {
+          this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
+        } else if (h % 13 === 0) {
+          this.addProp('bush', x, y, -10, 3, 0.72);
         }
       }
     }
 
-    // Bush / flower clusters at meadow–forest transitions (outside build sites)
+    // A handful of edge bushes — one prop each, far from build sites.
     const clusters: Array<[number, number]> = [
-      [3, 4],
-      [3, 10],
-      [3, 15],
-      [8, 3],
-      [16, 3],
-      [17, 14],
-      [18, 16],
-      [21, 5],
-      [21, 14],
-      [34, 7],
-      [34, 14],
-      [30, 5],
+      [2, 4],
       [2, 20],
-      [10, 18],
-      [24, 18],
-      [36, 12],
-      // Loop 10 — extra meadow–forest edge scatter
-      [2, 8],
-      [2, 13],
-      [19, 3],
-      [19, 15],
-      [20, 10],
-      [35, 5],
-      [35, 11],
-      [31, 16],
-      [9, 17],
-      [1, 16],
-      [37, 8],
-      // Loop 20 — south map edge bush clusters
-      [6, 27],
+      [8, 3],
+      [34, 7],
+      [36, 14],
       [18, 28],
       [30, 27],
-      [39, 26],
     ];
     for (const [cx, cy] of clusters) {
       if (inRect(cx, cy, SITE_A) || inRect(cx, cy, SITE_B)) continue;
       const h = hash(cx, cy);
-      if (h % 3 !== 0) {
-        this.addProp(`flower_${h % 2}`, cx, cy, -5, 1, 0.48 + (h % 3) * 0.06);
-      }
-      this.addProp('bush', cx, cy, -10, 3, 0.72 + (h % 4) * 0.06);
-      if (h % 2 === 0) this.addProp('bush', cx + 1, cy, -10, 3, 0.68);
-      if (h % 3 === 0) this.addProp(`flower_${(h + 1) % 2}`, cx, cy + 1, -5, 1, 0.44);
-      if (h % 4 === 0) this.addProp('rock', cx + 1, cy, -4, 2, 0.78);
-      if (h % 5 === 0) this.addProp('bush', cx - 1, cy + 1, -10, 3, 0.65);
-      if (h % 4 === 1) this.addProp('stump', cx + 1, cy + 1, -6, 2, 0.85);
-      if (h % 6 === 0) this.addProp('log', cx - 1, cy, -4, 2, 0.8);
-    }
-    // Forest-floor clutter on north hills
-    for (let x = 1; x < WORLD_W - 1; x++) {
-      for (let y = 0; y < 4; y++) {
-        if (isWater(x, y) || isMainRoad(x, y)) continue;
-        const h = hash(x, y + 99);
-        if (h % 7 === 0) this.addProp('stump', x, y, -6, 2, 0.75 + (h % 3) * 0.05);
-        if (h % 11 === 0) this.addProp('log', x, y, -4, 2, 0.7);
-      }
+      this.addProp(h % 2 === 0 ? 'bush' : 'tree_deciduous', cx, cy, h % 2 === 0 ? -10 : -28, 3, 0.8);
     }
   }
 
@@ -1150,7 +1003,7 @@ export class WorldView {
 
   private spawnClouds(): void {
     const variants = ['cloud', 'cloud_soft', 'cloud_wide'] as const;
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) {
       const s = isoToScreen(4 + i * 5, 0 + (i % 2));
       const key = variants[i % variants.length];
       const tex = this.scene.textures.exists(key) ? key : 'cloud';
@@ -1165,7 +1018,7 @@ export class WorldView {
   }
 
   private spawnBirds(): void {
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < 4; i++) {
       const g = this.scene.add.graphics();
       g.setDepth(-90);
       g.setScrollFactor(0.25);
@@ -1220,34 +1073,30 @@ export class WorldView {
   }
 
   private spawnFoam(): void {
-    // True froth strips along bank edges + bridge — not mini water diamonds.
-    for (let y = 1; y < WORLD_H; y += 1) {
-      if (hash(19, y) % 2 !== 0) continue;
+    // Sparse froth along the river + a little at the bridge.
+    for (let y = 1; y < WORLD_H; y += 3) {
+      if (hash(19, y) % 3 !== 0) continue;
       const cx = riverCenterX(y);
-      for (const side of [-1.05, 1.05] as const) {
-        const fx = cx + side;
-        const s = isoToScreen(fx, y);
-        const key = `foam_strip_${y % 3}`;
-        const foam = this.scene.add.image(s.x, s.y - 1, this.scene.textures.exists(key) ? key : 'foam');
-        foam.setDepth(depthFor(Math.floor(fx), y, 1));
-        foam.setAlpha(0.5);
-        foam.setScale(0.85 + (hash(y, Math.floor(side + 2)) % 20) / 100);
-        this.foam.push(foam);
-        this.props.push(foam);
-      }
+      const fx = cx + (y % 2 === 0 ? -1.05 : 1.05);
+      const s = isoToScreen(fx, y);
+      const key = `foam_strip_${y % 3}`;
+      const foam = this.scene.add.image(s.x, s.y - 1, this.scene.textures.exists(key) ? key : 'foam');
+      foam.setDepth(depthFor(Math.floor(fx), y, 1));
+      foam.setAlpha(0.45);
+      foam.setScale(0.85);
+      this.foam.push(foam);
+      this.props.push(foam);
     }
-    // Extra froth churn near the bridge crossing (y=6).
     const bridgeY = 6;
     const bridgeCx = riverCenterX(bridgeY);
-    const bridgeOffsets = [-0.6, 0, 0.6, -1.2, 1.2];
-    for (let i = 0; i < bridgeOffsets.length; i++) {
-      const fx = bridgeCx + bridgeOffsets[i];
+    for (const off of [-0.6, 0.6] as const) {
+      const fx = bridgeCx + off;
       const s = isoToScreen(fx, bridgeY);
-      const key = `foam_strip_${i % 3}`;
-      const foam = this.scene.add.image(s.x, s.y - 2, this.scene.textures.exists(key) ? key : 'foam');
+      const foam = this.scene.add.image(s.x, s.y - 2, 'foam_strip_0');
+      if (!this.scene.textures.exists('foam_strip_0')) foam.setTexture('foam');
       foam.setDepth(depthFor(Math.floor(fx), bridgeY, 2));
-      foam.setAlpha(0.62);
-      foam.setScale(0.95 + (i % 3) * 0.08);
+      foam.setAlpha(0.55);
+      foam.setScale(0.95);
       this.foam.push(foam);
       this.props.push(foam);
     }
