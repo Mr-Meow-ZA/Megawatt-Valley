@@ -519,7 +519,8 @@ export class DomHud {
         .map((id) => {
           const def = EQUIPMENT[id];
           const active = snapshot.buildMode === id ? 'active' : '';
-          return `<button type="button" class="build-card ${active}" data-build="${id}">
+          const tip = `${def.name} — ${def.description}`;
+          return `<button type="button" class="build-card ${active}" data-build="${id}" title="${tip.replace(/"/g, '&quot;')}">
             <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
             <strong>${def.name}</strong>
             <span class="price">${money(def.cost)}</span>

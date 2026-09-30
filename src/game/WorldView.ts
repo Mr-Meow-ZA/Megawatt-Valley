@@ -186,6 +186,7 @@ export class WorldView {
   private readonly staffFacing = new Map<string, number>();
   private readonly staffTrails = new Map<string, StaffTrailBlob[]>();
   private readonly staffTrailLastSpawn = new Map<string, number>();
+  private readonly staffWalkTextures = ['tech_walk_0', 'tech_walk_1'] as const;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -364,8 +365,8 @@ export class WorldView {
 
     const riser = this.scene.add.graphics();
     if (westDrop >= 0.55) {
-      const h = Math.min(28, westDrop * 6);
-      riser.fillStyle(CLIFF_FACE_W, 0.88);
+      const h = Math.min(20, westDrop * 5);
+      riser.fillStyle(CLIFF_FACE_W, 0.68);
       riser.beginPath();
       riser.moveTo(cx - 40, cy);
       riser.lineTo(cx, cy + 20);
@@ -377,8 +378,8 @@ export class WorldView {
       riser.fillRect(cx - 38, cy + h - 4, 36, 3);
     }
     if (eastDrop >= 0.55) {
-      const h = Math.min(28, eastDrop * 6);
-      riser.fillStyle(CLIFF_FACE_E, 0.86);
+      const h = Math.min(20, eastDrop * 5);
+      riser.fillStyle(CLIFF_FACE_E, 0.65);
       riser.beginPath();
       riser.moveTo(cx + 40, cy);
       riser.lineTo(cx, cy + 20);
@@ -1512,6 +1513,12 @@ export class WorldView {
         ? 1.0 + Math.sin(this.scene.time.now / 95) * 0.05
         : 1.05;
       sprite.setScale(1.05 * face, squashY);
+      if (traveling) {
+        const walkFrame = Math.floor(this.scene.time.now / 120) % 2;
+        sprite.setTexture(this.staffWalkTextures[walkFrame]);
+      } else {
+        sprite.setTexture('tech');
+      }
       if (traveling) {
         const lastSpawn = this.staffTrailLastSpawn.get(staff.id) ?? 0;
         if (this.scene.time.now - lastSpawn > 70) {

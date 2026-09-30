@@ -373,3 +373,27 @@ Done:
 | Simulation UX | 8.5 | Sparks visible pre-export via powerKw |
 | Overall cohesion | 8.4 | Lighting + banks closer to concept |
 | **Average** | **8.4** | Harsh QA; tree mesh + staff walk frames remain |
+
+---
+
+## Loop 15 — richer trees, staff walk frames, cliff soften
+
+Done:
+- [x] Rebuilt `tree.png`, `tree_big.png`, `tree_round.png`, `tree_deciduous.png` with layered ellipses/triangles, bark notches, baked shadows
+- [x] `tech_walk_0/1.png` leg-swap frames; alternate every ~120 ms during travel
+- [x] Build card `title` tooltips; bargain/premium icons already use rebuilt PV sprites
+- [x] Cliff risers: lower opacity (0.65–0.68), max height 20 (was 28)
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.7 | Softer cliff risers; less harsh earth wedges |
+| Props & foliage | 9.0 | Denser layered canopies + baked ground shadows |
+| Solar / grid | 8.5 | Holds Loop 14 |
+| Staff & vehicles | 8.8 | Two-frame walk cycle during travel |
+| Placement feedback | 8.4 | Build card tooltips add context |
+| HUD / UI | 8.5 | PV icons + hover titles on build cards |
+| Atmosphere | 8.8 | Richer tree silhouettes improve valley read |
+| Readability vs concept | 8.6 | Trees closer to stylised management-game foliage |
+| Simulation UX | 8.5 | Holds |
+| Overall cohesion | 8.7 | Visible jump in organic props; cliffs less intrusive |
+| **Average** | **8.7** | Harsh QA; trees landed well; still below 9.5 target |

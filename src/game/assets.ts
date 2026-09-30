@@ -70,6 +70,8 @@ export const ASSET_KEYS = [
   'truck',
   'truck_delivery',
   'tech',
+  'tech_walk_0',
+  'tech_walk_1',
   'icon_coin',
   'icon_power',
   'icon_dollar',
