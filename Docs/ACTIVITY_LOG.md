@@ -38,6 +38,34 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+
+## 2026-09-30 — Visual quality Loops 6–13 (continued polish)
+
+**Agent:** Cursor
+**Status:** Partial — ≥5 loops done; harsh visual scores still below 9.5 target
+
+**Changed / Produced**
+- Loops 6–13: mountains, denser forests, rebuilt PV/fence/grass, day/night+weather, foam animation, iso vehicles, staff path lerp + trails, sparks, dust/pollen, parking, stump/log clutter, HUD polish.
+- Scorecard: `Docs/PHASER_QUALITY_SCORECARD.md` tracks each loop.
+- Latest HEAD includes Loop 12 mountain/foam/spark fixes and Loop 13 forest clutter.
+
+**Tested / Verified**
+- `tsc` + `npm test` 8/8 across loops.
+- Multiple computerUse visual QA passes; latest harsh average ~8.3 after Loop 11 claims.
+
+**Known issues / limitations**
+- Harsh visual scores lag optimistic code-audit estimates (~9.5 claimed vs ~8.3 observed).
+- Remaining gaps: organic river banks, richer tree meshes, directional lighting, verified sparks during export play.
+
+**Next recommended step**
+- Play with commissioned exporting arrays so sparks are visible; continue art fidelity on banks/trees/lighting until harsh scores hit 9.5.
+
+**Git / References**
+- Branch/PR: `cursor/phaser-level1-build-5938` / #7
+- Recent: `c7e9f18`, `09247d3`, `0b7673e`, `45c54d7`
+
+---
+
 ## 2026-09-30 — Loop 11 — staff walk cycle + pollen drift
 
 **Agent:** Cursor
