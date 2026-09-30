@@ -229,6 +229,11 @@ html, body, #app {
   padding: 10px;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 24px rgba(0, 16, 32, 0.22);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.panel:hover {
+  border-color: rgba(180, 220, 255, 0.4);
 }
 
 .panel h2 {
@@ -365,6 +370,13 @@ html, body, #app {
   cursor: pointer;
   width: 100%;
   font-family: var(--font);
+  transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.build-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(61, 220, 132, 0.55);
+  background: #1f3d68;
 }
 
 .build-icon {

@@ -21,6 +21,9 @@ export const ASSET_KEYS = [
   'tile_bridge',
   'tile_hill',
   'tile_beach',
+  'tile_water_foam_2',
+  'tile_water_foam_1',
+  'tile_water_foam_0',
   'tile_grass_hd_0',
   'tile_grass_hd_1',
   'tile_grass_hd_2',
@@ -66,7 +69,7 @@ export function preloadGameAssets(scene: Phaser.Scene): void {
   for (const key of ASSET_KEYS) {
     scene.load.image(key, `/assets/game/${key}.png`);
   }
-  }
+}
 
 /** Procedural overlays that don't need sourced art. */
 export function generateOverlayTextures(scene: Phaser.Scene): void {

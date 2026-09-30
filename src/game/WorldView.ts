@@ -83,6 +83,7 @@ export class WorldView {
   private readonly entityShadows = new Map<string, Phaser.GameObjects.Image>();
   private readonly overlays = new Map<string, Phaser.GameObjects.Image>();
   private ghost: Phaser.GameObjects.Image | null = null;
+  private ghostPad: Phaser.GameObjects.Image | null = null;
   private selectRing: Phaser.GameObjects.Image | null = null;
   private hoverTile: Vec2 | null = null;
   private clouds: Phaser.GameObjects.Image[] = [];
@@ -110,13 +111,20 @@ export class WorldView {
 
   private terrainKey(x: number, y: number): string {
     if (isWater(x, y)) {
-      const h = hash(x, y) % 3;
-      return h === 0 ? 'tile_water' : h === 1 ? 'tile_water_n' : 'tile_river';
+      const h = hash(x, y);
+      // Foam / rapids near banks and bridge; deeper water in the channel core.
+      const cx = riverCenterX(y);
+      const nearEdge = Math.abs(x - cx) > 0.55;
+      if (nearEdge && h % 3 === 0) return `tile_water_foam_${h % 3}`;
+      if (h % 5 === 0) return 'tile_river_ew';
+      if (h % 3 === 0) return 'tile_water_n';
+      return h % 2 === 0 ? 'tile_water' : 'tile_river';
     }
 
     if (isBank(x, y)) {
       const h = hash(x, y);
-      // Mix bank variants with occasional grass/dirt for organic edges.
+      // Sandy beach shelves on the warmer sun-facing banks; muddy banks elsewhere.
+      if (h % 4 === 0) return 'tile_beach';
       if (h % 7 === 0) return h % 2 === 0 ? 'tile_grass' : 'tile_grass_alt';
       if (h % 5 === 0) return 'tile_dirt';
       return h % 2 === 0 ? 'tile_bank' : 'tile_bank_ew';
@@ -136,6 +144,12 @@ export class WorldView {
 
     // Service / dirt pads near office
     if (x >= 4 && x <= 7 && y >= 5 && y <= 7) return 'tile_dirt';
+
+    // Rolling hill crowns on elevated far edges
+    const elev = this.heightAt(x, y);
+    if (elev >= 2.4 && !inRect(x, y, SITE_A) && !inRect(x, y, SITE_B)) {
+      if (hash(x, y) % 3 === 0) return 'tile_hill';
+    }
 
     if (!inRect(x, y, SITE_A) && !inRect(x, y, SITE_B) && hash(x, y) % 11 === 0) {
       return 'tile_dirt';
@@ -283,38 +297,45 @@ export class WorldView {
       [10, 12],
       [11, 10],
       [12, 11],
+      [8, 12],
+      [9, 13],
     ];
     for (const [x, y] of demoRows) {
       this.addProp('pv_group', x, y, -22, 5, 0.75);
     }
+    // Short chain-link around the starter array pad
+    for (let x = 7; x <= 13; x += 2) {
+      this.addProp('fence_short', x, 9, -4, 3, 0.75);
+      this.addProp('fence_short', x, 14, -4, 3, 0.75);
+    }
+    for (let y = 10; y <= 13; y += 2) {
+      this.addProp('fence_short', 7, y, -4, 3, 0.7);
+      this.addProp('fence_short', 13, y, -4, 3, 0.7);
+    }
 
-    // Decorative vehicles — office / yard / substation / Site B access
+    // Decorative vehicles — prefer iso vans; keep one delivery truck at the yard only
     this.addProp('van', 6, 6, -10, 7);
-    this.addProp('truck', 5, 7, -10, 7, 0.95);
+    this.addProp('truck_delivery', 5, 7, -12, 7, 0.85);
     this.addProp('van', 7, 5, -10, 7, 0.9);
-    this.addProp('truck', 13, 7, -10, 7);
     this.addProp('van', 14, 5, -10, 7, 0.92);
-    this.addProp('truck', 12, 11, -10, 7, 0.88);
+    this.addProp('van', 13, 7, -10, 7, 0.88);
     this.addProp('van', 27, 9, -10, 7);
-    this.addProp('truck', 25, 10, -10, 7, 0.9);
 
-    // Tech workers around office, yard, and substation
+    // Tech workers around office, yard, and substation (fewer cluttered sprites)
     this.addProp('tech', 7, 9, -14, 9, 0.95);
     this.addProp('tech', 6, 8, -14, 9, 0.9);
-    this.addProp('tech', 8, 7, -14, 9, 0.92);
     this.addProp('tech', 13, 5, -14, 9, 0.95);
     this.addProp('tech', 14, 6, -14, 9, 0.88);
     this.addProp('tech', 12, 10, -14, 9, 0.9);
-    this.addProp('tech', 15, 11, -14, 9, 0.85);
 
-    // Full fence perimeter around Site A meadow
+    // Full fence perimeter around Site A meadow (short posts + corner posts)
     for (let x = SITE_A.x0; x < SITE_A.x1; x += 2) {
-      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.9);
-      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.9);
+      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.88);
+      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.88);
     }
     for (let y = SITE_A.y0 + 1; y < SITE_A.y1 - 1; y += 2) {
-      this.addProp('fence', SITE_A.x0, y, -6, 3, 0.85);
-      this.addProp('fence', SITE_A.x1 - 1, y, -6, 3, 0.85);
+      this.addProp('fence_short', SITE_A.x0, y, -4, 3, 0.82);
+      this.addProp('fence_short', SITE_A.x1 - 1, y, -4, 3, 0.82);
     }
 
     // Dense pine forests — north hills and river sides (Site A stays clear)
@@ -409,13 +430,17 @@ export class WorldView {
 
   private spawnFoam(): void {
     for (let y = 1; y < WORLD_H; y += 1) {
-      if (hash(19, y) % 3 !== 0) continue;
+      if (hash(19, y) % 2 !== 0) continue;
       const cx = riverCenterX(y);
       const s = isoToScreen(cx, y);
-      const foam = this.scene.add.image(s.x, s.y - 4, 'foam');
+      // Prefer sourced foam tiles; fall back to procedural foam key.
+      const foamKey = this.scene.textures.exists(`tile_water_foam_${y % 3}`)
+        ? `tile_water_foam_${y % 3}`
+        : 'foam';
+      const foam = this.scene.add.image(s.x + ((y % 3) - 1) * 6, s.y - 2, foamKey);
       foam.setDepth(depthFor(Math.floor(cx), y, 1));
-      foam.setAlpha(0.45);
-      foam.setScale(0.7 + (hash(y, 3) % 40) / 100);
+      foam.setAlpha(foamKey.startsWith('tile_water_foam') ? 0.55 : 0.45);
+      foam.setScale(foamKey.startsWith('tile_water_foam') ? 0.55 + (hash(y, 3) % 25) / 100 : 0.7);
       this.foam.push(foam);
       this.props.push(foam);
     }
@@ -521,17 +546,29 @@ export class WorldView {
     for (const staff of snapshot.staff) {
       seen.add(staff.id);
       const pos = isoToScreen(staff.tile.x, staff.tile.y);
+      const elev = this.heightAt(staff.tile.x, staff.tile.y);
+      let shadow = this.entityShadows.get(staff.id);
+      if (!shadow) {
+        shadow = this.scene.add.image(pos.x - 4, pos.y + 6 - elev * 5, 'shadow_blob');
+        this.entityShadows.set(staff.id, shadow);
+      }
+      shadow.setPosition(pos.x - 4, pos.y + 6 - elev * 5);
+      shadow.setScale(0.45, 0.28);
+      shadow.setAlpha(0.7);
+      shadow.setDepth(depthFor(staff.tile.x, staff.tile.y, 6));
+
       let sprite = this.entitySprites.get(staff.id);
       if (!sprite) {
-        sprite = this.scene.add.image(pos.x, pos.y - 18, 'tech');
+        sprite = this.scene.add.image(pos.x, pos.y - 18 - elev * 5, 'tech');
         this.entitySprites.set(staff.id, sprite);
       }
       const bob =
         staff.task.type === 'idle'
           ? Math.sin(this.scene.time.now / 280) * 1.5
           : Math.sin(this.scene.time.now / 110) * 2.5;
-      sprite.setPosition(pos.x, pos.y - 18 + bob);
+      sprite.setPosition(pos.x, pos.y - 18 - elev * 5 + bob);
       sprite.setDepth(depthFor(staff.tile.x, staff.tile.y, 8));
+      sprite.setScale(0.95);
     }
 
     for (const [id, sprite] of this.entitySprites) {
@@ -570,6 +607,7 @@ export class WorldView {
   updateGhost(snapshot: GameSnapshot, pointerWorld: { x: number; y: number }): void {
     if (!snapshot.buildMode) {
       this.ghost?.setVisible(false);
+      this.ghostPad?.setVisible(false);
       this.hoverTile = null;
       return;
     }
@@ -578,13 +616,33 @@ export class WorldView {
     this.hoverTile = tile;
     const plotId = this.sim.plotAtTile(tile);
     const ok = plotId ? this.sim.canPlace(snapshot.buildMode, plotId, tile) === null : false;
-    const screen = isoToScreen(tile.x, tile.y);
-    if (!this.ghost) {
-      this.ghost = this.scene.add.image(screen.x, screen.y, ok ? 'ghost_ok' : 'ghost_bad');
+    const def = EQUIPMENT[snapshot.buildMode];
+    const elev = this.heightAt(tile.x, tile.y);
+    const screen = isoToScreen(
+      tile.x + def.footprint.x / 2 - 0.5,
+      tile.y + def.footprint.y / 2 - 0.5,
+    );
+    const padY = screen.y - elev * 5 + 8;
+    const yOff = (isPv(snapshot.buildMode) ? -36 : snapshot.buildMode === 'office' || snapshot.buildMode === 'substation' ? -40 : -18) - elev * 5;
+    // Footprint pad + building silhouette tinted green/red.
+    if (!this.ghostPad) {
+      this.ghostPad = this.scene.add.image(screen.x, padY, ok ? 'ghost_ok' : 'ghost_bad');
     }
-    this.ghost.setTexture(ok ? 'ghost_ok' : 'ghost_bad');
-    this.ghost.setPosition(screen.x, screen.y);
+    this.ghostPad.setTexture(ok ? 'ghost_ok' : 'ghost_bad');
+    this.ghostPad.setPosition(screen.x, padY);
+    this.ghostPad.setDepth(depthFor(tile.x, tile.y, 14));
+    this.ghostPad.setVisible(true);
+
+    const tex = textureFor(snapshot.buildMode);
+    if (!this.ghost) {
+      this.ghost = this.scene.add.image(screen.x, screen.y + yOff, tex);
+    }
+    this.ghost.setTexture(tex);
+    this.ghost.setPosition(screen.x, screen.y + yOff);
     this.ghost.setDepth(depthFor(tile.x, tile.y, 15));
+    this.ghost.setAlpha(0.55);
+    this.ghost.setScale(isPv(snapshot.buildMode) ? 1.15 : 1);
+    this.ghost.setTint(ok ? 0x66ff99 : 0xff6677);
     this.ghost.setVisible(true);
   }
 
