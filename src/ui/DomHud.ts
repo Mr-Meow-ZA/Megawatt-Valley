@@ -88,6 +88,7 @@ export class DomHud {
   private lastSelectionKey = '__uninit__';
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
+  private toastClearAt = 0;
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'all';
   private minimapCtx: CanvasRenderingContext2D | null = null;
 
@@ -159,7 +160,10 @@ export class DomHud {
         <h2>Valley map</h2>
         <canvas data-k="minimap" width="220" height="120"></canvas>
         <div class="minimap-legend">
-          <span>Terrain</span><span>Solar</span><span>Grid</span><span>Buildings</span>
+          <span><i class="swatch grass"></i>Terrain</span>
+          <span><i class="swatch solar"></i>Solar</span>
+          <span><i class="swatch grid"></i>Grid</span>
+          <span><i class="swatch build"></i>Buildings</span>
         </div>
       </aside>
 
@@ -187,6 +191,10 @@ export class DomHud {
       </aside>
 
       <div class="toast" data-k="toast" hidden></div>
+      <div class="build-banner" data-k="build-banner" hidden>
+        <strong data-k="build-banner-label">Placing…</strong>
+        <span>Click a valid meadow tile · Esc / Cancel to abort</span>
+      </div>
 
       <footer class="hud-bottom">
         <button type="button" data-action="save">Save</button>
@@ -281,6 +289,10 @@ export class DomHud {
     this.root.addEventListener('click', handleUiAction);
 
     window.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && this.sim.snapshot().buildMode) {
+        this.sim.setBuildMode(null);
+        return;
+      }
       if (!this.sim.activeEvent) return;
       if (ev.key === '1' || ev.key === '2' || ev.key === '3') {
         const idx = Number(ev.key) - 1;
@@ -410,7 +422,10 @@ export class DomHud {
     };
 
     setText('cash-val', money(snapshot.cash));
-    setText('cash-rate', `+${money(snapshot.revenuePerHour || 0)}/h`);
+    const rate = snapshot.revenuePerHour || 0;
+    setText('cash-rate', `${rate >= 0 ? '+' : '−'}${money(Math.abs(rate))}/h`);
+    const cashRateEl = this.root.querySelector('[data-k="cash-rate"]') as HTMLElement | null;
+    if (cashRateEl) cashRateEl.style.color = rate >= 0 ? 'var(--accent)' : 'var(--danger)';
     setText('power-val', `${snapshot.exportedKw.toFixed(1)} kW export`);
     const capacity = Math.max(100, snapshot.powerKw * 1.15, snapshot.exportedKw);
     const pct = Math.min(100, (snapshot.exportedKw / capacity) * 100);
@@ -435,21 +450,25 @@ export class DomHud {
       b.classList.toggle('active', Number(b.getAttribute('data-speed')) === snapshot.speed);
     });
 
-    const objectivesKey = snapshot.objectives.map((o) => `${o.id}:${o.complete}:${o.active}`).join('|');
+    const activeObjs = snapshot.objectives.filter((o) => o.active || o.complete);
+    const doneCount = activeObjs.filter((o) => o.complete).length;
+    const objectivesKey = `${doneCount}/${activeObjs.length}|` + activeObjs.map((o) => `${o.id}:${o.complete}:${o.active}`).join('|');
     if (objectivesKey !== this.lastObjectivesKey) {
       this.lastObjectivesKey = objectivesKey;
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
-      objList.innerHTML = snapshot.objectives
-        .filter((o) => o.active || o.complete)
-        .slice(0, 6)
-        .map((o) => {
-          const mark = o.complete ? '✓' : '○';
-          return `<li class="${o.complete ? 'done' : 'active'}">
+      const progressPct = activeObjs.length ? Math.round((doneCount / activeObjs.length) * 100) : 0;
+      objList.innerHTML =
+        `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${doneCount}/${activeObjs.length} complete</span></li>` +
+        activeObjs
+          .slice(0, 6)
+          .map((o) => {
+            const mark = o.complete ? '✓' : '○';
+            return `<li class="${o.complete ? 'done' : 'active'}">
             <span class="check">${mark}</span>
             <div><strong>${o.title}</strong><span>${o.description}</span></div>
           </li>`;
-        })
-        .join('');
+          })
+          .join('');
     }
 
     const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}`;
@@ -480,6 +499,15 @@ export class DomHud {
       }
     }
 
+    const banner = this.root.querySelector('[data-k="build-banner"]') as HTMLElement;
+    if (snapshot.buildMode) {
+      banner.hidden = false;
+      const def = EQUIPMENT[snapshot.buildMode];
+      setText('build-banner-label', `Placing ${def.name}`);
+    } else {
+      banner.hidden = true;
+    }
+
     const capsKey = snapshot.capabilities.join(',');
     if (capsKey !== this.lastCapsKey) {
       this.lastCapsKey = capsKey;
@@ -502,6 +530,17 @@ export class DomHud {
       if (snapshot.message) {
         toast.hidden = false;
         toast.textContent = snapshot.message;
+        this.toastClearAt = performance.now() + 3500;
+      } else {
+        toast.hidden = true;
+        this.toastClearAt = 0;
+      }
+    } else if (this.toastClearAt && performance.now() > this.toastClearAt) {
+      toast.hidden = true;
+      this.toastClearAt = 0;
+      if (this.sim.message === snapshot.message) {
+        this.sim.message = null;
+        this.lastMessage = null;
       }
     }
 

@@ -42,19 +42,40 @@ Categories:
 
 ---
 
-## Loop 1 — in progress
-
-Planned / done:
-- [x] Foam water tiles wired + beach banks + hill crowns
-- [x] Ghost = building silhouette + pad
-- [x] Staff shadows; rebuilt tech sprite
-- [x] Fewer side-view trucks; short fence around demo PV
-- [x] HUD panel/card hover polish
-- [ ] Hard-refresh visual rescore
+## Loop 1 — complete (code audit)
 
 | Category | Score | Notes |
 |----------|------:|-------|
-| Terrain & water | — | pending review |
+| Terrain & water | 7.0 | Beach/hills/foam wired; foam layer was mini water tiles |
+| Props & foliage | 7.0 | Fence/pylon better; gaps + single-dir fence |
+| Solar / grid | 7.5 | Demo PV fought Site A placement |
+| Staff & vehicles | 5.5 | Tiny tech; vans had sky-blue BG |
+| Placement feedback | 7.0 | Silhouette ghost shipped |
+| HUD / UI | 7.5 | Sticky toast; thin objective chrome |
+| Atmosphere | 6.0 | Clouds only; no day/night |
+| Readability vs concept | 6.5 | Mixed art languages |
+| Simulation UX | 7.5 | Core loop intact |
+| Overall cohesion | 6.5 | Edges improved |
+| **Average** | **6.8** | |
+
+---
+
+## Loop 2 — in progress
+
+Done:
+- [x] Key out vehicle sky backgrounds; larger tech sprite
+- [x] Real foam_strip froth on banks (not mini water tiles)
+- [x] Day/night + weather veil + rain streaks
+- [x] Ghost pad footprint scale; ghost_bad stroke; elev select ring
+- [x] Toast auto-dismiss; build banner; Esc cancel; cash rate sign
+- [x] Objective progress bar; minimap legend swatches
+- [x] Neighbor farm moved off Site A; warehouse yard; tighter fences
+- [x] Improved inverter cabinet art
+- [ ] Visual rescore
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | — | pending |
 | Props & foliage | — | |
 | Solar / grid | — | |
 | Staff & vehicles | — | |
@@ -68,6 +89,6 @@ Planned / done:
 
 ---
 
-## Loop 2–5
+## Loop 3–5
 
 *(filled after each review)*

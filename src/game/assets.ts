@@ -40,6 +40,9 @@ export const ASSET_KEYS = [
   'rock',
   'fence',
   'fence_short',
+  'foam_strip_0',
+  'foam_strip_1',
+  'foam_strip_2',
   'pv_bargain',
   'pv_premium',
   'pv_group',
@@ -103,6 +106,8 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.lineTo(5, 30);
     g.closePath();
     g.fillPath();
+    g.lineStyle(2, 0xff2233, 0.95);
+    g.strokePath();
   });
 
   make('select_ring', 140, 70, (g) => {
@@ -144,16 +149,24 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.fillEllipse(24, 10, 14, 7);
   });
 
-  // Simple inverter box (no sourced match)
-  make('inverter', 64, 64, (g) => {
-    g.fillStyle(0x061208, 0.35);
-    g.fillEllipse(30, 52, 40, 14);
-    g.fillStyle(0x4a5464, 1);
-    g.fillRoundedRect(16, 18, 32, 28, 3);
+  // Compact inverter cabinet with vents + status LEDs
+  make('inverter', 72, 72, (g) => {
+    g.fillStyle(0x061208, 0.4);
+    g.fillEllipse(34, 60, 48, 16);
+    g.fillStyle(0x3a4454, 1);
+    g.fillRoundedRect(18, 14, 36, 42, 4);
+    g.fillStyle(0x2a3344, 1);
+    g.fillRoundedRect(22, 18, 28, 20, 2);
+    g.lineStyle(1, 0x5a6a7a, 0.9);
+    for (let i = 0; i < 4; i++) g.lineBetween(24, 22 + i * 4, 48, 22 + i * 4);
+    g.fillStyle(0x1a2230, 1);
+    g.fillRoundedRect(22, 42, 28, 10, 2);
     g.fillStyle(0x3ddc84, 1);
-    g.fillCircle(26, 30, 3);
+    g.fillCircle(28, 47, 2.5);
     g.fillStyle(0xf5c542, 1);
-    g.fillCircle(38, 30, 3);
+    g.fillCircle(36, 47, 2.5);
+    g.fillStyle(0x6ec8ff, 1);
+    g.fillCircle(44, 47, 2.5);
   });
 
   // Tech sprite loaded from /assets/game/tech.png via ASSET_KEYS.
