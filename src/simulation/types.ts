@@ -206,4 +206,6 @@ export interface SerializedGameState {
   pendingCapabilityChoice: boolean;
   bargainDiscountCharges: number;
   playerPlacedPv: boolean;
+  staffBusyHours: number;
+  tariffBonus: number;
 }

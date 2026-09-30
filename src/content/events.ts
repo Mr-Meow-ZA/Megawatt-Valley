@@ -16,12 +16,12 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'sponsor',
         label: 'Sponsor tea & biscuits (−$2,000)',
-        description: 'Spend cash now for smoother relations.',
+        description: 'Lasting goodwill: +$0.01/kWh tariff for the run.',
       },
       {
         id: 'promise',
         label: 'Promise a public tour',
-        description: 'No cash cost, but staff stay busy next week.',
+        description: 'No cash cost, but Tess is busy ~18h (manual dispatch delayed).',
       },
     ],
   },

@@ -985,6 +985,29 @@ html, body, #app {
 .panel.objectives li.pending {
   opacity: 0.72;
 }
+.panel.objectives li.obj-focus {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+  background: rgba(61, 220, 132, 0.14) !important;
+  border: 1px solid rgba(61, 220, 132, 0.35);
+  border-radius: 10px;
+  padding: 8px 10px !important;
+}
+.panel.objectives li.obj-focus .focus-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-weight: 700;
+}
+.panel.objectives li.obj-focus strong {
+  font-size: 13px;
+}
+.panel.objectives li.obj-focus span:last-child {
+  color: var(--muted);
+  font-size: 11px;
+}
 [data-k="power-gen"] {
   display: block;
   font-size: 11px;

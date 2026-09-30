@@ -1,6 +1,6 @@
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
 import { CAPABILITY_INFO, ONBOARDING_STEPS } from '../content/scenario';
-import { initAudio, isMuted, playSfx, toggleMute } from '../audio/Sfx';
+import { initAudio, isMuted, playSfx, startAmbience, toggleMute } from '../audio/Sfx';
 import type { GameSimulation } from '../simulation/GameSimulation';
 import type { EquipmentKind, GameSnapshot } from '../simulation/types';
 import { clearSave, getSaveMeta, hasSave, loadGame, saveGame } from '../persistence/save';
@@ -320,6 +320,7 @@ export class DomHud {
       if (this.audioPrimed) return;
       this.audioPrimed = true;
       initAudio();
+      startAmbience();
     };
 
     const handleUiAction = (ev: Event) => {
@@ -874,8 +875,13 @@ export class DomHud {
       this.lastObjectivesKey = objectivesKey;
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
       const progressPct = totalObjectives ? Math.round((completedCount / totalObjectives) * 100) : 0;
+      const focus = incompleteActive[0] ?? incompleteInactive[0];
+      const focusHtml = focus
+        ? `<li class="obj-focus"><span class="focus-label">Next</span><strong>${focus.title}</strong><span>${focus.description}</span></li>`
+        : '';
       objList.innerHTML =
         `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${completedCount}/${totalObjectives} complete</span></li>` +
+        focusHtml +
         ordered
           .map((o) => {
             const mark = o.complete ? '✓' : '○';
@@ -887,6 +893,12 @@ export class DomHud {
           </li>`;
           })
           .join('');
+      for (const o of newlyDone) {
+        if (o.id === 'first_power') {
+          playSfx('unlock');
+          this.sim.message = 'First Power! Electrons are leaving the valley — keep building.';
+        }
+      }
       for (const o of snapshot.objectives) {
         if (o.complete) this.completedObjectiveIds.add(o.id);
       }

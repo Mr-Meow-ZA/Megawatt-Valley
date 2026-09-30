@@ -75,6 +75,10 @@ export class GameSimulation {
   pendingCapabilityChoice = false;
   bargainDiscountCharges = 0;
   playerPlacedPv = false;
+  /** Temporary staff busy timer (hours) from event choices. */
+  staffBusyHours = 0;
+  /** Small lasting tariff bonus from community goodwill. */
+  tariffBonus = 0;
   private eventDelays: Partial<Record<EventId, number>> = {};
   private lastCommissionId: string | null = null;
   private lastFaultToastId: string | null = null;
@@ -307,6 +311,10 @@ export class GameSimulation {
 
   /** Smart repair: selected fault, else nearest faulted asset. */
   dispatchRepair(equipmentId?: string | null): boolean {
+    if (this.staffBusyHours > 0 && !this.capabilities.includes('radio_dispatch')) {
+      this.message = 'Staff are busy with the village tour promise.';
+      return false;
+    }
     const targetId =
       equipmentId ??
       this.selectedId ??
@@ -346,6 +354,10 @@ export class GameSimulation {
 
   /** Smart clean: selected dirty PV, else dirtiest array. */
   dispatchClean(equipmentId?: string | null): boolean {
+    if (this.staffBusyHours > 0 && !this.capabilities.includes('radio_dispatch')) {
+      this.message = 'Staff are busy with the village tour promise.';
+      return false;
+    }
     let eq = equipmentId ? this.equipment.find((e) => e.id === equipmentId) : null;
     if (!eq && this.selectedId) {
       eq = this.equipment.find((e) => e.id === this.selectedId) ?? null;
@@ -395,9 +407,12 @@ export class GameSimulation {
       case 'community_meeting':
         if (choiceId === 'sponsor') {
           this.cash -= 2000;
-          this.message = 'Tea secured. Goats remain unimpressed but peaceful.';
+          this.tariffBonus = Math.min(0.02, this.tariffBonus + 0.01);
+          this.tariffPerKwh = TARIFF_PER_KWH + this.tariffBonus;
+          this.message = 'Tea secured. Locals talk you up — tariff goodwill +$0.01/kWh.';
         } else {
-          this.message = 'Tour promised. Tess will look photogenic later.';
+          this.staffBusyHours = Math.max(this.staffBusyHours, 18);
+          this.message = 'Tour promised. Tess is booked for village PR for a while.';
         }
         break;
       case 'bargain_batch':
@@ -619,6 +634,9 @@ export class GameSimulation {
     }
     this.eventClock += 1 / 60;
     this.weatherTimer += 1 / 60;
+    if (this.staffBusyHours > 0) {
+      this.staffBusyHours = Math.max(0, this.staffBusyHours - 1 / 60);
+    }
     if (this.curtailmentTimer > 0) {
       this.curtailmentTimer -= 1 / 60;
       if (this.curtailmentTimer <= 0) this.curtailmentFactor = 1;
@@ -1081,6 +1099,8 @@ export class GameSimulation {
       pendingCapabilityChoice: this.pendingCapabilityChoice,
       bargainDiscountCharges: this.bargainDiscountCharges,
       playerPlacedPv: this.playerPlacedPv,
+      staffBusyHours: this.staffBusyHours,
+      tariffBonus: this.tariffBonus,
     };
   }
 
@@ -1138,6 +1158,9 @@ export class GameSimulation {
     this.bargainDiscountCharges = data.bargainDiscountCharges ?? 0;
     this.playerPlacedPv =
       data.playerPlacedPv ?? this.equipment.some((e) => isPv(e.kind));
+    this.staffBusyHours = data.staffBusyHours ?? 0;
+    this.tariffBonus = data.tariffBonus ?? 0;
+    this.tariffPerKwh = TARIFF_PER_KWH + this.tariffBonus;
   }
 }
 

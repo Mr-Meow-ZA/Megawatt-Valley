@@ -19,6 +19,8 @@ function migrate(state: SerializedGameState, fromVersion: number): SerializedGam
       ...p,
       exportFactor: p.exportFactor ?? (p.id === 'site_b' ? 0.78 : 1),
     }));
+    next.staffBusyHours = next.staffBusyHours ?? 0;
+    next.tariffBonus = next.tariffBonus ?? 0;
   }
   return next;
 }

@@ -85,6 +85,7 @@ export function setMuted(value: boolean): void {
   if (master) {
     master.gain.value = muted ? 0 : MASTER_GAIN;
   }
+  syncAmbienceMute();
 }
 
 export function isMuted(): boolean {
@@ -233,5 +234,35 @@ export function playSfx(name: SfxName): void {
     playNamed(name);
   } catch {
     /* ignore synthesis failures */
+  }
+}
+
+/** Soft looping valley pad — starts on first gesture; respects mute. */
+let ambienceNodes: { osc: OscillatorNode; gain: GainNode }[] = [];
+let ambienceOn = false;
+
+export function startAmbience(): void {
+  if (ambienceOn || unavailable) return;
+  const c = ensureContext();
+  if (!c || !master) return;
+  if (c.state === 'suspended') void c.resume().catch(() => undefined);
+  ambienceOn = true;
+  const freqs = [110, 165, 220];
+  for (const f of freqs) {
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    g.gain.value = muted ? 0 : 0.018;
+    osc.connect(g);
+    g.connect(master);
+    osc.start();
+    ambienceNodes.push({ osc, gain: g });
+  }
+}
+
+export function syncAmbienceMute(): void {
+  for (const n of ambienceNodes) {
+    n.gain.gain.value = muted ? 0 : 0.018;
   }
 }
