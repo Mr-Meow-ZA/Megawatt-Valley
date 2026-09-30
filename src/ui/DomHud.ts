@@ -38,6 +38,28 @@ function weatherIconClass(w: GameSnapshot['weather']): string {
   }
 }
 
+/** Weather chip sub-label — never show nonsense like "-100% sun" when weather is Sunny. */
+function weatherModLabel(weather: GameSnapshot['weather'], irradiance: number): string {
+  // Combined irradiance includes daylight; near-zero means night regardless of sky label.
+  if (irradiance < 0.05) return 'Night';
+
+  const weatherSun: Record<GameSnapshot['weather'], number> = {
+    clear: 100,
+    partly_cloudy: 75,
+    overcast: 45,
+    rain: 30,
+    hail: 15,
+  };
+  const sky = weatherSun[weather];
+  const now = Math.round(irradiance * 100);
+
+  if (weather === 'clear' && irradiance >= 0.95) return 'Peak sun';
+  if (weather === 'clear') return `${now}% sun`;
+  // Cloudy / rain: show sky quality, not a negative delta from 100%.
+  if (now >= sky - 5) return `${sky}% sun`;
+  return `${now}% sun`;
+}
+
 function clock(hour: number): string {
   const h = Math.floor(hour) % 24;
   const m = Math.floor((hour % 1) * 60);
@@ -50,11 +72,11 @@ function seasonForDay(day: number): string {
 }
 
 const BUILD_ICONS: Record<string, string> = {
-  bargain_pv: '<img src="/assets/game/pv_group.png" alt="" width="36" height="36"/>',
-  premium_pv: '<img src="/assets/game/pv_portrait.png" alt="" width="36" height="36"/>',
-  inverter: '🔌',
-  office: '<img src="/assets/game/office_mod2.png" alt="" width="36" height="36"/>',
-  substation: '<img src="/assets/game/tank.png" alt="" width="36" height="36"/>',
+  bargain_pv: '<img src="/assets/game/pv_bargain.png" alt="" width="40" height="28"/>',
+  premium_pv: '<img src="/assets/game/pv_premium.png" alt="" width="40" height="28"/>',
+  inverter: '<img src="/assets/game/icon_power.png" alt="" width="28" height="28" style="filter:invert(1) sepia(1) saturate(5) hue-rotate(80deg)"/>',
+  office: '<img src="/assets/game/office.png" alt="" width="36" height="28"/>',
+  substation: '<img src="/assets/game/substation.png" alt="" width="36" height="28"/>',
 };
 
 export class DomHud {
@@ -273,35 +295,111 @@ export class DomHud {
     if (!ctx) return;
     const w = 220;
     const h = 120;
+    const sx = (tx: number) => 8 + tx * 4.8;
+    const sy = (ty: number) => 6 + ty * 3.5;
     ctx.clearRect(0, 0, w, h);
-    // valley backdrop
+
+    // Valley backdrop
     const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#6db8e8');
-    grad.addColorStop(0.35, '#5aae3a');
+    grad.addColorStop(0, '#7ec4ef');
+    grad.addColorStop(0.28, '#6db848');
     grad.addColorStop(1, '#3f8a28');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
-    // river
-    ctx.fillStyle = '#3f9ad4';
-    ctx.fillRect(w * 0.48, 0, w * 0.08, h);
-    // plots
-    for (const plot of snapshot.plots) {
-      const px = 10 + plot.origin.x * 4.2;
-      const py = 8 + plot.origin.y * 3.2;
-      ctx.fillStyle = plot.unlocked ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.28)';
-      ctx.fillRect(px, py, plot.size.x * 4.2, plot.size.y * 3.2);
-      ctx.strokeStyle = plot.unlocked ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.15)';
-      ctx.strokeRect(px, py, plot.size.x * 4.2, plot.size.y * 3.2);
+
+    // Soft meadow patches
+    ctx.fillStyle = 'rgba(90, 170, 55, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(55, 48, 42, 28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(155, 62, 48, 30, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Meandering river (sine)
+    ctx.beginPath();
+    for (let y = 0; y <= h; y += 2) {
+      const t = y / h;
+      const worldY = t * 30;
+      const wobble = Math.sin(worldY * 0.45) * 0.7 + Math.sin(worldY * 0.17) * 0.4;
+      const x = sx(19 + wobble);
+      if (y === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     }
-    // equipment dots
+    ctx.strokeStyle = '#2e7eb8';
+    ctx.lineWidth = 9;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.strokeStyle = '#4aade0';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    // Foam highlight
+    ctx.strokeStyle = 'rgba(190, 230, 255, 0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Road network (matches WorldView isMainRoad corridors)
+    const roads: Array<[number, number, number, number]> = [
+      [3, 6, 34, 6], // main E–W
+      [11, 6, 11, 16], // site A spur
+      [15, 6, 15, 12],
+      [11, 12, 15, 12],
+      [21, 8, 32, 8], // site B
+      [26, 8, 26, 14],
+    ];
+    ctx.strokeStyle = '#4a4e56';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'butt';
+    for (const [x0, y0, x1, y1] of roads) {
+      ctx.beginPath();
+      ctx.moveTo(sx(x0), sy(y0));
+      ctx.lineTo(sx(x1), sy(y1));
+      ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(220, 210, 140, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    for (const [x0, y0, x1, y1] of roads) {
+      ctx.beginPath();
+      ctx.moveTo(sx(x0), sy(y0));
+      ctx.lineTo(sx(x1), sy(y1));
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // Plots
+    for (const plot of snapshot.plots) {
+      const px = sx(plot.origin.x);
+      const py = sy(plot.origin.y);
+      const pw = plot.size.x * 4.8;
+      const ph = plot.size.y * 3.5;
+      ctx.fillStyle = plot.unlocked ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.28)';
+      ctx.fillRect(px, py, pw, ph);
+      ctx.strokeStyle = plot.unlocked ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)';
+      ctx.strokeRect(px, py, pw, ph);
+    }
+
+    // Equipment dots
     for (const eq of snapshot.equipment) {
-      const px = 10 + eq.tile.x * 4.2;
-      const py = 8 + eq.tile.y * 3.2;
-      if (eq.kind === 'office') ctx.fillStyle = '#f4f7fb';
-      else if (eq.kind === 'substation') ctx.fillStyle = '#9aa3b0';
-      else if (eq.kind.includes('pv')) ctx.fillStyle = eq.faulted ? '#ff4455' : '#2f6fd4';
-      else ctx.fillStyle = '#f5c542';
-      ctx.fillRect(px, py, 5, 5);
+      const px = sx(eq.tile.x);
+      const py = sy(eq.tile.y);
+      if (eq.kind === 'office') {
+        ctx.fillStyle = '#f4f7fb';
+        ctx.fillRect(px - 1, py - 1, 6, 6);
+      } else if (eq.kind === 'substation') {
+        ctx.fillStyle = '#9aa3b0';
+        ctx.fillRect(px - 1, py - 1, 5, 5);
+      } else if (eq.kind.includes('pv')) {
+        ctx.beginPath();
+        ctx.fillStyle = eq.faulted ? '#ff4455' : '#2f7fe0';
+        ctx.arc(px + 2, py + 2, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.fillStyle = '#f5c542';
+        ctx.arc(px + 2, py + 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }
 
@@ -322,13 +420,8 @@ export class DomHud {
     const weatherEl = this.root.querySelector('[data-k="weather-icon"]') as HTMLElement;
     weatherEl.className = `chip-icon ${weatherIconClass(snapshot.weather)}`;
     setText('weather-val', weatherLabel(snapshot.weather));
-    const mod = Math.round((snapshot.irradiance - 1) * 100);
-    setText(
-      'weather-mod',
-      snapshot.irradiance >= 0.95
-        ? `+${Math.round(snapshot.irradiance * 18)}% output`
-        : `${mod >= 0 ? '+' : ''}${mod}% sun`,
-    );
+    // Irradiance folds in hour-of-day — don't show "-100% sun" at night while weather says Sunny.
+    setText('weather-mod', weatherModLabel(snapshot.weather, snapshot.irradiance));
 
     setText('time-val', `Day ${snapshot.day}, ${seasonForDay(snapshot.day)}, Year 1`);
     setText('time-clock', clock(snapshot.hour));

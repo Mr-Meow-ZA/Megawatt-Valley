@@ -228,50 +228,18 @@ def draw_fence_suggestion(
 
 
 def build_pv(premium: bool) -> Image.Image:
-    W, H = 280, 220
-    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    cx, cy = W // 2, H // 2 + 30
-    rx, ry = 120, 54
-    draw_gravel_diamond(canvas, cx, cy, rx, ry, gold_accent=premium)
+    """Delegate to procedural solar builder (Kenney arches replaced)."""
+    import importlib.util
 
-    group = scale_to_width(load_crop("pv_group.png"), 104 if premium else 96)
-    single = scale_to_width(load_crop("pv_single.png"), 50 if premium else 46)
-    # Portrait used only as a spaced third row for premium density
-    portrait = scale_to_width(load_crop("pv_portrait.png"), 68)
-
-    # Layout: distinct 2–3 clusters (back → front), avoid heavy overlap
-    if premium:
-        placements = [
-            (group, cx - 86, cy - 82),   # back-left
-            (group, cx + 10, cy - 76),   # back-right
-            (portrait, cx - 42, cy - 48),  # mid-front denser row
-            (single, cx + 78, cy - 34),  # side accent
-        ]
-    else:
-        placements = [
-            (group, cx - 82, cy - 76),   # back-left
-            (group, cx + 6, cy - 64),    # front-right
-            (single, cx - 8, cy - 36),   # small mid accent
-            (single, cx + 68, cy - 28),  # side accent
-        ]
-
-    for sprite, x, y in placements:
-        sh = soft_shadow((sprite.width, max(20, sprite.height // 3)), blur=4.5, opacity=55, squash=0.85)
-        paste(canvas, sh, (x + 6, y + sprite.height - 12))
-        paste(canvas, sprite, (x, y))
-
-    if premium:
-        # Extra subtle gold trim brackets near front pad edge
-        accent = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-        ad = ImageDraw.Draw(accent)
-        g = (220, 175, 55, 210)
-        ad.line([(cx - 48, cy + 22), (cx - 28, cy + 32)], fill=g, width=2)
-        ad.line([(cx + 28, cy + 32), (cx + 48, cy + 22)], fill=g, width=2)
-        ad.ellipse((cx - 52, cy + 19, cx - 46, cy + 25), fill=g)
-        ad.ellipse((cx + 46, cy + 19, cx + 52, cy + 25), fill=g)
-        canvas.alpha_composite(accent)
-
-    return canvas
+    spec = importlib.util.spec_from_file_location(
+        "rebuild_solar_sprites",
+        Path(__file__).with_name("rebuild_solar_sprites.py"),
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Cannot load rebuild_solar_sprites.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.build_pv_farm(premium=premium, size=(280, 200))
 
 
 def build_substation() -> Image.Image:

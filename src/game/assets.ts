@@ -53,6 +53,7 @@ export const ASSET_KEYS = [
   'van',
   'truck',
   'truck_delivery',
+  'tech',
   'icon_coin',
   'icon_power',
   'icon_dollar',
@@ -151,7 +152,8 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.fillCircle(38, 30, 3);
   });
 
-  // Tech from worker sheet frame 0 if available, else draw
+  // Tech sprite loaded from /assets/game/tech.png via ASSET_KEYS.
+  // Procedural fallback only if the file failed to load.
   if (!scene.textures.exists('tech')) {
     make('tech', 36, 48, (g) => {
       g.fillStyle(0x061208, 0.3);
