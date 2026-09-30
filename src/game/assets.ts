@@ -45,6 +45,8 @@ export const ASSET_KEYS = [
   'tree_sm_3',
   'bush',
   'rock',
+  'stump',
+  'log',
   'fence',
   'fence_short',
   'foam_strip_0',
