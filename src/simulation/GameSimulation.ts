@@ -799,16 +799,21 @@ export class GameSimulation {
         return;
       }
     }
+    // No random faults until the player has enjoyed First Power for a bit —
+    // otherwise bargain arrays fault during construction/commission and look "broken".
+    if (!this.objectives.find((o) => o.id === 'first_power')?.complete) return;
+    if (this.firstPowerHoldHours < 4) return;
+
     for (const eq of this.equipment) {
       if (!eq.commissioned || eq.faulted) continue;
       if (!isPv(eq.kind) && eq.kind !== 'inverter') continue;
       const reliability = EQUIPMENT[eq.kind].reliability;
-      const chance = (1 - reliability) * (monitor ? 0.05 : 0.08);
+      const chance = (1 - reliability) * (monitor ? 0.035 : 0.055);
       if (Math.random() < chance) {
         eq.faulted = true;
         eq.condition = clamp(eq.condition - (monitor ? 0.04 : 0.08), 0.25, 1);
         this.lastFaultToastId = eq.id;
-        this.message = `${EQUIPMENT[eq.kind].name} faulted!`;
+        this.message = `${EQUIPMENT[eq.kind].name} faulted! Press R to dispatch.`;
         this.activateObjective('first_repair');
       }
     }
