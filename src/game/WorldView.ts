@@ -28,7 +28,7 @@ type SkyBird = {
   wing: number;
 };
 
-type PowerLineMid = { x: number; y: number; depth: number };
+type PowerLineSpark = { x: number; y: number; depth: number };
 
 type DustMote = {
   dot: Phaser.GameObjects.Arc;
@@ -177,7 +177,7 @@ export class WorldView {
   private rainDrops: Phaser.GameObjects.Rectangle[] = [];
   private ambientMotion: AmbientMotion[] = [];
   private birds: SkyBird[] = [];
-  private readonly powerLineMidpoints: PowerLineMid[] = [];
+  private readonly powerLineSparkPoints: PowerLineSpark[] = [];
   private powerSparks: Phaser.GameObjects.Graphics | null = null;
   private dustMotes: DustMote[] = [];
   private pollenMotles: PollenMote[] = [];
@@ -279,8 +279,11 @@ export class WorldView {
 
     if (isBank(x, y)) {
       const h = hash(x, y);
-      // Sandy beach shelves on the warmer sun-facing banks; muddy banks elsewhere.
-      if (h % 4 === 0) return 'tile_beach';
+      const cx = riverCenterX(y);
+      const southFacing = x > cx;
+      // Sandy beach shelves more often on warmer south-facing banks.
+      if (southFacing && (h % 3 === 0 || h % 5 === 1)) return 'tile_beach';
+      if (!southFacing && h % 6 === 0) return 'tile_beach';
       if (h % 7 === 0) return h % 2 === 0 ? 'tile_grass' : 'tile_grass_alt';
       if (h % 5 === 0) return 'tile_dirt';
       return h % 2 === 0 ? 'tile_bank' : 'tile_bank_ew';
@@ -401,6 +404,12 @@ export class WorldView {
           img.setTint(
             Phaser.Display.Color.GetColor(255, Math.floor(228 + (hash(x, y) % 8)), Math.floor(175 + (hash(x, y) % 12))),
           );
+        } else if (key.startsWith('tile_grass_hd_')) {
+          const h = hash(x, y);
+          const gBoost = (h % 20) - 8;
+          img.setTint(
+            Phaser.Display.Color.GetColor(110 + gBoost, 170 + gBoost, 70 + (h % 12)),
+          );
         }
         this.ground.set(this.tileKey(x, y), img);
       }
@@ -473,11 +482,15 @@ export class WorldView {
       const by = sb.y + b.yOff - 58 * b.scale;
       const midX = (ax + bx) / 2;
       const midY = (ay + by) / 2 + 14;
-      this.powerLineMidpoints.push({
-        x: midX,
-        y: midY,
-        depth: depthFor(midTileX, midTileY, 7),
-      });
+      const sparkDepth = depthFor(midTileX, midTileY, 7);
+      for (const t of [1 / 3, 0.5, 2 / 3]) {
+        const mt = 1 - t;
+        this.powerLineSparkPoints.push({
+          x: mt * mt * ax + 2 * mt * t * midX + t * t * bx,
+          y: mt * mt * ay + 2 * mt * t * midY + t * t * by,
+          depth: sparkDepth,
+        });
+      }
       for (let c = 0; c < 3; c++) {
         const dy = (c - 1) * 4;
         g.beginPath();
@@ -832,6 +845,15 @@ export class WorldView {
         if (isBank(x, y) && h % 2 === 0) {
           this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
         }
+        if (isBank(x, y) && h % 7 === 2) {
+          const cx = riverCenterX(y);
+          const towardWater = x > cx ? -0.18 : 0.18;
+          const edgeX = x + towardWater;
+          for (let f = 0; f < 2; f++) {
+            const fx = edgeX + (f === 0 ? -0.1 : 0.1) * (x > cx ? 1 : -1);
+            this.addBankFoamStrip(fx, y + (f === 0 ? -0.08 : 0.08), h + f);
+          }
+        }
         if (isBank(x, y) && (h % 6 === 0 || h % 7 === 1)) {
           this.addProp('bush', x, y, -10, 3, 0.72 + (h % 4) * 0.06);
           if (h % 2 === 0) {
@@ -973,6 +995,33 @@ export class WorldView {
     b.g.lineTo(0, -1);
     b.g.lineTo(5, flap);
     b.g.strokePath();
+  }
+
+  /** Bank-edge froth overlapping water line — registered for foam animation. */
+  private addBankFoamStrip(worldX: number, tileY: number, seed: number): void {
+    const s = isoToScreen(worldX, tileY);
+    const key = `foam_strip_${seed % 3}`;
+    const foam = this.scene.add.image(s.x, s.y - 1, this.scene.textures.exists(key) ? key : 'foam');
+    foam.setDepth(depthFor(Math.floor(worldX), tileY, 1));
+    foam.setAlpha(0.55);
+    foam.setScale(0.78 + (seed % 15) / 100);
+    this.foam.push(foam);
+    this.props.push(foam);
+  }
+
+  /** Very subtle warm/cool entity tint from sun angle — skip when status tint active. */
+  private applyDirectionalLight(
+    sprite: Phaser.GameObjects.Image,
+    irradiance: number,
+    night: number,
+  ): void {
+    if (night > 0.25) {
+      sprite.setTint(Phaser.Display.Color.GetColor(195, 205, 228));
+    } else if (irradiance > 0.7) {
+      sprite.setTint(Phaser.Display.Color.GetColor(255, 250, 238));
+    } else {
+      sprite.clearTint();
+    }
   }
 
   private spawnFoam(): void {
@@ -1183,14 +1232,6 @@ export class WorldView {
             Math.floor(210 + shimmer * 40),
           ),
         );
-      } else if (k.startsWith('tile_grass_hd_')) {
-        // Micro hue jitter so meadows don't look like one stamped tile
-        const [xs, ys] = key.split(',');
-        const h = hash(Number(xs), Number(ys));
-        const gBoost = (h % 20) - 8;
-        img.setTint(
-          Phaser.Display.Color.GetColor(110 + gBoost, 170 + gBoost, 70 + (h % 12)),
-        );
       }
     }
     for (let i = 0; i < this.foam.length; i++) {
@@ -1205,23 +1246,24 @@ export class WorldView {
       }
     }
 
-    // Power-line sparks when generating (use powerKw so daytime production shows even before export settles)
-    const sparking = (snapshot.exportedKw > 0.05 || snapshot.powerKw > 0.5) && night < 0.25;
+    // Power-line sparks when generating (powerKw fallback when export capped / pre-inverter)
+    const sparking =
+      (snapshot.exportedKw > 0.05 || snapshot.powerKw > 1) && night < 0.25;
     if (this.powerSparks) {
       this.powerSparks.clear();
       if (sparking) {
         const now = this.scene.time.now;
-        for (let i = 0; i < this.powerLineMidpoints.length; i++) {
-          const mid = this.powerLineMidpoints[i];
+        for (let i = 0; i < this.powerLineSparkPoints.length; i++) {
+          const pt = this.powerLineSparkPoints[i];
           const flicker = Math.sin(now / 70 + i * 2.7);
           if (flicker < 0.05) continue;
           const alpha = 0.55 + flicker * 0.4;
           const r = 3.5 + flicker * 3.5;
-          this.powerSparks.setDepth(mid.depth + 1);
+          this.powerSparks.setDepth(pt.depth + 1);
           this.powerSparks.fillStyle(0xffe44a, alpha);
-          this.powerSparks.fillCircle(mid.x, mid.y + (i % 3 - 1) * 3, r);
+          this.powerSparks.fillCircle(pt.x, pt.y + (i % 3 - 1) * 3, r);
           this.powerSparks.fillStyle(0xffffff, alpha * 0.75);
-          this.powerSparks.fillCircle(mid.x + 2, mid.y - 2, r * 0.55);
+          this.powerSparks.fillCircle(pt.x + 2, pt.y - 2, r * 0.55);
         }
       }
     }
@@ -1339,8 +1381,10 @@ export class WorldView {
       sprite.setDepth(depthFor(eq.tile.x, eq.tile.y, 5));
       sprite.setScale(isPv(eq.kind) ? 1.2 : 1);
       sprite.setAlpha(eq.commissioned ? 1 : 0.4 + eq.constructionProgress * 0.6);
+      let statusTinted = false;
       if (eq.faulted) {
         sprite.setTint(0xff8899);
+        statusTinted = true;
       } else if (isPv(eq.kind) && eq.soiling > 0.35) {
         // Light dusting only when heavily soiled — avoid purple/blue tint wash.
         const dust = Math.min(0.35, eq.soiling * 0.4);
@@ -1351,6 +1395,7 @@ export class WorldView {
             Math.floor(255 - dust * 10),
           ),
         );
+        statusTinted = true;
       } else if (
         isPv(eq.kind) &&
         eq.commissioned &&
@@ -1366,8 +1411,12 @@ export class WorldView {
             255,
           ),
         );
+        statusTinted = true;
       } else {
         sprite.clearTint();
+      }
+      if (!statusTinted) {
+        this.applyDirectionalLight(sprite, snapshot.irradiance, night);
       }
 
       const building = eq.constructionProgress < 1;
@@ -1475,6 +1524,7 @@ export class WorldView {
           this.staffTrailLastSpawn.set(staff.id, this.scene.time.now);
         }
       }
+      const taskTinted = staff.task.type !== 'idle';
       if (staff.task.type === 'idle') {
         sprite.clearTint();
       } else if (staff.task.type === 'repair') {
@@ -1483,6 +1533,9 @@ export class WorldView {
         sprite.setTint(0x88ccaa);
       } else {
         sprite.setTint(0xffcc88);
+      }
+      if (!taskTinted) {
+        this.applyDirectionalLight(sprite, snapshot.irradiance, night);
       }
     }
 

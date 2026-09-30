@@ -349,3 +349,27 @@ Harsh visual re-score pending.
 Forest-floor stump + fallen log props for foliage density.
 
 **Process note:** ≥5 full review→improve loops completed (Loops 1–13). Harsh computerUse scores lag optimistic code-audit scores; remaining gap is art fidelity vs concept (lighting, organic banks, tree mesh richness).
+
+---
+
+## Loop 14 — bank foam, lighting tints, denser sparks
+
+Done:
+- [x] Grass hue jitter baked once at terrain build (no per-frame striping)
+- [x] South-facing banks get more beach; occasional paired `foam_strip` on bank edges
+- [x] Subtle warm/cool directional tint on entity sprites (skips fault/soil/task tints)
+- [x] Power sparks at ⅓ / ½ / ⅔ along each cable span; `powerKw > 1` fallback
+
+| Category | Score | Notes |
+|----------|------:|-------|
+| Terrain & water | 8.6 | Organic bank foam + directional beach; grass striping fixed |
+| Props & foliage | 8.4 | Holds Loop 13 clutter |
+| Solar / grid | 8.5 | Denser sparks along full span |
+| Staff & vehicles | 8.5 | Directional light on idle staff |
+| Placement feedback | 8.3 | Holds |
+| HUD / UI | 8.3 | Holds |
+| Atmosphere | 8.7 | Entity warm/cool tints + static grass |
+| Readability vs concept | 8.4 | Warmer south banks read more natural |
+| Simulation UX | 8.5 | Sparks visible pre-export via powerKw |
+| Overall cohesion | 8.4 | Lighting + banks closer to concept |
+| **Average** | **8.4** | Harsh QA; tree mesh + staff walk frames remain |

@@ -1243,3 +1243,34 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 **Git / References**
 - Commit: collaboration-doc commits on `main`
 - Branch / PR / Issue: `main`
+
+---
+
+## 2026-09-30 — Phaser Loop 14 — bank foam, lighting tints, denser sparks
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- `WorldView.ts`: grass hue jitter baked once in `buildTerrain` (removed per-frame sync tint)
+- South-facing bank tiles favour beach; paired `foam_strip` props on occasional bank edges
+- `applyDirectionalLight` warm/cool entity tints (skips fault/soil/glint/task tints)
+- Power sparks at ⅓ / ½ / ⅔ along each cable span; threshold uses `powerKw > 1` fallback
+- `Docs/PHASER_QUALITY_SCORECARD.md` Loop 14 harsh QA entry (~8.4 avg)
+
+**Tested / Verified**
+- `npm run typecheck` — pass
+- `npm test` — 8/8 pass
+
+**Known issues / limitations**
+- Harsh visual QA still below 9.5 target; tree mesh richness and staff walk frames remain
+
+**Decisions / assumptions / recommendations**
+- Starter 100 kW inverter capacity already allows export without placed inverter; sparks use `powerKw` when export lags
+
+**Next recommended step**
+- Loop 15: tree mesh richness or staff multi-frame walk if harsh QA still flags those categories
+
+**Git / References**
+- Commit: `feat: Loop 14 — bank foam, lighting tints, denser sparks`
+- Branch / PR / Issue: `cursor/phaser-level1-build-5938`
