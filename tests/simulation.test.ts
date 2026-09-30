@@ -82,4 +82,26 @@ describe('GameSimulation', () => {
     expect(sim.equipment.some((e) => e.kind === 'bargain_pv' || e.kind === 'premium_pv')).toBe(false);
     expect(sim.computePower().exportedKw).toBe(0);
   });
+
+  it('commissions placed PV via update and then exports', () => {
+    const sim = new GameSimulation();
+    sim.dismissOnboarding();
+    expect(sim.placeEquipment('bargain_pv', 'site_a', { x: 10, y: 10 })).toBe(true);
+    const eq = sim.equipment[sim.equipment.length - 1];
+    expect(eq.commissioned).toBe(false);
+    sim.setSpeed(4);
+    for (let i = 0; i < 200; i++) {
+      sim.hour = 12;
+      sim.weather = 'clear';
+      if (sim.activeEvent) {
+        sim.resolveEventChoice(sim.activeEvent.choices[0].id);
+      }
+      sim.update(0.5);
+    }
+    expect(eq.commissioned).toBe(true);
+    eq.faulted = false;
+    sim.hour = 12;
+    sim.weather = 'clear';
+    expect(sim.computePower().exportedKw).toBeGreaterThan(20);
+  });
 });

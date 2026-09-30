@@ -199,6 +199,7 @@ export interface SerializedGameState {
   lifetimeRevenue: number;
   peakExportKw: number;
   scriptedFirstFault: boolean;
+  firstPowerHoldHours: number;
   curtailmentFactor: number;
   curtailmentTimer: number;
   onboardingStep: number;
