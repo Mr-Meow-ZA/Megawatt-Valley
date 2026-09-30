@@ -55,14 +55,10 @@ def _lerp(a: float, b: float, t: float) -> float:
 
 def draw_chain_link_fence(
     size: tuple[int, int],
-    post_spacing: float = 20.0,
-    post_h: int = 28,
+    post_spacing: float = 18.0,
+    post_h: int = 34,
 ) -> Image.Image:
-    """Isometric chain-link fence segment (not a curved handrail).
-
-    Posts sit along an isometric ground line (~2:1), with dual rails and
-    a light diamond mesh between posts, plus a soft ground shadow.
-    """
+    """Isometric chain-link fence segment — thick posts, visible mesh, iso diamond-friendly."""
     w, h = size
     canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -103,24 +99,24 @@ def draw_chain_link_fence(
         top_b = by - post_h + 4
         bot_a = ay - 4
         bot_b = by - 4
-        # Classic chain-link: paired diagonals forming diamonds
-        cell = 5
-        steps = max(3, int(abs(bx - ax) / cell))
+        # Classic chain-link: paired diagonals forming diamonds (denser, higher contrast)
+        cell = 4
+        steps = max(4, int(abs(bx - ax) / cell))
         for s in range(steps + 1):
             t = s / steps
             mx = _lerp(ax, bx, t)
             my_top = _lerp(top_a, top_b, t)
             my_bot = _lerp(bot_a, bot_b, t)
-            half_w = 4.0
+            half_w = 5.5
             draw.line(
                 [(mx - half_w, my_top), (mx + half_w, my_bot)],
-                fill=(*MESH, 140),
-                width=1,
+                fill=(*MESH, 175),
+                width=2,
             )
             draw.line(
                 [(mx + half_w, my_top), (mx - half_w, my_bot)],
-                fill=(*MESH_DIM, 120),
-                width=1,
+                fill=(*MESH_DIM, 150),
+                width=2,
             )
         # Offset row for denser diamond read
         for s in range(steps):
@@ -141,31 +137,31 @@ def draw_chain_link_fence(
                 width=1,
             )
 
-    # Horizontal rails (top, mid, bottom knuckle rail)
+    # Horizontal rails (top, mid, bottom knuckle rail) — thicker for readability
     for dy_frac, width, col in (
-        (1.0, 2, (*FENCE_RAIL, 245)),       # top rail
-        (0.55, 2, (*STEEL, 210)),           # mid rail
-        (0.14, 2, (*FENCE_RAIL, 235)),      # bottom rail
+        (1.0, 3, (*FENCE_RAIL, 255)),       # top rail
+        (0.55, 3, (*STEEL, 230)),           # mid rail
+        (0.14, 3, (*FENCE_RAIL, 245)),      # bottom rail
     ):
         pts = [(px, py - post_h * dy_frac) for px, py in posts]
         draw.line(pts, fill=col, width=width)
 
-    # Metal posts + caps
+    # Metal posts + caps (thicker)
     for px, py in posts:
-        draw.line([(px - 1, py - post_h), (px - 1, py)], fill=(*STEEL_DARK, 245), width=1)
-        draw.line([(px, py - post_h), (px, py)], fill=(*FENCE_POST, 255), width=2)
-        draw.line([(px + 1, py - post_h + 1), (px + 1, py - 1)], fill=(*STEEL_LITE, 190), width=1)
+        draw.line([(px - 2, py - post_h), (px - 2, py)], fill=(*STEEL_DARK, 255), width=2)
+        draw.line([(px, py - post_h), (px, py)], fill=(*FENCE_POST, 255), width=4)
+        draw.line([(px + 2, py - post_h + 1), (px + 2, py - 1)], fill=(*STEEL_LITE, 210), width=2)
         # Cap
         draw.rectangle(
-            (px - 2, py - post_h - 2, px + 2, py - post_h + 1),
-            fill=(*STEEL_HI, 250),
+            (px - 3, py - post_h - 3, px + 3, py - post_h + 2),
+            fill=(*STEEL_HI, 255),
         )
         draw.rectangle(
-            (px - 1, py - post_h - 3, px + 1, py - post_h - 1),
+            (px - 2, py - post_h - 4, px + 2, py - post_h - 1),
             fill=(*STEEL_LITE, 255),
         )
-        # Small foot plate (shadow does the soft ground read)
-        draw.ellipse((px - 2, py - 1, px + 2, py + 1), fill=(*STEEL_DARK, 160))
+        # Foot plate
+        draw.ellipse((px - 3, py - 1, px + 3, py + 2), fill=(*STEEL_DARK, 200))
 
     canvas.alpha_composite(layer)
     return canvas
@@ -284,8 +280,8 @@ def draw_lattice_pylon(size: tuple[int, int] = (80, 160)) -> Image.Image:
 def main() -> None:
     ASSET.mkdir(parents=True, exist_ok=True)
 
-    fence = draw_chain_link_fence((120, 50), post_spacing=20.0, post_h=30)
-    fence_short = draw_chain_link_fence((80, 40), post_spacing=18.0, post_h=24)
+    fence = draw_chain_link_fence((120, 50), post_spacing=17.0, post_h=34)
+    fence_short = draw_chain_link_fence((80, 40), post_spacing=15.0, post_h=28)
     pylon = draw_lattice_pylon((80, 160))
 
     fence_path = ASSET / "fence.png"

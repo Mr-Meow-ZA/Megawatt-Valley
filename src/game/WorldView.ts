@@ -130,6 +130,7 @@ export class WorldView {
     private readonly sim: GameSimulation,
   ) {
     scene.cameras.main.setBackgroundColor(SKY);
+    this.spawnMountains();
     this.buildTerrain();
     this.scatterEnvironment();
     this.spawnClouds();
@@ -257,7 +258,7 @@ export class WorldView {
 
     const h = hash(x, y);
     // Prefer higher-detail landscape grass where available; fall back to roads pack.
-    return `tile_grass_hd_${h % 4}`;
+    return `tile_grass_hd_${h % 8}`;
   }
 
   /** Fake valley elevation: hills on far edges, lower near river. */
@@ -432,7 +433,7 @@ export class WorldView {
         for (let x = site.x0 + 2; x < site.x1 - 2; x++) {
           if (isMainRoad(x, y)) continue;
           const h = hash(x, y);
-          if (h % 53 !== 0) continue;
+          if (h % 29 !== 0) continue;
           this.addProp(`flower_${h % 2}`, x, y, -4, 1, 0.42 + (h % 4) * 0.05);
         }
       }
@@ -559,7 +560,8 @@ export class WorldView {
         }
         const h = hash(x, y);
         const edge = x < 3 || y < 3 || x > 36 || y > 24;
-        const threshold = edge ? 320 : 140;
+        // Dense concept-style forests on hills; still leave meadow interiors clear.
+        const threshold = edge ? 620 : 280;
         if (h % 1000 < threshold) {
           pines.push([x, y, h % 3 === 0]);
         }
@@ -634,9 +636,38 @@ export class WorldView {
     }
   }
 
+  private spawnMountains(): void {
+    // Soft sky gradient band so the backdrop isn't flat browser blue.
+    const skyBand = this.scene.add.graphics();
+    skyBand.fillGradientStyle(0xb8dcff, 0xb8dcff, 0x8ec8ef, 0x7eb0d8, 1);
+    skyBand.fillRect(-400, -80, 2400, 280);
+    skyBand.setDepth(-220);
+    skyBand.setScrollFactor(0.02);
+    this.props.push(skyBand);
+
+    // Far snow-capped ridge behind the valley (concept backdrop).
+    const mounts = [
+      { key: 'mountain_0', x: 180, y: 70, scale: 1.35, a: 0.85 },
+      { key: 'mountain_1', x: 480, y: 55, scale: 1.55, a: 0.9 },
+      { key: 'mountain_2', x: 820, y: 65, scale: 1.4, a: 0.82 },
+      { key: 'mountain_1', x: 1100, y: 80, scale: 1.2, a: 0.75 },
+      { key: 'mountain_0', x: -40, y: 90, scale: 1.1, a: 0.7 },
+    ];
+    for (let i = 0; i < mounts.length; i++) {
+      const m = mounts[i];
+      const key = this.scene.textures.exists(m.key) ? m.key : 'tile_hill';
+      const img = this.scene.add.image(m.x, m.y, key);
+      img.setScale(m.scale);
+      img.setAlpha(m.a);
+      img.setDepth(-200 + i);
+      img.setScrollFactor(0.08);
+      this.props.push(img);
+    }
+  }
+
   private spawnClouds(): void {
     const variants = ['cloud', 'cloud_soft', 'cloud_wide'] as const;
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 10; i++) {
       const s = isoToScreen(4 + i * 5, 0 + (i % 2));
       const key = variants[i % variants.length];
       const tex = this.scene.textures.exists(key) ? key : 'cloud';
@@ -651,15 +682,15 @@ export class WorldView {
   }
 
   private spawnBirds(): void {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       const g = this.scene.add.graphics();
       g.setDepth(-90);
       g.setScrollFactor(0.25);
       this.birds.push({
         g,
-        x: 180 + i * 140,
-        y: 60 + (i % 3) * 35,
-        vx: 0.35 + (i % 3) * 0.12,
+        x: 120 + i * 110,
+        y: 50 + (i % 4) * 28,
+        vx: 0.35 + (i % 3) * 0.14,
         wing: i * 1.7,
       });
       this.props.push(g);
@@ -854,12 +885,31 @@ export class WorldView {
         m.sprite.x = m.baseX + Math.sin(t / (m.period * 1.3) + m.phase) * m.drift;
       }
     }
-    // Soft alpha pulse on water / river tiles
-    const pulse = 0.94 + Math.sin(this.scene.time.now / 700) * 0.06;
-    for (const [, img] of this.ground) {
+    // Water shimmer: pulse alpha + gentle cyan/blue tint cycle
+    const t = this.scene.time.now;
+    const pulse = 0.9 + Math.sin(t / 550) * 0.1;
+    for (const [key, img] of this.ground) {
       const k = img.texture.key;
       if (k.startsWith('tile_water') || k.startsWith('tile_river')) {
         img.setAlpha(pulse);
+        const [xs, ys] = key.split(',');
+        const phase = (Number(xs) + Number(ys) * 3) * 0.4;
+        const shimmer = 0.5 + 0.5 * Math.sin(t / 420 + phase);
+        img.setTint(
+          Phaser.Display.Color.GetColor(
+            Math.floor(90 + shimmer * 40),
+            Math.floor(160 + shimmer * 50),
+            Math.floor(210 + shimmer * 40),
+          ),
+        );
+      } else if (k.startsWith('tile_grass_hd_')) {
+        // Micro hue jitter so meadows don't look like one stamped tile
+        const [xs, ys] = key.split(',');
+        const h = hash(Number(xs), Number(ys));
+        const gBoost = (h % 20) - 8;
+        img.setTint(
+          Phaser.Display.Color.GetColor(110 + gBoost, 170 + gBoost, 70 + (h % 12)),
+        );
       }
     }
     for (let i = 0; i < this.foam.length; i++) {
@@ -924,7 +974,9 @@ export class WorldView {
       sprite.setDepth(depthFor(eq.tile.x, eq.tile.y, 5));
       sprite.setScale(isPv(eq.kind) ? 1.2 : 1);
       sprite.setAlpha(eq.commissioned ? 1 : 0.4 + eq.constructionProgress * 0.6);
-      if (isPv(eq.kind) && eq.soiling > 0.35) {
+      if (eq.faulted) {
+        sprite.setTint(0xff8899);
+      } else if (isPv(eq.kind) && eq.soiling > 0.35) {
         // Light dusting only when heavily soiled — avoid purple/blue tint wash.
         const dust = Math.min(0.35, eq.soiling * 0.4);
         sprite.setTint(
@@ -932,6 +984,21 @@ export class WorldView {
             Math.floor(255 - dust * 40),
             Math.floor(255 - dust * 30),
             Math.floor(255 - dust * 10),
+          ),
+        );
+      } else if (
+        isPv(eq.kind) &&
+        eq.commissioned &&
+        !eq.faulted &&
+        snapshot.irradiance > 0.35
+      ) {
+        // Soft production glint when exporting under sun
+        const glint = 0.08 + Math.sin(this.scene.time.now / 400) * 0.04;
+        sprite.setTint(
+          Phaser.Display.Color.GetColor(
+            Math.floor(255 - glint * 20),
+            Math.floor(255 - glint * 5),
+            255,
           ),
         );
       } else {

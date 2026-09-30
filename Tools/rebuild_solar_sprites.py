@@ -103,7 +103,7 @@ def draw_gravel_pad(
     )
 
     rng = random.Random(seed)
-    for _ in range(int(rx * ry * 0.09)):
+    for _ in range(int(rx * ry * 0.14)):
         # Rejection sample inside diamond via ellipse approx
         ang = rng.random() * math.tau
         rad = math.sqrt(rng.random())
@@ -119,7 +119,17 @@ def draw_gravel_pad(
         s = rng.choice([1, 1, 1, 2])
         draw.rectangle((x, y, x + s, y + s), fill=c)
 
-    draw.line(diamond + [diamond[0]], fill=(96, 86, 70, 210), width=2)
+    draw.line(diamond + [diamond[0]], fill=(96, 86, 70, 230), width=3)
+    # Inner gravel tone variation band
+    draw.polygon(
+        [
+            (cx - int(rx * 0.55), cy - int(ry * 0.35)),
+            (cx + int(rx * 0.2), cy - int(ry * 0.45)),
+            (cx + int(rx * 0.45), cy + int(ry * 0.15)),
+            (cx - int(rx * 0.35), cy + int(ry * 0.2)),
+        ],
+        fill=(148, 136, 112, 55),
+    )
 
     if gold_accent:
         for i, (px, py) in enumerate(diamond):
@@ -159,27 +169,35 @@ def draw_iso_panel(
     hw: float = 14,
     hh: float = 8,
     premium: bool = False,
-    cells_u: int = 3,
-    cells_v: int = 2,
+    cells_u: int = 4,
+    cells_v: int = 3,
 ) -> None:
     """Draw one tilted isometric solar panel with cell grid + steel rack legs."""
     layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
 
-    # Mounting rack legs (drawn first, behind panel)
-    leg = (*STEEL_DARK, 240)
-    foot = (*STEEL, 220)
-    # Left & right posts under lower face
+    # Mounting rack legs (drawn first, behind panel) — thicker, more visible steel
+    leg = (*STEEL_DARK, 255)
+    leg_hi = (*STEEL_LITE, 220)
+    foot = (*STEEL, 240)
+    leg_h = 13
     for dx, dy in ((-hw * 0.55, hh * 0.35), (hw * 0.45, hh * 0.25)):
         x0, y0 = cx + dx, cy + dy
-        draw.line([(x0, y0), (x0 - 1, y0 + 11)], fill=leg, width=2)
-        draw.line([(x0 + 1, y0), (x0, y0 + 11)], fill=(*STEEL, 180), width=1)
-        draw.ellipse((x0 - 3, y0 + 10, x0 + 2, y0 + 14), fill=foot)
-    # Cross brace
+        # Front/back leg pair for 3D read
+        draw.line([(x0 - 2, y0), (x0 - 2, y0 + leg_h)], fill=leg, width=3)
+        draw.line([(x0 + 1, y0), (x0 + 1, y0 + leg_h)], fill=leg_hi, width=2)
+        draw.ellipse((x0 - 4, y0 + leg_h - 1, x0 + 3, y0 + leg_h + 4), fill=foot)
+        draw.rectangle((x0 - 3, y0 - 1, x0 + 2, y0 + 2), fill=(*STEEL, 200))
+    # Cross brace + rear kickstand
     draw.line(
-        [(cx - hw * 0.5, cy + hh * 0.4 + 6), (cx + hw * 0.4, cy + hh * 0.3 + 6)],
-        fill=(*STEEL, 160),
-        width=1,
+        [(cx - hw * 0.5, cy + hh * 0.4 + 5), (cx + hw * 0.4, cy + hh * 0.3 + 5)],
+        fill=(*STEEL, 200),
+        width=2,
+    )
+    draw.line(
+        [(cx, cy + hh * 0.15), (cx - 2, cy + hh * 0.35 + leg_h - 2)],
+        fill=(*STEEL_DARK, 180),
+        width=2,
     )
 
     # Panel underside / thickness (dark edge below diamond)
@@ -220,10 +238,11 @@ def draw_iso_panel(
     lite = iso_quad(cx - 0.4, cy - 0.6, hw - 2.2, hh - 1.6)
     draw.polygon([(int(x), int(y)) for x, y in lite], fill=(*PANEL_LITE, 210))
 
-    # Cell grid — lines along both iso axes
-    frame_col = GOLD if premium else blend(PANEL_DEEP, PANEL_LITE, 0.7)
-    cell_a = (*PANEL_CELL, 180)
-    cell_b = (18, 55, 120, 150)
+    # Cell grid — CLEAR visible lines along both iso axes (high contrast on azure)
+    frame_col = GOLD if premium else blend(PANEL_DEEP, PANEL_LITE, 0.55)
+    cell_a = (12, 48, 108, 255)       # dark grid line
+    cell_b = (8, 36, 92, 240)         # darker orthogonal
+    grid_w = 2 if premium else 2
 
     def lerp_pt(a: tuple[float, float], b: tuple[float, float], t: float) -> tuple[float, float]:
         return (lerp(a[0], b[0], t), lerp(a[1], b[1], t))
@@ -236,7 +255,7 @@ def draw_iso_panel(
         draw.line(
             [(int(p0[0]), int(p0[1])), (int(p1[0]), int(p1[1]))],
             fill=cell_b,
-            width=1,
+            width=grid_w,
         )
     for v in range(1, cells_v):
         t = v / cells_v
@@ -245,12 +264,12 @@ def draw_iso_panel(
         draw.line(
             [(int(p0[0]), int(p0[1])), (int(p1[0]), int(p1[1]))],
             fill=cell_a,
-            width=1,
+            width=grid_w,
         )
 
-    # Outer frame
+    # Outer frame — aluminium / gold rim
     pts = [(int(x), int(y)) for x, y in face]
-    draw.line(pts + [pts[0]], fill=(*frame_col, 230 if premium else 200), width=2 if premium else 1)
+    draw.line(pts + [pts[0]], fill=(*frame_col, 255 if premium else 230), width=3 if premium else 2)
 
     # Specular glint on upper-right facet
     glint = [
@@ -275,55 +294,61 @@ def draw_iso_panel(
 def draw_chain_fence(
     canvas: Image.Image,
     diamond: list[tuple[int, int]],
-    post_h: int = 16,
+    post_h: int = 18,
     front: bool = False,
 ) -> None:
-    """Chain-link fence along diamond edges. back = N-E + N-W; front = S-E + S-W."""
+    """Chain-link fence perimeter baked into solar sprites."""
     layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
     n, e, s, w = diamond
 
     if front:
-        segments = [(w, s), (s, e)]
+        segments = [(e, s), (s, w)]
     else:
         segments = [(w, n), (n, e)]
 
     for (x0, y0), (x1, y1) in segments:
         dist = math.dist((x0, y0), (x1, y1))
-        steps = max(4, int(dist / 14))
+        steps = max(5, int(dist / 12))
         posts: list[tuple[int, int]] = []
         for i in range(steps + 1):
             t = i / steps
             px = int(x0 + (x1 - x0) * t)
             py = int(y0 + (y1 - y0) * t)
             posts.append((px, py))
-            # Post
-            draw.line([(px, py - post_h), (px, py)], fill=(*FENCE_POST, 235), width=2)
+            # Thicker post with cap
+            draw.line([(px - 1, py - post_h), (px - 1, py)], fill=(*STEEL_DARK, 255), width=2)
+            draw.line([(px, py - post_h), (px, py)], fill=(*FENCE_POST, 255), width=3)
+            draw.line([(px + 1, py - post_h + 1), (px + 1, py - 1)], fill=(*STEEL_LITE, 200), width=1)
             draw.rectangle(
-                (px - 2, py - post_h - 1, px + 2, py - post_h + 2),
-                fill=(*STEEL_LITE, 230),
+                (px - 3, py - post_h - 2, px + 3, py - post_h + 3),
+                fill=(*STEEL_LITE, 250),
             )
-        # Top + mid rails
-        for dy in (-2, -post_h // 2, -post_h + 1):
+            draw.ellipse((px - 2, py - 1, px + 2, py + 2), fill=(*STEEL_DARK, 180))
+        # Top + mid + bottom rails (thicker)
+        for dy, rw in ((-2, 2), (-post_h // 2, 2), (-post_h + 2, 2)):
             rail = [(p[0], p[1] + dy) for p in posts]
-            draw.line(rail, fill=(*FENCE, 200), width=1)
-        # Diamond mesh hatch between posts
+            draw.line(rail, fill=(*FENCE, 230), width=rw)
+        # Dense diamond mesh between posts
         for i in range(len(posts) - 1):
             ax, ay = posts[i]
             bx, by = posts[i + 1]
-            for k in range(3):
-                t = (k + 1) / 4
+            mesh_steps = max(4, int(dist / 8))
+            for k in range(mesh_steps):
+                t = (k + 0.5) / mesh_steps
                 mx = int(ax + (bx - ax) * t)
                 my = int(ay + (by - ay) * t)
-                # X of mesh
+                top_y = my - post_h + 4
+                bot_y = my - 3
+                half = 5
                 draw.line(
-                    [(mx - 4, my - post_h + 3), (mx + 4, my - 3)],
-                    fill=(130, 138, 150, 110),
+                    [(mx - half, top_y), (mx + half, bot_y)],
+                    fill=(130, 138, 150, 160),
                     width=1,
                 )
                 draw.line(
-                    [(mx + 4, my - post_h + 3), (mx - 4, my - 3)],
-                    fill=(130, 138, 150, 90),
+                    [(mx + half, top_y), (mx - half, bot_y)],
+                    fill=(110, 118, 130, 140),
                     width=1,
                 )
 
@@ -434,6 +459,28 @@ def build_pv_group(size: tuple[int, int] = (160, 120)) -> Image.Image:
     return canvas
 
 
+def build_pv_single(size: tuple[int, int] = (120, 96)) -> Image.Image:
+    """Single tilted panel with gravel pad, rack legs, and fence perimeter."""
+    W, H = size
+    canvas = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    cx, cy = W // 2, H // 2 + 14
+    rx, ry = 52, 26
+    diamond = draw_gravel_pad(canvas, cx, cy, rx, ry, gold_accent=False, seed=33)
+    draw_chain_fence(canvas, diamond, post_h=13, front=False)
+    draw_iso_panel(
+        canvas,
+        cx,
+        cy - 22,
+        hw=22,
+        hh=11,
+        premium=False,
+        cells_u=5,
+        cells_v=3,
+    )
+    draw_chain_fence(canvas, diamond, post_h=12, front=True)
+    return canvas
+
+
 def extract_tech() -> Image.Image:
     """Extract idle frame from worker_sheet.png → transparent, ~2x nearest."""
     sheet = Image.open(ASSET / "worker_sheet.png").convert("RGB")
@@ -471,6 +518,7 @@ def main() -> None:
         "pv_bargain.png": build_pv_farm(premium=False, size=(280, 200)),
         "pv_premium.png": build_pv_farm(premium=True, size=(280, 200)),
         "pv_group.png": build_pv_group(size=(160, 120)),
+        "pv_single.png": build_pv_single(size=(120, 96)),
         "tech.png": extract_tech(),
     }
     for name, im in outputs.items():
