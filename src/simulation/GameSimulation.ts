@@ -249,7 +249,7 @@ export class GameSimulation {
       this.message = 'Technician is busy.';
       return false;
     }
-    tech.task = { type: 'travel', targetId: eq.id, progress: 0 };
+    tech.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...tech.tile } };
     this.message = `${tech.name} is on the way.`;
     return true;
   }
@@ -265,7 +265,7 @@ export class GameSimulation {
       this.message = 'Technician is busy.';
       return false;
     }
-    tech.task = { type: 'travel', targetId: eq.id, progress: 0 };
+    tech.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...tech.tile } };
     // Mark clean intent via soiling threshold; travel then clean.
     (tech as StaffMember & { _intent?: 'clean' | 'repair' })._intent = 'clean';
     this.message = `${tech.name} heading out with a mop.`;
@@ -505,10 +505,17 @@ export class GameSimulation {
         task.progress += hours / 0.35;
         const target = this.equipment.find((e) => e.id === task.targetId);
         if (target) {
-          tech.tile = { ...target.tile };
+          const t = Math.min(1, task.progress);
+          // Ease across the map so the player can see Tess walking.
+          const ease = t * t * (3 - 2 * t);
+          tech.tile = {
+            x: task.from.x + (target.tile.x - task.from.x) * ease,
+            y: task.from.y + (target.tile.y - task.from.y) * ease,
+          };
           tech.plotId = target.plotId;
         }
         if (task.progress >= 1 && target) {
+          tech.tile = { ...target.tile };
           const intent = this.staffIntent(tech);
           delete (tech as StaffMember & { _intent?: string })._intent;
           if (intent === 'repair' && target.faulted) {
@@ -623,7 +630,7 @@ export class GameSimulation {
     if (!idle) return;
     const fault = this.equipment.find((e) => e.faulted && e.commissioned);
     if (fault) {
-      idle.task = { type: 'travel', targetId: fault.id, progress: 0 };
+      idle.task = { type: 'travel', targetId: fault.id, progress: 0, from: { ...idle.tile } };
       (idle as StaffMember & { _intent?: string })._intent = 'repair';
       return;
     }
@@ -631,7 +638,7 @@ export class GameSimulation {
       .filter((e) => isPv(e.kind) && e.soiling > 0.55 && e.commissioned)
       .sort((a, b) => b.soiling - a.soiling)[0];
     if (dirty) {
-      idle.task = { type: 'travel', targetId: dirty.id, progress: 0 };
+      idle.task = { type: 'travel', targetId: dirty.id, progress: 0, from: { ...idle.tile } };
       (idle as StaffMember & { _intent?: string })._intent = 'clean';
     }
   }

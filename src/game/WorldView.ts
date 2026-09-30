@@ -1056,7 +1056,7 @@ export class WorldView {
     for (const staff of snapshot.staff) {
       seen.add(staff.id);
       const pos = isoToScreen(staff.tile.x, staff.tile.y);
-      const elev = this.heightAt(staff.tile.x, staff.tile.y);
+      const elev = this.heightAt(Math.floor(staff.tile.x), Math.floor(staff.tile.y));
       let shadow = this.entityShadows.get(staff.id);
       if (!shadow) {
         shadow = this.scene.add.image(pos.x - 4, pos.y + 6 - elev * 5, 'shadow_blob');

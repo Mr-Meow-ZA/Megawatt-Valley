@@ -8,7 +8,7 @@ export type WeatherKind = 'clear' | 'partly_cloudy' | 'overcast' | 'rain' | 'hai
 
 export type StaffTask =
   | { type: 'idle' }
-  | { type: 'travel'; targetId: string; progress: number }
+  | { type: 'travel'; targetId: string; progress: number; from: Vec2 }
   | { type: 'repair'; targetId: string; progress: number }
   | { type: 'clean'; targetId: string; progress: number };
 
