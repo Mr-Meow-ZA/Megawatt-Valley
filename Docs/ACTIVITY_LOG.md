@@ -38,6 +38,32 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 
 ---
 
+## 2026-09-30 — Loop 18 — ops feedback polish
+
+**Agent:** Cursor
+**Status:** Complete
+
+**Changed / Produced**
+- Commissioned substation: pulsing amber ADD ellipse beacon on sprite roof.
+- Staff travel/repair: yellow dashed Graphics line from tech to target equipment each frame.
+- HUD power bar: `.bar-glow` box-shadow when fill > 40%.
+- Beach tiles: 40% chance small rock prop scatter on `tile_beach`.
+- Scorecard Loop 18 entry; harsh average 9.2.
+
+**Tested / Verified**
+- `tsc` clean; `npm test` 8/8.
+
+**Known issues / limitations**
+- No category at 9.5 yet; procedural art + missing SFX still cap harsh ceiling.
+
+**Next recommended step**
+- Hand-painted equipment pass, SFX, richer staff idle/work animations toward 9.5.
+
+**Git / References**
+- Commit: `7867224`
+- Branch: `cursor/phaser-level1-build-5938`
+
+---
 
 ## 2026-09-30 — Visual quality Loops 6–13 (continued polish)
 
