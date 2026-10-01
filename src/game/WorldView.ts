@@ -1685,7 +1685,7 @@ export class WorldView {
         this.entityShadows.set(staff.id, shadow);
       }
       shadow.setPosition(pos.x - 4, pos.y + 6 - elev * 5);
-      shadow.setScale(0.45, 0.28);
+      shadow.setScale(0.22, 0.13);
       shadow.setAlpha(0.7);
       shadow.setDepth(depthFor(staff.tile.x, staff.tile.y, 6));
 
@@ -1703,7 +1703,7 @@ export class WorldView {
         staff.task.type === 'idle'
           ? Math.sin(this.scene.time.now / 280) * 1.5
           : Math.sin(this.scene.time.now / 95) * 4.2;
-      sprite.setPosition(pos.x, pos.y - 18 - elev * 5 + bob);
+      sprite.setPosition(pos.x, pos.y - 9 - elev * 5 + bob * 0.5);
       sprite.setDepth(depthFor(staff.tile.x, staff.tile.y, 8));
       const prevX = this.staffLastTileX.get(staff.id);
       if (prevX !== undefined && staff.tile.x !== prevX) {
@@ -1722,7 +1722,7 @@ export class WorldView {
       const squashY = traveling
         ? 1.0 + Math.sin(this.scene.time.now / 95) * 0.05
         : 1.05;
-      sprite.setScale(1.05 * face, squashY);
+      sprite.setScale(0.52 * face, squashY * 0.5);
       if (traveling) {
         const walkFrame = Math.floor(this.scene.time.now / 120) % 2;
         sprite.setTexture(this.staffWalkTextures[walkFrame]);
@@ -1767,7 +1767,8 @@ export class WorldView {
           this.staffToolIcons.set(staff.id, toolIcon);
         }
         this.drawStaffToolIcon(toolIcon, workType, this.scene.time.now);
-        toolIcon.setPosition(pos.x, pos.y - 40 - elev * 5 + bob);
+        toolIcon.setScale(0.7);
+        toolIcon.setPosition(pos.x, pos.y - 26 - elev * 5 + bob * 0.5);
         toolIcon.setDepth(depthFor(staff.tile.x, staff.tile.y, 10));
         toolIcon.setVisible(true);
       } else {

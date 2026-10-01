@@ -418,13 +418,6 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.lineTo(5, 30);
     g.closePath();
     g.fillPath();
-    g.lineStyle(1, 0x3a4a38, 0.32);
-    for (let i = -50; i < 100; i += 7) {
-      g.lineBetween(5 + i, 8, 45 + i, 52);
-    }
-    for (let i = -50; i < 100; i += 7) {
-      g.lineBetween(95 - i, 8, 55 - i, 52);
-    }
     g.lineStyle(1, 0x7a8a70, 0.28);
     g.strokePath();
   });
