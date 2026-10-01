@@ -266,6 +266,8 @@ export class WorldView {
     return `${x},${y}`;
   }
 
+  private smallTreeKey(seed: number): string { return 'tree_sm_' + (Math.abs(seed) % 4); }
+
   private terrainKey(x: number, y: number): string {
     if (isWater(x,y)) return 'valley_water';
     if (isBank(x,y)) return 'valley_sand';
