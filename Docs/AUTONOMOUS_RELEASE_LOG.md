@@ -54,7 +54,11 @@ The archived Unity branch remains untouched. No merge into main has been perform
 - Chromium launched the standalone file offline with no external HTTP requests
   or runtime errors; placement, reload, hiring, repeated restart, portable import,
   storm preparation, completion UI and laptop capability access passed.
-- Three-star continuation test added; its result is reported in the latest CI run.
+- Final run 36858376691 (60eda06): all 17 tests, build, licensing package and
+  Chromium checks passed. The same company reached three stars 350 seconds after
+  one star; mastery save/load preserved stars and capabilities.
+- Playable artifact: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/36858376691/artifacts/11160770502
+- Review: https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/10
 - Opening, completed-site and laptop screenshots are retained in browser-evidence.
 
 ## Scope and remaining work
