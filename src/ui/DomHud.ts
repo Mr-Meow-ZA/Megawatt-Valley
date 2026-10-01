@@ -1,3 +1,5 @@
+import { SITE_ICONS } from '../game/siteArt';
+import { ROAD_TILES, riverCenterX } from '../content/valleyLayout';
 import { sound } from '../audio/sound';
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
 import { CAPABILITY_INFO } from '../content/scenario';
@@ -123,6 +125,7 @@ export class DomHud {
     private readonly sim: GameSimulation,
     private readonly onNewGame: () => void,
   ) {
+    for(const [kind,uri]of Object.entries(SITE_ICONS)) BUILD_ICONS[kind]='<img src="'+uri+'" alt="" width="48" height="38" style="object-fit:contain;image-rendering:pixelated"/>';
     const el = document.getElementById('ui-root');
     if (!el) throw new Error('#ui-root missing');
     this.root = el;
@@ -388,73 +391,12 @@ export class DomHud {
     const sy = (ty: number) => 6 + ty * 3.5;
     ctx.clearRect(0, 0, w, h);
 
-    // Valley backdrop
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#7ec4ef');
-    grad.addColorStop(0.28, '#6db848');
-    grad.addColorStop(1, '#3f8a28');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-
-    // Soft meadow patches
-    ctx.fillStyle = 'rgba(90, 170, 55, 0.35)';
+    ctx.fillStyle='#91a674';ctx.fillRect(0,0,w,h);
     ctx.beginPath();
-    ctx.ellipse(55, 48, 42, 28, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(155, 62, 48, 30, 0.1, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Meandering river (sine)
-    ctx.beginPath();
-    for (let y = 0; y <= h; y += 2) {
-      const t = y / h;
-      const worldY = t * 30;
-      const wobble = Math.sin(worldY * 0.45) * 0.7 + Math.sin(worldY * 0.17) * 0.4;
-      const x = sx(19 + wobble);
-      if (y === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = '#2e7eb8';
-    ctx.lineWidth = 9;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.strokeStyle = '#4aade0';
-    ctx.lineWidth = 5;
-    ctx.stroke();
-    // Foam highlight
-    ctx.strokeStyle = 'rgba(190, 230, 255, 0.45)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Road network (matches WorldView isMainRoad corridors)
-    const roads: Array<[number, number, number, number]> = [
-      [3, 6, 34, 6], // main E–W
-      [11, 6, 11, 16], // site A spur
-      [15, 6, 15, 12],
-      [11, 12, 15, 12],
-      [21, 8, 32, 8], // site B
-      [26, 8, 26, 14],
-    ];
-    ctx.strokeStyle = '#4a4e56';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'butt';
-    for (const [x0, y0, x1, y1] of roads) {
-      ctx.beginPath();
-      ctx.moveTo(sx(x0), sy(y0));
-      ctx.lineTo(sx(x1), sy(y1));
-      ctx.stroke();
-    }
-    ctx.strokeStyle = 'rgba(220, 210, 140, 0.55)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    for (const [x0, y0, x1, y1] of roads) {
-      ctx.beginPath();
-      ctx.moveTo(sx(x0), sy(y0));
-      ctx.lineTo(sx(x1), sy(y1));
-      ctx.stroke();
-    }
-    ctx.setLineDash([]);
+    for(let y=0;y<=30;y+=.5){const x=sx(riverCenterX(y));if(y===0)ctx.moveTo(x,sy(y));else ctx.lineTo(x,sy(y));}
+    ctx.strokeStyle='#5d9f9e';ctx.lineWidth=11;ctx.stroke();
+    ctx.fillStyle='#858e80';
+    for(const tile of ROAD_TILES)ctx.fillRect(sx(tile.x)-2.4,sy(tile.y)-1.75,4.8,3.5);
 
     // Plots
     for (const plot of snapshot.plots) {

@@ -1,3 +1,4 @@
+import { isMainRoad, isWater, isBank, alongPath, staffRoute } from '../content/valleyLayout';
 import { validateState } from '../persistence/validate';
 import { EQUIPMENT } from '../content/equipment';
 import { EVENTS } from '../content/events';
@@ -209,6 +210,11 @@ export class GameSimulation {
       tile.y + def.footprint.y > plot.origin.y + plot.size.y
     ) {
       return 'Outside buildable area';
+    }
+    for (let y=tile.y;y<tile.y+def.footprint.y;y++) for(let x=tile.x;x<tile.x+def.footprint.x;x++) {
+      if(isMainRoad(x,y)) return 'Keep the access road clear';
+      if(isWater(x,y)||isBank(x,y)) return 'River setback: keep infrastructure on dry land';
+      if(x>=5&&x<=7&&y>=5&&y<=8) return 'Reserved office and parking yard';
     }
     for (const other of this.equipment) {
       const odef = EQUIPMENT[other.kind];
@@ -537,12 +543,7 @@ export class GameSimulation {
         const target = this.equipment.find((e) => e.id === task.targetId);
         if (target) {
           const t = Math.min(1, task.progress);
-          // Ease across the map so the player can see Tess walking.
-          const ease = t * t * (3 - 2 * t);
-          tech.tile = {
-            x: task.from.x + (target.tile.x - task.from.x) * ease,
-            y: task.from.y + (target.tile.y - task.from.y) * ease,
-          };
+          tech.tile = alongPath(staffRoute(task.from,target.tile),t);
           tech.plotId = target.plotId;
         }
         if (task.progress >= 1 && target) {

@@ -84,7 +84,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
-      const next = Phaser.Math.Clamp(cam.zoom - dy * 0.0015, 0.5, 2.4);
+      const next = Phaser.Math.Clamp(cam.zoom - dy * 0.0015, 0.35, 1.8);
       cam.setZoom(next);
     });
 

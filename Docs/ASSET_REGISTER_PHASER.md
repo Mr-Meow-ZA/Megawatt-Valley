@@ -29,3 +29,7 @@ Downloaded under `public/assets/sourced/` for processing:
 - Industrial kit PNGs in `Previews/` are 64×64; upscaled ×3 nearest-neighbour for readability.
 - Nature Kit isometric trees are cropped from 512×512 renders.
 - Procedural Graphics remain only for ghosts, selection ring, fault icon, shadows, clouds, foam, inverter, and locked tiles.
+
+
+## Autonomous visual correction (2026-10-01)
+The revised valley uses original code-generated 2:1 art in src/game/siteArt.ts for solar racks, office, workshop, grid equipment, roads, fences, trees, shrubs, rocks, van and signs. It also uses original terrain geometry. These were made to enforce matching projection and ground anchors where the previously combined assets did not match. The existing technician frames and UI icons retain their prior provenance above. No additional third-party assets or licenses were introduced. Upstream Tiled documentation and Phaser projection code were consulted as research; Tiled is not bundled.
