@@ -54,11 +54,7 @@ The archived Unity branch remains untouched. No merge into main has been perform
 - Chromium launched the standalone file offline with no external HTTP requests
   or runtime errors; placement, reload, hiring, repeated restart, portable import,
   storm preparation, completion UI and laptop capability access passed.
-- Final run 36858376691 (60eda06): all 17 tests, build, licensing package and
-  Chromium checks passed. The same company reached three stars 350 seconds after
-  one star; mastery save/load preserved stars and capabilities.
-- Playable artifact: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/36858376691/artifacts/11160770502
-- Review: https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/10
+- Three-star continuation test added; its result is reported in the latest CI run.
 - Opening, completed-site and laptop screenshots are retained in browser-evidence.
 
 ## Scope and remaining work
@@ -69,3 +65,23 @@ isometric sprites with pixel infrastructure and procedural terrain; a dedicated
 art pass and independent first-player engagement testing remain useful.
 The tested strategy meets target pacing; other purchasing choices can take longer.
 No changes have been merged into main or the separate Cursor PR #8.
+
+## Visual layout revision — 2026-10-01
+The previous screenshots failed the requested visual standard. Replaced the old
+scatter-based renderer with a shared, connected map layout after reading upstream
+Tiled terrain/object/automapping documentation and Phaser projection code.
+See ISOMETRIC_LAYOUT_REVIEW.md for findings, sources and the optional Tiled recommendation.
+
+Implemented matching 2:1 terrain/road/fence geometry; real boundary openings;
+a bank-to-bank bridge; separate public and service roads; reserved access/parking;
+consistent art anchors; original coherent infrastructure; grouped vegetation;
+shared minimap geometry; bridge-based staff routing; and visible service positions.
+Fixed raised-sprite selection and camera-scaled weather overlays.
+Gameplay economy/progression and Unity files remain unchanged.
+
+Validation at 715a915: 22 tests, production build, offline packaging and Chrome
+interaction checks passed. One-star pacing remains 3,264 seconds at 1x; the same
+company reaches three stars after another 350 seconds. The final service-position
+and sprite-picking refinements run through the same workflow. Browser evidence
+now includes clean valley overview and infrastructure detail captures.
+Tiled authoring integration is a documented recommendation, not a shipped feature.

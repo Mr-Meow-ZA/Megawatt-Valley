@@ -77,7 +77,7 @@ export class WorldView {
     this.area(g,21.5,5.5,12,10,0xa4b680,.4);
     const ribbon=(margin:number,colour:number)=>{
       const left:P[]=[],right:P[]=[];
-      for(let y=-.5;y<=WORLD_H-.5;y+=.35){const half=riverHalfWidth(y)+margin;left.push(isoToScreen(riverCenterX(y)-half,y));right.push(isoToScreen(riverCenterX(y)+half,y));}
+      for(let y=-.5;y<=WORLD_H-.5;y+=.25){const half=riverHalfWidth(y)+margin;left.push(isoToScreen(riverCenterX(y)-half,y));right.push(isoToScreen(riverCenterX(y)+half,y));}
       this.polygon(g,[...left,...right.reverse()],colour);
     };
     ribbon(.5,0xc4c29a);ribbon(.18,0x88b2a5);ribbon(0,0x5d9f9e);
@@ -124,6 +124,9 @@ export class WorldView {
       const a=isoToScreen(poleTiles[i].x,poleTiles[i].y),b=isoToScreen(poleTiles[i+1].x,poleTiles[i+1].y);
       for(const off of [-8,8]){wire.lineStyle(1,0x556b5b,.7);wire.beginPath();wire.moveTo(a.x+off,a.y-63);wire.lineTo((a.x+b.x)/2+off,(a.y+b.y)/2-50);wire.lineTo(b.x+off,b.y-63);wire.strokePath();}
     }
+    const feederA=isoToScreen(14.5,2),feederB=isoToScreen(13.8,4.8);
+    wire.lineStyle(1,0x556b5b,.8);
+    for(const off of [-5,5]){wire.beginPath();wire.moveTo(feederA.x+off,feederA.y-63);wire.lineTo((feederA.x+feederB.x)/2+off,(feederA.y+feederB.y)/2-50);wire.lineTo(feederB.x+off,feederB.y-64);wire.strokePath();}
     this.label('SUNNY MEADOW',10.5,15,12);
     this.siteBLabel=this.label('RIVER BENCH · FUTURE EXPANSION',28,14.8,12);
     this.plotGraphics=this.scene.add.graphics().setDepth(-920);
@@ -237,6 +240,16 @@ export class WorldView {
   }
   getHoverTile():Vec2|null{return this.hoverTile;}
   pickEntity(snapshot:GameSnapshot,worldX:number,worldY:number):string|null{
+    // Hit visible opaque sprite pixels before falling back to ground footprints.
+    // Isometric roofs and racks extend above their ground cells.
+    const visible=[...snapshot.equipment].sort((a,b)=>(this.entities.get(b.id)?.sprite.depth??0)-(this.entities.get(a.id)?.sprite.depth??0));
+    for(const eq of visible){
+      const sprite=this.entities.get(eq.id)?.sprite;if(!sprite)continue;
+      const source=sprite.texture.getSourceImage() as HTMLCanvasElement;
+      const px=Math.floor((worldX-sprite.x)/sprite.scaleX+sprite.displayOriginX);
+      const py=Math.floor((worldY-sprite.y)/sprite.scaleY+sprite.displayOriginY);
+      if(px>=0&&py>=0&&px<source.width&&py<source.height&&source.getContext?.('2d')?.getImageData(px,py,1,1).data[3])return eq.id;
+    }
     const tile=this.getTile({x:worldX,y:worldY});
     // Footprint picking uses precisely the same cell convention as drawing/building.
     for(const eq of [...snapshot.equipment].reverse()){

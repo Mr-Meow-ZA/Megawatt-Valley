@@ -532,6 +532,12 @@ export class GameSimulation {
     }
   }
 
+  /** Work from the front service edge of the footprint, never hidden under a rack. */
+  private workPosition(eq: PlacedEquipment): Vec2 {
+    const footprint = EQUIPMENT[eq.kind].footprint;
+    return { x:eq.tile.x+(footprint.x-1)/2, y:eq.tile.y+footprint.y-.65 };
+  }
+
   private advanceStaff(hours: number): void {
     for (const tech of this.staff) {
       if (tech.task.type === 'idle') continue;
@@ -543,11 +549,11 @@ export class GameSimulation {
         const target = this.equipment.find((e) => e.id === task.targetId);
         if (target) {
           const t = Math.min(1, task.progress);
-          tech.tile = alongPath(staffRoute(task.from,target.tile),t);
+          tech.tile = alongPath(staffRoute(task.from,this.workPosition(target)),t);
           tech.plotId = target.plotId;
         }
         if (task.progress >= 1 && target) {
-          tech.tile = { ...target.tile };
+          tech.tile = this.workPosition(target);
           const intent = this.staffIntent(tech);
           delete (tech as StaffMember & { _intent?: string })._intent;
           if (intent === 'repair' && target.faulted) {
