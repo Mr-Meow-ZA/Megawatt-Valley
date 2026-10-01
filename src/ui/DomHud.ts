@@ -102,6 +102,8 @@ export class DomHud {
   private lastObjectivesKey = '__uninit__';
   private lastBuildKey = '__uninit__';
   private lastCapsKey = '__uninit__';
+  private lastCapabilityHtml = '';
+  private lastRosterHtml = '';
   private lastSelectionKey = '__uninit__';
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
@@ -676,10 +678,10 @@ export class DomHud {
       const locked = !snapshot.plots[1].unlocked || (id === 'scheduled_cleaning' && !snapshot.capabilities.includes('cleaning_rig'));
       return '<button type="button" data-action="capability" data-id="' + id + '" ' + (owned || locked ? 'disabled' : '') + ' title="' + CAPABILITY_INFO[id].description + '">' + (owned ? '✓ ' : locked ? 'Locked · ' : '') + CAPABILITY_INFO[id].name + '</button><small>' + CAPABILITY_INFO[id].description + '</small>';
     }).join('') + '<details><summary>Company capability tree</summary><h3>Generation technology</h3><small>✓ Fixed tilt → ✓ Premium PV → 🔒 Bifacial → 🔒 Trackers → 🔒 Wind</small><h3>Operations & reliability</h3><small>✓ Manual repairs → Earn Radio Dispatch + Workshop → Cleaning Kit → Cleaning Rig → Scheduled Cleaning → 🔒 Predictive Maintenance</small><h3>Digital & automation</h3><small>✓ Basic monitoring → Radio Dispatch → Remote Monitoring → 🔒 SCADA → 🔒 Robots → 🔒 Command Centre</small><h3>People & organisation</h3><small>✓ Technician → Hire Cleaner / Engineer / Manager → Train skills → 🔒 Regional O&M</small><h3>Grid & flexibility</h3><small>✓ Basic grid → Build Inverter → 🔒 BESS → 🔒 Hybrid systems</small><h3>Development & commercial</h3><small>✓ Site A → Earn Site B → 🔒 Site studies → 🔒 PPAs → 🔒 Multi-project finance</small><small>Locked future nodes are previews for later scenarios.</small></details>';
-    if (capActions.innerHTML !== capHtml) capActions.innerHTML = capHtml;
+    if (this.lastCapabilityHtml !== capHtml) { this.lastCapabilityHtml = capHtml; capActions.innerHTML = capHtml; }
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
     const rosterHtml = snapshot.staff.map((s) => '<div><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '">Train · $800</button></div>').join('');
-    if (roster.innerHTML !== rosterHtml) roster.innerHTML = rosterHtml;
+    if (this.lastRosterHtml !== rosterHtml) { this.lastRosterHtml = rosterHtml; roster.innerHTML = rosterHtml; }
     const finance = this.root.querySelector('[data-k="finance"]') as HTMLElement;
     finance.textContent = 'Sales ' + money(this.sim.lifetimeRevenue) + ' · Operating expenses ' + money(this.sim.totalExpenses) + ' · Energy ' + Math.round(snapshot.totalEnergyKwh) + ' kWh · Peak ' + Math.round(this.sim.peakExportKw) + ' kW · Staff ' + snapshot.staff.length;
     sound.update(snapshot.weather, snapshot.faultsRepaired, snapshot.cleansCompleted, snapshot.stars);

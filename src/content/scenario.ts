@@ -97,7 +97,7 @@ export function createInitialObjectives(): ObjectiveState[] {
       id: 'expand_site_b',
       title: 'Second Plot',
       description: 'Commission any PV array on Site B.',
-      rewardText: 'Company expands',
+      rewardText: 'Company expands · $5,000 organisation grant',
     },
     {
       id: 'survive_hail',

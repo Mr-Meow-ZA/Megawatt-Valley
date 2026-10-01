@@ -16,12 +16,12 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'sponsor',
         label: 'Sponsor tea & biscuits (−$2,000)',
-        description: 'Spend cash now for smoother relations.',
+        description: 'Pay $2,000 to keep the crew generating without a public tour interruption.',
       },
       {
         id: 'promise',
         label: 'Promise a public tour',
-        description: 'No cash cost. A public tour is promised; no operational modifier.',
+        description: 'Free, but export falls 10% for 12 simulation hours while the crew hosts.',
       },
     ],
   },
@@ -33,7 +33,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'buy',
         label: 'Buy the batch (−$5,000, +cash cushion later)',
-        description: 'Pay $5,000 and immediately resell for $7,500; net +$2,500.',
+        description: 'Net +$2,500 now; supplier trial reduces the oldest bargain array condition by 8%.',
       },
       {
         id: 'pass',
@@ -101,7 +101,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'host',
         label: 'Host the shoot (−$1,500)',
-        description: 'Receive $4,000 sponsorship immediately; net +$2,500.',
+        description: 'Net +$2,500 now; export reduced 30% for 8 simulation hours for drone safety.',
       },
       {
         id: 'busy',

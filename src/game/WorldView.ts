@@ -139,7 +139,7 @@ function isForestTile(x: number, y: number): boolean {
   }
   const h = hash(x, y);
   const edge = x < 3 || y < 3 || x > 36 || y > 24;
-  const threshold = edge ? 620 : 280;
+  const threshold = edge ? 450 : 160;
   return h % 1000 < threshold;
 }
 
@@ -266,101 +266,12 @@ export class WorldView {
     return `${x},${y}`;
   }
 
-  /** Pick river/water tile variant from neighbor flow + meander tangent. */
-  private riverTileKey(x: number, y: number): string {
-    const h = hash(x, y);
-    const cx = riverCenterX(y);
-    const nearEdge = Math.abs(x - cx) > 0.55;
-    if (nearEdge && h % 3 === 0) return `tile_water_foam_${h % 3}`;
-
-    const wN = isWater(x, y - 1);
-    const wS = isWater(x, y + 1);
-    const wE = isWater(x + 1, y);
-    const wW = isWater(x - 1, y);
-    const ewCount = (wE ? 1 : 0) + (wW ? 1 : 0);
-    const nsCount = (wN ? 1 : 0) + (wS ? 1 : 0);
-    const meanderEw = Math.abs(riverCenterX(y + 1) - riverCenterX(y - 1)) > 0.25;
-    const runsEw = ewCount > nsCount || (ewCount === nsCount && meanderEw);
-
-    if (runsEw) {
-      if (h % 5 === 0) return 'tile_water_n';
-      if (h % 3 === 0) return 'tile_water';
-      return h % 2 === 0 ? 'tile_river_ew' : 'tile_water';
-    }
-    if (h % 5 === 0) return 'tile_river_ew';
-    if (h % 3 === 0) return 'tile_water_n';
-    return h % 2 === 0 ? 'tile_river' : 'tile_water';
-  }
-
-  private smallTreeKey(h: number): string {
-    return `tree_sm_${h % 4}`;
-  }
-
   private terrainKey(x: number, y: number): string {
-    if (isWater(x, y)) {
-      return this.riverTileKey(x, y);
-    }
-
-    if (isBank(x, y)) {
-      const h = hash(x, y);
-      const cx = riverCenterX(y);
-      const southFacing = x > cx;
-      // Sandy beach shelves more often on warmer south-facing banks.
-      if (southFacing && (h % 3 === 0 || h % 5 === 1)) return 'tile_beach';
-      if (!southFacing && h % 6 === 0) return 'tile_beach';
-      if (h % 7 === 0) return h % 2 === 0 ? 'tile_grass' : 'tile_grass_alt';
-      if (h % 5 === 0) return 'tile_dirt';
-      return h % 2 === 0 ? 'tile_bank' : 'tile_bank_ew';
-    }
-
-    // Main loop roads (asphalt)
-    if (y === 6 && x >= 3 && x <= 34) {
-      if (x === 11 || x === 15) return 'tile_crossroad';
-      return hash(x, y) % 4 === 0 ? 'tile_road_ew' : 'tile_road';
-    }
-    if (x === 11 && y >= 6 && y <= 16) return 'tile_road_ns';
-    if (x === 15 && y >= 6 && y <= 12) return 'tile_road_ns';
-    if (y === 12 && x >= 11 && x <= 15) return 'tile_road_ew';
-    // Site B access
-    if (y === 8 && x >= 21 && x <= 32) return 'tile_road_ew';
-    if (x === 26 && y >= 8 && y <= 14) return 'tile_road_ns';
-
-    // Occasional dirt wear speckles beside main roads
-    if (
-      !inRect(x, y, SITE_A) &&
-      !inRect(x, y, SITE_B) &&
-      (isMainRoad(x - 1, y) ||
-        isMainRoad(x + 1, y) ||
-        isMainRoad(x, y - 1) ||
-        isMainRoad(x, y + 1))
-    ) {
-      const h = hash(x, y);
-      if (h % 9 === 0 || h % 13 === 0) return 'tile_dirt';
-    }
-
-    // Service / dirt pads near office + outer wear ring
-    if (x >= 4 && x <= 7 && y >= 5 && y <= 7) return 'tile_dirt';
-    if (
-      (x >= 3 && x <= 8 && y >= 4 && y <= 8) &&
-      !(x >= 4 && x <= 7 && y >= 5 && y <= 7)
-    ) {
-      const h = hash(x, y);
-      if (h % 3 !== 0) return 'tile_dirt';
-    }
-
-    // Rolling hill crowns on elevated far edges
-    const elev = this.heightAt(x, y);
-    if (elev >= 2.4 && !inRect(x, y, SITE_A) && !inRect(x, y, SITE_B)) {
-      if (hash(x, y) % 3 === 0) return 'tile_hill';
-    }
-
-    if (!inRect(x, y, SITE_A) && !inRect(x, y, SITE_B) && hash(x, y) % 11 === 0) {
-      return 'tile_dirt';
-    }
-
-    const h = hash(x, y);
-    // Prefer higher-detail landscape grass where available; fall back to roads pack.
-    return `tile_grass_hd_${h % 8}`;
+    if (isWater(x,y)) return 'valley_water';
+    if (isBank(x,y)) return 'valley_sand';
+    if (isMainRoad(x,y)) return x===11 || x===15 || x===26 ? 'valley_road_ns' : 'valley_road_ew';
+    if (x>=4 && x<=7 && y>=5 && y<=7) return 'valley_gravel';
+    return 'meadow_' + (hash(x,y)%4);
   }
 
   /** Fake valley elevation: hills on far edges, lower near river. */
@@ -478,6 +389,7 @@ export class WorldView {
     scale = 1,
     motion: 'bob' | 'sway' | null = null,
   ): void {
+    if (tex === 'rock') tex = 'valley_rock';
     const s = isoToScreen(x, y);
     const elev = this.heightAt(x, y);
     const baseY = s.y - elev * 5;
@@ -939,41 +851,9 @@ export class WorldView {
     }
     this.drawPowerLines(pylons);
     this.scatterMeadowWildflowers();
-    this.addProp('water_tower', 13, 4, -40, 7, 0.5);
-    this.addProp('tank', 14, 5, -28, 6, 0.45);
     // Substation yard accents — chimney + spare tank near grid connection (14,5)
-    this.addProp('chimney', 15, 4, -32, 7, 0.48);
-    this.addProp('chimney', 13, 6, -28, 6, 0.42);
-    this.addProp('tank', 15, 6, -24, 6, 0.4);
 
     // Maintenance yard near office — warehouse shed + small office_kit + container + yard kit
-    this.addProp('warehouse', 4, 8, -30, 6, 0.72);
-    this.addProp('office_kit', 3, 9, -20, 6, 0.52);
-    this.addProp('yard', 5, 9, -24, 5, 0.85);
-    this.addProp('container', 6, 9, -18, 5, 0.7);
-
-    // Neighbor solar farm south of Site B (scenery only — keeps Site A clear for placement)
-    const neighborRows: Array<[number, number]> = [
-      [23, 18],
-      [24, 19],
-      [25, 20],
-      [26, 18],
-      [27, 19],
-      [28, 20],
-      [24, 21],
-      [26, 21],
-    ];
-    for (const [x, y] of neighborRows) {
-      this.addProp('pv_group', x, y, -22, 5, 0.8);
-    }
-    for (let x = 22; x <= 29; x += 1) {
-      this.addProp('fence_short', x, 17, -4, 3, 0.72);
-      this.addProp('fence_short', x, 22, -4, 3, 0.72);
-    }
-    for (let y = 18; y <= 21; y += 1) {
-      this.addProp('fence_short', 22, y, -4, 3, 0.68);
-      this.addProp('fence_short', 29, y, -4, 3, 0.68);
-    }
 
     // Decorative vehicles — parking pad only; keep main E–W road (y = 6) clear
     this.addProp('van', 4, 5, -10, 7, 0.85, 'bob');
@@ -982,21 +862,14 @@ export class WorldView {
     this.addProp('van', 14, 5, -10, 7, 0.82, 'bob');
     this.addProp('van', 27, 9, -10, 7, 0.8, 'bob');
 
-    // Ambient techs near yard / substation only (sim staff are the interactive ones)
-    this.addProp('tech', 6, 8, -14, 9, 0.85, 'sway');
-    this.addProp('tech', 13, 5, -14, 9, 0.88, 'sway');
-    this.addProp('tech', 13, 7, -14, 9, 0.82, 'sway');
-    this.addProp('tech', 8, 6, -14, 9, 0.86, 'bob');
-    this.addProp('tech', 10, 9, -14, 9, 0.84, 'bob');
-
     // Full fence perimeter around Site A meadow — thick fence.png on all sides
     for (let x = SITE_A.x0; x < SITE_A.x1; x += 1) {
-      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.98);
-      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.98);
+      this.addProp('fence', x, SITE_A.y0, -6, 3, 0.60);
+      this.addProp('fence', x, SITE_A.y1 - 1, -6, 3, 0.60);
     }
     for (let y = SITE_A.y0 + 1; y < SITE_A.y1 - 1; y += 1) {
-      this.addProp('fence', SITE_A.x0, y, -6, 3, 0.94);
-      this.addProp('fence', SITE_A.x1 - 1, y, -6, 3, 0.94);
+      this.addProp('fence', SITE_A.x0, y, -6, 3, 0.58);
+      this.addProp('fence', SITE_A.x1 - 1, y, -6, 3, 0.58);
     }
 
     // Dense pine forests — north hills and river sides (Site A stays clear)
@@ -1035,7 +908,7 @@ export class WorldView {
                   : h % 2 === 0
                     ? this.smallTreeKey(h + 2)
                     : 'tree';
-      this.addProp(key, x, y, big ? -36 : -28, 3, big ? 1.05 : 0.95);
+      this.addProp(key, x, y, big ? -36 : -28, 3, big ? 0.72 : 0.65);
     }
 
     // Rocks along river banks + bush/rock clusters at water edges
@@ -1043,7 +916,7 @@ export class WorldView {
       for (let x = 0; x < WORLD_W; x++) {
         if (!isBank(x, y) && !isWater(x, y)) continue;
         const h = hash(x, y);
-        if (isBank(x, y) && h % 2 === 0) {
+        if (isBank(x, y) && h % 6 === 0) {
           this.addProp('rock', x, y, -4, 2, 0.85 + (h % 3) * 0.08);
         }
         if (isBank(x, y) && h % 7 === 2) {
@@ -1062,7 +935,7 @@ export class WorldView {
           }
         }
         // Occasional rocks sitting in shallow water / foam edge
-        if (isWater(x, y) && (h % 4 === 0 || h % 9 === 2) && y !== 6) {
+        if (isWater(x, y) && h % 13 === 0 && y !== 6) {
           this.addProp('rock', x, y, -2, 1, 0.7 + (h % 2) * 0.1);
         }
       }

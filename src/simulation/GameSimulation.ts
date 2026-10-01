@@ -312,14 +312,17 @@ export class GameSimulation {
           this.cash -= 2000;
           this.message = 'Tea secured. Goats remain unimpressed but peaceful.';
         } else {
-          this.message = 'Tour promised. Tess will look photogenic later.';
+          this.curtailmentFactor = 0.9; this.curtailmentTimer = 12;
+          this.message = 'Public tour arranged: export reduced 10% for 12 hours while the crew hosts.';
         }
         break;
       case 'bargain_batch':
         if (choiceId === 'buy') {
           this.cash -= 5000;
           this.cash += 7500;
-          this.message = 'Batch bought and flipped to a neighbour. Net +$2,500.';
+          const trial = this.equipment.find((e) => e.kind === 'bargain_pv' && e.commissioned);
+          if (trial) trial.condition = Math.max(0.25, trial.condition - 0.08);
+          this.message = 'Supplier trial earns $2,500, but the oldest bargain array loses 8% condition.';
         } else {
           this.message = 'You kept your standards. And your cash.';
         }
@@ -364,7 +367,8 @@ export class GameSimulation {
         if (choiceId === 'host') {
           this.cash -= 1500;
           this.cash += 4000;
-          this.message = 'Sponsorship lands. The valley goes mildly viral.';
+          this.curtailmentFactor = 0.7; this.curtailmentTimer = 8;
+          this.message = 'Sponsorship nets $2,500. Drone safety restricts export 30% for 8 hours.';
         } else {
           this.message = 'You stayed focused on electrons.';
         }
@@ -736,6 +740,7 @@ export class GameSimulation {
     }
 
     if (this.equipment.some((e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned)) {
+      if (!this.objectives.find((o) => o.id === 'expand_site_b')?.complete) this.cash += 5000;
       this.completeObjective('expand_site_b');
     }
 

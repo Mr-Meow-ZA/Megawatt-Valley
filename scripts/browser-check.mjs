@@ -10,6 +10,7 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror',(error)=>errors.push(error.message));
 page.on('console',(message)=>{if(message.type()==='error')errors.push(message.text());});
+page.on('request',(request)=>{if(/^https?:/.test(request.url()))errors.push('Unexpected network dependency: '+request.url());});
 page.on('dialog',(dialog)=>dialog.accept());
 const url = pathToFileURL(path.resolve('playable/PLAY-MEGAWATT-VALLEY.html')).href;
 await page.goto(url);
@@ -49,6 +50,22 @@ await page.locator('[data-action="hire"][data-id="cleaner"]').scrollIntoViewIfNe
 await page.locator('[data-action="hire"][data-id="cleaner"]').click();
 assert.equal((await saved()).staff.length,2);
 await page.locator('[data-action="export-save"]').click();
+async function importFixture(name) {
+  const chooser = page.waitForEvent('filechooser');
+  await page.locator('[data-action="import-save"]').click();
+  await (await chooser).setFiles('browser-fixtures/'+name+'.json');
+  await page.waitForTimeout(300);
+}
+await importFixture('storm');
+await page.locator('[data-action="event-choice"][data-id="prepare"]').waitFor();
+await page.locator('[data-action="event-choice"][data-id="prepare"]').click();
+assert.equal((await saved()).hailPrepared,true);
+await importFixture('one-star');
+await page.locator('[data-k="win"]:not([hidden])').waitFor();
+await page.locator('[data-action="dismiss-win"]').click();
+assert.ok((await saved()).stars>=1);
+await page.screenshot({path:'browser-evidence/one-star.png'});
+console.log('COMPLETION_BASE64:'+(await page.screenshot({type:'jpeg',quality:40})).toString('base64'));
 await page.setViewportSize({width:1024,height:768});
 await page.locator('[data-action="capability"][data-id="cleaning_rig"]').scrollIntoViewIfNeeded();
 assert.ok(await page.locator('[data-action="capability"][data-id="cleaning_rig"]').isVisible());

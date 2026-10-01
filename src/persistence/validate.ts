@@ -24,6 +24,7 @@ export function validateState(value: unknown): value is SerializedGameState {
   if (!num(value.revenuePerHour, -1e9) || requiredBooleans.some((k) => typeof value[k] !== 'boolean')) return false;
   if (!enumValue(value.speed,[0,1,2,4]) || (value.speedBeforeEvent !== undefined && !enumValue(value.speedBeforeEvent,[0,1,2,4]))) return false;
   if (!enumValue(value.weather,['clear','partly_cloudy','overcast','rain','hail']) || !enumValue(value.stars,[0,1,2,3])) return false;
+  if (value.curtailmentFactor !== undefined && !num(value.curtailmentFactor,0,1)) return false;
   if (!num(value.hour,0,24) || !Number.isInteger(value.day) || !Number.isInteger(value.nextEntityId)) return false;
   if (value.selectedId !== null && !text(value.selectedId)) return false;
   if (value.message !== null && !text(value.message)) return false;
@@ -31,12 +32,12 @@ export function validateState(value: unknown): value is SerializedGameState {
   if (!Array.isArray(value.plots) || value.plots.length !== 2 || new Set(value.plots.map((p) => object(p) ? p.id : null)).size !== 2) return false;
   if (!value.plots.every((p) => object(p) && enumValue(p.id,plots) && text(p.name) && vector(p.origin) && vector(p.size) && num(p.solarResource,0,2) && typeof p.unlocked === 'boolean' && typeof p.gridConnected === 'boolean')) return false;
   if (!Array.isArray(value.equipment) || value.equipment.length > 500) return false;
-  if (!value.equipment.every((e) => object(e) && text(e.id) && enumValue(e.kind,keys(EQUIPMENT)) && enumValue(e.plotId,plots) && vector(e.tile) && object(e.tile) && Number.isInteger(e.tile.x) && Number.isInteger(e.tile.y) && num(e.condition,0,1) && num(e.soiling,0,1) && num(e.constructionProgress,0,1) && typeof e.faulted === 'boolean' && typeof e.commissioned === 'boolean')) return false;
+  if (!value.equipment.every((e) => object(e) && text(e.id) && /^eq_[0-9]+$/.test(e.id) && enumValue(e.kind,keys(EQUIPMENT)) && enumValue(e.plotId,plots) && vector(e.tile) && object(e.tile) && Number.isInteger(e.tile.x) && Number.isInteger(e.tile.y) && num(e.condition,0,1) && num(e.soiling,0,1) && num(e.constructionProgress,0,1) && typeof e.faulted === 'boolean' && typeof e.commissioned === 'boolean')) return false;
   const equipmentIds = new Set(value.equipment.map((e) => (e as Obj).id));
   if (equipmentIds.size !== value.equipment.length) return false;
   if (!Array.isArray(value.staff) || value.staff.length < 1 || value.staff.length > 20) return false;
   if (!value.staff.every((s) => {
-    if (!object(s) || !text(s.id) || !text(s.name) || !enumValue(s.role,['technician','cleaner','engineer','manager']) || !enumValue(s.plotId,plots) || !vector(s.tile) || !object(s.task)) return false;
+    if (!object(s) || !text(s.id) || !/^staff_[0-9]+$/.test(s.id) || !text(s.name) || !enumValue(s.role,['technician','cleaner','engineer','manager']) || !enumValue(s.plotId,plots) || !vector(s.tile) || !object(s.task)) return false;
     if ((s.skill !== undefined && !num(s.skill,1,5)) || (s.salary !== undefined && !num(s.salary,0,100)) || (s.trait !== undefined && !text(s.trait))) return false;
     if (s._intent !== undefined && !enumValue(s._intent,['clean','repair'])) return false;
     const t = s.task;

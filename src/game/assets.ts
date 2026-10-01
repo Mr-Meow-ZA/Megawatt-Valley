@@ -96,6 +96,47 @@ export function generateOverlayTextures(scene: Phaser.Scene): void {
     g.destroy();
   };
 
+
+  // Original terrain family: one projection, quiet surfaces, readable infrastructure.
+  const diamond = (g: Phaser.GameObjects.Graphics, colour: number) => {
+    g.fillStyle(colour, 1); g.beginPath(); g.moveTo(50,0); g.lineTo(100,25);
+    g.lineTo(50,50); g.lineTo(0,25); g.closePath(); g.fillPath();
+  };
+  for (let variant = 0; variant < 4; variant++) {
+    make('meadow_' + variant, 100, 50, (g) => {
+      diamond(g, [0x8ba967,0x8ca969,0x8aa767,0x8da96a][variant]);
+      for (let n=0;n<14;n++) {
+        const x=(n*37+variant*13)%90+5, y=(n*19+variant*7)%40+5;
+        if (Math.abs(x-50)/50+Math.abs(y-25)/25>.85) continue;
+        g.fillStyle(n%3===0?0xaac17c:0x7f9e5e,.5); g.fillRect(x,y,2,1);
+      }
+    });
+  }
+  for (const [key,colour] of [['valley_water',0x589faf],['valley_sand',0xc8bc8c],['valley_gravel',0xb3ae95]] as const) {
+    make(key,100,50,(g)=>{
+      diamond(g,colour);
+      if(key==='valley_water') {
+        g.lineStyle(1,0xa8d4d7,.35); g.lineBetween(28,24,39,25); g.lineBetween(61,30,72,31);
+      }
+    });
+  }
+  for (const direction of ['ew','ns'] as const) {
+    make('valley_road_'+direction,100,50,(g)=>{
+      diamond(g,0x9b9b87);
+      g.fillStyle(0x747c78,1); g.beginPath();
+      const points=direction==='ew'?[[0,25],[16,17],[100,25],[84,33]]:[[50,0],[66,8],[50,50],[34,42]];
+      for(let i=0;i<points.length;i++) { const [x,y]=points[i]; if(i===0)g.moveTo(x,y);else g.lineTo(x,y); }
+      g.closePath();g.fillPath();
+      g.lineStyle(1,0xdacb97,.75);
+      if(direction==='ew'){g.lineBetween(18,25,32,25);g.lineBetween(68,25,82,25);}
+      else {g.lineBetween(50,9,50,16);g.lineBetween(50,34,50,41);}
+    });
+  }
+  make('valley_rock',40,28,(g)=>{
+    g.fillStyle(0x666f6a,1);g.beginPath();g.moveTo(3,20);g.lineTo(9,8);g.lineTo(24,4);g.lineTo(36,15);g.lineTo(30,25);g.lineTo(12,26);g.closePath();g.fillPath();
+    g.fillStyle(0x9a9e89,1);g.beginPath();g.moveTo(9,8);g.lineTo(24,4);g.lineTo(26,14);g.lineTo(15,19);g.lineTo(3,20);g.closePath();g.fillPath();
+  });
+
   make('safety_sign', 64, 64, (g) => {
     g.fillStyle(0x5a4936,1); g.fillRect(28,24,5,38);
     g.fillStyle(0xffd968,1); g.fillRect(6,3,52,28);
