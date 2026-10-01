@@ -750,6 +750,7 @@ export class GameSimulation {
       this.hailSurvived && this.manualRepairs > 0 && this.manualCleans > 0 &&
       this.objectives.find((o) => o.id === 'expand_site_b')?.complete
     ) {
+      if (this.stars < 1) this.cash += 12000;
       this.completeObjective('star_1');
       this.stars = Math.max(this.stars, 1) as 0 | 1 | 2 | 3;
       this.scenarioComplete = true;
@@ -761,6 +762,7 @@ export class GameSimulation {
       this.capabilities.includes('radio_dispatch') &&
       this.peakExportKw >= STAR_THRESHOLDS.star2PeakKw
     ) {
+      if (this.stars < 2) this.cash += 12000;
       this.completeObjective('star_2');
       this.stars = Math.max(this.stars, 2) as 0 | 1 | 2 | 3;
     }

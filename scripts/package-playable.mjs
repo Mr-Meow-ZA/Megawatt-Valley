@@ -27,5 +27,14 @@ const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta n
 await mkdir('playable',{recursive:true});
 await writeFile('playable/PLAY-MEGAWATT-VALLEY.html',html);
 await copyFile('Docs/ASSET_REGISTER_PHASER.md','playable/ASSET-CREDITS.md');
+await mkdir('playable/licenses',{recursive:true});
+for (const name of ['phaser','eventemitter3']) {
+  const dir = path.join('node_modules',name);
+  const licence = (await readdir(dir)).find((file)=>/^licen[sc]e(\.|$)/i.test(file));
+  if (!licence) throw new Error('Missing distribution license: '+name);
+  await copyFile(path.join(dir,licence),'playable/licenses/'+name+'-LICENSE.txt');
+}
+await writeFile('playable/licenses/ORIGINAL-ASSETS.txt','Original code-generated meadow, sand, water, road, rock and sign textures and synthesized audio were added for this autonomous build. Existing Kenney and domsson assets retain their CC0 provenance in ASSET-CREDITS.md.\n');
+
 await writeFile('playable/READ-ME.txt','MEGAWATT VALLEY — HERE COMES THE SUN\n\nOpen PLAY-MEGAWATT-VALLEY.html in Chrome or Edge. No install, server or internet required.\nDrag to pan; wheel to zoom. Build from the right panel. Select equipment to repair, clean or sell.\nSave locally; Export save makes a portable backup. Keep the HTML at the same path for reliable local saves.\nSound is optional; enable it with the bottom toolbar.\nThis build is under acceptance testing. Scenario 2 is a future release.\n');
 console.log('Packaged standalone playable HTML:',Buffer.byteLength(html),'bytes');

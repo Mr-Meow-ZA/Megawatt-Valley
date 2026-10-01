@@ -61,5 +61,21 @@ describe('Level 1 with real starting budget and normal time', () => {
     expect(sim.scenarioComplete).toBe(true);
     expect(sim.stars).toBeGreaterThanOrEqual(1);
     expect(seconds).toBeLessThan(3600);
+    // Continue the same solvent company to mastery, purchasing from earned funds.
+    let masterySeconds = 0;
+    for (; masterySeconds < 30000 && sim.stars < 3; masterySeconds++) {
+      if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[sim.activeEvent.choices.length - 1].id);
+      if (slot < slots.length && sim.cash >= 8500) sim.placeEquipment('bargain_pv','site_a',slots[slot++]);
+      sim.update(1);
+    }
+    console.log('Mastery continuation:',masterySeconds,'seconds at 1x');
+    expect(sim.stars).toBe(3);
+    expect(sim.objectives.find((o)=>o.id==='star_2')?.complete).toBe(true);
+    expect(sim.objectives.find((o)=>o.id==='star_3')?.complete).toBe(true);
+    const roundTrip = new GameSimulation(); roundTrip.load(JSON.parse(JSON.stringify(sim.serialize())));
+    expect(roundTrip.stars).toBe(3);
+    expect(roundTrip.capabilities).toEqual(sim.capabilities);
+    capture('three-star');
+
   });
 });

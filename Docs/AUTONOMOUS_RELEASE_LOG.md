@@ -38,16 +38,30 @@ The archived Unity branch remains untouched. No merge into main has been perform
 - Curtailment limits export rather than reducing physical sunlight.
 - Hail remains visible for two simulated hours after the decision.
 
-## Verification record
-- Baseline existing build: 8 tests and production build passed on GitHub Actions.
-- First hardening run: 16/17 tests passed; normal-economy one-star completion
-  succeeded at 3,888 seconds but exceeded the 3,600-second pacing assertion.
-- Revenue target adjusted from $4,500 to $3,500; verification in progress.
-- Browser acceptance and standalone packaging are being tested, not yet certified.
+## Additional completed features
+- Player-built roads, fences, gates, trees, signs and workshop.
+- Six-branch capability overview separates usable Level 1 upgrades from future content.
+- Original coherent terrain textures; reduced decorative clutter and removed fake workers.
+- First commissioned Site B array awards organization funding.
+- One- and two-star milestones award $12,000 expansion grants once each.
+- Distribution includes runtime library licenses.
 
-## Remaining acceptance scope
-The broader brief is not yet fully accepted: rich six-branch capability-tree
-presentation, player-built roads/fences/gates, deeper equipment maintenance,
-full audio variety, sustained engagement balancing, and final visual review
-still need review or expansion. Scenario 2 is an unlock marker, not a playable map.
-Avoid equating automated test success with confirmed fun or commercial polish.
+## Verification record
+- 17 automated tests and production build passed in Actions run 36857733296.
+- Normal starting-budget one-star playthrough: 3,264 seconds at 1x (54.4 minutes).
+  No cash injection, forced daylight or instant construction. It exercises manual
+  repair/cleaning, later automatic dispatch/cleaning, expansion, events, hail and resume.
+- Chromium launched the standalone file offline with no external HTTP requests
+  or runtime errors; placement, reload, hiring, repeated restart, portable import,
+  storm preparation, completion UI and laptop capability access passed.
+- Three-star continuation test added; its result is reported in the latest CI run.
+- Opening, completed-site and laptop screenshots are retained in browser-evidence.
+
+## Scope and remaining work
+This is a playable Level 1 release candidate, not a claim of commercial polish.
+Scenario 2 is an unlock marker, not a playable map. Future capabilities are clearly
+labelled. Audio is basic synthesized feedback/music. The art combines licensed
+isometric sprites with pixel infrastructure and procedural terrain; a dedicated
+art pass and independent first-player engagement testing remain useful.
+The tested strategy meets target pacing; other purchasing choices can take longer.
+No changes have been merged into main or the separate Cursor PR #8.

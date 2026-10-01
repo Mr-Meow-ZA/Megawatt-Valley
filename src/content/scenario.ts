@@ -109,13 +109,13 @@ export function createInitialObjectives(): ObjectiveState[] {
       id: 'star_1',
       title: '1★ Here Comes the Sun',
       description: 'Export 120 kW peak and earn $3,500 lifetime revenue, repair and clean manually, expand Site B, choose an upgrade, and weather the hail.',
-      rewardText: 'Scenario complete — continue for mastery',
+      rewardText: 'Scenario 2 unlocked · $12,000 growth investment',
     },
     {
       id: 'star_2',
       title: '2★ Strong Operator',
       description: 'Own Site B PV, Radio Dispatch, and 220 kW peak.',
-      rewardText: 'Mastery',
+      rewardText: 'Mastery · $12,000 growth investment',
     },
     {
       id: 'star_3',
