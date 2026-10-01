@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 await mkdir('browser-evidence',{recursive:true});
-const browser = await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const browser = await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const context = await browser.newContext({viewport:{width:1440,height:900},acceptDownloads:true});
 const page = await context.newPage();
 const errors = [];
