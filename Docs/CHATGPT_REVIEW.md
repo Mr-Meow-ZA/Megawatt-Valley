@@ -49,3 +49,39 @@ After acceptance, choose the next roadmap item from playtest evidence rather tha
 
 ## Current project question
 > Does PR #7 already feel like a coherent, fun, polished first Megawatt Valley level when Rapha plays it, or has implementation moved faster than player experience?
+
+
+---
+
+## Review update — 2026-09-30 later repository state
+
+Meaningful development occurred after the review above.
+
+### Cursor track
+- PR #8 is now the active Level 1 steam-finish/release candidate stacked on PR #7.
+- It reports scenario/boot/SFX/deploy preparation plus a deliberate world-map declutter pass.
+- The latest PR notes report 16/16 tests passing and a refreshed gh-pages playtest build.
+- Site A/B readability was improved by reducing forests, props, fences, vehicles and ambient effects.
+
+### Parallel Codex track
+Issue #9 records a separate `codex/solar-release-hardening` branch with changes to Level 1 progression/economy, staff, saves, browser/offline packaging, site-kit buildables and weather/interaction behaviour. It also reports that the Solar release checks failed and that this branch currently has no PR.
+
+### Alignment
+The Phaser + TypeScript + Vite architecture, pixel-isometric visual direction and Solar Level 1 goal remain aligned. Cursor's declutter pass is directionally healthy because management readability matters more than ambient density.
+
+### Main risk
+There are now two branches changing overlapping Level 1 gameplay. This conflicts with the current collaboration model in which Cursor is the primary implementation lane. Economy thresholds, capabilities, staff behaviour, saves and simulation rules should not develop into two competing sources of truth.
+
+### Current blockers / gates
+1. Product-owner playtest of the current Cursor Level 1 remains the key acceptance gate.
+2. The parallel Codex branch needs a review surface and its failed release checks understood before adoption.
+3. Public Pages deployment may still require repository-owner enablement.
+
+### Next smallest useful goal
+**Freeze feature expansion and run one controlled Level 1 acceptance/comparison pass.**
+
+Treat PR #8 as the primary candidate, play fresh through at least 1 star, record concrete pacing/UI/visual/gameplay friction, fix only those issues, and retest. Separately make the Codex branch reviewable and compare its changes selectively after the primary baseline is accepted.
+
+Do not start wind, BESS or another scenario yet.
+
+Until Rapha explicitly changes ownership, Cursor should remain the authoritative Level 1 implementation lane and Codex should be treated as an experimental hardening/proposal lane rather than a second source of truth.
