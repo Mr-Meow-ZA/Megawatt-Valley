@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { EQUIPMENT } from '../content/equipment';
-import { WORLD_W,WORLD_H,ROAD_TILES,FENCE_EDGES,SCENERY,connectionMask,isMainRoad,riverCenterX,alongPath } from '../content/valleyLayout';
+import { WORLD_W,WORLD_H,ACCESS_Y,ROAD_TILES,FENCE_EDGES,SCENERY,connectionMask,isMainRoad,riverCenterX,riverHalfWidth,alongPath } from '../content/valleyLayout';
 import type { GameSimulation } from '../simulation/GameSimulation';
 import type { EquipmentKind,GameSnapshot,Vec2 } from '../simulation/types';
 import { depthFor,isoToScreen,screenToIso,TILE_H } from './iso';
@@ -19,6 +19,7 @@ export class WorldView {
   private veil!:Phaser.GameObjects.Rectangle;
   private hoverTile:Vec2|null=null;
   private pointerInWorld=true;
+  private labels:Phaser.GameObjects.Text[]=[];
   private siteBLabel!:Phaser.GameObjects.Text;
   private van!:Phaser.GameObjects.Image;
   private lastEquipmentKey='';
@@ -51,8 +52,9 @@ export class WorldView {
   }
   private label(text:string,x:number,y:number,size=14){
     const p=isoToScreen(x,y);
-    return this.scene.add.text(p.x,p.y,text,{fontFamily:'system-ui, sans-serif',fontSize:size+'px',color:'#e5ead2',
+    const label=this.scene.add.text(p.x,p.y,text,{fontFamily:'system-ui, sans-serif',fontSize:size+'px',resolution:2,color:'#e5ead2',
       backgroundColor:'#385b49',padding:{x:10,y:5}}).setOrigin(.5).setDepth(770).setAlpha(.88);
+    this.labels.push(label);return label;
   }
   private fence(a:P,b:P){
     const g=this.scene.add.graphics().setDepth(depthFor((a.x+b.x)/2,(a.y+b.y)/2,7));
@@ -73,12 +75,12 @@ export class WorldView {
     }
     this.area(g,3.5,3.5,14,12,0xa4b680,.48);
     this.area(g,21.5,5.5,12,10,0xa4b680,.4);
-    const ribbon=(half:number,colour:number)=>{
+    const ribbon=(margin:number,colour:number)=>{
       const left:P[]=[],right:P[]=[];
-      for(let y=-.5;y<=WORLD_H-.5;y+=.5){left.push(isoToScreen(riverCenterX(y)-half,y));right.push(isoToScreen(riverCenterX(y)+half,y));}
+      for(let y=-.5;y<=WORLD_H-.5;y+=.35){const half=riverHalfWidth(y)+margin;left.push(isoToScreen(riverCenterX(y)-half,y));right.push(isoToScreen(riverCenterX(y)+half,y));}
       this.polygon(g,[...left,...right.reverse()],colour);
     };
-    ribbon(1.68,0xc4c29a);ribbon(1.33,0x88b2a5);ribbon(1.15,0x5d9f9e);
+    ribbon(.5,0xc4c29a);ribbon(.18,0x88b2a5);ribbon(0,0x5d9f9e);
     for(let y=0;y<WORLD_H;y+=1.6){
       const x=riverCenterX(y)+(Math.sin(y*2)*.65);
       this.line(g,{x:x-.15,y},{x:x+.24,y:y+.1},0xc0d8bf,1,.55);
@@ -92,9 +94,9 @@ export class WorldView {
     }
     // Deck spans BOTH banks and exactly follows the access-road axis.
     const deck=this.scene.add.graphics().setDepth(-940);
-    this.area(deck,17.45,2.58,4.7,.84,0x9caa99);
-    for(let x=17.5;x<22.2;x+=.2)this.line(deck,{x,y:2.6},{x,y:3.4},0x798e82,1,.65);
-    for(let x=17.5;x<22;x+=.5)for(const y of [2.55,3.45])this.fence({x,y},{x:x+.5,y});
+    this.area(deck,17.45,ACCESS_Y-.42,4.7,.84,0x9caa99);
+    for(let x=17.5;x<22.2;x+=.2)this.line(deck,{x,y:ACCESS_Y-.4},{x,y:ACCESS_Y+.4},0x798e82,1,.65);
+    for(let x=17.5;x<22;x+=.5)for(const y of [ACCESS_Y-.45,ACCESS_Y+.45])this.fence({x,y},{x:x+.5,y});
     for(const edge of FENCE_EDGES)this.fence(edge.a,edge.b);
     for(const prop of SCENERY){
       const p=isoToScreen(prop.x,prop.y);
@@ -190,7 +192,8 @@ export class WorldView {
     this.siteBLabel.setText(expanded?'RIVER BENCH · SITE B':'RIVER BENCH · FUTURE EXPANSION');
     // A closed service route includes the yard exit, avoiding jumps between parked and driving.
     const phase=((this.scene.time.now-this.startedAt)/1000)%80;
-    const path=[{x:7,y:7.4},{x:4,y:7.4},{x:4,y:3},{x:15.5,y:3},{x:4,y:3},{x:4,y:7.4},{x:7,y:7.4}];
+    for(const label of this.labels)label.setScale(1/this.scene.cameras.main.zoom);
+    const path=[{x:7,y:7.4},{x:4,y:7.4},{x:4,y:ACCESS_Y},{x:15.5,y:ACCESS_Y},{x:4,y:ACCESS_Y},{x:4,y:7.4},{x:7,y:7.4}];
     const v=phase<40?path[0]:alongPath(path,(phase-40)/40);
     const vp=isoToScreen(v.x,v.y);this.van.setPosition(vp.x,vp.y).setDepth(depthFor(v.x,v.y,10)).setFlipX(phase>=60);
     this.plotGraphics.clear();
@@ -203,7 +206,8 @@ export class WorldView {
     const night=snapshot.hour<6||snapshot.hour>19?.33:0;
     const wet=snapshot.weather==='rain'||snapshot.weather==='hail';
     const dim=night+(wet?.15:snapshot.weather==='overcast'?.1:0);
-    this.veil.setPosition(0,0).setSize(cam.width,cam.height).setAlpha(dim);
+    this.veil.setOrigin(.5).setPosition(cam.width/2,cam.height/2).setSize(cam.width/cam.zoom,cam.height/cam.zoom).setAlpha(dim);
+    this.weatherGraphics.setScale(1/cam.zoom).setPosition(cam.width/2*(1-1/cam.zoom),cam.height/2*(1-1/cam.zoom));
     this.weatherGraphics.clear();
     if(wet)for(let i=0;i<70;i++){
       const x=(i*197+(this.scene.time.now/20))%cam.width;

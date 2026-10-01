@@ -3,6 +3,7 @@ on:
   push:
     branches: [codex/solar-release-hardening]
   pull_request:
+    branches: [main]
     paths: ['src/**', 'tests/**', 'package*.json', 'vite.config.ts', '.github/workflows/solar-release.yml', 'scripts/**']
 permissions:
   contents: read

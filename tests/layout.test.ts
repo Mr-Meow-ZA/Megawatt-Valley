@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import { ROAD_TILES,FENCE_EDGES,SCENERY,DIRECTIONS,isMainRoad,isWater,clearForScenery,staffRoute,alongPath } from '../src/content/valleyLayout';
+import { ACCESS_Y,ROAD_TILES,FENCE_EDGES,SCENERY,DIRECTIONS,isMainRoad,isWater,clearForScenery,staffRoute,alongPath } from '../src/content/valleyLayout';
 import { GameSimulation } from '../src/simulation/GameSimulation';
 import { isoToScreen,screenToIso } from '../src/game/iso';
 describe('shared valley layout',()=>{
@@ -30,7 +30,7 @@ describe('shared valley layout',()=>{
   });
   it('routes cross-river staff through the bridge rather than through water',()=>{
     for(const route of [staffRoute({x:7,y:12},{x:25,y:12}),staffRoute({x:25,y:12},{x:7,y:12})]){
-      for(let t=0;t<=1;t+=.005){const p=alongPath(route,t);if(isWater(p.x,p.y))expect(p.y).toBe(3);}
+      for(let t=0;t<=1;t+=.005){const p=alongPath(route,t);if(isWater(p.x,p.y))expect(p.y).toBe(ACCESS_Y);}
       expect(alongPath(route,0)).toEqual(route[0]);expect(alongPath(route,1)).toEqual(route[route.length-1]);
     }
   });
