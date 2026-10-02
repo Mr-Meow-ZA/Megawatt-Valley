@@ -111,6 +111,7 @@ export class DomHud {
   private lastMessage: string | null = '__uninit__';
   private toastClearAt = 0;
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'generation';
+  private managementView: 'build' | 'people' | 'caps' | 'finance' = 'build';
   private minimapCtx: CanvasRenderingContext2D | null = null;
   private lastCash = -1;
   private cashFloatUntil = 0;
@@ -191,12 +192,27 @@ export class DomHud {
       </header>
 
       <aside class="panel objectives">
-        <h2>Objectives</h2>
+        <div class="panel-title-row">
+          <h2>Objectives</h2>
+          <span class="panel-kicker">Here Comes the Sun</span>
+        </div>
         <ul data-k="objectives"></ul>
       </aside>
 
+      <aside class="panel selection contextual-panel" data-k="selection" hidden>
+        <div class="panel-title-row">
+          <h2>Selected</h2>
+          <span class="panel-kicker">Site inspector</span>
+        </div>
+        <div data-k="selection-body">Click equipment or staff.</div>
+        <div class="row" data-k="selection-actions"></div>
+      </aside>
+
       <aside class="panel minimap-panel">
-        <h2>Valley map</h2>
+        <div class="panel-title-row">
+          <h2>Valley Map</h2>
+          <span class="panel-kicker">Site A</span>
+        </div>
         <canvas data-k="minimap" width="220" height="120"></canvas>
         <div class="minimap-legend">
           <span><i class="swatch grass"></i>Terrain</span>
@@ -206,49 +222,83 @@ export class DomHud {
         </div>
       </aside>
 
-      <div class="sidebar-right">
-      <nav class="sidebar-nav" aria-label="Management panels"><button data-action="jump" data-id="build">Build</button><button data-action="jump" data-id="people">Team</button><button data-action="jump" data-id="caps">Upgrades</button><button data-action="jump" data-id="finance">Money</button></nav>
-      <aside class="panel build">
-        <h2>Build</h2>
-        <div class="build-tabs">
-          <button type="button" data-cat="all">All</button>
-          <button type="button" data-cat="generation" class="active">Generation</button>
-          <button type="button" data-cat="grid">Grid</button>
-          <button type="button" data-cat="support">Support</button>
+      <section class="management-dock" data-k="management-dock">
+        <nav class="dock-nav" aria-label="Management">
+          <button type="button" class="active" data-action="jump" data-id="build"><span>⚒</span> Build</button>
+          <button type="button" data-action="jump" data-id="people"><span>👷</span> Team</button>
+          <button type="button" data-action="jump" data-id="caps"><span>⚙</span> Upgrades</button>
+          <button type="button" data-action="jump" data-id="finance"><span>▥</span> Finance</button>
+          <div class="dock-hint">Drag to pan · Wheel to zoom · R repair · C clean</div>
+        </nav>
+
+        <div class="dock-content">
+          <aside class="panel build dock-panel active" data-panel="build">
+            <div class="dock-panel-header">
+              <div>
+                <h2>Build</h2>
+                <span>Expand your site</span>
+              </div>
+              <div class="build-tabs">
+                <button type="button" data-cat="all">All</button>
+                <button type="button" data-cat="generation" class="active">Generation</button>
+                <button type="button" data-cat="grid">Grid</button>
+                <button type="button" data-cat="support">Support</button>
+              </div>
+            </div>
+            <div class="build-grid" data-k="build"></div>
+            <button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel placement</button>
+          </aside>
+
+          <aside class="panel people dock-panel" data-panel="people" hidden>
+            <div class="dock-panel-header">
+              <div><h2>People & Operations</h2><span>Build your O&M team</span></div>
+              <div class="hire-actions">
+                <button type="button" data-action="hire" data-id="technician">+ Technician · $1,500</button>
+                <button type="button" data-action="hire" data-id="cleaner">+ Cleaner · $1,500</button>
+                <button type="button" data-action="hire" data-id="engineer">+ Engineer · $1,500</button>
+                <button type="button" data-action="hire" data-id="manager">+ Manager · $1,500</button>
+              </div>
+            </div>
+            <div class="roster-grid" data-k="roster"></div>
+          </aside>
+
+          <aside class="panel caps dock-panel" data-panel="caps" hidden>
+            <div class="dock-panel-header">
+              <div><h2>Company Upgrades</h2><span>Move work from manual to automated</span></div>
+            </div>
+            <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
+            <div class="capability-grid" data-k="capability-actions"></div>
+          </aside>
+
+          <aside class="panel finance dock-panel" data-panel="finance" hidden>
+            <div class="dock-panel-header">
+              <div><h2>Finance & Reports</h2><span>Cash flow, output and playtest tools</span></div>
+            </div>
+            <div class="finance-summary" data-k="finance"></div>
+            <small>1★ Complete the core lessons and storm · 2★ 220 kW + Site B + Radio · 3★ 300 kW + prepared hail + Cleaning Kit.</small>
+            <details class="playtest-tools">
+              <summary>Playtest cheats</summary>
+              <button type="button" data-action="cheat-cash" data-amount="25000">+$25,000 cash</button>
+              <button type="button" data-action="cheat-cash" data-amount="100000">+$100,000 cash</button>
+              <button type="button" data-action="cheat-event">Trigger positive event</button>
+              <small>Ctrl+Shift+M = +$25k · Ctrl+Shift+G = positive event.</small>
+            </details>
+          </aside>
         </div>
-        <div class="build-grid" data-k="build"></div>
-        <button type="button" class="ghost" data-action="cancel-build">Cancel placement</button>
-      </aside>
+      </section>
 
-      <aside class="panel selection" data-k="selection">
-        <h2>Selection</h2>
-        <div data-k="selection-body">Click equipment or staff.</div>
-        <div class="row" data-k="selection-actions"></div>
-      </aside>
-
-      <aside class="panel caps">
-        <h2>Capabilities</h2>
-        <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
-        <div data-k="capability-actions"></div>
-      </aside>
-      <aside class="panel people"><h2>People & operations</h2><div data-k="roster"></div>
-        <button type="button" data-action="hire" data-id="technician">Technician · $1,500</button>
-        <button type="button" data-action="hire" data-id="cleaner">Cleaner · $1,500</button>
-        <button type="button" data-action="hire" data-id="engineer">Engineer · $1,500</button>
-        <button type="button" data-action="hire" data-id="manager">Site Manager · $1,500</button>
-        <small>Technicians repair; cleaners clean. Engineers reduce faults; managers speed up field work. Salaries $1–2/sim hour.</small>
-      </aside>
-      <aside class="panel finance"><h2>Finance & reports</h2><div data-k="finance"></div>
-        <small>1★ Complete all core lessons and the storm · 2★ 220 kW + Site B + Radio · 3★ 300 kW + prepared hail + Cleaning Kit. Scenario 2 unlock is recorded at 1★; its playable map is future content.</small>
-        <details class="playtest-tools">
-          <summary>Playtest cheats</summary>
-          <button type="button" data-action="cheat-cash" data-amount="25000">+$25,000 cash</button>
-          <button type="button" data-action="cheat-cash" data-amount="100000">+$100,000 cash</button>
-          <button type="button" data-action="cheat-event">Trigger positive event</button>
-          <small>Keyboard: Ctrl+Shift+M = +$25k · Ctrl+Shift+G = positive event.</small>
-        </details>
-      </aside>
-      </div>
+      <details class="utility-menu">
+        <summary title="Game menu">⚙</summary>
+        <div class="utility-popover">
+          <strong>Game</strong>
+          <button type="button" data-action="save">Save</button>
+          <button type="button" data-action="load">Load</button>
+          <button type="button" data-action="new">New Game</button>
+          <button type="button" data-action="export-save">Export save</button>
+          <button type="button" data-action="import-save">Import save</button>
+          <button type="button" data-action="audio">Sound: off</button>
+        </div>
+      </details>
 
       <div class="toast" data-k="toast" hidden></div>
       <div class="build-banner" data-k="build-banner" hidden>
@@ -256,15 +306,6 @@ export class DomHud {
         <span>Click a valid meadow tile · Esc / Cancel to abort</span>
       </div>
 
-      <footer class="hud-bottom">
-        <button type="button" data-action="save">Save</button>
-        <button type="button" data-action="load">Load</button>
-        <button type="button" data-action="new">New Game</button>
-        <button type="button" data-action="export-save">Export save</button>
-        <button type="button" data-action="import-save">Import save</button>
-        <button type="button" data-action="audio">Sound: off</button>
-        <span class="hint">Drag pan · Wheel zoom · 1/2 events · R repair · C clean</span>
-      </footer>
 
       <div class="modal" data-k="modal" hidden>
         <div class="modal-card">
@@ -315,8 +356,18 @@ export class DomHud {
       }
       const action = t.getAttribute('data-action');
       if (action === 'jump') {
-        const id=t.getAttribute('data-id');
-        if(['build','people','caps','finance'].includes(id??''))this.root.querySelector('.sidebar-right .'+id)?.scrollIntoView({block:'start',behavior:'auto'});
+        const id = t.getAttribute('data-id') as typeof this.managementView | null;
+        if (id && ['build','people','caps','finance'].includes(id)) {
+          this.managementView = id;
+          this.root.querySelectorAll('[data-panel]').forEach((panel) => {
+            const active = panel.getAttribute('data-panel') === id;
+            (panel as HTMLElement).hidden = !active;
+            panel.classList.toggle('active', active);
+          });
+          this.root.querySelectorAll('.dock-nav [data-action="jump"]').forEach((button) => {
+            button.classList.toggle('active', button.getAttribute('data-id') === id);
+          });
+        }
       }
       if (action === 'cancel-build') this.sim.setBuildMode(null);
       if (action === 'save') {
@@ -682,6 +733,8 @@ export class DomHud {
 
     const selected = snapshot.equipment.find((e) => e.id === snapshot.selectedId);
     const staff = snapshot.staff.find((s) => s.id === snapshot.selectedId);
+    const selectionPanel = this.root.querySelector('[data-k="selection"]') as HTMLElement;
+    selectionPanel.hidden = !selected && !staff;
     const selectionBodyKey = selected
       ? `eq:${selected.id}:${Math.floor(selected.soiling * 10)}:${Math.floor(selected.condition * 10)}:${selected.faulted}:${selected.commissioned}`
       : staff
@@ -707,7 +760,7 @@ export class DomHud {
           <span>Plot</span><b>${selected.plotId}</b>
         </div>`;
       } else if (staff) {
-        selBody.innerHTML = `<strong>${staff.name}</strong><div>Technician · ${staff.task.type}</div>`;
+        selBody.innerHTML = `<strong>${staff.name}</strong><div class="sel-grid"><span>Role</span><b>${staff.role}</b><span>Skill</span><b>${(staff.skill ?? 1).toFixed(1)}</b><span>Task</span><b>${staff.task.type}</b><span>Trait</span><b>${staff.trait ?? '—'}</b></div>`;
       } else {
         selBody.textContent = 'Click equipment or staff.';
       }
@@ -725,6 +778,10 @@ export class DomHud {
           actions += `<button type="button" data-action="clean" data-id="${selected.id}">Clean Array</button>`;
         }
         selActions.innerHTML = actions || `<span class="muted">No actions</span>`;
+      } else if (staff) {
+        selActions.innerHTML =
+          '<button type="button" data-action="train" data-id="' + staff.id + '">Train · $800</button>' +
+          '<button type="button" class="ghost" data-action="dismiss-staff" data-id="' + staff.id + '">Dismiss</button>';
       } else {
         selActions.innerHTML = '';
       }
