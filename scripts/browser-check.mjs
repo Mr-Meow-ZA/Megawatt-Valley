@@ -58,7 +58,7 @@ for(const point of [{x:450,y:320},{x:550,y:320},{x:650,y:320},{x:750,y:320},{x:4
 assert.ok(built,'A player can place PV through canvas input');
 await page.locator('[data-action="cancel-build"]').click();
 await page.reload();
-await page.locator('[data-action="save"]').waitFor({timeout:60000});
+await page.locator('[data-k="management-dock"]').waitFor({timeout:60000});
 const resumed = await saved();
 assert.equal(resumed.equipment.length,4); assert.equal(resumed.cash,before.cash-8000);
 await page.locator('[data-action="jump"][data-id="people"]').click();
@@ -67,6 +67,7 @@ assert.equal((await saved()).staff.length,2);
 await clickGameAction('new');
 assert.equal((await saved()).equipment.length,3);
 await clickGameAction('new');
+await page.locator('[data-action="jump"][data-id="people"]').click();
 await page.locator('[data-action="hire"][data-id="cleaner"]').scrollIntoViewIfNeeded();
 await page.locator('[data-action="hire"][data-id="cleaner"]').click();
 assert.equal((await saved()).staff.length,2);
