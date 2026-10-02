@@ -313,6 +313,16 @@ export class GameSimulation {
     this.speed = this.speedBeforeEvent;
 
     switch (eventId) {
+      case 'green_growth_grant':
+        if (choiceId === 'training') {
+          this.cash += 4000;
+          for (const member of this.staff) member.skill = Math.min(5, (member.skill ?? 1) + 0.5);
+          this.message = 'Grant approved: $4,000 plus team training. Even the forms were friendly.';
+        } else {
+          this.cash += 7500;
+          this.message = 'Green Growth Grant received: +$7,500 for expansion.';
+        }
+        break;
       case 'community_meeting':
         if (choiceId === 'sponsor') {
           this.cash -= 2000;
@@ -697,6 +707,14 @@ export class GameSimulation {
     if (pvCount >= 2 && !this.triggeredEvents.includes('community_meeting')) {
       this.enqueueEvent('community_meeting');
     }
+    if (
+      this.objectives.find((o) => o.id === 'first_power')?.complete &&
+      this.eventClock >= 4 &&
+      !this.triggeredEvents.includes('green_growth_grant') &&
+      !this.pendingEventQueue.includes('green_growth_grant')
+    ) {
+      this.enqueueEvent('green_growth_grant');
+    }
     /* Delay bargain_batch until day 3 so early fault loop can be practiced. */
     if (this.day >= 3 && pvCount >= 1 && !this.triggeredEvents.includes('bargain_batch')) {
       this.enqueueEvent('bargain_batch');
@@ -815,6 +833,190 @@ export class GameSimulation {
     this.staff.push({ id: this.uid('staff'), name: names[role], role, skill: 1, salary: role === 'engineer' ? 2 : 1,
       trait: traits[role], plotId: 'site_a', tile: { x: 6, y: 7 }, task: { type: 'idle' } });
     this.message = names[role] + ' joined the team.';
+    return true;
+  }
+
+  dismissStaff(id: string): boolean {
+    const member = this.staff.find((s) => s.id === id);
+    if (!member) return false;
+    this.staff = this.staff.filter((s) => s.id !== id);
+    if (this.selectedId === id) this.selectedId = null;
+    this.message = member.name + ' left the company. You can hire a replacement at any time.';
+    return true;
+  }
+
+  grantPlaytestCash(amount = 25_000): boolean {
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000) return false;
+    this.cash += amount;
+    this.message = 'Playtest funding: +
+    const member = this.staff.find((s) => s.id === id);
+    if (!member || (member.skill ?? 1) >= 5 || this.cash < 800) return false;
+    this.cash -= 800; member.skill = Math.min(5, (member.skill ?? 1) + 1);
+    this.message = member.name + ' completed training. Faster field work unlocked.';
+    return true;
+  }
+
+  demolish(id: string): boolean {
+    const eq = this.equipment.find((e) => e.id === id);
+    if (!eq || !EQUIPMENT[eq.kind].buildable) return false;
+    if (isPv(eq.kind) && this.equipment.filter((e) => isPv(e.kind)).length <= 1) {
+      this.message = 'Keep one solar array so the company can recover.'; return false;
+    }
+    this.cash += Math.floor(EQUIPMENT[eq.kind].cost * 0.6 * eq.condition);
+    this.equipment = this.equipment.filter((e) => e.id !== id);
+    for (const member of this.staff) if (member.task.type !== 'idle' && member.task.targetId === id) member.task = { type: 'idle' };
+    this.selectedId = null; this.message = 'Equipment removed; 60% condition-adjusted resale returned.';
+    return true;
+  }
+
+  plotAtTile(tile: Vec2): PlotId | null {
+    for (const plot of this.plots) {
+      if (!plot.unlocked) continue;
+      if (
+        tile.x >= plot.origin.x &&
+        tile.y >= plot.origin.y &&
+        tile.x < plot.origin.x + plot.size.x &&
+        tile.y < plot.origin.y + plot.size.y
+      ) {
+        return plot.id;
+      }
+    }
+    return null;
+  }
+
+  snapshot(): GameSnapshot {
+    const { generationKw, exportedKw } = this.computePower();
+    return {
+      cash: this.cash,
+      revenuePerHour: this.revenuePerHour,
+      powerKw: generationKw,
+      exportedKw,
+      day: this.day,
+      hour: this.hour,
+      speed: this.speed,
+      weather: this.weather,
+      irradiance: this.getIrradiance(),
+      tariffPerKwh: this.tariffPerKwh,
+      plots: this.plots.map((p) => ({ ...p, origin: { ...p.origin }, size: { ...p.size } })),
+      equipment: this.equipment.map((e) => ({ ...e, tile: { ...e.tile } })),
+      staff: this.staff.map((s) => ({
+        ...s,
+        tile: { ...s.tile },
+        task: { ...s.task },
+      })),
+      capabilities: [...this.capabilities],
+      objectives: this.objectives.map((o) => ({ ...o })),
+      stars: this.stars,
+      activeEvent: this.activeEvent
+        ? { ...this.activeEvent, choices: this.activeEvent.choices.map((c) => ({ ...c })) }
+        : null,
+      selectedId: this.selectedId,
+      buildMode: this.buildMode,
+      message: this.message,
+      hailPrepared: this.hailPrepared,
+      totalEnergyKwh: this.totalEnergyKwh,
+      faultsRepaired: this.faultsRepaired,
+      cleansCompleted: this.cleansCompleted,
+      scenarioComplete: this.scenarioComplete,
+    };
+  }
+
+  serialize(): SerializedGameState {
+    return {
+      cash: this.cash,
+      day: this.day,
+      hour: this.hour,
+      speed: this.speed,
+      weather: this.weather,
+      weatherTimer: this.weatherTimer,
+      tariffPerKwh: this.tariffPerKwh,
+      plots: this.plots,
+      equipment: this.equipment,
+      staff: this.staff,
+      capabilities: this.capabilities,
+      objectives: this.objectives,
+      stars: this.stars,
+      nextEntityId: this.nextEntityId,
+      triggeredEvents: this.triggeredEvents,
+      pendingEventQueue: this.pendingEventQueue,
+      activeEvent: this.activeEvent,
+      selectedId: this.selectedId,
+      buildMode: this.buildMode,
+      message: this.message,
+      hailPrepared: this.hailPrepared,
+      hailSurvived: this.hailSurvived,
+      totalEnergyKwh: this.totalEnergyKwh,
+      faultsRepaired: this.faultsRepaired,
+      cleansCompleted: this.cleansCompleted,
+      scenarioComplete: this.scenarioComplete,
+      tickAccumulator: this.tickAccumulator,
+      nextFaultCheck: this.nextFaultCheck,
+      nextSoilTick: this.nextSoilTick,
+      revenuePerHour: this.revenuePerHour,
+      lifetimeRevenue: this.lifetimeRevenue,
+      peakExportKw: this.peakExportKw,
+      scriptedFirstFault: this.scriptedFirstFault,
+      curtailmentFactor: this.curtailmentFactor, curtailmentTimer: this.curtailmentTimer,
+      eventClock: this.eventClock, eventDelays: { ...this.eventDelays }, rngState: this.rngState,
+      totalExpenses: this.totalExpenses, manualRepairs: this.manualRepairs, manualCleans: this.manualCleans,
+      speedBeforeEvent: this.speedBeforeEvent,
+    };
+  }
+
+  load(data: SerializedGameState): void {
+    if (!validateState(data)) throw new Error('Invalid save data');
+    const copy = structuredClone(data);
+    // Reset optional fields when loading older saves into an existing session.
+    this.curtailmentFactor = 1; this.curtailmentTimer = 0; this.eventClock = 0;
+    this.eventDelays = {}; this.rngState = 924817; this.totalExpenses = 0;
+    this.manualRepairs = data.capabilities.includes('radio_dispatch') ? 1 : 0;
+    this.manualCleans = data.capabilities.includes('cleaning_kit') ? 1 : 0;
+    this.speedBeforeEvent = 1;
+    Object.assign(this, copy);
+    this.lifetimeRevenue = data.lifetimeRevenue ?? this.lifetimeRevenue;
+    this.peakExportKw = data.peakExportKw ?? this.peakExportKw;
+    this.scriptedFirstFault = data.scriptedFirstFault ?? false;
+  }
+}
+
+/** Pure helpers for unit tests. */
+export function generationKwForArray(args: {
+  nameplateKw: number;
+  efficiency: number;
+  condition: number;
+  soiling: number;
+  irradiance: number;
+  solarResource: number;
+}): number {
+  const soilPenalty = 1 - args.soiling * 0.45;
+  return (
+    args.nameplateKw *
+    args.efficiency *
+    args.condition *
+    soilPenalty *
+    args.irradiance *
+    args.solarResource
+  );
+}
+
+export function revenueFor(energyKwh: number, tariff: number): number {
+  return energyKwh * tariff;
+}
+ + Math.round(amount).toLocaleString('en-US') + '.';
+    return true;
+  }
+
+  triggerPlaytestGrant(): boolean {
+    if (this.activeEvent) {
+      this.message = 'Resolve the current event first.';
+      return false;
+    }
+    if (this.triggeredEvents.includes('green_growth_grant')) {
+      this.cash += 7500;
+      this.message = 'Playtest repeat grant: +$7,500.';
+      return true;
+    }
+    this.openEvent('green_growth_grant');
     return true;
   }
 
