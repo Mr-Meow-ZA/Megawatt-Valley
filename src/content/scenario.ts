@@ -2,7 +2,7 @@ import type { CapabilityId, ObjectiveId, ObjectiveState, PlotState } from '../si
 
 export const STARTING_CASH = 50_000;
 // Gameplay tariff is intentionally boosted for tycoon pacing.
-export const TARIFF_PER_KWH = 0.45;
+export const TARIFF_PER_KWH = 0.24;
 export const SAVE_VERSION = 1;
 export const SAVE_KEY = 'megawatt-valley-solar-v1';
 
