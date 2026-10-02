@@ -243,10 +243,10 @@ export class DomHud {
                 <button type="button" data-cat="generation" class="active">Generation</button>
                 <button type="button" data-cat="grid">Grid</button>
                 <button type="button" data-cat="support">Support</button>
+                <button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel</button>
               </div>
             </div>
             <div class="build-grid" data-k="build"></div>
-            <button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel placement</button>
           </aside>
 
           <aside class="panel people dock-panel" data-panel="people" hidden>
