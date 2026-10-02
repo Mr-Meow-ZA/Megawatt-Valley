@@ -102,17 +102,17 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on('keydown-SPACE', () => {
-      if (this.hud.isOverlayOpen()) return;
+      if (this.hud.isOverlayOpen() || this.hud.isTextEntryFocused()) return;
       const snap = this.sim.snapshot();
       this.sim.setSpeed(snap.speed === 0 ? 1 : 0);
     });
     this.input.keyboard?.on('keydown-R', () => {
-      if (this.hud.isOverlayOpen()) return;
+      if (this.hud.isOverlayOpen() || this.hud.isTextEntryFocused()) return;
       const snap = this.sim.snapshot();
       if (snap.selectedId) this.sim.dispatchRepair(snap.selectedId);
     });
     this.input.keyboard?.on('keydown-C', () => {
-      if (this.hud.isOverlayOpen()) return;
+      if (this.hud.isOverlayOpen() || this.hud.isTextEntryFocused()) return;
       const snap = this.sim.snapshot();
       if (snap.selectedId) this.sim.dispatchClean(snap.selectedId);
     });

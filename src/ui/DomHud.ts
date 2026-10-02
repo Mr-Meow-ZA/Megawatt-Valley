@@ -111,6 +111,7 @@ export class DomHud {
   private lastAlertHtml = '';
   private alertLayoutKey = '';
   private researchReturnFocus: HTMLElement | null = null;
+  isTextEntryFocused(): boolean { return !!document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'); }
   isOverlayOpen(): boolean { return !!this.root.querySelector('.research-modal:not([hidden]), .modal:not([hidden]), .win:not([hidden])'); }
   private lastEventId: string | null = null;
   private lastObjectivesKey = '__uninit__';
@@ -118,14 +119,18 @@ export class DomHud {
   private lastCapsKey = '__uninit__';
   private lastCapabilityHtml = '';
   private lastRosterHtml = '';
-  private lastOverviewHtml = '';
+  private buildSearch = '';
+  private staffSearch = '';
+  private staffRole = 'all';
+  private staffSort = 'name';
+  private lastSelectedStaffId: string | null = null;
   private lastWeatherScene = '';
   private lastSelectionKey = '__uninit__';
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
   private toastClearAt = 0;
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' | 'decor' = 'all';
-  private managementView: 'build' | 'people' | 'caps' | 'finance' = 'build';
+  private managementView: 'build' | 'people' | 'caps' | 'finance' | 'events' = 'build';
   private minimapCtx: CanvasRenderingContext2D | null = null;
   private lastCash = -1;
   private cashFloatUntil = 0;
@@ -217,7 +222,7 @@ export class DomHud {
 
       <aside class="panel selection contextual-panel" data-k="selection" hidden>
         <div class="panel-title-row">
-          <h2>Selected</h2>
+          <h2 data-k="selection-title">Selected</h2>
           <button type="button" class="inspector-close" data-action="close-inspector" aria-label="Close inspector">×</button>
         </div>
         <div data-k="selection-body">Click equipment or staff.</div>
@@ -238,37 +243,25 @@ export class DomHud {
         </div>
       </aside>
 
-      <section class="management-dock" data-k="management-dock">
+      <section class="management-dock collapsed" data-k="management-dock">
         <nav class="dock-nav" aria-label="Management">
-          <button type="button" class="active" data-action="jump" data-id="build"><span>⚒</span> Build</button>
-          <button type="button" data-action="jump" data-id="people"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="6" r="3"/><path d="M1 17v-2a6 6 0 0 1 12 0v2M13 3a3 3 0 0 1 0 6M15 12a5 5 0 0 1 4 5"/></svg> Team</button>
+          <button type="button" data-action="jump" data-id="build" aria-expanded="false" title="Build catalogue · B"><span>⚒</span> Build</button>
+          <button type="button" data-action="jump" data-id="people" title="Staff management · T"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="6" r="3"/><path d="M1 17v-2a6 6 0 0 1 12 0v2M13 3a3 3 0 0 1 0 6M15 12a5 5 0 0 1 4 5"/></svg> Staff</button>
           <button type="button" data-action="jump" data-id="caps"><span>⚙</span> Upgrades</button>
           <button type="button" data-action="jump" data-id="finance"><span>▥</span> Finance</button>
-          <div class="dock-hint">Drag to pan · Wheel zoom · H home · F find · U research</div>
-          <button type="button" class="dock-toggle" data-action="toggle-dock" aria-expanded="true" aria-controls="management-content" title="Collapse management panel">⌄</button>
+          <button type="button" data-action="jump" data-id="events" aria-expanded="false"><span>⚑</span> Events</button>
+          <div class="dock-hint">B build · T staff · U research · H home · F find</div>
+          <button type="button" class="dock-toggle" data-action="toggle-dock" aria-expanded="false" aria-controls="management-content" title="Open management tools">⌃</button>
         </nav>
 
         <div class="dock-content" id="management-content">
-          <aside class="overview-panel staff-overview" aria-label="Staff overview">
-            <header class="overview-header"><h2><span>♟</span> Staff</h2><span>Meet your valley crew</span></header>
-            <div class="role-gallery">${(['engineer', 'technician', 'cleaner', 'manager'] as StaffMember['role'][]).map(role => `<button type="button" data-action="manage-team" title="Manage your ${ROLE_LABEL[role].toLowerCase()} team">${staffPortrait(role)}<strong>${ROLE_LABEL[role]}</strong><small data-role-count="${role}">0 hired</small></button>`).join('')}</div>
-            <div class="crew-summary" data-k="crew-summary"></div>
-            <button type="button" class="team-launch" data-action="manage-team">Manage team <span>Hire & train →</span></button>
-          </aside>
-          <aside class="overview-panel events-overview" aria-label="Events overview">
-            <header class="overview-header"><h2><span>⚑</span> Events</h2><span>A living, changing valley</span></header>
-            <div class="weather-scene" data-k="weather-scene"></div>
-            <div class="weather-report"><strong data-k="weather-report-title"></strong><p data-k="weather-report-body"></p></div>
-            <div class="activity-row"><span>◷</span><div><strong>Park update</strong><p data-k="park-update"></p></div></div>
-            <button type="button" class="development-launch" data-action="manage-upgrades"><span>⚙</span><div><strong>Company development</strong><small data-k="development-status"></small></div><b>›</b></button>
-          </aside>
           <aside class="panel build dock-panel active" data-panel="build">
             <div class="dock-panel-header">
               <div>
                 <h2>⚒ Build Menu</h2>
-                <span>Plan a brighter valley</span>
+                <span data-k="build-count">Choose equipment to place</span>
               </div>
-              <button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel placement</button>
+              <div class="catalogue-tools"><label class="search-field"><span aria-hidden="true">⌕</span><input type="search" data-k="build-search" placeholder="Find equipment…" aria-label="Find equipment" maxlength="64" /></label><button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel placement</button></div>
             </div>
             <div class="build-tabs" aria-label="Build categories">
               <button type="button" data-cat="all" class="active">All</button>
@@ -277,12 +270,12 @@ export class DomHud {
               <button type="button" data-cat="grid">Grid & Utilities</button>
               <button type="button" data-cat="decor">Decorations</button>
             </div>
-            <div class="build-grid" data-k="build"></div>
+            <div class="build-grid" data-k="build" tabindex="0" aria-label="Equipment catalogue"></div><div class="catalogue-footer"><span>Choose an item, then click a valid tile · Shift-click to repeat</span><div><button type="button" data-action="browse-build" data-direction="-1" aria-label="Previous catalogue items">‹</button><button type="button" data-action="browse-build" data-direction="1" aria-label="Next catalogue items">›</button></div></div>
           </aside>
 
           <aside class="panel people dock-panel" data-panel="people" hidden>
             <div class="dock-panel-header">
-              <div><h2>People & Operations</h2><span>Build your O&M team</span></div>
+              <div><h2>Staff management</h2><span>Build your O&M team</span></div>
               <div class="hire-actions">
                 <button type="button" data-action="hire" data-id="technician">+ Technician · $1,500</button>
                 <button type="button" data-action="hire" data-id="cleaner">+ Cleaner · $1,500</button>
@@ -290,7 +283,7 @@ export class DomHud {
                 <button type="button" data-action="hire" data-id="manager">+ Manager · $1,500</button>
               </div>
             </div>
-            <div class="roster-grid" data-k="roster"></div>
+            <div class="staff-filters"><input type="search" data-k="staff-search" placeholder="Find a worker…" aria-label="Find a worker" maxlength="64"/><select data-k="staff-role" aria-label="Filter staff role"><option value="all">All roles</option><option value="technician">Technicians</option><option value="cleaner">Maintenance</option><option value="engineer">Engineers</option><option value="manager">Managers</option></select><select data-k="staff-sort" aria-label="Sort staff"><option value="name">Name</option><option value="skill">Highest skill</option><option value="task">Current task</option></select><span data-k="staff-summary"></span></div><div class="roster-grid" data-k="roster"></div>
           </aside>
 
           <aside class="panel caps dock-panel" data-panel="caps" hidden>
@@ -316,6 +309,11 @@ export class DomHud {
               <small>Ctrl+Shift+M = +$25k · Ctrl+Shift+G = positive event.</small>
             </details>
           </aside>
+          <aside class="panel events dock-panel" data-panel="events" hidden>
+            <div class="dock-panel-header"><div><h2>Valley events</h2><span>Weather, notices & development</span></div></div>
+            <div class="events-layout"><div class="weather-card"><div class="weather-scene" data-k="weather-scene"></div><div class="weather-report"><strong data-k="weather-report-title"></strong><p data-k="weather-report-body"></p></div></div><div class="event-notices"><article><span class="notice-icon">◷</span><div><h3>Latest park update</h3><p data-k="park-update"></p></div></article><button type="button" class="development-launch" data-action="manage-upgrades"><span>⚙</span><div><strong>Company development</strong><small data-k="development-status"></small></div><b>›</b></button><small>Urgent faults stay visible as alerts. Decisions open when an event occurs.</small></div></div>
+          </aside>
+
         </div>
       </section>
 
@@ -409,34 +407,24 @@ export class DomHud {
       const action = t.getAttribute('data-action');
       if (action === 'close-inspector') this.sim.selectEntity(null);
       if (action === 'toggle-dock') {
-        const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
-        const collapsed = dock.classList.toggle('collapsed');
-        t.setAttribute('aria-expanded', String(!collapsed));
-        t.setAttribute('title', collapsed ? 'Expand management panel' : 'Collapse management panel');
-        t.textContent = collapsed ? '⌃' : '⌄';
+        const closed = this.root.querySelector('.management-dock')!.classList.contains('collapsed');
+        this.setManagementView(closed ? this.managementView : null);
       }
-      if (action === 'jump' || action === 'manage-team' || action === 'manage-upgrades') {
-        const id = (action === 'manage-team' ? 'people' : action === 'manage-upgrades' ? 'caps' : t.getAttribute('data-id')) as typeof this.managementView | null;
-        if (id && ['build','people','caps','finance'].includes(id)) {
-          this.managementView = id;
-          const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
-          dock.classList.toggle('expanded-workspace', id !== 'build');
-          dock.classList.remove('collapsed');
-          const toggle = dock.querySelector('[data-action="toggle-dock"]') as HTMLElement;
-          toggle.setAttribute('aria-expanded', 'true');
-          toggle.setAttribute('title', 'Collapse management panel');
-          toggle.textContent = '⌄';
-          // A build ghost should not remain armed while managing people or finance.
-          if (id !== 'build') this.sim.setBuildMode(null);
-          this.root.querySelectorAll('[data-panel]').forEach((panel) => {
-            const active = panel.getAttribute('data-panel') === id;
-            (panel as HTMLElement).hidden = !active;
-            panel.classList.toggle('active', active);
-          });
-          this.root.querySelectorAll('.dock-nav [data-action="jump"]').forEach((button) => {
-            button.classList.toggle('active', button.getAttribute('data-id') === id);
-          });
+      if (action === 'jump' || action === 'manage-upgrades') {
+        const id = (action === 'manage-upgrades' ? 'caps' : t.getAttribute('data-id')) as typeof this.managementView;
+        if (['build','people','caps','finance','events'].includes(id)) {
+          const open = !this.root.querySelector('.management-dock')!.classList.contains('collapsed');
+          this.setManagementView(open && this.managementView === id && action === 'jump' ? null : id);
         }
+      }
+      if (action === 'inspect-worker') {
+        this.sim.selectEntity(t.getAttribute('data-id'));
+        this.setManagementView(null);
+        this.render(this.sim.snapshot());
+      }
+      if (action === 'browse-build') {
+        const catalogue = this.root.querySelector('[data-k="build"]') as HTMLElement;
+        catalogue.scrollBy({left: Number(t.getAttribute('data-direction')) * catalogue.clientWidth * .75, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
       }
       if (action === 'open-research') this.openResearch();
       if (action === 'close-research') this.closeResearch();
@@ -523,6 +511,19 @@ export class DomHud {
       }
     };
     this.root.addEventListener('click', handleUiAction, { signal: this.listeners.signal });
+    this.root.addEventListener('input', ev => {
+      const input = ev.target as HTMLInputElement;
+      if (input.dataset.k === 'build-search') { this.buildSearch = input.value.trim().toLowerCase(); this.sim.setBuildMode(null); }
+      if (input.dataset.k === 'staff-search') this.staffSearch = input.value.trim().toLowerCase();
+      this.render(this.sim.snapshot());
+    }, { signal: this.listeners.signal });
+    this.root.addEventListener('change', ev => {
+      const input = ev.target as HTMLSelectElement;
+      if (input.dataset.k === 'staff-role') this.staffRole = input.value;
+      if (input.dataset.k === 'staff-sort') this.staffSort = input.value;
+      this.render(this.sim.snapshot());
+    }, { signal: this.listeners.signal });
+    this.setManagementView(null);
 
     window.addEventListener('keydown', (ev) => {
       const researchModal = this.root.querySelector('[data-k="research-modal"]') as HTMLElement;
@@ -534,8 +535,21 @@ export class DomHud {
         return;
       }
       if (ev.key === 'Escape' && !researchModal.hidden) { this.closeResearch(); return; }
-      if (ev.repeat || (ev.target as HTMLElement)?.closest('input,textarea,select,[contenteditable="true"]')) return;
+      if (ev.repeat) return;
+      if (ev.key === 'Escape' && !this.isOverlayOpen()) {
+        if (this.sim.buildMode) this.sim.setBuildMode(null);
+        else if (this.sim.selectedId) this.sim.selectEntity(null);
+        else this.setManagementView(null);
+        this.render(this.sim.snapshot());
+        return;
+      }
+      if ((ev.target as HTMLElement)?.closest('input,textarea,select,[contenteditable="true"]')) return;
       if (!ev.ctrlKey && !ev.metaKey && !ev.altKey && !this.sim.activeEvent && researchModal.hidden) {
+        if (ev.key.toLowerCase() === 'b' || ev.key.toLowerCase() === 't') {
+          const view = ev.key.toLowerCase() === 'b' ? 'build' : 'people';
+          this.setManagementView(!this.root.querySelector('.management-dock')!.classList.contains('collapsed') && this.managementView === view ? null : view);
+          return;
+        }
         if (ev.key.toLowerCase() === 'u') { this.openResearch(); return; }
         if (ev.key.toLowerCase() === 'h') { this.onCamera(null); return; }
         if (ev.key.toLowerCase() === 'f') { this.focusEntity(this.sim.selectedId); return; }
@@ -551,10 +565,6 @@ export class DomHud {
         this.sim.triggerPlaytestGrant();
         return;
       }
-      if (ev.key === 'Escape' && this.sim.snapshot().buildMode) {
-        this.sim.setBuildMode(null);
-        return;
-      }
       if (!this.sim.activeEvent) return;
       if (ev.key === '1' || ev.key === '2' || ev.key === '3') {
         const idx = Number(ev.key) - 1;
@@ -562,6 +572,28 @@ export class DomHud {
         if (choice) this.sim.resolveEventChoice(choice.id);
       }
     }, { signal: this.listeners.signal });
+  }
+
+  private setManagementView(view: typeof this.managementView | null): void {
+    const dock = this.root.querySelector('.management-dock')!;
+    if (view) this.managementView = view;
+    dock.classList.toggle('collapsed', !view);
+    this.root.classList.toggle('tools-open', !!view);
+    if (view !== 'build') this.sim.setBuildMode(null);
+    this.root.querySelectorAll<HTMLElement>('[data-panel]').forEach(panel => {
+      panel.hidden = panel.dataset.panel !== view;
+      panel.classList.toggle('active', !panel.hidden);
+    });
+    this.root.querySelectorAll<HTMLButtonElement>('.dock-nav [data-action="jump"]').forEach(button => {
+      const active = button.dataset.id === view;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-expanded', String(active));
+    });
+    const toggle = this.root.querySelector('[data-action="toggle-dock"]')!;
+    toggle.setAttribute('aria-expanded', String(!!view));
+    toggle.setAttribute('title', view ? 'Close management tools' : 'Open management tools');
+    toggle.textContent = view ? '⌄' : '⌃';
+    if (!view && this.isTextEntryFocused()) (document.activeElement as HTMLElement).blur();
   }
 
   private openResearch(): void {
@@ -805,7 +837,7 @@ export class DomHud {
       }
     }
 
-    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}|${snapshot.capabilities.includes('radio_dispatch')}|${BUILD_MENU_ORDER.map(id => snapshot.cash >= EQUIPMENT[id].cost ? 1 : 0).join('')}`;
+    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}|${this.buildSearch}|${snapshot.capabilities.includes('radio_dispatch')}|${BUILD_MENU_ORDER.map(id => snapshot.cash >= EQUIPMENT[id].cost ? 1 : 0).join('')}`;
     if (buildKey !== this.lastBuildKey) {
       this.lastBuildKey = buildKey;
       const build = this.root.querySelector('[data-k="build"]') as HTMLElement;
@@ -818,7 +850,9 @@ export class DomHud {
         if (this.buildCategory === 'decor') return def.category === 'building' && id !== 'workshop';
         return true;
       });
-      build.innerHTML = items
+      const visibleItems = items.filter(id => `${EQUIPMENT[id].name} ${BUILD_LABEL[id]} ${EQUIPMENT[id].description}`.toLowerCase().includes(this.buildSearch));
+      setText('build-count', `${visibleItems.length} item${visibleItems.length === 1 ? '' : 's'} · ${this.buildCategory === 'all' ? 'All equipment' : this.buildCategory === 'generation' ? 'Solar generation' : this.buildCategory === 'grid' ? 'Grid & utilities' : this.buildCategory === 'support' ? 'Operations' : 'Decorations'}`);
+      build.innerHTML = visibleItems
         .map((id) => {
           const def = EQUIPMENT[id];
           const active = snapshot.buildMode === id ? 'active' : '';
@@ -832,8 +866,8 @@ export class DomHud {
           </button>`;
         })
         .join('');
-      if (items.length === 0) {
-        build.innerHTML = `<div class="muted">Nothing in this category yet.</div>`;
+      if (visibleItems.length === 0) {
+        build.innerHTML = `<div class="catalogue-empty">No equipment matches. Try another category or search.</div>`;
       }
     }
 
@@ -875,22 +909,10 @@ export class DomHud {
     }).join('');
     if (this.lastCapabilityHtml !== capHtml) { this.lastCapabilityHtml = capHtml; capActions.innerHTML = capHtml; }
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
-    const rosterHtml = snapshot.staff.map(s => `<div class="staff-card"><div class="staff-art">${staffPortrait(s.role)}</div><div class="staff-details"><strong>${escapeHtml(s.name)}</strong><span class="role-label">${ROLE_LABEL[s.role]} · Skill ${(s.skill ?? 1).toFixed(1)}</span><div class="skill-track"><i style="width:${(s.skill ?? 1) / 5 * 100}%"></i></div><small>${escapeHtml(s.trait ?? 'Panel Whisperer')} · ${s.task.type === 'idle' ? 'Ready for a job' : s.task.type === 'travel' ? 'On the way' : s.task.type === 'repair' ? 'Repairing equipment' : 'Cleaning panels'}</small><div class="staff-actions"><button type="button" data-action="train" data-id="${s.id}" ${(s.skill ?? 1) >= 5 || snapshot.cash < 800 ? 'disabled' : ''}>Train · $800</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="${s.id}" ${snapshot.staff.length <= 1 ? 'disabled title="Keep at least one staff member"' : ''}>Dismiss</button></div></div></div>`).join('');
+    const staffRows = snapshot.staff.filter(member => (this.staffRole === 'all' || member.role === this.staffRole) && `${member.name} ${ROLE_LABEL[member.role]} ${member.trait ?? ''}`.toLowerCase().includes(this.staffSearch)).sort((a,b) => this.staffSort === 'skill' ? (b.skill ?? 1) - (a.skill ?? 1) : this.staffSort === 'task' ? a.task.type.localeCompare(b.task.type) : a.name.localeCompare(b.name));
+    setText('staff-summary', `${staffRows.length} / ${snapshot.staff.length} workers · ${money(snapshot.staff.reduce((sum,member) => sum + (member.salary ?? 1),0))} payroll / park hour`);
+    const rosterHtml = '<div class="staff-table-head"><span>Worker</span><span>Role</span><span>Skill</span><span>Current task</span><span>Wage / park hour</span><span></span></div>' + staffRows.map(member => `<div class="staff-table-row ${member.id === snapshot.selectedId ? 'selected' : ''}"><button type="button" class="staff-name" data-action="inspect-worker" data-id="${member.id}"><span class="staff-role-marker ${member.role}">${ROLE_LABEL[member.role].charAt(0)}</span><strong>${escapeHtml(member.name)}</strong></button><span>${ROLE_LABEL[member.role]}</span><div><b>${(member.skill ?? 1).toFixed(1)} / 5</b><div class="skill-track"><i style="width:${(member.skill ?? 1) / 5 * 100}%"></i></div></div><span>${member.task.type === 'idle' ? 'Ready for a job' : member.task.type === 'travel' ? 'Travelling' : member.task.type === 'repair' ? 'Repairing' : 'Cleaning'}</span><span>${money(member.salary ?? 1)}</span><button type="button" class="inspect-worker" data-action="inspect-worker" data-id="${member.id}" aria-label="Inspect ${escapeHtml(member.name)}">Inspect →</button></div>`).join('') + (staffRows.length ? '' : '<p class="roster-empty">No workers match this filter.</p>');
     if (this.lastRosterHtml !== rosterHtml) { this.lastRosterHtml = rosterHtml; roster.innerHTML = rosterHtml; }
-    const overviewKey = snapshot.selectedId + '|' + snapshot.staff.map(s => `${s.id}:${s.name}:${s.role}:${s.skill}:${s.task.type}`).join('|');
-    if (overviewKey !== this.lastOverviewHtml) {
-      this.lastOverviewHtml = overviewKey;
-      for (const role of Object.keys(ROLE_LABEL) as StaffMember['role'][]) {
-        const count = snapshot.staff.filter(s => s.role === role).length;
-        const label = this.root.querySelector(`[data-role-count="${role}"]`)!;
-        label.textContent = `${count} hired`;
-        label.parentElement!.classList.toggle('role-hired', count > 0);
-      }
-      const lead = snapshot.staff.find(s => s.id === snapshot.selectedId) ?? snapshot.staff[0];
-      (this.root.querySelector('[data-k="crew-summary"]') as HTMLElement).innerHTML = lead
-        ? `<button type="button" class="lead-portrait" data-action="locate" data-id="${lead.id}" title="Find ${escapeHtml(lead.name)}">${staffPortrait(lead.role)}</button><div><strong>${escapeHtml(lead.name)}</strong><small>${ROLE_LABEL[lead.role]} · Skill ${(lead.skill ?? 1).toFixed(1)}</small><div class="skill-track"><i style="width:${(lead.skill ?? 1) / 5 * 100}%"></i></div><span>${lead.task.type === 'idle' ? 'Ready for the next job' : lead.task.type === 'travel' ? 'Heading to a job' : lead.task.type === 'repair' ? 'Repairing equipment' : 'Cleaning solar panels'}</span></div>`
-        : '<div><strong>Your crew starts here</strong><small>Hire a specialist to help your park grow.</small></div>';
-    }
     const night = snapshot.irradiance < 0.05;
     const sceneKey = `${snapshot.weather}|${night}`;
     if (sceneKey !== this.lastWeatherScene) {
@@ -961,16 +983,19 @@ export class DomHud {
     const selected = snapshot.equipment.find((e) => e.id === snapshot.selectedId);
     const staff = snapshot.staff.find((s) => s.id === snapshot.selectedId);
     const selectionPanel = this.root.querySelector('[data-k="selection"]') as HTMLElement;
+    if (staff && staff.id !== this.lastSelectedStaffId) this.setManagementView(null);
+    this.lastSelectedStaffId = staff?.id ?? null;
     selectionPanel.hidden = !selected && !staff;
+    (this.root.querySelector('[data-k="selection-title"]') as HTMLElement).textContent = staff ? 'Staff member' : 'Equipment';
     const selectionBodyKey = selected
       ? `eq:${selected.id}:${Math.floor(selected.soiling * 10)}:${Math.floor(selected.condition * 10)}:${selected.faulted}:${selected.commissioned}`
       : staff
-        ? `staff:${staff.id}:${staff.task.type}`
+        ? `staff:${staff.id}:${staff.name}:${staff.role}:${staff.skill}:${staff.salary}:${staff.trait}:${staff.task.type}`
         : 'none';
     const selectionActionsKey = selected
       ? `act:${selected.id}:${selected.faulted}:${selected.soiling >= 0.15}:${snapshot.capabilities.includes('radio_dispatch')}:${selected.kind}`
       : staff
-        ? `act:staff:${staff.id}`
+        ? `act:staff:${staff.id}:${staff.skill}:${snapshot.cash >= 800}:${snapshot.staff.length > 1}`
         : 'act:none';
 
     if (selectionBodyKey !== this.lastSelectionKey) {
@@ -987,7 +1012,7 @@ export class DomHud {
           <span>Plot</span><b>${selected.plotId}</b>
         </div>`;
       } else if (staff) {
-        selBody.innerHTML = `<strong>${staff.name}</strong><div class="sel-grid"><span>Role</span><b>${staff.role}</b><span>Skill</span><b>${(staff.skill ?? 1).toFixed(1)}</b><span>Task</span><b>${staff.task.type}</b><span>Trait</span><b>${staff.trait ?? '—'}</b></div>`;
+        selBody.innerHTML = `<div class="worker-profile"><div class="worker-portrait" role="img" aria-label="${ROLE_LABEL[staff.role]} character">${staffPortrait(staff.role)}</div><div class="worker-identity"><small>${ROLE_LABEL[staff.role]}</small><h3>${escapeHtml(staff.name)}</h3><span class="worker-status">${staff.task.type === 'idle' ? '● Ready for a job' : staff.task.type === 'travel' ? '→ Travelling to a job' : staff.task.type === 'repair' ? '⚒ Repairing equipment' : '✦ Cleaning an array'}</span></div></div><div class="worker-facts"><div class="worker-skill"><span>Skill</span><b>${(staff.skill ?? 1).toFixed(1)} / 5</b><div class="skill-track"><i style="width:${(staff.skill ?? 1) / 5 * 100}%"></i></div></div><div><span>Wage / park hour</span><b>${money(staff.salary ?? 1)}</b></div><div><span>Trait</span><b>${escapeHtml(staff.trait ?? '—')}</b></div></div>`;
       } else {
         selBody.textContent = 'Click equipment or staff.';
       }
@@ -1007,8 +1032,7 @@ export class DomHud {
         selActions.innerHTML = actions || `<span class="muted">No actions</span>`;
       } else if (staff) {
         selActions.innerHTML =
-          '<button type="button" data-action="train" data-id="' + staff.id + '">Train · $800</button>' +
-          '<button type="button" class="ghost" data-action="dismiss-staff" data-id="' + staff.id + '">Dismiss</button>';
+          `<button type="button" data-action="focus-selected">Find in park · F</button><button type="button" data-action="train" data-id="${staff.id}" ${(staff.skill ?? 1) >= 5 || snapshot.cash < 800 ? 'disabled' : ''}>${(staff.skill ?? 1) >= 5 ? 'Fully trained' : 'Train · $800'}</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="${staff.id}" ${snapshot.staff.length <= 1 ? 'disabled title="Keep at least one worker in the park"' : ''}>Dismiss</button>`;
       } else {
         selActions.innerHTML = '';
       }

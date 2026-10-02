@@ -17,27 +17,36 @@ The separate Cursor PR #8 remains independent.
 - Faster economy: $0.24/kWh. Reference strategy completes 1★ in 1,353 real seconds
   at 1x (22.6 minutes), then mastery after another 347 seconds. This is simulation
   evidence, not a first-player engagement verdict; alternative choices take longer.
-- Bottom Build/Team/Upgrades/Finance dock, contextual inspector and top utility menu.
+- Compact Build/Staff/Upgrades/Finance/Events toolbar, contextual inspector and top utility menu.
 - Dock can collapse; inspector can close; switching away from Build cancels placement.
 - Load/import starts paused. Event choices immediately refresh the overlay.
 - Staff dismissal, positive grants and optional playtest cash controls are implemented.
 - Net-positive supplier/sponsorship rewards work even with zero cash.
 - Browser verification uses ordinary visible clicks, without bypassing modal overlays.
 
-### Reference-driven interface pass
+### Research-led tycoon interface pass
 
-The previous menu design was too far from Rapha's reference. Build mode now
-shows separate illustrated Staff, Events and Build Menu panels, blue headers,
-light cards, larger equipment previews and green prices. Objectives and an
-illustrated map sit on the right; alerts/selection occupy the left. Team,
-Upgrades, Finance and dialogs share the same visual language. Native-resolution
-world art and smooth sampling replace forced pixel rendering. See
-[REFERENCE_UI_PASS_2026-10-02.md](REFERENCE_UI_PASS_2026-10-02.md) for the actual
-changes, remaining reference-fidelity gaps and validation.
+The permanent illustrated Staff/Events/Build dashboard is superseded. Reference
+images guide palette and art, rather than a fixed screen layout. Research into
+Two Point Campus, Planet Zoo, Parkitect and Planet Coaster supports separating
+management lists from contextual worker profiles. See
+[TYCOON_UI_RESEARCH_2026-10-02.md](TYCOON_UI_RESEARCH_2026-10-02.md) for sources,
+interpretation and implemented decisions.
 
-The interface is substantially closer; the scene still needs stronger terrain,
-lighting, campus assets and character art. This is not a claim that the supplied
-image's production quality has been reached.
+- Tools start closed, leaving a compact toolbar and more visible park.
+- One Build/Staff/Upgrades/Finance/Events drawer opens at a time.
+- Worker selection in the world or roster opens a character profile; portraits
+  appear only there, never in the bottom toolbar or roster.
+- Profile actions use real training costs, skill limits and dismissal rules.
+- Staff has search, role filters, sorting and actual total payroll.
+- Build has larger horizontal equipment cards, search, categories and browse arrows.
+- B/T toggle tools; search typing does not trigger simulation shortcuts.
+- Objectives, alerts and minimap remain outside management drawers.
+
+34 simulation tests and offline browser checks cover these interactions as well
+as existing progression, saving, research and laptop layouts. No new commercial
+quality score is claimed from this pass. The world still needs stronger terrain,
+lighting, campus assets and expressive character art.
 
 ### Visual-first asset pass
 
@@ -59,7 +68,7 @@ from asset count; terrain composition and the remaining equipment/staff still ne
   Resilience. All have real effects, prerequisites and save support. The former
   future-feature tree preview is removed.
 - Brighter original terrain/art, blue roofs/panels, distant mountains/lake/village,
-  four role-specific staff uniforms and roster portraits.
+  four role-specific staff uniforms and contextual portraits.
 - Click-to-find fault/dust/clipping alerts, minimap navigation, H/F/U camera/research
   controls, Shift-click repeat placement, clearer finance/star progress and persistent
   completion acknowledgement.

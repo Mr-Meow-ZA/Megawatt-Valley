@@ -168,6 +168,13 @@ Effects should communicate gameplay state, not just decorate.
 
 ## UI
 
+**2 October 2026 interaction update:** supplied images are visual references,
+not fixed HUD layouts. Use a compact toolbar and one management drawer at a time.
+Keep portraits in the selected worker profile; the staff roster is for comparing,
+filtering and finding workers. Keep the park visible when tools are not in use.
+See [TYCOON_UI_RESEARCH_2026-10-02.md](TYCOON_UI_RESEARCH_2026-10-02.md).
+
+
 The management UI should be significantly sharper than the world sprites.
 
 Visual language:

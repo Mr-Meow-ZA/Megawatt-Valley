@@ -2,20 +2,26 @@
 Open the latest successful [Solar release workflow](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/workflows/solar-release.yml), download **PLAY-MEGAWATT-VALLEY**, unzip, and open **PLAY-MEGAWATT-VALLEY.html** in desktop Chrome or Edge. No install, editor, server, or network is needed after download. GitHub requires login to download private artifacts; artifacts expire after 30 days and the workflow can rebuild them.
 
 ## Playing
-Follow the top-left objectives. Build another array on Site A, add inverter capacity
+Follow the top-right objectives. Build another array on Site A, add inverter capacity
 as needed, select faulty equipment and dispatch your technician. Radio Dispatch
 automates later repairs. Order panel cleaning, expand across the river and choose
 your first operational capability. Prepare for the hail warning. One star completes
 Here Comes the Sun; two and three stars remain available.
 
 Drag the world to pan, use the mouse wheel to zoom, and choose speed at top right.
-Select an object for details/actions; × closes its inspector. The bottom dock has
-Build, Team, Upgrades and Finance tabs. Build shows illustrated Staff, Events and
-Build Menu panels; all nine existing items appear initially, with Solar,
-Operations, Grid & Utilities and Decorations filters. The Staff panel's Manage
-Team button opens hiring/training; clicking the lead portrait finds that worker.
-The arrow collapses the dock to show more
-of the valley; any tab reopens it. Switching away from Build cancels placement.
+Select an object for details/actions; × closes its inspector. The compact bottom
+bar opens **Build, Staff, Upgrades, Finance or Events**, one drawer at a time.
+Tools start closed. Click the active tool again, or the arrow, to close it.
+**B** toggles Build; **T** toggles Staff. Build has large equipment cards, search,
+category filters and arrows to browse the nine implemented items.
+
+Click a worker in the park, or **Inspect** in Staff, to open their character
+profile. The portrait appears only in that selected profile. It shows the actual
+role, skill, task, trait and wage, with Find, Train and Dismiss actions.
+Staff management provides hiring, search, role filters and name/skill/task sorting.
+**Esc** cancels placement first, then clears selection, then closes tools.
+Switching away from Build cancels placement. Events shows actual weather/notices;
+urgent faults and event decisions appear when they need attention.
 Click a fault/dust alert to select and find the equipment. Click the minimap to
 centre the camera. Its home button, or Enter/Home while the map is focused,
 returns home. **H** restores the home view; **F** finds the selected object.

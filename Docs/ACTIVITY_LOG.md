@@ -1488,3 +1488,36 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 **Git / References**
 - Commit: `feat: Loop 14 — bank foam, lighting tints, denser sparks`
 - Branch / PR / Issue: `cursor/phaser-level1-build-5938`
+
+
+## 2026-10-02 — Support — Contextual tycoon UI after simulator research
+
+**Agent:** ChatGPT / Codex
+**Status:** Complete
+
+**Changed / Produced**
+- Researched published Two Point Campus, Planet Zoo, Parkitect and Planet Coaster interface guides before changing the game; documented sources and design inference in TYCOON_UI_RESEARCH_2026-10-02.md.
+- Replaced the permanent Staff/Events/Build dashboard with a closed compact toolbar and one management drawer at a time.
+- Added a selected worker character profile with actual task, skill, trait, salary, Find/Train/Dismiss. Portraits appear only in this profile, not in the bottom bar or roster.
+- Staff roster supports search, role filtering and name/skill/task sorting. Build supports large horizontal equipment cards, search, categories and browse arrows. Weather/notices moved to an optional Events drawer.
+- Added B/T tool shortcuts, guarded simulation shortcuts during text entry, and Escape handling for selection/tools. Updated play instructions, current status and visual direction.
+
+**Tested / Verified**
+- 34 simulation/layout/research/release/playthrough tests passed; TypeScript and Vite production build passed.
+- Standalone offline Chromium checks passed: default closed tools, one drawer, searchable/browsable catalogue, map separation, world worker selection, portrait only on selection, training cost/skill/profile refresh, roster filters/sort/inspection, and existing save/load/placement/research/day-night/gameplay checks.
+- Inspected desktop default/build/worker/staff screenshots and 1024×768 build/finance layouts; release workflow captures browser evidence.
+
+**Known issues / limitations**
+- Portraits use the existing original role art, not individual animated models. Terrain, lighting, character animation and facilities remain below the reference's production quality.
+- Independent player evaluation still needed; no new enjoyment or commercial polish score is asserted.
+- The legacy Polaris vault is not accessible from this Linux workspace; repo documentation is updated.
+
+**Decisions / assumptions / recommendations**
+- Reference images guide art direction, not permanent screen occupancy. Global staff management and selected-worker profiles serve separate jobs.
+
+**Next recommended step**
+- Improve the park art slice (terrain depth, lighting, expressive staff motion), then evaluate with an independent playtest.
+
+**Git / References**
+- Commit: this entry ships with the contextual tycoon UI commit.
+- Branch / PR: codex/solar-release-hardening / #10, still stacked on PR #7.
