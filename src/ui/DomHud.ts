@@ -240,6 +240,13 @@ export class DomHud {
       </aside>
       <aside class="panel finance"><h2>Finance & reports</h2><div data-k="finance"></div>
         <small>1★ Complete all core lessons and the storm · 2★ 220 kW + Site B + Radio · 3★ 300 kW + prepared hail + Cleaning Kit. Scenario 2 unlock is recorded at 1★; its playable map is future content.</small>
+        <details class="playtest-tools">
+          <summary>Playtest cheats</summary>
+          <button type="button" data-action="cheat-cash" data-amount="25000">+$25,000 cash</button>
+          <button type="button" data-action="cheat-cash" data-amount="100000">+$100,000 cash</button>
+          <button type="button" data-action="cheat-event">Trigger positive event</button>
+          <small>Keyboard: Ctrl+Shift+M = +$25k · Ctrl+Shift+G = positive event.</small>
+        </details>
       </aside>
       </div>
 
@@ -333,6 +340,9 @@ export class DomHud {
       if (action === 'capability') this.sim.buyCapability(t.getAttribute('data-id') as CapabilityId);
       if (action === 'hire') this.sim.hireStaff(t.getAttribute('data-id') as StaffMember['role']);
       if (action === 'train') this.sim.trainStaff(t.getAttribute('data-id') ?? '');
+      if (action === 'dismiss-staff') this.sim.dismissStaff(t.getAttribute('data-id') ?? '');
+      if (action === 'cheat-cash') this.sim.grantPlaytestCash(Number(t.getAttribute('data-amount') ?? 25000));
+      if (action === 'cheat-event') this.sim.triggerPlaytestGrant();
       if (action === 'audio') {
         sound.toggle(); t.textContent = sound.enabled ? 'Sound: on' : 'Sound: off';
       }
@@ -628,7 +638,7 @@ export class DomHud {
     }).join('') + '<details><summary>Company capability tree</summary><h3>Generation technology</h3><small>✓ Fixed tilt → ✓ Premium PV → 🔒 Bifacial → 🔒 Trackers → 🔒 Wind</small><h3>Operations & reliability</h3><small>✓ Manual repairs → Earn Radio Dispatch + Workshop → Cleaning Kit → Cleaning Rig → Scheduled Cleaning → 🔒 Predictive Maintenance</small><h3>Digital & automation</h3><small>✓ Basic monitoring → Radio Dispatch → Remote Monitoring → 🔒 SCADA → 🔒 Robots → 🔒 Command Centre</small><h3>People & organisation</h3><small>✓ Technician → Hire Cleaner / Engineer / Manager → Train skills → 🔒 Regional O&M</small><h3>Grid & flexibility</h3><small>✓ Basic grid → Build Inverter → 🔒 BESS → 🔒 Hybrid systems</small><h3>Development & commercial</h3><small>✓ Site A → Earn Site B → 🔒 Site studies → 🔒 PPAs → 🔒 Multi-project finance</small><small>Locked future nodes are previews for later scenarios.</small></details>';
     if (this.lastCapabilityHtml !== capHtml) { this.lastCapabilityHtml = capHtml; capActions.innerHTML = capHtml; }
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
-    const rosterHtml = snapshot.staff.map((s) => '<div><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '">Train · $800</button></div>').join('');
+    const rosterHtml = snapshot.staff.map((s) => '<div><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '">Train · $800</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="' + s.id + '">Dismiss</button></div>').join('');
     if (this.lastRosterHtml !== rosterHtml) { this.lastRosterHtml = rosterHtml; roster.innerHTML = rosterHtml; }
     const finance = this.root.querySelector('[data-k="finance"]') as HTMLElement;
     finance.textContent = 'Sales ' + money(this.sim.lifetimeRevenue) + ' · Operating expenses ' + money(this.sim.totalExpenses) + ' · Energy ' + Math.round(snapshot.totalEnergyKwh) + ' kWh · Peak ' + Math.round(this.sim.peakExportKw) + ' kW · Staff ' + snapshot.staff.length;
