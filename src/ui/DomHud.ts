@@ -105,6 +105,7 @@ export class DomHud {
   private lastFinanceHtml = '';
   private lastResearchHtml = '';
   private lastAlertHtml = '';
+  private alertLayoutKey = '';
   private researchReturnFocus: HTMLElement | null = null;
   isOverlayOpen(): boolean { return !!this.root.querySelector('.research-modal:not([hidden]), .modal:not([hidden]), .win:not([hidden])'); }
   private lastEventId: string | null = null;
@@ -977,6 +978,19 @@ export class DomHud {
       win.dataset.shown = '1';
     }
 
+    // Keep alerts below the actual objective panel, including taller later lessons.
+    const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
+    const alertLayoutKey = `${window.innerWidth},${window.innerHeight}|${this.lastObjectivesKey}|${dock.classList.contains('collapsed')}`;
+    if (alertLayoutKey !== this.alertLayoutKey) {
+      this.alertLayoutKey = alertLayoutKey;
+      const objectives = this.root.querySelector('.objectives') as HTMLElement;
+      const alerts = this.root.querySelector('[data-k="park-alerts"]') as HTMLElement;
+      const dockTop = dock.getBoundingClientRect().top;
+      const top = Math.min(objectives.getBoundingClientRect().bottom + 8,dockTop - 60);
+      alerts.style.top = `${top}px`;
+      alerts.style.bottom = 'auto';
+      alerts.style.maxHeight = `${Math.max(48,dockTop - top - 8)}px`;
+    }
     this.drawMinimap(snapshot);
   }
 }

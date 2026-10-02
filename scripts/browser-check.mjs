@@ -214,6 +214,7 @@ assert.equal((await saved()).selectedId,faultId);
 await page.keyboard.press('h');
 await page.locator('[data-action="close-inspector"]').click();
 await page.setViewportSize({width:1440,height:900});
+assert.equal(await page.locator('[data-k="park-alerts"]').evaluate(el=>el.getBoundingClientRect().top >= document.querySelector('.objectives').getBoundingClientRect().bottom),true,'Alerts stay below objectives');
 await page.screenshot({path:'browser-evidence/actionable-alerts.png'});
 // Repeat placement keeps the same tool armed, and Escape cancels it.
 await clickGameAction('new');

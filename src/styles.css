@@ -1603,3 +1603,5 @@ button:disabled { opacity:.5; cursor:default; }
 @media (max-width: 800px) { .finance-cards { grid-template-columns: repeat(2,minmax(95px,1fr)); } }
 
 .research-board > header { position: sticky; top: 0; z-index: 2; }
+
+.park-alerts { overflow-y: auto; overscroll-behavior: contain; }
