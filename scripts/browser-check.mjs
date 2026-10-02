@@ -18,13 +18,13 @@ await page.locator('[data-k="management-dock"]').waitFor({timeout:60000});
 await page.locator('[data-speed="0"]').click();
 async function openGameMenu() {
   const menu = page.locator('.utility-menu');
-  if (!(await menu.getAttribute('open'))) await menu.locator('summary').click();
+  if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click();
   return menu;
 }
 async function clickGameAction(action) {
   const menu = await openGameMenu();
   await menu.locator('[data-action="' + action + '"]').click();
-  if (await menu.getAttribute('open')) await menu.locator('summary').click();
+  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click();
 }
 async function saved() {
   await clickGameAction('save');
@@ -76,7 +76,7 @@ async function importFixture(name) {
   const menu = await openGameMenu();
   await menu.locator('[data-action="import-save"]').click();
   await (await chooser).setFiles('browser-fixtures/'+name+'.json');
-  if (await menu.getAttribute('open')) await menu.locator('summary').click();
+  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click();
   await page.waitForTimeout(300);
 }
 await importFixture('storm');
