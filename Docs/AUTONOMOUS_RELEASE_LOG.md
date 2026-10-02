@@ -85,3 +85,17 @@ company reaches three stars after another 350 seconds. The final service-positio
 and sprite-picking refinements run through the same workflow. Browser evidence
 now includes clean valley overview and infrastructure detail captures.
 Tiled authoring integration is a documented recommendation, not a shipped feature.
+
+## Living-valley pass — 2026-10-02
+Added original meadow/forest texture, flower drifts, reeds, ducks, insects, birds,
+office details, coffee furniture and supplies. Introduced evening entrance lighting,
+lit office windows, dirt overlays, construction reveal and completion feedback.
+Placement explains invalid locations; staff are selectable in front of equipment.
+Procurement shows the workshop lock. Warmer UI and quick panel navigation improve
+readability. Indie reference principles and provenance are in INDIE_ART_DIRECTION.md.
+
+Verification at d744dc3: 22 tests and complete offline Chrome flow passed.
+One-star pacing remains 3,264 seconds at 1x. Day/night screenshot comparison caught
+and fixed a transparent dimming layer; measured luminance fell from 146.3 to 108.5.
+Final browser checks also exercise staff picking and the coffee-table inspection.
+Existing Unity files and concurrent implementation branches remain untouched.
