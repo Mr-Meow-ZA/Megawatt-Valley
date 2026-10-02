@@ -30,6 +30,7 @@ export type ObjectiveId =
 
 export type EventId =
   | 'community_meeting'
+  | 'green_growth_grant'
   | 'bargain_batch'
   | 'grid_curtailment'
   | 'temp_worker'
