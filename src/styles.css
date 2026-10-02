@@ -1501,3 +1501,20 @@ button:disabled { opacity:.5; cursor:default; }
   .minimap-panel { bottom: 14px; }
   .toast { bottom: 210px; }
 }
+
+
+/* Build-mode cancel lives with category controls, never over them. */
+.management-dock .cancel-build {
+  position: static;
+  width: auto;
+  margin: 0 0 0 3px;
+  padding: 5px 9px;
+  font-size: 10px;
+  opacity: .42;
+}
+.management-dock .panel.build.build-mode-active .cancel-build {
+  opacity: 1;
+  background: rgba(145, 71, 65, .72);
+  border-color: #b8786e;
+  color: #fff;
+}
