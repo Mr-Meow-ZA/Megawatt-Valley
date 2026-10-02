@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 await mkdir('browser-evidence',{recursive:true});
-const browser = await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const browser = await chromium.launch({...(process.env.BROWSER_CHANNEL === 'chromium' ? {} : {channel:'chrome'}),headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const context = await browser.newContext({viewport:{width:1440,height:900},acceptDownloads:true});
 const page = await context.newPage();
 const errors = [];
@@ -17,21 +17,17 @@ await page.goto(url);
 await page.locator('[data-k="management-dock"]').waitFor({timeout:60000});
 await page.locator('[data-speed="0"]').click();
 async function openGameMenu() {
-  const modal = page.locator('[data-k="modal"]:not([hidden])');
-  if (await modal.count()) {
-    const firstChoice = modal.locator('[data-action="event-choice"]').first();
-    if (await firstChoice.count()) await firstChoice.click();
-  }
-  const win = page.locator('[data-k="win"]:not([hidden])');
-  if (await win.count()) await win.locator('[data-action="dismiss-win"]').click();
+  // Utility checks must not silently choose decisions or click through overlays.
+  await page.locator('[data-k="modal"]').waitFor({state:'hidden'});
+  await page.locator('[data-k="win"]').waitFor({state:'hidden'});
   const menu = page.locator('.utility-menu');
-  if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click({force:true});
+  if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click();
   return menu;
 }
 async function clickGameAction(action) {
   const menu = await openGameMenu();
-  await menu.locator('[data-action="' + action + '"]').click({force:true});
-  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click({force:true});
+  await menu.locator('[data-action="' + action + '"]').click();
+  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click();
 }
 async function saved() {
   await clickGameAction('save');
@@ -42,6 +38,10 @@ assert.ok(Math.abs(before.cash - 50000) < 20);
 assert.equal(before.equipment.length,3);
 assert.equal(await page.locator('#game-root canvas').count(),1);
 assert.equal(await page.locator('img').evaluateAll((images)=>images.every((img)=>img.complete && img.naturalWidth>0)),true);
+await page.locator('[data-action="toggle-dock"]').click();
+assert.equal(await page.locator('.management-dock').evaluate(el=>el.offsetHeight),42);
+await page.locator('[data-action="jump"][data-id="build"]').click();
+assert.equal(await page.locator('[data-action="toggle-dock"]').getAttribute('aria-expanded'),'true');
 await page.screenshot({path:'browser-evidence/opening.png'});
 console.log('OPENING_BASE64:'+(await page.screenshot({type:'jpeg',quality:40})).toString('base64'));
 const cleanStyle=await page.addStyleTag({content:'#ui-root { visibility: hidden !important; }'});
@@ -68,6 +68,8 @@ await page.reload();
 await page.locator('[data-k="management-dock"]').waitFor({timeout:60000});
 const resumed = await saved();
 assert.equal(resumed.equipment.length,4); assert.equal(resumed.cash,before.cash-8000);
+await clickGameAction('load');
+assert.equal((await saved()).speed,0,'Loading lets the player inspect their company before resuming');
 await page.locator('[data-action="jump"][data-id="people"]').click();
 await page.locator('[data-action="hire"][data-id="cleaner"]').click();
 assert.equal((await saved()).staff.length,2);
@@ -82,14 +84,16 @@ await clickGameAction('export-save');
 async function importFixture(name) {
   const chooser = page.waitForEvent('filechooser');
   const menu = await openGameMenu();
-  await menu.locator('[data-action="import-save"]').click({force:true});
-  await (await chooser).setFiles('browser-fixtures/'+name+'.json');
-  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click();
+  await menu.locator('[data-action="import-save"]').click();
+  const input = await chooser;
+  await menu.locator('summary').click();
+  await input.setFiles('browser-fixtures/'+name+'.json');
   await page.waitForTimeout(300);
 }
 await importFixture('storm');
 await page.locator('[data-action="event-choice"][data-id="prepare"]').waitFor();
 await page.locator('[data-action="event-choice"][data-id="prepare"]').click();
+await page.locator('[data-k="modal"]').waitFor({state:'hidden'});
 assert.equal((await saved()).hailPrepared,true);
 await importFixture('one-star');
 await page.locator('[data-k="win"]:not([hidden])').waitFor();
@@ -102,6 +106,8 @@ const project=(x,y,z=0)=>({x:720+((x-y)*50-390)*.62,y:450+((x+y)*25-z-650)*.62})
 const workerScreen=project(worker.tile.x,worker.tile.y,11);
 await page.mouse.click(workerScreen.x,workerScreen.y);
 assert.equal((await saved()).selectedId,worker.id,'Visible technician can be selected in front of the rack');
+await page.locator('[data-action="close-inspector"]').click();
+assert.equal((await saved()).selectedId,null);
 const picnicScreen=project(7.35,5.25,10);
 await page.mouse.click(picnicScreen.x,picnicScreen.y);
 await page.waitForFunction(()=>document.querySelector('[data-k="toast"]')?.textContent.includes('Company headquarters'));
@@ -130,6 +136,7 @@ const night=JSON.parse(await readFile('browser-fixtures/one-star.json','utf8'));
 night.state.hour=22;night.state.speed=0;night.state.weather='clear';
 await writeFile('browser-fixtures/night.json',JSON.stringify(night));
 await importFixture('night');
+await page.locator('[data-action="dismiss-win"]').click();
 assert.equal((await saved()).hour,22);
 const nightStyle=await page.addStyleTag({content:'#ui-root { visibility: hidden !important; }'});
 await page.mouse.move(700,420);await page.mouse.wheel(0,-170);await page.waitForTimeout(300);
@@ -141,11 +148,18 @@ console.log('NIGHT_BASE64:'+(await page.screenshot({type:'jpeg',quality:75})).to
 await page.mouse.wheel(0,170);await page.waitForTimeout(300);
 await nightStyle.evaluate(el=>el.remove());
 await importFixture('one-star');
+await page.locator('[data-action="dismiss-win"]').click();
 await page.setViewportSize({width:1024,height:768});
 await page.locator('[data-action="jump"][data-id="caps"]').click();
 await page.locator('[data-action="capability"][data-id="cleaning_rig"]').scrollIntoViewIfNeeded();
 assert.ok(await page.locator('[data-action="capability"][data-id="cleaning_rig"]').isVisible());
 await page.screenshot({path:'browser-evidence/laptop.png'});
+await page.locator('[data-action="jump"][data-id="finance"]').click();
+await page.locator('.playtest-tools summary').click();
+const cashBeforeCheat=(await saved()).cash;
+await page.locator('[data-action="cheat-cash"][data-amount="25000"]').click();
+assert.equal((await saved()).cash,cashBeforeCheat+25000);
+await page.screenshot({path:'browser-evidence/laptop-finance.png'});
 assert.deepEqual(errors,[]);
 console.log('BROWSER_CHECK_PASSED: offline launch, assets, placement, reload, hiring, restart, laptop capability access');
 const jpeg = await page.screenshot({type:'jpeg',quality:45});

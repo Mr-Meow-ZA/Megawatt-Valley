@@ -5,6 +5,36 @@
 **PR:** #10  
 **Status:** Implementation changes are committed. Unit tests and production build have been passing; the standalone browser regression harness has been iteratively updated for the new tabbed HUD and should be rechecked on the latest workflow run.
 
+## Continuation in the next session — 2 October 2026
+
+The incoming head was `4f24edb`. Its workflow failed after the storm choice:
+the helper queried a stale visible-modal attribute before the next render and
+tried to click the choice again after it disappeared. Utility helpers also used
+forced clicks through overlays, so their success was weak evidence of usability.
+
+Changes in this continuation:
+- Event choices refresh the HUD immediately. Browser utilities wait for dialogs
+  to close and use ordinary clicks; they no longer choose event outcomes implicitly.
+- Fixture import closes the gear menu before loading the file, avoiding overlay races.
+- Imported/restored companies pause, including the speed restored after an event.
+- Import resets completion-overlay state so an older company's banner cannot persist.
+- Bottom dock collapses to its navigation bar; clicking any tab expands it again.
+- Switching away from Build cancels placement. Contextual inspector has a close button.
+- Finance scrolls so expanded cheat controls remain reachable on laptop screens.
+- Supplier and sponsored-shoot rewards now credit their advertised net $2,500
+  without an undisclosed upfront-cash gate; their operational trade-offs remain.
+- Play instructions and packaged README describe the actual current controls.
+
+Verification: 24 unit/simulation tests, TypeScript/Vite build and standalone packaging.
+The browser regression additionally checks collapse/reopen, inspector close,
+storm choice followed by normal save, repeated fixture imports, and laptop cash cheats.
+Desktop/laptop screenshots are retained in `browser-evidence` by Actions.
+Reference strategy pacing remains 1,353 seconds to 1★ and another 347 to 3★.
+
+Next priorities: user playtest of the verified dock, then richer terrain composition
+and meaningful two-/three-star progression. Preserve the quicker cash flow; do not
+stretch playtime by reinstating slow earnings. Scenario 2 remains future scope.
+
 ## Why this pass happened
 
 Rapha playtested the Codex build and reported:

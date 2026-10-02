@@ -9,8 +9,14 @@ your first operational capability. Prepare for the hail warning. One star comple
 Here Comes the Sun; two and three stars remain available.
 
 Drag the world to pan, use the mouse wheel to zoom, and choose speed at top right.
-Select an object for details/actions. The right sidebar scrolls to staff, finance
-and capabilities. Bottom controls provide save/load, restart and sound.
+Select an object for details/actions; × closes its inspector. The bottom dock has
+Build, Team, Upgrades and Finance tabs. The arrow collapses the dock to show more
+of the valley; any tab reopens it. Switching away from Build cancels placement.
+The top-right gear menu provides save/load, restart, portable saves and sound.
+Loaded/imported companies start paused so you can inspect before pressing Play.
+
+For faster experimentation, open **Finance → Playtest cheats** for cash grants
+or a positive event. Ctrl+Shift+M adds $25,000; Ctrl+Shift+G triggers a grant.
 
 Saves are automatic and browser-local. Keep the HTML at the same path, and use
 **Export save** for a durable portable backup. **Import save** restores that JSON

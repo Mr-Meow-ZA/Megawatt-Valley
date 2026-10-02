@@ -2,8 +2,24 @@ import { describe, expect, it, vi } from 'vitest';
 import { GameSimulation } from '../src/simulation/GameSimulation';
 import { validateState } from '../src/persistence/validate';
 import { loadGame, saveGame } from '../src/persistence/save';
+import { EVENTS } from '../src/content/events';
 
 describe('release safety', () => {
+  it('lets a cash-strapped company accept net-positive supplier and sponsorship offers', () => {
+    const sim = new GameSimulation();
+    sim.cash = 0;
+    sim.activeEvent = { ...EVENTS.bargain_batch, paused: true };
+    sim.resolveEventChoice('buy');
+    expect(sim.cash).toBe(2500);
+    expect(sim.activeEvent).toBeNull();
+    sim.cash = 0;
+    sim.activeEvent = { ...EVENTS.influencer_visit, paused: true };
+    sim.resolveEventChoice('host');
+    expect(sim.cash).toBe(2500);
+    expect(sim.curtailmentFactor).toBe(0.7);
+    expect(sim.curtailmentTimer).toBe(8);
+    expect(sim.activeEvent).toBeNull();
+  });
   it('does not complete First Power before the player builds', () => {
     const sim = new GameSimulation(); sim.update(1);
     expect(sim.objectives.find((o) => o.id === 'first_power')?.complete).toBe(false);

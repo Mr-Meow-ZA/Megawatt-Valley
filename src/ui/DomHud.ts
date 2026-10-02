@@ -202,7 +202,7 @@ export class DomHud {
       <aside class="panel selection contextual-panel" data-k="selection" hidden>
         <div class="panel-title-row">
           <h2>Selected</h2>
-          <span class="panel-kicker">Site inspector</span>
+          <button type="button" class="inspector-close" data-action="close-inspector" aria-label="Close inspector">×</button>
         </div>
         <div data-k="selection-body">Click equipment or staff.</div>
         <div class="row" data-k="selection-actions"></div>
@@ -225,13 +225,14 @@ export class DomHud {
       <section class="management-dock" data-k="management-dock">
         <nav class="dock-nav" aria-label="Management">
           <button type="button" class="active" data-action="jump" data-id="build"><span>⚒</span> Build</button>
-          <button type="button" data-action="jump" data-id="people"><span>👷</span> Team</button>
+          <button type="button" data-action="jump" data-id="people"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="6" r="3"/><path d="M1 17v-2a6 6 0 0 1 12 0v2M13 3a3 3 0 0 1 0 6M15 12a5 5 0 0 1 4 5"/></svg> Team</button>
           <button type="button" data-action="jump" data-id="caps"><span>⚙</span> Upgrades</button>
           <button type="button" data-action="jump" data-id="finance"><span>▥</span> Finance</button>
           <div class="dock-hint">Drag to pan · Wheel to zoom · R repair · C clean</div>
+          <button type="button" class="dock-toggle" data-action="toggle-dock" aria-expanded="true" aria-controls="management-content" title="Collapse management panel">⌄</button>
         </nav>
 
-        <div class="dock-content">
+        <div class="dock-content" id="management-content">
           <aside class="panel build dock-panel active" data-panel="build">
             <div class="dock-panel-header">
               <div>
@@ -355,10 +356,26 @@ export class DomHud {
         return;
       }
       const action = t.getAttribute('data-action');
+      if (action === 'close-inspector') this.sim.selectEntity(null);
+      if (action === 'toggle-dock') {
+        const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
+        const collapsed = dock.classList.toggle('collapsed');
+        t.setAttribute('aria-expanded', String(!collapsed));
+        t.setAttribute('title', collapsed ? 'Expand management panel' : 'Collapse management panel');
+        t.textContent = collapsed ? '⌃' : '⌄';
+      }
       if (action === 'jump') {
         const id = t.getAttribute('data-id') as typeof this.managementView | null;
         if (id && ['build','people','caps','finance'].includes(id)) {
           this.managementView = id;
+          const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
+          dock.classList.remove('collapsed');
+          const toggle = dock.querySelector('[data-action="toggle-dock"]') as HTMLElement;
+          toggle.setAttribute('aria-expanded', 'true');
+          toggle.setAttribute('title', 'Collapse management panel');
+          toggle.textContent = '⌄';
+          // A build ghost should not remain armed while managing people or finance.
+          if (id !== 'build') this.sim.setBuildMode(null);
           this.root.querySelectorAll('[data-panel]').forEach((panel) => {
             const active = panel.getAttribute('data-panel') === id;
             (panel as HTMLElement).hidden = !active;
@@ -377,7 +394,14 @@ export class DomHud {
         const data = loadGame();
         if (data) {
           this.sim.load(data);
-          this.sim.message = 'Game loaded.';
+          this.sim.speed = 0;
+          this.sim.speedBeforeEvent = 0;
+          this.lastEventId = null;
+          const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
+          win.hidden = true;
+          delete win.dataset.shown;
+          this.sim.message = 'Game loaded. Press Play when ready.';
+          this.render(this.sim.snapshot());
         } else {
           this.sim.message = 'No save found.';
         }
@@ -408,7 +432,15 @@ export class DomHud {
             const file = input.files?.[0]; if (!file || file.size > 2_000_000) throw Error();
             const parsed = JSON.parse(await file.text());
             if (parsed.version !== 1) throw Error();
-            this.sim.load(parsed.state); this.sim.message = 'Save imported.';
+            this.sim.load(parsed.state);
+            this.sim.speed = 0;
+            this.sim.speedBeforeEvent = 0;
+            this.lastEventId = null;
+            const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
+            win.hidden = true;
+            delete win.dataset.shown;
+            this.sim.message = 'Save imported. Press Play when ready.';
+            this.render(this.sim.snapshot());
           } catch { this.sim.message = 'Invalid save file; your company was not changed.'; }
         };
         input.click();
@@ -424,7 +456,7 @@ export class DomHud {
       }
       if (action === 'event-choice') {
         const id = t.getAttribute('data-id');
-        if (id) this.sim.resolveEventChoice(id);
+        if (id) { this.sim.resolveEventChoice(id); this.render(this.sim.snapshot()); }
       }
       if (action === 'dismiss-win') {
         const win = this.root.querySelector('[data-k="win"]') as HTMLElement;

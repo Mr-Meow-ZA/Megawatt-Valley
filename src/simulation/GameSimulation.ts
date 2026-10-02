@@ -304,7 +304,7 @@ export class GameSimulation {
     if (!this.activeEvent) return;
     const eventId = this.activeEvent.id;
     if (!this.activeEvent.choices.some((choice) => choice.id === choiceId)) return;
-    const costs: Record<string, number> = { community_meeting_sponsor: 2000, bargain_batch_buy: 5000, grid_curtailment_upgrade_talk: 3000, temp_worker_hire: 4000, insurance_upsell_buy: 6000, influencer_visit_host: 1500, hail_warning_prepare: 2500 };
+    const costs: Record<string, number> = { community_meeting_sponsor: 2000, grid_curtailment_upgrade_talk: 3000, temp_worker_hire: 4000, insurance_upsell_buy: 6000, hail_warning_prepare: 2500 };
     if (this.cash < (costs[eventId + '_' + choiceId] ?? 0)) {
       this.message = 'Not enough cash for this choice. Choose the free option.';
       return;
@@ -334,8 +334,7 @@ export class GameSimulation {
         break;
       case 'bargain_batch':
         if (choiceId === 'buy') {
-          this.cash -= 5000;
-          this.cash += 7500;
+          this.cash += 2500;
           const trial = this.equipment.find((e) => e.kind === 'bargain_pv' && e.commissioned);
           if (trial) trial.condition = Math.max(0.25, trial.condition - 0.08);
           this.message = 'Supplier trial earns $2,500, but the oldest bargain array loses 8% condition.';
@@ -381,8 +380,7 @@ export class GameSimulation {
         break;
       case 'influencer_visit':
         if (choiceId === 'host') {
-          this.cash -= 1500;
-          this.cash += 4000;
+          this.cash += 2500;
           this.curtailmentFactor = 0.7; this.curtailmentTimer = 8;
           this.message = 'Sponsorship nets $2,500. Drone safety restricts export 30% for 8 hours.';
         } else {
