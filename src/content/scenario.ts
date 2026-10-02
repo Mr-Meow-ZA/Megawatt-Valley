@@ -1,7 +1,7 @@
 import type { CapabilityId, ObjectiveId, ObjectiveState, PlotState } from '../simulation/types';
 
 export const STARTING_CASH = 50_000;
-export const TARIFF_PER_KWH = 0.12;
+// Gameplay tariff: intentionally above real-world PPA pricing so Level 1 keeps moving.\nexport const TARIFF_PER_KWH = 0.45;
 export const SAVE_VERSION = 1;
 export const SAVE_KEY = 'megawatt-valley-solar-v1';
 
