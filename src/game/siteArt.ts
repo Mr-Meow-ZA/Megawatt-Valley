@@ -15,14 +15,13 @@ export const SITE_ART:Record<string,{key:string;originY:number;scale:number}>={
   fence:{key:'site_fence_5',originY:40/70,scale:1},
   gate:{key:'site_gate',originY:40/70,scale:1},
 };
-/** Original art uses the same 100x50 ground grid. Canvas is drawn at half
- * resolution and sampled nearest-neighbour: one deliberate two-screen-pixel unit.
+/** Original art uses the same 100x50 ground grid, rendered at native resolution.
  * All sprite manifests include a ground anchor instead of magic screen offsets.
  */
 export function generateSiteArt(scene:Phaser.Scene):void {
   function make(key:string,w:number,h:number,draw:(c:C)=>void){
-    const canvas=document.createElement('canvas');canvas.width=w/2;canvas.height=h/2;
-    const c=canvas.getContext('2d')!;c.scale(.5,.5);draw(c);
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const c=canvas.getContext('2d')!;draw(c);
     const full=document.createElement('canvas');full.width=w;full.height=h;
     const f=full.getContext('2d')!;f.imageSmoothingEnabled=false;f.drawImage(canvas,0,0,w,h);
     if(scene.textures.exists(key))scene.textures.remove(key);scene.textures.addCanvas(key,full);
@@ -222,6 +221,13 @@ export function generateSiteArt(scene:Phaser.Scene):void {
 
   applyLowPolyArt(scene);
   for(const [kind,art]of Object.entries(SITE_ART)){
-    SITE_ICONS[kind]=(scene.textures.get(art.key).getSourceImage() as HTMLCanvasElement).toDataURL();
+    // Crop transparent sprite margins for catalogue previews; world ground anchors stay intact.
+    const source=scene.textures.get(art.key).getSourceImage() as HTMLCanvasElement;
+    const pixels=source.getContext('2d')!.getImageData(0,0,source.width,source.height).data;
+    let left=source.width,top=source.height,right=0,bottom=0;
+    for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(pixels[(y*source.width+x)*4+3]>12){left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x);bottom=Math.max(bottom,y);}
+    const preview=document.createElement('canvas');preview.width=right-left+9;preview.height=bottom-top+9;
+    preview.getContext('2d')!.drawImage(source,left,top,right-left+1,bottom-top+1,4,4,right-left+1,bottom-top+1);
+    SITE_ICONS[kind]=preview.toDataURL();
   }
 }

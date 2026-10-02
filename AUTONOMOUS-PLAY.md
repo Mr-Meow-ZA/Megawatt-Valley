@@ -10,10 +10,15 @@ Here Comes the Sun; two and three stars remain available.
 
 Drag the world to pan, use the mouse wheel to zoom, and choose speed at top right.
 Select an object for details/actions; × closes its inspector. The bottom dock has
-Build, Team, Upgrades and Finance tabs. The arrow collapses the dock to show more
+Build, Team, Upgrades and Finance tabs. Build shows illustrated Staff, Events and
+Build Menu panels; all nine existing items appear initially, with Solar,
+Operations, Grid & Utilities and Decorations filters. The Staff panel's Manage
+Team button opens hiring/training; clicking the lead portrait finds that worker.
+The arrow collapses the dock to show more
 of the valley; any tab reopens it. Switching away from Build cancels placement.
 Click a fault/dust alert to select and find the equipment. Click the minimap to
-centre the camera. **H** restores the home view; **F** finds the selected object.
+centre the camera. Its home button, or Enter/Home while the map is focused,
+returns home. **H** restores the home view; **F** finds the selected object.
 **Shift-click** a valid tile to place equipment and keep building the same kind.
 
 **Upgrades → Open tech tree** (or **U**) opens nine working research upgrades.

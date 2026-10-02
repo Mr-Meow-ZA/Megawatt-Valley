@@ -24,6 +24,21 @@ The separate Cursor PR #8 remains independent.
 - Net-positive supplier/sponsorship rewards work even with zero cash.
 - Browser verification uses ordinary visible clicks, without bypassing modal overlays.
 
+### Reference-driven interface pass
+
+The previous menu design was too far from Rapha's reference. Build mode now
+shows separate illustrated Staff, Events and Build Menu panels, blue headers,
+light cards, larger equipment previews and green prices. Objectives and an
+illustrated map sit on the right; alerts/selection occupy the left. Team,
+Upgrades, Finance and dialogs share the same visual language. Native-resolution
+world art and smooth sampling replace forced pixel rendering. See
+[REFERENCE_UI_PASS_2026-10-02.md](REFERENCE_UI_PASS_2026-10-02.md) for the actual
+changes, remaining reference-fidelity gaps and validation.
+
+The interface is substantially closer; the scene still needs stronger terrain,
+lighting, campus assets and character art. This is not a claim that the supplied
+image's production quality has been reached.
+
 ### Visual-first asset pass
 
 Nine solar/building/nature sprites now derive from verified free CC0 Kenney models.

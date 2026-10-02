@@ -38,6 +38,22 @@ assert.ok(Math.abs(before.cash - 50000) < 20);
 assert.equal(before.equipment.length,3);
 assert.equal(await page.locator('#game-root canvas').count(),1);
 assert.equal(await page.locator('img').evaluateAll((images)=>images.every((img)=>img.complete && img.naturalWidth>0)),true);
+assert.equal(await page.locator('[data-build]').count(),9,'The initial build menu shows the full available catalogue');
+assert.equal(await page.locator('.staff-overview').isVisible(),true);
+assert.equal(await page.locator('.events-overview').isVisible(),true);
+assert.equal(await page.locator('[data-build="bargain_pv"] img').evaluate(el=>el.getBoundingClientRect().width >= 100),true,'Equipment previews are large enough to recognise');
+assert.equal(await page.locator('.dock-content').evaluate(el=>{
+  const panels=[...el.children].filter(e=>!e.hidden && getComputedStyle(e).display!=='none').map(e=>e.getBoundingClientRect());
+  return panels.length===3 && panels.every((r,i)=>i===0 || r.left >= panels[i-1].right) && panels.every(r=>r.bottom <= innerHeight);
+}),true,'Staff, Events and Build occupy three separate visible panels');
+assert.equal(await page.locator('.objectives').evaluate(el=>{
+  const o=el.getBoundingClientRect(),m=document.querySelector('.minimap-panel').getBoundingClientRect();
+  return o.left>innerWidth/2 && o.bottom<m.top && m.bottom<document.querySelector('.management-dock').getBoundingClientRect().top;
+}),true,'Objectives and the valley map fit the right sidebar');
+await page.locator('[data-k="minimap"]').click({position:{x:180,y:80}});
+await page.locator('[data-k="minimap"]').focus();
+await page.keyboard.press('Enter');
+await page.locator('[data-action="map-home"]').click();
 await page.locator('[data-action="toggle-dock"]').click();
 assert.equal(await page.locator('.management-dock').evaluate(el=>el.offsetHeight),42);
 await page.locator('[data-action="jump"][data-id="build"]').click();
@@ -150,6 +166,10 @@ await nightStyle.evaluate(el=>el.remove());
 await importFixture('one-star');
 await page.locator('[data-action="dismiss-win"]').click();
 await page.setViewportSize({width:1024,height:768});
+await page.locator('[data-action="jump"][data-id="build"]').click();
+assert.equal(await page.locator('.staff-overview [data-action="manage-team"]').last().evaluate(el=>el.getBoundingClientRect().bottom <= el.closest('.overview-panel').getBoundingClientRect().bottom),true,'Laptop team action fits its panel');
+assert.equal(await page.locator('.events-overview [data-action="manage-upgrades"]').evaluate(el=>el.getBoundingClientRect().bottom <= el.closest('.overview-panel').getBoundingClientRect().bottom),true,'Laptop development action fits its panel');
+await page.screenshot({path:'browser-evidence/laptop-build.png'});
 await page.locator('[data-action="jump"][data-id="caps"]').click();
 await page.locator('[data-action="capability"][data-id="cleaning_rig"]').scrollIntoViewIfNeeded();
 assert.ok(await page.locator('[data-action="capability"][data-id="cleaning_rig"]').isVisible());
@@ -214,7 +234,10 @@ assert.equal((await saved()).selectedId,faultId);
 await page.keyboard.press('h');
 await page.locator('[data-action="close-inspector"]').click();
 await page.setViewportSize({width:1440,height:900});
-assert.equal(await page.locator('[data-k="park-alerts"]').evaluate(el=>el.getBoundingClientRect().top >= document.querySelector('.objectives').getBoundingClientRect().bottom),true,'Alerts stay below objectives');
+assert.equal(await page.locator('[data-k="park-alerts"]').evaluate(el=>{
+  const a=el.getBoundingClientRect(),o=document.querySelector('.objectives').getBoundingClientRect(),s=document.querySelector('[data-k="selection"]');
+  return a.right<o.left && (s.hidden || a.top>=s.getBoundingClientRect().bottom);
+}),true,'Alerts avoid the objective sidebar and selected inspector');
 await page.screenshot({path:'browser-evidence/actionable-alerts.png'});
 // Repeat placement keeps the same tool armed, and Escape cancels it.
 await clickGameAction('new');

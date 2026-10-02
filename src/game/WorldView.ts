@@ -76,9 +76,9 @@ export class WorldView {
   }
   private buildLandscape(){
     const g=this.scene.add.graphics().setDepth(-1000);
-    this.area(g,-.5,-.5,WORLD_W,WORLD_H,0x9abe74);
-    this.area(g,3.5,3.5,14,12,0xb7cc87,.48);
-    this.area(g,21.5,5.5,12,10,0xb7cc87,.4);
+    this.area(g,-.5,-.5,WORLD_W,WORLD_H,0xa7ca75);
+    this.area(g,3.5,3.5,14,12,0xd4dc99,.32);
+    this.area(g,21.5,5.5,12,10,0xd4dc99,.28);
     const ribbon=(margin:number,colour:number)=>{
       const left:P[]=[],right:P[]=[];
       for(let y=-.5;y<=WORLD_H-.5;y+=.25){const half=riverHalfWidth(y)+margin;left.push(isoToScreen(riverCenterX(y)-half,y));right.push(isoToScreen(riverCenterX(y)+half,y));}

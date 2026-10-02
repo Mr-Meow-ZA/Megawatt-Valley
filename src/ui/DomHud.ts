@@ -1,13 +1,17 @@
 import { RESEARCH, RESEARCH_BRANCHES, type ResearchId } from '../content/research';
 import type { Vec2 } from '../simulation/types';
 import { SITE_ICONS } from '../game/siteArt';
-import { ROAD_TILES, riverCenterX } from '../content/valleyLayout';
+import { ROAD_TILES, SCENERY, riverCenterX } from '../content/valleyLayout';
 import { sound } from '../audio/sound';
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
 import { CAPABILITY_INFO, STAR_THRESHOLDS } from '../content/scenario';
 import type { GameSimulation } from '../simulation/GameSimulation';
 import type { CapabilityId, EquipmentKind, GameSnapshot, StaffMember } from '../simulation/types';
 import { clearSave, loadGame, saveGame } from '../persistence/save';
+import { ROLE_LABEL, staffPortrait, weatherLandscape } from './referenceArt';
+
+const BUILD_LABEL: Partial<Record<EquipmentKind, string>> = { bargain_pv: 'Solar Array', premium_pv: 'Premium Array', inverter: 'Inverter Station', workshop: 'Maintenance Garage', road: 'Service Road', fence: 'Site Fence', gate: 'Service Gate', tree: 'Valley Tree', sign: 'Safety Sign' };
+function escapeHtml(value: string): string { return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!)); }
 
 function money(n: number): string {
   return `$${Math.round(n).toLocaleString('en-US')}`;
@@ -114,11 +118,13 @@ export class DomHud {
   private lastCapsKey = '__uninit__';
   private lastCapabilityHtml = '';
   private lastRosterHtml = '';
+  private lastOverviewHtml = '';
+  private lastWeatherScene = '';
   private lastSelectionKey = '__uninit__';
   private lastSelectionActionsKey = '__uninit__';
   private lastMessage: string | null = '__uninit__';
   private toastClearAt = 0;
-  private buildCategory: 'all' | 'generation' | 'grid' | 'support' = 'generation';
+  private buildCategory: 'all' | 'generation' | 'grid' | 'support' | 'decor' = 'all';
   private managementView: 'build' | 'people' | 'caps' | 'finance' = 'build';
   private minimapCtx: CanvasRenderingContext2D | null = null;
   private lastCash = -1;
@@ -135,10 +141,11 @@ export class DomHud {
     private readonly onNewGame: () => void,
     private readonly onCamera: (tile: Vec2 | null) => void = () => {},
   ) {
-    for(const [kind,uri]of Object.entries(SITE_ICONS)) BUILD_ICONS[kind]='<img src="'+uri+'" alt="" width="48" height="38" style="object-fit:contain;image-rendering:pixelated"/>';
+    for(const [kind,uri]of Object.entries(SITE_ICONS)) BUILD_ICONS[kind]='<img src="'+uri+'" alt=""/>';
     const el = document.getElementById('ui-root');
     if (!el) throw new Error('#ui-root missing');
     this.root = el;
+    this.root.classList.add('reference-hud');
     this.root.innerHTML = `
       <header class="hud-top">
         <div class="brand-block">
@@ -202,7 +209,7 @@ export class DomHud {
 
       <aside class="panel objectives">
         <div class="panel-title-row">
-          <h2>Objectives</h2>
+          <h2><span class="objective-star">★</span> Objectives</h2>
           <span class="panel-kicker">Here Comes the Sun</span>
         </div>
         <ul data-k="objectives"></ul>
@@ -220,9 +227,9 @@ export class DomHud {
       <aside class="panel minimap-panel">
         <div class="panel-title-row">
           <h2>Valley Map</h2>
-          <span class="panel-kicker">Site A</span>
+          <button type="button" class="map-home" data-action="map-home" title="Return to home view" aria-label="Return to home view">⌂</button>
         </div>
-        <canvas data-k="minimap" width="220" height="120"></canvas>
+        <canvas data-k="minimap" width="660" height="360"></canvas>
         <div class="minimap-legend">
           <span><i class="swatch grass"></i>Terrain</span>
           <span><i class="swatch solar"></i>Solar</span>
@@ -242,19 +249,33 @@ export class DomHud {
         </nav>
 
         <div class="dock-content" id="management-content">
+          <aside class="overview-panel staff-overview" aria-label="Staff overview">
+            <header class="overview-header"><h2><span>♟</span> Staff</h2><span>Meet your valley crew</span></header>
+            <div class="role-gallery">${(['engineer', 'technician', 'cleaner', 'manager'] as StaffMember['role'][]).map(role => `<button type="button" data-action="manage-team" title="Manage your ${ROLE_LABEL[role].toLowerCase()} team">${staffPortrait(role)}<strong>${ROLE_LABEL[role]}</strong><small data-role-count="${role}">0 hired</small></button>`).join('')}</div>
+            <div class="crew-summary" data-k="crew-summary"></div>
+            <button type="button" class="team-launch" data-action="manage-team">Manage team <span>Hire & train →</span></button>
+          </aside>
+          <aside class="overview-panel events-overview" aria-label="Events overview">
+            <header class="overview-header"><h2><span>⚑</span> Events</h2><span>A living, changing valley</span></header>
+            <div class="weather-scene" data-k="weather-scene"></div>
+            <div class="weather-report"><strong data-k="weather-report-title"></strong><p data-k="weather-report-body"></p></div>
+            <div class="activity-row"><span>◷</span><div><strong>Park update</strong><p data-k="park-update"></p></div></div>
+            <button type="button" class="development-launch" data-action="manage-upgrades"><span>⚙</span><div><strong>Company development</strong><small data-k="development-status"></small></div><b>›</b></button>
+          </aside>
           <aside class="panel build dock-panel active" data-panel="build">
             <div class="dock-panel-header">
               <div>
-                <h2>Build</h2>
-                <span>Expand your site</span>
+                <h2>⚒ Build Menu</h2>
+                <span>Plan a brighter valley</span>
               </div>
-              <div class="build-tabs">
-                <button type="button" data-cat="all">All</button>
-                <button type="button" data-cat="generation" class="active">Generation</button>
-                <button type="button" data-cat="grid">Grid</button>
-                <button type="button" data-cat="support">Support</button>
-                <button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel</button>
-              </div>
+              <button type="button" class="ghost cancel-build" data-action="cancel-build">Cancel placement</button>
+            </div>
+            <div class="build-tabs" aria-label="Build categories">
+              <button type="button" data-cat="all" class="active">All</button>
+              <button type="button" data-cat="generation">Solar</button>
+              <button type="button" data-cat="support">Operations</button>
+              <button type="button" data-cat="grid">Grid & Utilities</button>
+              <button type="button" data-cat="decor">Decorations</button>
             </div>
             <div class="build-grid" data-k="build"></div>
           </aside>
@@ -351,11 +372,12 @@ export class DomHud {
     this.minimapCtx = canvas.getContext('2d');
 
     canvas.tabIndex = 0;
-    canvas.setAttribute('aria-label', 'Valley map. Click a position to centre the camera.');
+    canvas.setAttribute('aria-label', 'Valley map. Click to navigate. Enter returns to the home view.');
     canvas.addEventListener('click', ev => {
       const rect = canvas.getBoundingClientRect();
       this.onCamera({ x: ((ev.clientX - rect.left) * 220 / rect.width - 8) / 4.8, y: ((ev.clientY - rect.top) * 120 / rect.height - 6) / 3.5 });
     }, { signal: this.listeners.signal });
+    canvas.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === 'Home') { ev.preventDefault(); this.onCamera(null); } }, { signal: this.listeners.signal });
 
     const handleUiAction = (ev: Event) => {
       const t = (ev.target as HTMLElement).closest(
@@ -393,11 +415,12 @@ export class DomHud {
         t.setAttribute('title', collapsed ? 'Expand management panel' : 'Collapse management panel');
         t.textContent = collapsed ? '⌃' : '⌄';
       }
-      if (action === 'jump') {
-        const id = t.getAttribute('data-id') as typeof this.managementView | null;
+      if (action === 'jump' || action === 'manage-team' || action === 'manage-upgrades') {
+        const id = (action === 'manage-team' ? 'people' : action === 'manage-upgrades' ? 'caps' : t.getAttribute('data-id')) as typeof this.managementView | null;
         if (id && ['build','people','caps','finance'].includes(id)) {
           this.managementView = id;
           const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
+          dock.classList.toggle('expanded-workspace', id !== 'build');
           dock.classList.remove('collapsed');
           const toggle = dock.querySelector('[data-action="toggle-dock"]') as HTMLElement;
           toggle.setAttribute('aria-expanded', 'true');
@@ -418,7 +441,7 @@ export class DomHud {
       if (action === 'open-research') this.openResearch();
       if (action === 'close-research') this.closeResearch();
       if (action === 'research') { this.sim.startResearch(t.getAttribute('data-id') as ResearchId); this.render(this.sim.snapshot()); }
-      if (action === 'home-camera') this.onCamera(null);
+      if (action === 'home-camera' || action === 'map-home') this.onCamera(null);
       if (action === 'focus-selected') this.focusEntity(this.sim.selectedId);
       if (action === 'locate') this.focusEntity(t.getAttribute('data-id'));
       if (action === 'cancel-build') this.sim.setBuildMode(null);
@@ -600,14 +623,27 @@ export class DomHud {
     const h = 120;
     const sx = (tx: number) => 8 + tx * 4.8;
     const sy = (ty: number) => 6 + ty * 3.5;
+    ctx.setTransform(3,0,0,3,0,0);
     ctx.clearRect(0, 0, w, h);
 
-    ctx.fillStyle='#91a674';ctx.fillRect(0,0,w,h);
+    const ground = ctx.createLinearGradient(0,0,w,h);ground.addColorStop(0,'#b6d78a');ground.addColorStop(1,'#7faa64');
+    ctx.fillStyle=ground;ctx.fillRect(0,0,w,h);
     ctx.beginPath();
     for(let y=0;y<=30;y+=.5){const x=sx(riverCenterX(y));if(y===0)ctx.moveTo(x,sy(y));else ctx.lineTo(x,sy(y));}
-    ctx.strokeStyle='#5d9f9e';ctx.lineWidth=11;ctx.stroke();
-    ctx.fillStyle='#858e80';
-    for(const tile of ROAD_TILES)ctx.fillRect(sx(tile.x)-2.4,sy(tile.y)-1.75,4.8,3.5);
+    ctx.strokeStyle='#e0d6a8';ctx.lineWidth=14;ctx.stroke();
+    ctx.strokeStyle='#61b4d0';ctx.lineWidth=10;ctx.stroke();
+    ctx.strokeStyle='#8ed5df';ctx.lineWidth=3;ctx.stroke();
+    ctx.fillStyle='#e6d9b1';
+    for(const tile of ROAD_TILES)ctx.fillRect(sx(tile.x)-2.8,sy(tile.y)-2.1,5.6,4.2);
+    ctx.fillStyle='#8c9d91';
+    for(const tile of ROAD_TILES)ctx.fillRect(sx(tile.x)-1.7,sy(tile.y)-1.1,3.4,2.2);
+    for(const prop of SCENERY){
+      if(prop.kind!=='tree')continue;
+      const x=sx(prop.x),y=sy(prop.y),size=3*prop.scale;
+      ctx.fillStyle='#426a4333';ctx.beginPath();ctx.ellipse(x+1,y+1,3,1.5,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#426949';ctx.beginPath();ctx.moveTo(x,y-size*1.8);ctx.lineTo(x+size,y);ctx.lineTo(x-size,y);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#689149';ctx.beginPath();ctx.moveTo(x,y-size*1.8);ctx.lineTo(x,y);ctx.lineTo(x-size,y);ctx.closePath();ctx.fill();
+    }
 
     // Plots
     for (const plot of snapshot.plots) {
@@ -615,9 +651,9 @@ export class DomHud {
       const py = sy(plot.origin.y);
       const pw = plot.size.x * 4.8;
       const ph = plot.size.y * 3.5;
-      ctx.fillStyle = plot.unlocked ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.28)';
+      ctx.fillStyle = plot.unlocked ? 'rgba(222,235,146,0.3)' : 'rgba(36,67,47,0.2)';
       ctx.fillRect(px, py, pw, ph);
-      ctx.strokeStyle = plot.unlocked ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)';
+      ctx.strokeStyle = plot.unlocked ? '#e1e4ba' : '#94ae73';
       ctx.strokeRect(px, py, pw, ph);
     }
 
@@ -639,22 +675,23 @@ export class DomHud {
       const px = sx(eq.tile.x);
       const py = sy(eq.tile.y);
       if (eq.kind === 'office') {
-        ctx.fillStyle = '#f4f7fb';
-        ctx.fillRect(px - 1, py - 1, 6, 6);
+        ctx.fillStyle = '#f8f2d8';ctx.fillRect(px - 1, py - 1, 8, 6);
+        ctx.fillStyle = '#397daf';ctx.fillRect(px - 1, py - 2, 8, 3);
       } else if (eq.kind === 'substation') {
         ctx.fillStyle = '#9aa3b0';
         ctx.fillRect(px - 1, py - 1, 5, 5);
       } else if (eq.kind.includes('pv')) {
-        ctx.beginPath();
-        ctx.fillStyle = eq.faulted ? '#ff4455' : '#2f7fe0';
-        ctx.arc(px + 2, py + 2, 2.4, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = eq.faulted ? '#ff5961' : '#306cb4';ctx.fillRect(px,py,8,6);
+        ctx.strokeStyle='#bbd7ed';ctx.lineWidth=.45;ctx.strokeRect(px,py,8,6);
+        for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(px+i*2,py);ctx.lineTo(px+i*2,py+6);ctx.stroke();}
+        ctx.beginPath();ctx.moveTo(px,py+3);ctx.lineTo(px+8,py+3);ctx.stroke();
       } else {
         ctx.beginPath();
         ctx.fillStyle = '#f5c542';
         ctx.arc(px + 2, py + 2, 2, 0, Math.PI * 2);
         ctx.fill();
       }
+      if(eq.id===snapshot.selectedId){ctx.strokeStyle='#fff08a';ctx.lineWidth=1.3;ctx.strokeRect(px-2,py-3,12,11);}
     }
   }
 
@@ -768,7 +805,7 @@ export class DomHud {
       }
     }
 
-    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}|${snapshot.capabilities.includes('radio_dispatch')}`;
+    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}|${snapshot.capabilities.includes('radio_dispatch')}|${BUILD_MENU_ORDER.map(id => snapshot.cash >= EQUIPMENT[id].cost ? 1 : 0).join('')}`;
     if (buildKey !== this.lastBuildKey) {
       this.lastBuildKey = buildKey;
       const build = this.root.querySelector('[data-k="build"]') as HTMLElement;
@@ -777,7 +814,8 @@ export class DomHud {
         if (this.buildCategory === 'all') return true;
         if (this.buildCategory === 'generation') return def.category === 'generation';
         if (this.buildCategory === 'grid') return def.category === 'electrical';
-        if (this.buildCategory === 'support') return def.category === 'building';
+        if (this.buildCategory === 'support') return id === 'workshop';
+        if (this.buildCategory === 'decor') return def.category === 'building' && id !== 'workshop';
         return true;
       });
       build.innerHTML = items
@@ -785,11 +823,12 @@ export class DomHud {
           const def = EQUIPMENT[id];
           const active = snapshot.buildMode === id ? 'active' : '';
           const locked=id==='workshop'&&!snapshot.capabilities.includes('radio_dispatch');
-          const tip = locked?'Unlock with your first repair':`${def.name} — ${def.description}`;
-          return `<button type="button" class="build-card ${active}" ${locked ? "disabled" : ""} data-build="${id}" title="${tip.replace(/"/g, '&quot;')}">
+          const unaffordable = snapshot.cash < def.cost;
+          const tip = locked?'Unlock with your first repair':`${def.name} — ${def.description}${unaffordable ? ' · Not enough cash' : ''}`;
+          return `<button type="button" class="build-card ${active} ${locked ? 'locked' : ''}" ${locked || unaffordable ? "disabled" : ""} data-build="${id}" title="${escapeHtml(tip)}" aria-pressed="${snapshot.buildMode === id}">
             <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
-            <strong>${def.name}</strong>
-            <span class="price">${money(def.cost)}</span><small>${def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% reliability" : "Site improvement"}</small><small>${locked ? "Locked · Complete First Failure" : def.description}</small>
+            <strong>${BUILD_LABEL[id] ?? def.name}</strong>
+            <span class="price">${money(def.cost)}</span><small>${locked ? 'First repair to unlock' : unaffordable ? 'More cash needed' : def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% reliability" : id === 'workshop' ? 'Faster repairs' : 'Landscape & layout'}</small>
           </button>`;
         })
         .join('');
@@ -836,8 +875,33 @@ export class DomHud {
     }).join('');
     if (this.lastCapabilityHtml !== capHtml) { this.lastCapabilityHtml = capHtml; capActions.innerHTML = capHtml; }
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
-    const rosterHtml = snapshot.staff.map((s) => '<div><img class="staff-portrait" src="' + SITE_ICONS['staff_' + s.role] + '" alt=""/><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '" ' + ((s.skill ?? 1) >= 5 || snapshot.cash < 800 ? 'disabled' : '') + '>Train · $800</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="' + s.id + '" ' + (snapshot.staff.length <= 1 ? 'disabled title="Keep at least one staff member"' : '') + '>Dismiss</button></div>').join('');
+    const rosterHtml = snapshot.staff.map(s => `<div class="staff-card"><div class="staff-art">${staffPortrait(s.role)}</div><div class="staff-details"><strong>${escapeHtml(s.name)}</strong><span class="role-label">${ROLE_LABEL[s.role]} · Skill ${(s.skill ?? 1).toFixed(1)}</span><div class="skill-track"><i style="width:${(s.skill ?? 1) / 5 * 100}%"></i></div><small>${escapeHtml(s.trait ?? 'Panel Whisperer')} · ${s.task.type === 'idle' ? 'Ready for a job' : s.task.type === 'travel' ? 'On the way' : s.task.type === 'repair' ? 'Repairing equipment' : 'Cleaning panels'}</small><div class="staff-actions"><button type="button" data-action="train" data-id="${s.id}" ${(s.skill ?? 1) >= 5 || snapshot.cash < 800 ? 'disabled' : ''}>Train · $800</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="${s.id}" ${snapshot.staff.length <= 1 ? 'disabled title="Keep at least one staff member"' : ''}>Dismiss</button></div></div></div>`).join('');
     if (this.lastRosterHtml !== rosterHtml) { this.lastRosterHtml = rosterHtml; roster.innerHTML = rosterHtml; }
+    const overviewKey = snapshot.selectedId + '|' + snapshot.staff.map(s => `${s.id}:${s.name}:${s.role}:${s.skill}:${s.task.type}`).join('|');
+    if (overviewKey !== this.lastOverviewHtml) {
+      this.lastOverviewHtml = overviewKey;
+      for (const role of Object.keys(ROLE_LABEL) as StaffMember['role'][]) {
+        const count = snapshot.staff.filter(s => s.role === role).length;
+        const label = this.root.querySelector(`[data-role-count="${role}"]`)!;
+        label.textContent = `${count} hired`;
+        label.parentElement!.classList.toggle('role-hired', count > 0);
+      }
+      const lead = snapshot.staff.find(s => s.id === snapshot.selectedId) ?? snapshot.staff[0];
+      (this.root.querySelector('[data-k="crew-summary"]') as HTMLElement).innerHTML = lead
+        ? `<button type="button" class="lead-portrait" data-action="locate" data-id="${lead.id}" title="Find ${escapeHtml(lead.name)}">${staffPortrait(lead.role)}</button><div><strong>${escapeHtml(lead.name)}</strong><small>${ROLE_LABEL[lead.role]} · Skill ${(lead.skill ?? 1).toFixed(1)}</small><div class="skill-track"><i style="width:${(lead.skill ?? 1) / 5 * 100}%"></i></div><span>${lead.task.type === 'idle' ? 'Ready for the next job' : lead.task.type === 'travel' ? 'Heading to a job' : lead.task.type === 'repair' ? 'Repairing equipment' : 'Cleaning solar panels'}</span></div>`
+        : '<div><strong>Your crew starts here</strong><small>Hire a specialist to help your park grow.</small></div>';
+    }
+    const night = snapshot.irradiance < 0.05;
+    const sceneKey = `${snapshot.weather}|${night}`;
+    if (sceneKey !== this.lastWeatherScene) {
+      this.lastWeatherScene = sceneKey;
+      this.root.querySelector('[data-k="weather-scene"]')!.innerHTML = weatherLandscape(snapshot.weather, night);
+    }
+    const stormWatch = this.sim.triggeredEvents.includes('hail_warning') && !this.sim.hailSurvived;
+    setText('weather-report-title', stormWatch ? 'Storm watch' : night ? 'A quiet valley night' : snapshot.weather === 'clear' ? 'Sunny skies' : weatherLabel(snapshot.weather));
+    setText('weather-report-body', stormWatch ? snapshot.hailPrepared ? 'Your team is prepared for the approaching hail.' : 'Hail is on the way. Check your equipment and repairs.' : night ? 'Solar production rests until sunrise. Your team keeps working.' : `${snapshot.exportedKw.toFixed(1)} kW flowing to the valley grid · ${Math.round(snapshot.irradiance * 100)}% sunlight.`);
+    setText('park-update', snapshot.message ?? 'All quiet. Keep building your brighter valley.');
+    setText('development-status', snapshot.activeResearch ? `Researching ${RESEARCH[snapshot.activeResearch.id].name}` : `${snapshot.researched.length} / 9 technologies researched`);
     const finance = this.root.querySelector('[data-k="finance"]') as HTMLElement;
     const panels = snapshot.equipment.filter(e => e.kind.includes('pv') && e.commissioned);
     const availability = panels.length ? Math.round(panels.filter(e => !e.faulted).length / panels.length * 100) : 100;
@@ -978,15 +1042,15 @@ export class DomHud {
       win.dataset.shown = '1';
     }
 
-    // Keep alerts below the actual objective panel, including taller later lessons.
+    // Alerts and inspection live opposite the objective/map sidebar.
     const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
-    const alertLayoutKey = `${window.innerWidth},${window.innerHeight}|${this.lastObjectivesKey}|${dock.classList.contains('collapsed')}`;
+    const alertLayoutKey = `${window.innerWidth},${window.innerHeight}|${this.lastSelectionKey}|${this.lastSelectionActionsKey}|${dock.classList.contains('collapsed')}`;
     if (alertLayoutKey !== this.alertLayoutKey) {
       this.alertLayoutKey = alertLayoutKey;
-      const objectives = this.root.querySelector('.objectives') as HTMLElement;
       const alerts = this.root.querySelector('[data-k="park-alerts"]') as HTMLElement;
+      const inspector = this.root.querySelector('[data-k="selection"]') as HTMLElement;
       const dockTop = dock.getBoundingClientRect().top;
-      const top = Math.min(objectives.getBoundingClientRect().bottom + 8,dockTop - 60);
+      const top = inspector.hidden ? 76 : Math.min(inspector.getBoundingClientRect().bottom + 8, dockTop - 60);
       alerts.style.top = `${top}px`;
       alerts.style.bottom = 'auto';
       alerts.style.maxHeight = `${Math.max(48,dockTop - top - 8)}px`;

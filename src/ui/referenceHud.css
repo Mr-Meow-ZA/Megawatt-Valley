@@ -1,0 +1,253 @@
+/* The reference HUD: three illustrated workbench panels, light cards, blue headers.
+   Scoped to this version so older world overlays keep their gameplay behaviour. */
+.reference-hud {
+  --workbench-height: 330px;
+  --ink: #173954;
+  --blue: #245b87;
+  --paper: #f6fbfd;
+  --line: #c9e0e9;
+  --green: #35a96a;
+  font-family: "Segoe UI", sans-serif;
+}
+.reference-hud button { font-family: inherit; }
+.reference-hud button:focus-visible { outline: 3px solid #ffd45e; outline-offset: -3px; }
+.reference-hud .hud-top {
+  top: 12px; left: 12px; right: 62px; height: 54px; min-height: 54px;
+  padding: 5px 12px; gap: 8px; border-radius: 12px;
+  background: linear-gradient(120deg,#173d59f5,#142c40f5);
+  border: 1px solid #c3dbea; box-shadow: 0 3px 9px #18395230;
+}
+.reference-hud .brand-block { min-width: 180px; padding: 0 12px 0 0; }
+.reference-hud .brand { font-size: 16px; }
+.reference-hud .brand-sub { font-size: 9px; color: #a8d2e7; letter-spacing: .07em; }
+.reference-hud .chip { background: transparent; border: 0; border-left: 1px solid #ffffff1f; border-radius: 0; padding: 2px 12px; min-width: 106px; }
+.reference-hud .chip.power { min-width: 163px; }
+.reference-hud .chip.time { min-width: 175px; }
+.reference-hud .chip-label { font-size: 9px; color: #bedae7; }
+.reference-hud .chip strong { font-size: 14px; color: white; }
+.reference-hud .chip em { font-size: 10px; color: #93dba7; }
+.reference-hud .chip-icon { width: 27px; height: 27px; border-radius: 50%; background-color: #42725f; }
+.reference-hud .cash .chip-icon { background: #3fa562; }
+.reference-hud .power .chip-icon { background: #6e6534; }
+.reference-hud .speed-group { margin-left: auto; gap: 4px; }
+.reference-hud .speed-group button { width: 34px; min-width: 34px; padding: 5px 3px; border: 1px solid #5d8198; border-radius: 6px; background: #22445b; }
+.reference-hud .speed-group button.active { background: #4a9c63; border-color: #b9e1b0; color: white; }
+.reference-hud .stars { font-size: 20px; color: #ffda58; min-width: 68px; }
+.reference-hud .panel:not(.dock-panel) { background: #183348ed; border: 1px solid #c7e1ec; border-radius: 12px; box-shadow: 0 5px 14px #19384c25; }
+.reference-hud .panel-title-row h2 { font-size: 15px; letter-spacing: 0; text-transform: none; color: #fff; }
+.reference-hud .panel-kicker { font-size: 10px; color: #bfd8e5; }
+.reference-hud .objective-star { color: #ffd440; font-size: 22px; vertical-align: -1px; margin-right: 5px; }
+.reference-hud .objectives {
+  top: 78px; left: auto; right: 12px; width: 250px; padding: 10px;
+  max-height: min(260px,calc(100vh - var(--workbench-height) - 266px)); overflow-y: auto;
+}
+.reference-hud .objectives .panel-title-row { flex-wrap: wrap; gap: 2px; margin-bottom: 8px; }
+.reference-hud .objectives .panel-kicker { display: none; }
+.reference-hud .objectives ul { margin: 0; padding: 0; display: grid; gap: 6px; }
+.reference-hud .objectives li { background: #ffffff09; padding: 7px 6px; border: 0; border-radius: 6px; }
+.reference-hud .objectives li strong { font-size: 12px; color: #fff; }
+.reference-hud .objectives li div > span { color: #c2d5df; font-size: 11px; line-height: 1.4; }
+.reference-hud .objectives .check { border-radius: 5px; width: 19px; height: 19px; min-width: 19px; background: #ffffff0d; border: 1px solid #8caabc; color: #e7f3fc; }
+.reference-hud .objectives .done .check { background: #3caa58; border-color: #8cd58e; color: white; }
+.reference-hud .obj-progress { padding: 5px 7px !important; color: #d3e7ec; font-size: 10px; }
+.reference-hud .obj-progress .bar { height: 5px; background: #395468; }
+.reference-hud .obj-progress .bar i { background: #58c17c; }
+.reference-hud .minimap-panel { display: block; left: auto; right: 12px; bottom: calc(var(--workbench-height) + 26px); width: 250px; padding: 8px; height: 178px; }
+.reference-hud .minimap-panel .panel-title-row { margin-bottom: 6px; }
+.reference-hud .minimap-panel .panel-title-row h2 { font-size: 12px; }
+.reference-hud .map-home { width: 24px; height: 22px; padding: 0; background: #315d75; color: white; border: 1px solid #8ab2c8; border-radius: 5px; cursor: pointer; font-size: 19px; }
+.reference-hud .minimap-panel canvas { width: 100%; height: 120px; border-radius: 7px; border: 2px solid #9ccd77; image-rendering: auto; }
+.reference-hud .minimap-legend { font-size: 8px; padding-top: 3px; }
+.reference-hud .contextual-panel { top: 78px; left: 12px; right: auto; bottom: auto; width: 278px; max-height: calc(100vh - var(--workbench-height) - 108px); overflow-y: auto; padding: 12px; }
+.reference-hud .park-alerts { left: 12px; right: auto; width: 278px; gap: 6px; }
+.reference-hud .park-alerts button { border-radius: 9px; background: #19384cee; border: 1px solid #bad0dc; padding: 9px 11px; }
+.reference-hud .management-dock {
+  position: absolute; left: 12px; right: 12px; bottom: 12px;
+  width: auto; height: var(--workbench-height); padding: 0; border: 0; border-radius: 0;
+  background: transparent; box-shadow: none; overflow: visible; display: flex; flex-direction: column;
+}
+.reference-hud .dock-nav { flex: 0 0 34px; min-height: 34px; max-height: 34px; margin-bottom: 7px; padding: 2px 5px; align-items: center; border-radius: 9px; background: #17394bea; border: 1px solid #b2ced9; }
+.reference-hud .dock-nav button { min-width: 94px; font-size: 12px; padding: 3px 10px; color: #d2e6ef; height: 27px; }
+.reference-hud .dock-nav button.active { background: #4a9c69; border-color: #99d8a5; color: #fff; }
+.reference-hud .dock-nav button:hover:not(.active) { background: #2b5b73; border-color: #6c99af; }
+.reference-hud .dock-hint { color: #bbd5df; font-size: 10px; }
+.reference-hud .dock-nav .dock-toggle { min-width: 30px; margin-left: auto; }
+.reference-hud .dock-content { display: grid; grid-template-columns: minmax(240px,.95fr) minmax(220px,.8fr) minmax(440px,2fr); gap: 8px; background: transparent; overflow: visible; min-height: 0; }
+.reference-hud .overview-panel, .reference-hud .management-dock .dock-panel {
+  position: relative; inset: auto; width: 100%; height: 100%; min-width: 0; min-height: 0;
+  border: 2px solid #e1f3fc; border-radius: 12px; background: var(--paper);
+  color: var(--ink); box-shadow: 0 5px 12px #1d42532b; overflow: hidden; padding: 0;
+  pointer-events: auto;
+}
+.reference-hud .overview-header, .reference-hud .dock-panel-header {
+  height: 42px; min-height: 42px; margin: 0; padding: 6px 11px;
+  background: linear-gradient(110deg,#286697,#20446b); color: #fff;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.reference-hud .overview-header h2, .reference-hud .dock-panel-header h2 { margin: 0; font-size: 19px; color: #fff; letter-spacing: -.03em; text-transform: none; white-space: nowrap; }
+.reference-hud .overview-header h2 > span { color: #ffda56; margin-right: 4px; }
+.reference-hud .overview-header > span, .reference-hud .dock-panel-header > div:first-child > span { color: #d0e6f4; font-size: 10px; letter-spacing: 0; }
+.reference-hud .dock-panel-header > div:first-child { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 10px; white-space: normal; }
+.reference-hud .role-gallery { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); padding: 7px 6px 5px; gap: 4px; background: linear-gradient(#eff9fd,#fff 76%,#d6ebba 77%,#bad38f); }
+.reference-hud .role-gallery button { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 0 3px; background: transparent; border: 0; border-radius: 7px; color: var(--ink); min-width: 0; cursor: pointer; }
+.reference-hud .role-gallery button:hover { background: #cfe5f0; }
+.reference-hud .role-gallery svg { width: 100%; height: 96px; display: block; }
+.reference-hud .role-gallery strong { font-size: 10px; margin-top: 3px; line-height: 1.2; }
+.reference-hud .role-gallery small { font-size: 9px; color: #5e756d; }
+.reference-hud .role-hired small { color: #21763f; font-weight: 700; }
+.reference-hud .crew-summary { margin: 7px 8px; padding: 5px 7px; display: flex; gap: 8px; align-items: center; border: 1px solid #d2e4ec; border-radius: 8px; background: #eaf4f8; }
+.reference-hud .lead-portrait { width: 48px; height: 53px; padding: 0; border: 0; border-radius: 6px; background: #dcecf0; flex-shrink: 0; cursor: pointer; }
+.reference-hud .lead-portrait svg { width: 100%; height: 100%; }
+.reference-hud .crew-summary > div { flex: 1; min-width: 0; }
+.reference-hud .crew-summary strong { display: block; font-size: 12px; }
+.reference-hud .crew-summary small, .reference-hud .crew-summary span { display: block; font-size: 10px; color: #4f6b7d; }
+.reference-hud .skill-track { height: 6px; background: #bed4df; border-radius: 5px; margin: 5px 0; overflow: hidden; }
+.reference-hud .skill-track i { display: block; height: 100%; border-radius: inherit; background: #36ac6a; }
+.reference-hud .team-launch { display: flex; justify-content: space-between; align-items: center; width: calc(100% - 16px); margin: 0 8px; padding: 6px 9px; background: #d9eaf2; border: 1px solid #c6dce8; border-radius: 7px; font-size: 11px; font-weight: 700; color: #214866; cursor: pointer; }
+.reference-hud .team-launch span { font-size: 10px; color: #557388; }
+.reference-hud .weather-scene { margin: 7px 7px 0; border: 1px solid #c3dce7; border-radius: 7px 7px 0 0; overflow: hidden; height: 80px; }
+.reference-hud .weather-scene svg { width: 100%; height: 100%; display: block; object-fit: cover; }
+.reference-hud .weather-report { padding: 7px 9px; margin: 0 7px 6px; background: #1f4059; color: #fff; border-radius: 0 0 7px 7px; }
+.reference-hud .weather-report strong { font-size: 13px; }
+.reference-hud .weather-report p { font-size: 10px; margin: 3px 0 0; line-height: 1.35; color: #dae9f2; }
+.reference-hud .activity-row { margin: 6px 7px; display: flex; gap: 7px; align-items: center; }
+.reference-hud .activity-row > span, .reference-hud .development-launch > span { background: #e8bf56; border-radius: 7px; width: 29px; height: 29px; display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+.reference-hud .activity-row strong, .reference-hud .development-launch strong { display: block; font-size: 11px; }
+.reference-hud .activity-row p { margin: 2px 0 0; font-size: 10px; color: #57758b; line-height: 1.3; max-height: 28px; overflow-y: auto; }
+.reference-hud .development-launch { display: flex; align-items: center; gap: 7px; text-align: left; width: calc(100% - 14px); margin: 6px 7px; padding: 5px; color: var(--ink); background: #edf5f9; border: 1px solid #d4e6ee; border-radius: 7px; cursor: pointer; }
+.reference-hud .development-launch > span { background: #91bf9e; }
+.reference-hud .development-launch small { display: block; font-size: 9px; color: #5a7488; }
+.reference-hud .development-launch b { margin-left: auto; font-size: 22px; }
+.reference-hud .management-dock .build-tabs { display: flex; height: 30px; margin: 0; gap: 2px; padding: 3px 5px 0; }
+.reference-hud .management-dock .build-tabs button { flex: 1; padding: 4px 3px; min-width: 0; border-radius: 7px 7px 0 0; background: #e4eff5; border: 1px solid #d3e4ed; color: #224a68; font-size: 10px; white-space: nowrap; font-weight: 600; }
+.reference-hud .management-dock .build-tabs button.active { background: #71d88b; border-color: #53c472; color: #154b2e; }
+.reference-hud .management-dock .build-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); grid-auto-rows: 98px; gap: 5px; padding: 6px; width: 100%; height: calc(100% - 72px); overflow: auto; align-content: start; scrollbar-width: thin; }
+.reference-hud .management-dock .build-card { position: relative; width: 100%; height: 98px; display: flex; flex-direction: column; gap: 0; align-items: center; justify-content: flex-end; padding: 3px; background: #fff; border: 1px solid #d8e7ee; border-radius: 8px; box-shadow: none; text-align: center; color: var(--ink); cursor: pointer; overflow: hidden; }
+.reference-hud .management-dock .build-card:hover { background: #eef9ee; border-color: #59be7a; transform: none; }
+.reference-hud .management-dock .build-card.active { background: #e7f8eb; border: 2px solid #43ad6e; box-shadow: inset 0 0 0 1px #a8dfb7; }
+.reference-hud .management-dock .build-card:disabled { opacity: 1; cursor: not-allowed; background: #eef2f4; }
+.reference-hud .management-dock .build-card:disabled .build-icon { opacity: .57; }
+.reference-hud .management-dock .build-card.locked::before { content: 'LOCKED'; position: absolute; top: 4px; right: 4px; z-index: 1; font-size: 8px; padding: 2px 4px; background: #36556ee6; color: #fff; border-radius: 4px; }
+.reference-hud .management-dock .build-card .build-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 57px; min-height: 57px; margin: 0; border-radius: 4px; background: radial-gradient(ellipse at 50% 72%,#dcecb8 0,#edf6e5 38%,#f7fbfd00 64%); }
+.reference-hud .management-dock .build-card .build-icon img, .reference-hud .management-dock .build-card .build-icon svg { width: 100%; max-width: 126px; max-height: none; height: 61px; object-fit: contain; image-rendering: auto; }
+.reference-hud .management-dock .build-card strong { font-size: 10px; width: 100%; margin: 0; line-height: 1.3; color: #1e4260; }
+.reference-hud .management-dock .build-card .price { font-size: 12px; font-weight: 800; color: #23874d; line-height: 1.3; margin: 0; align-self: center; }
+.reference-hud .management-dock .build-card small { display: block; margin: 1px 0 0; font-size: 8px; line-height: 1.2; color: #647c87; }
+.reference-hud .management-dock .cancel-build { width: auto; min-width: 106px; height: 27px; margin: 0; padding: 4px 8px; border: 1px solid #85b5cd; background: #386481; color: white; border-radius: 6px; font-size: 10px; }
+.reference-hud .management-dock .panel.build:not(.build-mode-active) .cancel-build { visibility: visible; opacity: .5; }
+.reference-hud .management-dock.expanded-workspace .dock-content { grid-template-columns: minmax(240px,.95fr) minmax(500px,2.8fr); }
+.reference-hud .expanded-workspace .events-overview { display: none; }
+.reference-hud .management-dock .people, .reference-hud .management-dock .caps, .reference-hud .management-dock .finance { overflow-y: auto; }
+.reference-hud .hire-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.reference-hud .hire-actions button { padding: 4px 6px; background: #e4f5e8; color: #245c3d; border: 1px solid #a9d5b2; font-size: 10px; border-radius: 5px; }
+.reference-hud .people .dock-panel-header { height: auto; min-height: 48px; }
+.reference-hud .roster-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); padding: 8px; gap: 7px; margin: 0; }
+.reference-hud .roster-grid .staff-card { display: flex; align-items: center; gap: 8px; padding: 8px; background: #eaf4f8; border: 1px solid #d1e4ec; border-radius: 9px; color: var(--ink); }
+.reference-hud .staff-art { width: 80px; height: 94px; flex-shrink: 0; background: linear-gradient(#d9eff9,#e6f0ca); border-radius: 8px; }
+.reference-hud .staff-art svg { width: 100%; height: 100%; }
+.reference-hud .staff-details { flex: 1; }
+.reference-hud .staff-details strong { color: #244760; font-size: 13px; }
+.reference-hud .staff-details .role-label, .reference-hud .staff-details small { display: block; color: #5c798a; font-size: 10px; }
+.reference-hud .staff-actions { display: flex; gap: 5px; margin-top: 6px; }
+.reference-hud .staff-actions button { background: #d7eaf5; color: #214b69; border: 1px solid #a9cedf; border-radius: 5px; padding: 4px 8px; font-size: 10px; }
+.reference-hud .staff-actions button:disabled { opacity: .45; }
+.reference-hud .staff-actions button { width: auto; min-width: 88px; white-space: nowrap; }
+.reference-hud .management-dock .caps ul { color: #23475f; margin: 7px 12px; padding: 0; }
+.reference-hud .management-dock .caps li { color: #567082; background: #edf5f9; border: 1px solid #d1e5ed; padding: 6px 8px; }
+.reference-hud .management-dock .caps li strong { color: #234b68; }
+.reference-hud .management-dock .caps ul { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 6px; overflow: visible; list-style: none; }
+.reference-hud .management-dock .caps li { display: block; min-width: 0; }
+.reference-hud .management-dock .caps li strong { display: block; margin-bottom: 4px; font-size: 12px; }
+.reference-hud .management-dock .caps li span { display: block; color: #587286; font-size: 11px; line-height: 1.35; }
+.reference-hud .caps .research-launch { background: #338a63; color: white; border: 1px solid #2d7556; margin: 5px 12px; padding: 7px 12px; border-radius: 7px; }
+.reference-hud .caps > small { color: #5a7484; }
+.reference-hud .capability-grid { padding: 5px 12px; color: #567083; }
+.reference-hud .capability-grid button { background: #e0eef6; color: #23516e; border: 1px solid #afcfe0; }
+.reference-hud .capability-grid small { color: #526f82; }
+.reference-hud .finance-summary { padding: 8px 12px; }
+.reference-hud .finance-cards > div { background: #e9f3f8; border: 1px solid #d2e5ee; }
+.reference-hud .finance-cards span { color: #607c8f; }
+.reference-hud .finance-cards strong { color: #214b64; }
+.reference-hud .star-checklist { color: #617888; }
+.reference-hud .star-checklist b { color: #254d6a; }
+.reference-hud .star-checklist .done { color: #288d52; }
+.reference-hud .management-dock .finance > small { color: #637c8a; margin: 0 12px; }
+.reference-hud .playtest-tools { color: #456a82; margin: 8px 12px; }
+.reference-hud .playtest-tools button { color: #224b68; background: #e1eff6; border: 1px solid #b1d1e0; }
+.reference-hud .management-dock.collapsed { height: 42px; background: transparent; }
+.reference-hud .management-dock.collapsed .dock-content { display: none; }
+.reference-hud .management-dock.collapsed .dock-nav { flex-basis: 42px; min-height: 42px; max-height: 42px; margin: 0; }
+.reference-hud .toast { bottom: calc(var(--workbench-height) + 27px); border: 1px solid #c2dbe4; background: #183b50ef; color: white; }
+.reference-hud .build-banner { top: 78px; left: 310px; right: 278px; max-width: 500px; width: auto; transform: none; padding: 8px 12px; background: #18415aeb; border: 1px solid #a6d0df; }
+.reference-hud .build-banner strong { font-size: 12px; }
+.reference-hud .build-banner span { font-size: 10px; }
+.reference-hud .utility-menu { top: 13px; right: 12px; }
+.reference-hud .utility-menu > summary { background: #173b55; border: 1px solid #bad7e4; border-radius: 10px; height: 42px; }
+.reference-hud .utility-popover { background: #f5fbfd; color: var(--ink); border: 1px solid #b4d7e6; }
+.reference-hud .utility-popover strong { color: var(--ink); }
+.reference-hud .utility-popover button { background: #e4f1f7; color: var(--ink); border: 1px solid #c5dfeb; }
+.reference-hud .modal-card { background: #f4fbfe; border: 2px solid #d9edf9; color: #214760; }
+.reference-hud .modal-card h2 { color: #245577; }
+.reference-hud .modal-card p { color: #54748c; }
+.reference-hud .modal-actions button { background: #e5f3f8; color: #244c68; border: 1px solid #b6d6e6; }
+.reference-hud .modal-actions button strong { color: #224a69; }
+.reference-hud .modal-actions button span { color: #547185; }
+.reference-hud .research-board > header { background: linear-gradient(110deg,#286697,#20446b); }
+@media (max-height: 800px) {
+  .reference-hud { --workbench-height: 294px; }
+  .reference-hud .role-gallery { padding: 4px 5px; }
+  .reference-hud .role-gallery svg { height: 68px; }
+  .reference-hud .role-gallery strong { font-size: 9px; }
+  .reference-hud .role-gallery small { font-size: 8px; line-height: 11px; }
+  .reference-hud .crew-summary { margin: 6px 7px; padding: 4px 6px; }
+  .reference-hud .lead-portrait { width: 38px; height: 44px; }
+  .reference-hud .team-launch { padding: 5px 8px; }
+  .reference-hud .weather-scene { height: 52px; }
+  .reference-hud .weather-report { padding: 4px 8px; margin-bottom: 4px; }
+  .reference-hud .weather-report p { font-size: 9px; }
+  .reference-hud .activity-row { margin: 4px 7px; }
+  .reference-hud .activity-row p { font-size: 9px; max-height: 24px; }
+  .reference-hud .development-launch { padding: 3px 5px; margin: 4px 7px; }
+  .reference-hud .minimap-panel { height: 152px; }
+  .reference-hud .minimap-panel canvas { height: 94px; }
+  .reference-hud .management-dock .build-grid { grid-auto-rows: 80px; }
+  .reference-hud .management-dock .build-card { height: 80px; }
+  .reference-hud .management-dock .build-card .build-icon { height: 42px; min-height: 42px; }
+  .reference-hud .management-dock .build-card .build-icon img { height: 45px; }
+}
+@media (max-width: 1220px) {
+  .reference-hud .brand-block { min-width: 150px; }
+  .reference-hud .brand { font-size: 14px; }
+  .reference-hud .chip { padding: 2px 8px; }
+  .reference-hud .chip.weather { display: flex; min-width: 100px; }
+  .reference-hud .chip.time { min-width: 150px; }
+  .reference-hud .overview-header > span { display: none; }
+  .reference-hud .dock-panel-header > div:first-child > span { display: none; }
+  .reference-hud .dock-hint { font-size: 9px; }
+  .reference-hud .management-dock .build-card strong { font-size: 9px; }
+}
+@media (max-width: 1000px) {
+  .reference-hud .brand-block { display: block; min-width: 155px; }
+  .reference-hud .chip.time { display: none; }
+  .reference-hud .dock-content { grid-template-columns: 230px minmax(420px,1fr); }
+  .reference-hud .events-overview { display: none; }
+  .reference-hud .dock-hint { display: none; }
+  .reference-hud .build-banner { left: 306px; right: 278px; }
+}
+@media (max-width: 720px) {
+  .reference-hud { --workbench-height: 275px; }
+  .reference-hud .brand-block, .reference-hud .chip.weather, .reference-hud .stars { display: none; }
+  .reference-hud .chip.power { min-width: 130px; }
+  .reference-hud .chip { padding: 2px 5px; min-width: 92px; }
+  .reference-hud .chip strong { font-size: 12px; }
+  .reference-hud .hud-top { gap: 2px; padding: 5px; }
+  .reference-hud .speed-group button { width: 27px; min-width: 27px; }
+  .reference-hud .objectives { width: 210px; max-height: 158px; }
+  .reference-hud .minimap-panel { display: none; }
+  .reference-hud .dock-content, .reference-hud .management-dock.expanded-workspace .dock-content { grid-template-columns: minmax(0,1fr); }
+  .reference-hud .staff-overview { display: none; }
+  .reference-hud .dock-nav button { min-width: 0; padding: 3px 8px; }
+  .reference-hud .build-banner { left: 12px; top: 78px; right: 234px; }
+  .reference-hud .management-dock .build-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  .reference-hud .contextual-panel, .reference-hud .park-alerts { width: 210px; }
+}
