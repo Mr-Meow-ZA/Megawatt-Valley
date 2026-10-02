@@ -848,14 +848,31 @@ export class GameSimulation {
   grantPlaytestCash(amount = 25_000): boolean {
     if (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000) return false;
     this.cash += amount;
-    this.message = 'Playtest funding: +
+    this.message = 'Playtest funding: +$' + Math.round(amount).toLocaleString('en-US') + '.';
+    return true;
+  }
+
+  triggerPlaytestGrant(): boolean {
+    if (this.activeEvent) {
+      this.message = 'Resolve the current event first.';
+      return false;
+    }
+    if (this.triggeredEvents.includes('green_growth_grant')) {
+      this.cash += 7500;
+      this.message = 'Playtest repeat grant: +$7,500.';
+      return true;
+    }
+    this.openEvent('green_growth_grant');
+    return true;
+  }
+
+  trainStaff(id: string): boolean {
     const member = this.staff.find((s) => s.id === id);
     if (!member || (member.skill ?? 1) >= 5 || this.cash < 800) return false;
     this.cash -= 800; member.skill = Math.min(5, (member.skill ?? 1) + 1);
     this.message = member.name + ' completed training. Faster field work unlocked.';
     return true;
   }
-
   demolish(id: string): boolean {
     const eq = this.equipment.find((e) => e.id === id);
     if (!eq || !EQUIPMENT[eq.kind].buildable) return false;
