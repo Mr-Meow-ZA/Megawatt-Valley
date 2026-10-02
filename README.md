@@ -116,3 +116,17 @@ Any older document that conflicts with the files above should be treated as arch
 > **Build the game, not the development project.**
 
 The objective is a finished playable Megawatt Valley release, not an endless sequence of prototypes or tooling exercises.
+
+## Run the Phaser build
+
+```bash
+npm install
+npm run dev
+```
+
+Open the printed local URL (default `http://localhost:5173`).
+
+```bash
+npm test
+npm run build
+```

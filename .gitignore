@@ -38,6 +38,10 @@ InitTestScene*.unity*
 
 # OS files
 .DS_Store
+
+# Large raw asset downloads (curated runtime pack is public/assets/game/)
+/public/assets/sourced/
+/.firecrawl/
 Thumbs.db
 Desktop.ini
 
@@ -71,3 +75,12 @@ CrashReports/
 
 # Cursor hook run logs (must stay ignored after the un-ignores above)
 .cursor/hooks/*.log
+
+# Node / Phaser web build
+node_modules/
+dist/
+.vite/
+*.local
+coverage/
+playwright-report/
+test-results/
