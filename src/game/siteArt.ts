@@ -1,3 +1,4 @@
+import { applyLowPolyArt } from './lowPolyArt';
 import type Phaser from 'phaser';
 export const SITE_ICONS:Record<string,string>={};
 type P=[number,number]; type C=CanvasRenderingContext2D;
@@ -219,6 +220,7 @@ export function generateSiteArt(scene:Phaser.Scene):void {
   });
   for(const role of ['technician','cleaner','engineer','manager']) SITE_ICONS['staff_'+role]=(scene.textures.get('staff_'+role+'_0').getSourceImage() as HTMLCanvasElement).toDataURL();
 
+  applyLowPolyArt(scene);
   for(const [kind,art]of Object.entries(SITE_ART)){
     SITE_ICONS[kind]=(scene.textures.get(art.key).getSourceImage() as HTMLCanvasElement).toDataURL();
   }

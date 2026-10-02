@@ -1,0 +1,74 @@
+[
+  {
+    "key": "site_pv_basic",
+    "width": 200,
+    "height": 160,
+    "source": "public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/solar-panel-landscape-group.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_pv_premium",
+    "width": 200,
+    "height": 160,
+    "source": "public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/solar-panel-landscape-group.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_office",
+    "width": 200,
+    "height": 170,
+    "source": "public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-p.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_workshop",
+    "width": 200,
+    "height": 170,
+    "source": "public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-i.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_tree_0",
+    "width": 80,
+    "height": 110,
+    "source": "public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_tree_1",
+    "width": 80,
+    "height": 110,
+    "source": "public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_pineRoundA.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_tree_2",
+    "width": 80,
+    "height": 110,
+    "source": "public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_shrub",
+    "width": 50,
+    "height": 40,
+    "source": "public/assets/sourced/kenney-nature-kit/Models/GLTF format/plant_bush.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  },
+  {
+    "key": "site_rock",
+    "width": 50,
+    "height": 40,
+    "source": "public/assets/sourced/kenney-nature-kit/Models/GLTF format/stone_largeA.glb",
+    "licence": "CC0",
+    "author": "Kenney"
+  }
+]

@@ -229,6 +229,16 @@ for(const point of [{x:550,y:320},{x:650,y:320},{x:750,y:320},{x:550,y:420},{x:6
 assert.ok(repeated,'Shift-click repeats placement');
 await page.keyboard.press('Escape'); assert.equal((await saved()).buildMode,null);
 console.log('RESEARCH_QOL_CHECK_PASSED: 9 real nodes, purchase, reload, pause, completion, prerequisites, laptop scroll, alert navigation, camera shortcuts');
+const vectors = await page.evaluate(()=>window.__MW_VECTOR_ASSETS__);
+assert.equal(Object.keys(vectors).length,9,'Nine rendered assets are embedded for offline play');
+const artPage = await context.newPage();
+const artNames = {site_pv_basic:'Bargain solar',site_pv_premium:'Premium solar',site_office:'Operations office',site_workshop:'Workshop',site_tree_0:'Broadleaf',site_tree_1:'Conifer',site_tree_2:'Summer broadleaf',site_shrub:'Shrub',site_rock:'Stone'};
+await artPage.setViewportSize({width:1100,height:600});
+await artPage.setContent('<body style="margin:0;background:#b3ce88;color:#24413c;font:16px system-ui"><h1 style="margin:24px">Megawatt Valley · free asset visual slice</h1><main style="padding:20px;display:grid;grid-template-columns:repeat(5,1fr);gap:20px">'+Object.entries(artNames).map(([key,name])=>'<section style="background:#ffffff33;border-radius:12px;padding:10px;text-align:center"><div style="height:160px;display:grid;place-items:center"><img src="'+vectors[key]+'" style="max-width:190px;max-height:160px"></div><b>'+name+'</b></section>').join('')+'</main><small style="margin:24px">CC0 Kenney models · matching 2:1 projection, palette and light · no 3D runtime</small></body>');
+await artPage.locator('img').evaluateAll(images=>Promise.all(images.map(img=>img.decode())));
+await artPage.screenshot({path:'browser-evidence/asset-palette.png'});
+await artPage.close();
+console.log('LOW_POLY_ASSET_CHECK_PASSED: 9 rendered CC0 sprites embedded, decoded and captured');
 assert.deepEqual(errors,[]);
 console.log('BROWSER_CHECK_PASSED: offline launch, assets, placement, reload, hiring, restart, laptop capability access');
 const jpeg = await page.screenshot({type:'jpeg',quality:45});

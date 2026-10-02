@@ -1,8 +1,9 @@
+import { preloadLowPolyArt } from './lowPolyArt';
 import Phaser from 'phaser';
 
 /**
- * Load curated Kenney / OGA sprites from /assets/game/.
- * Falls back to procedural Graphics only for ghosts / select / fault.
+ * Load retained PNG assets and the curated model-derived SVG art.
+ * generateSiteArt provides procedural fallbacks before applying the rendered slice.
  */
 export const ASSET_KEYS = [
   'tile_grass',
@@ -80,6 +81,7 @@ export const ASSET_KEYS = [
 export type AssetKey = (typeof ASSET_KEYS)[number];
 
 export function preloadGameAssets(scene: Phaser.Scene): void {
+  preloadLowPolyArt(scene);
   for (const key of ASSET_KEYS) {
     const embedded = (window as Window & { __MW_ASSETS__?: Record<string, string> }).__MW_ASSETS__;
     scene.load.image(key, embedded?.[key] ?? `/assets/game/${key}.png`);

@@ -24,6 +24,17 @@ The separate Cursor PR #8 remains independent.
 - Net-positive supplier/sponsorship rewards work even with zero cash.
 - Browser verification uses ordinary visible clicks, without bypassing modal overlays.
 
+### Visual-first asset pass
+
+Nine solar/building/nature sprites now derive from verified free CC0 Kenney models.
+They share the park's 2:1 projection, palette, light and ground anchors. Generated
+SVGs rasterise once during preload and are embedded in the offline HTML. This adds
+richer geometry while retaining Phaser and existing placement/selection behavior.
+Original pack licences ship in the playable package. See
+[VISUAL_ASSET_PASS_2026-10-02.md](VISUAL_ASSET_PASS_2026-10-02.md) for the asset
+shortlist, selected models and next art priorities. No new score is claimed solely
+from asset count; terrain composition and the remaining equipment/staff still need work.
+
 ### Latest improvement pass
 
 - Honest evaluation: **5.5/10 baseline → approximately 6.3/10 after this pass**.
