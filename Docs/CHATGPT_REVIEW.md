@@ -85,3 +85,55 @@ Treat PR #8 as the primary candidate, play fresh through at least 1 star, record
 Do not start wind, BESS or another scenario yet.
 
 Until Rapha explicitly changes ownership, Cursor should remain the authoritative Level 1 implementation lane and Codex should be treated as an experimental hardening/proposal lane rather than a second source of truth.
+
+
+---
+
+## Review update — 2026-10-02
+
+Meaningful development occurred after the previous review.
+
+### New Codex review surface
+- Draft PR #10 is now open from `codex/solar-release-hardening`, stacked on PR #7 rather than merged into Cursor PR #8.
+- PR #10 has moved well beyond packaging-only hardening: it now includes progression/economy corrections, staff controls, save portability/restart cleanup, capability presentation, site-kit buildables, browser/offline packaging, and a substantial shared isometric-layout rewrite.
+- Latest PR description reports 22 automated tests, TypeScript/Vite build, offline packaging and Chrome interaction checks passing, plus a normal-budget 1★ and 3★ continuation validation.
+- The layout rewrite introduces shared map/layout data for roads, fences, bridge, placement, minimap and staff routes, addressing concrete isometric-coherence problems.
+
+### Cursor track
+- PR #8 remains the authoritative Cursor steam-finish candidate at `f097e5a8`.
+- Its world declutter/readability pass remains directionally aligned and its Pages playtest surface is available.
+- No newer Cursor gameplay commit was identified in this review window.
+
+### Alignment
+**Game vision:** both tracks remain broadly aligned with the solar Level 1 product goal and Management Abstraction Ladder.
+
+**Visual direction:** PR #10's connected-layout work addresses genuine pixel-isometric coherence requirements (shared projection/anchors, connected roads/fences/bridge, placement/minimap/pathing agreement). PR #8's declutter pass addresses a different valid concern: readability and visual breathing room. These should be compared by play/visual inspection rather than merged mechanically.
+
+**Architecture:** Phaser + TypeScript + Vite remains intact. PR #10's shared layout data is conceptually compatible with the architecture, but its large `WorldView` rewrite makes it a competing implementation, not a small hardening patch.
+
+### Drift / risks
+- The main risk has escalated from “parallel branch exists” to **two competing Level 1 world implementations**. `WorldView` is now a direct conflict surface.
+- PR #10 is no longer safely classifiable as packaging/proposal-only work; it owns meaningful gameplay and visual architecture.
+- Main-branch `CURRENT_STATUS.md` and `ACTIVITY_LOG.md` do not yet reflect PR #8/#10 accurately; branch-local status also has reported drift. Do not use stale test counts/status text as acceptance evidence.
+- Automated tests and scripted playthroughs prove completion paths, not fun, pacing or visual quality. PR #10's reported ~54.4 minutes to 1★ at 1x is within the original 30–60 minute target, but still needs human pacing judgment.
+
+### Blocker / decision gate
+The immediate blocker is now a **product-owner track comparison**, not missing implementation.
+
+Do not merge PR #10 into PR #8 wholesale and do not continue two teams independently rewriting the same Level 1 systems.
+
+### Recommended next smallest useful goal
+**Run one controlled A/B acceptance pass between PR #8 and PR #10.**
+
+For each candidate:
+1. Start from a fresh game.
+2. Play the first 15–20 minutes and, where practical, continue to 1★.
+3. Compare visual coherence/readability, build interaction, objective cadence, staff visibility, automation payoff, event/weather pacing, bugs and overall fun.
+4. Choose one implementation as the authoritative Level 1 baseline.
+5. Cherry-pick/reimplement only clearly superior isolated ideas from the losing branch after that choice.
+6. Then fix concrete acceptance issues and merge the selected baseline.
+
+No wind, BESS, Scenario 2 implementation or additional feature expansion until this track decision and Level 1 acceptance are complete.
+
+### Current project question
+> Which candidate actually feels better to play: Cursor PR #8's decluttered steam-finish, or Codex PR #10's connected-layout/hardened release?
