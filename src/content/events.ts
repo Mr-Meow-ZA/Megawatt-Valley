@@ -25,6 +25,23 @@ export const EVENTS: Record<EventId, EventDef> = {
       },
     ],
   },
+  green_growth_grant: {
+    id: 'green_growth_grant',
+    title: 'Green Growth Grant',
+    body: 'A regional clean-energy fund likes what it sees. For once, the paperwork comes with money attached.',
+    choices: [
+      {
+        id: 'cash',
+        label: 'Take the growth grant (+$7,500)',
+        description: 'Immediate expansion cash. No strings, apart from one very smug press release.',
+      },
+      {
+        id: 'training',
+        label: 'Fund the team (+$4,000 + training)',
+        description: 'Receive $4,000 and give every current staff member +0.5 skill.',
+      },
+    ],
+  },
   bargain_batch: {
     id: 'bargain_batch',
     title: 'Bargain Batch Alert',
@@ -32,7 +49,7 @@ export const EVENTS: Record<EventId, EventDef> = {
     choices: [
       {
         id: 'buy',
-        label: 'Buy the batch (−$5,000, +cash cushion later)',
+        label: 'Take the supplier rebate (+$2,500 net)',
         description: 'Net +$2,500 now; supplier trial reduces the oldest bargain array condition by 8%.',
       },
       {
@@ -100,7 +117,7 @@ export const EVENTS: Record<EventId, EventDef> = {
     choices: [
       {
         id: 'host',
-        label: 'Host the shoot (−$1,500)',
+        label: 'Host the sponsored shoot (+$2,500 net)',
         description: 'Net +$2,500 now; export reduced 30% for 8 simulation hours for drone safety.',
       },
       {
