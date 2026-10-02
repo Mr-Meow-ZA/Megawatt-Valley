@@ -255,40 +255,15 @@ export class WorldView {
     const colour=ok?0x82deaa:0xeb8172;
     this.area(this.preview,tile.x-.5,tile.y-.5,def.footprint.x,def.footprint.y,colour,.25);
     this.outline(this.preview,tile,def.footprint,colour);
-    this.placementHint.setText(ok?'.setOrigin(.5,art.originY).setPosition(p.x,p.y).setScale(art.scale).setAlpha(.72).setTint(colour).setVisible(true);
+    this.placementHint.setText(ok?'$'+def.cost.toLocaleString('en-US')+' · Click to build':reason??'Cannot build here')
+      .setPosition(p.x,p.y-76).setScale(1/this.scene.cameras.main.zoom).setBackgroundColor(ok?'#294c3f':'#704b40').setVisible(true);
+    this.ghost.setTexture(this.texture(kind,tile,snapshot)).setOrigin(.5,art.originY).setPosition(p.x,p.y).setScale(art.scale).setAlpha(.72).setTint(colour).setVisible(true);
   }
   inspectScenery(x:number,y:number):string|null{return this.life.inspect(x,y);}
   getHoverTile():Vec2|null{return this.hoverTile;}
   pickEntity(snapshot:GameSnapshot,worldX:number,worldY:number):string|null{
     // A person at the service edge should remain selectable in front of their array.
     for(const staff of snapshot.staff){const p=isoToScreen(staff.tile.x,staff.tile.y);if(Math.hypot(worldX-p.x,worldY-p.y+11)<12)return staff.id;}
-    // Hit visible opaque sprite pixels before falling back to ground footprints.
-    // Isometric roofs and racks extend above their ground cells.
-    const visible=[...snapshot.equipment].sort((a,b)=>(this.entities.get(b.id)?.sprite.depth??0)-(this.entities.get(a.id)?.sprite.depth??0));
-    for(const eq of visible){
-      const sprite=this.entities.get(eq.id)?.sprite;if(!sprite)continue;
-      const source=sprite.texture.getSourceImage() as HTMLCanvasElement;
-      const px=Math.floor((worldX-sprite.x)/sprite.scaleX+sprite.displayOriginX);
-      const py=Math.floor((worldY-sprite.y)/sprite.scaleY+sprite.displayOriginY);
-      if(px>=0&&py>=0&&px<source.width&&py<source.height&&source.getContext?.('2d')?.getImageData(px,py,1,1).data[3])return eq.id;
-    }
-    const tile=this.getTile({x:worldX,y:worldY});
-    // Footprint picking uses precisely the same cell convention as drawing/building.
-    for(const eq of [...snapshot.equipment].reverse()){
-      const fp=EQUIPMENT[eq.kind].footprint;
-      if(tile.x>=eq.tile.x&&tile.x<eq.tile.x+fp.x&&tile.y>=eq.tile.y&&tile.y<eq.tile.y+fp.y)return eq.id;
-    }
-    for(const s of snapshot.staff){const p=isoToScreen(s.tile.x,s.tile.y);if(Math.hypot(worldX-p.x,worldY-p.y+10)<18)return s.id;}
-    return null;
-  }
-}
-export {WORLD_W,WORLD_H,TILE_H};
-+def.cost.toLocaleString('en-US')+' · Click to build':reason??'Cannot build here')
-      .setPosition(p.x,p.y-76).setScale(1/this.scene.cameras.main.zoom).setBackgroundColor(ok?'#294c3f':'#704b40').setVisible(true);
-    this.ghost.setTexture(this.texture(kind,tile,snapshot)).setOrigin(.5,art.originY).setPosition(p.x,p.y).setScale(art.scale).setAlpha(.72).setTint(colour).setVisible(true);
-  }
-  getHoverTile():Vec2|null{return this.hoverTile;}
-  pickEntity(snapshot:GameSnapshot,worldX:number,worldY:number):string|null{
     // Hit visible opaque sprite pixels before falling back to ground footprints.
     // Isometric roofs and racks extend above their ground cells.
     const visible=[...snapshot.equipment].sort((a,b)=>(this.entities.get(b.id)?.sprite.depth??0)-(this.entities.get(a.id)?.sprite.depth??0));

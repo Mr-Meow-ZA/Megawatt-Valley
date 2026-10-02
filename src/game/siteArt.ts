@@ -56,13 +56,14 @@ export function generateSiteArt(scene:Phaser.Scene):void {
     box(c,-.66,-.55,1.30,1.12,0,35,'#cbd3c1','#d7d1b1','#a6b7a4',100,cy);
     box(c,-.76,-.65,1.5,1.32,35,6,'#52776b','#395c51','#2e4c43',100,cy);
     // Ribbed roof, a vent, doorstep and flower box give this tiny office a lived-in scale.
-    box(c,-.48,-.38,.22,.23,42,8,'#b9bfa5','#929f87','#6c8270',100,cy);
     if(!workshop){
       box(c,-.49,.61,.76,.15,6,7,'#9a7950','#816644','#68573f',100,cy);
       for(let i=0;i<5;i++){const p=iso(-.41+i*.13,.66,16,100,cy);c.fillStyle=i%2?'#e4c679':'#afbe77';c.fillRect(p[0],p[1],4,4);}
       box(c,.76,.27,.22,.25,0,4,'#dfd4ad','#b4b096','#9ca78c',100,cy);
     }
     for(let i=1;i<6;i++)line(c,iso(-.76+i*.25,-.65,42,100,cy),iso(-.76+i*.25,.67,42,100,cy),'#67887b',2);
+    box(c,-.48,-.38,.22,.23,42,8,'#b9bfa5','#929f87','#6c8270',100,cy);
+
     if(workshop){
       poly(c,[iso(-.42,.58,3,100,cy),iso(.46,.58,3,100,cy),iso(.46,.58,27,100,cy),iso(-.42,.58,27,100,cy)],'#71877d');
       for(let z=6;z<26;z+=5)line(c,iso(-.42,.59,z,100,cy),iso(.46,.59,z,100,cy),'#a5b3a2',1);
