@@ -384,6 +384,16 @@ export class DomHud {
 
     window.addEventListener('keydown', (ev) => {
       if (ev.repeat || (ev.target as HTMLElement)?.closest('input,textarea,button')) return;
+      if (ev.ctrlKey && ev.shiftKey && ev.key.toLowerCase() === 'm') {
+        ev.preventDefault();
+        this.sim.grantPlaytestCash(25_000);
+        return;
+      }
+      if (ev.ctrlKey && ev.shiftKey && ev.key.toLowerCase() === 'g') {
+        ev.preventDefault();
+        this.sim.triggerPlaytestGrant();
+        return;
+      }
       if (ev.key === 'Escape' && this.sim.snapshot().buildMode) {
         this.sim.setBuildMode(null);
         return;
