@@ -54,8 +54,14 @@ export function generateSiteArt(scene:Phaser.Scene):void {
     const cy=110;
     rect(c,-.94,-.94,1.88,1.88,0,'#b9b49e',100,cy);
     box(c,-.66,-.55,1.30,1.12,0,35,'#cbd3c1','#d7d1b1','#a6b7a4',100,cy);
-    box(c,-.76,-.65,1.5,1.32,35,6,'#496d68','#365851','#2a4945',100,cy);
-    // Ribbed standing-seam roof and a little rainwater tank at the back.
+    box(c,-.76,-.65,1.5,1.32,35,6,'#52776b','#395c51','#2e4c43',100,cy);
+    // Ribbed roof, a vent, doorstep and flower box give this tiny office a lived-in scale.
+    box(c,-.48,-.38,.22,.23,42,8,'#b9bfa5','#929f87','#6c8270',100,cy);
+    if(!workshop){
+      box(c,-.49,.61,.76,.15,6,7,'#9a7950','#816644','#68573f',100,cy);
+      for(let i=0;i<5;i++){const p=iso(-.41+i*.13,.66,16,100,cy);c.fillStyle=i%2?'#e4c679':'#afbe77';c.fillRect(p[0],p[1],4,4);}
+      box(c,.76,.27,.22,.25,0,4,'#dfd4ad','#b4b096','#9ca78c',100,cy);
+    }
     for(let i=1;i<6;i++)line(c,iso(-.76+i*.25,-.65,42,100,cy),iso(-.76+i*.25,.67,42,100,cy),'#67887b',2);
     if(workshop){
       poly(c,[iso(-.42,.58,3,100,cy),iso(.46,.58,3,100,cy),iso(.46,.58,27,100,cy),iso(-.42,.58,27,100,cy)],'#71877d');
@@ -131,6 +137,64 @@ export function generateSiteArt(scene:Phaser.Scene):void {
     for(const z of [6,14])line(c,p(-.48,z),p(.12,z),'#bac1a5',2);
     line(c,p(.12,6),p(.12,14),'#bac1a5',2);
   });
+
+  make('site_reeds',48,60,c=>{
+    for(const [x,y,h]of [[10,49,23],[19,51,33],[28,47,28],[36,51,19]]){
+      line(c,[x,y],[x+2,y-h],'#65805a',2);
+      line(c,[x,y-5],[x-5,y-14],'#8d9f63',2);
+      line(c,[x,y-9],[x+6,y-18],'#7c985f',2);
+      c.fillStyle='#9b754c';c.fillRect(x,y-h-7,4,10);
+    }
+  });
+  for(let v=0;v<3;v++)make('site_flowers_'+v,40,34,c=>{
+    for(const [x,y]of [[8,25],[18,29],[27,21],[31,30]]){
+      c.fillStyle='#66864e';c.fillRect(x,y-8,2,10);
+      const col=['#e6cb7e','#e7e0b8','#b9acc1'][v];
+      c.fillStyle=col;c.fillRect(x-2,y-9,6,3);c.fillRect(x,y-11,2,7);
+      c.fillStyle='#b88c4f';c.fillRect(x,y-9,2,2);
+    }
+  });
+  for(let v=0;v<2;v++)make('site_duck_'+v,38,26,c=>{
+    c.fillStyle='#437f7955';c.fillRect(5,18,25,3);
+    poly(c,[[5,12],[11,9],[23,10],[29,14],[24,18],[11,18]],'#d9d1a0');
+    c.fillStyle='#6b8a65';c.fillRect(23,5,8,9);c.fillStyle='#d7aa56';c.fillRect(30,10,6,3);
+    c.fillStyle='#293f3c';c.fillRect(28,6,2,2);c.fillStyle='#ad9470';c.fillRect(10,12,11,3);
+    if(v){line(c,[2,20],[10,20],'#bdd5b7',2);line(c,[22,21],[32,21],'#bdd5b7',2);}
+  });
+  make('site_picnic',100,90,c=>{
+    const cx=50,cy=60;
+    for(const x of [-.28,.28])box(c,x,-.17,.08,.38,0,14,'#a99365','#806b4d','#655d44',cx,cy);
+    for(const y of [-.19,-.04,.11])rect(c,-.43,y,.86,.12,17,'#bca471',cx,cy);
+    for(const y of [-.36,.33]){rect(c,-.48,y,.96,.12,9,'#af9564',cx,cy);for(const x of [-.3,.3])line(c,iso(x,y+.06,0,cx,cy),iso(x,y+.06,9,cx,cy),'#716548',3);}
+    for(const x of [-.17,.2])box(c,x,-.03,.06,.06,18,5,'#eee4bd','#d2bf8e','#af9565',cx,cy);
+    rect(c,-.05,-.15,.17,.1,18,'#557d71',cx,cy);
+  });
+  make('site_supplies',100,100,c=>{
+    const cx=50,cy=65;
+    for(let y=-.27;y<.28;y+=.12)rect(c,-.44,y,.87,.08,2,'#9b8458',cx,cy);
+    box(c,-.35,-.17,.38,.37,4,16,'#baa775','#968053','#786c49',cx,cy);
+    for(const x of [-.28,-.11])line(c,iso(x,.21,5,cx,cy),iso(x,.21,18,cx,cy),'#ccbb88',2);
+    box(c,.1,-.2,.23,.28,3,22,'#91ac9b','#648979','#4b7065',cx,cy);
+    rect(c,.15,-.16,.1,.13,27,'#cfce9d',cx,cy);
+    line(c,iso(.33,.24,1,cx,cy),iso(.3,.22,37,cx,cy),'#b19a6c',3);
+    line(c,iso(.24,.17,2,cx,cy),iso(.46,.17,2,cx,cy),'#637f6d',4);
+  });
+  make('site_lamp',42,90,c=>{
+    c.fillStyle='#526e60';c.fillRect(19,20,4,56);c.fillStyle='#a4b49b';c.fillRect(19,17,15,3);
+    c.fillStyle='#d0c392';c.fillRect(29,19,9,4);c.fillStyle='#ece0a6';c.fillRect(30,23,7,3);
+    c.fillStyle='#758975';c.fillRect(15,74,12,3);
+  });
+  make('site_light',100,64,c=>{
+    const glow=c.createRadialGradient(50,32,0,50,32,45);glow.addColorStop(0,'#f5d98b80');glow.addColorStop(.4,'#ebc77830');glow.addColorStop(1,'#ebc77800');
+    c.fillStyle=glow;c.fillRect(0,0,100,64);
+  });
+  make('site_dust',200,160,c=>{
+    for(let row=0;row<3;row++)for(let i=0;i<24;i++){
+      const x=-.72+((i*17)%29)/29*1.44,y=-.7+row*.52+((i*11)%23)/23*.24;
+      const p=iso(x,y,19);c.fillStyle=i%3?'#c5b07c88':'#e1cca177';c.fillRect(p[0],p[1],4+(i%3)*2,2);
+    }
+  });
+
   for(const [kind,art]of Object.entries(SITE_ART)){
     SITE_ICONS[kind]=(scene.textures.get(art.key).getSourceImage() as HTMLCanvasElement).toDataURL();
   }

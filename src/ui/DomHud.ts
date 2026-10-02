@@ -207,6 +207,7 @@ export class DomHud {
       </aside>
 
       <div class="sidebar-right">
+      <nav class="sidebar-nav" aria-label="Management panels"><button data-action="jump" data-id="build">Build</button><button data-action="jump" data-id="people">Team</button><button data-action="jump" data-id="caps">Upgrades</button><button data-action="jump" data-id="finance">Money</button></nav>
       <aside class="panel build">
         <h2>Build</h2>
         <div class="build-tabs">
@@ -230,14 +231,14 @@ export class DomHud {
         <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
         <div data-k="capability-actions"></div>
       </aside>
-      <aside class="panel"><h2>People & operations</h2><div data-k="roster"></div>
+      <aside class="panel people"><h2>People & operations</h2><div data-k="roster"></div>
         <button type="button" data-action="hire" data-id="technician">Technician · $1,500</button>
         <button type="button" data-action="hire" data-id="cleaner">Cleaner · $1,500</button>
         <button type="button" data-action="hire" data-id="engineer">Engineer · $1,500</button>
         <button type="button" data-action="hire" data-id="manager">Site Manager · $1,500</button>
         <small>Technicians repair; cleaners clean. Engineers reduce faults; managers speed up field work. Salaries $1–2/sim hour.</small>
       </aside>
-      <aside class="panel"><h2>Finance & reports</h2><div data-k="finance"></div>
+      <aside class="panel finance"><h2>Finance & reports</h2><div data-k="finance"></div>
         <small>1★ Complete all core lessons and the storm · 2★ 220 kW + Site B + Radio · 3★ 300 kW + prepared hail + Cleaning Kit. Scenario 2 unlock is recorded at 1★; its playable map is future content.</small>
       </aside>
       </div>
@@ -306,6 +307,10 @@ export class DomHud {
         return;
       }
       const action = t.getAttribute('data-action');
+      if (action === 'jump') {
+        const id=t.getAttribute('data-id');
+        if(['build','people','caps','finance'].includes(id??''))this.root.querySelector('.sidebar-right .'+id)?.scrollIntoView({block:'start',behavior:'auto'});
+      }
       if (action === 'cancel-build') this.sim.setBuildMode(null);
       if (action === 'save') {
         this.sim.message = saveGame(this.sim.serialize()) ? 'Game saved.' : 'Could not save. Use Export save to keep your progress.';
@@ -540,7 +545,7 @@ export class DomHud {
         `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${doneCount}/${activeObjs.length} complete</span></li>` +
         activeObjs
           .sort((a, b) => Number(a.complete) - Number(b.complete))
-          .slice(0, 6)
+          .slice(0, 3)
           .map((o) => {
             const mark = o.complete ? '✓' : '○';
             const pulse = o.complete && newlyDone.some((n) => n.id === o.id) ? ' check-pulse' : '';
@@ -555,7 +560,7 @@ export class DomHud {
       }
     }
 
-    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}`;
+    const buildKey = `${snapshot.buildMode ?? ''}|${this.buildCategory}|${snapshot.capabilities.includes('radio_dispatch')}`;
     if (buildKey !== this.lastBuildKey) {
       this.lastBuildKey = buildKey;
       const build = this.root.querySelector('[data-k="build"]') as HTMLElement;
@@ -571,11 +576,12 @@ export class DomHud {
         .map((id) => {
           const def = EQUIPMENT[id];
           const active = snapshot.buildMode === id ? 'active' : '';
-          const tip = `${def.name} — ${def.description}`;
-          return `<button type="button" class="build-card ${active}" data-build="${id}" title="${tip.replace(/"/g, '&quot;')}">
+          const locked=id==='workshop'&&!snapshot.capabilities.includes('radio_dispatch');
+          const tip = locked?'Unlock with your first repair':`${def.name} — ${def.description}`;
+          return `<button type="button" class="build-card ${active}" ${locked ? "disabled" : ""} data-build="${id}" title="${tip.replace(/"/g, '&quot;')}">
             <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
             <strong>${def.name}</strong>
-            <span class="price">${money(def.cost)}</span><small>${def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% reliability" : "Site improvement"}</small><small>${def.description}</small>
+            <span class="price">${money(def.cost)}</span><small>${def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% reliability" : "Site improvement"}</small><small>${locked ? "Locked · Complete First Failure" : def.description}</small>
           </button>`;
         })
         .join('');

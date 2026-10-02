@@ -1,3 +1,4 @@
+import { ValleyLife } from './ValleyLife';
 import Phaser from 'phaser';
 import { EQUIPMENT } from '../content/equipment';
 import { WORLD_W,WORLD_H,ACCESS_Y,ROAD_TILES,FENCE_EDGES,SCENERY,connectionMask,isMainRoad,riverCenterX,riverHalfWidth,alongPath } from '../content/valleyLayout';
@@ -6,9 +7,13 @@ import type { EquipmentKind,GameSnapshot,Vec2 } from '../simulation/types';
 import { depthFor,isoToScreen,screenToIso,TILE_H } from './iso';
 import { generateSiteArt,SITE_ART } from './siteArt';
 type P={x:number;y:number};
-type Entity={sprite:Phaser.GameObjects.Image;status:Phaser.GameObjects.Text;shadow:Phaser.GameObjects.Ellipse};
+type Entity={dust:Phaser.GameObjects.Image;sprite:Phaser.GameObjects.Image;status:Phaser.GameObjects.Text;shadow:Phaser.GameObjects.Ellipse};
 const pv=(kind:string)=>kind==='bargain_pv'||kind==='premium_pv';
 export class WorldView {
+  private life!:ValleyLife;
+  private placementHint!:Phaser.GameObjects.Text;
+  private completionBursts:Array<{x:number;y:number;born:number}>=[];
+  private commissioned=new Map<string,boolean>();
   private entities=new Map<string,Entity>();
   private preview!:Phaser.GameObjects.Graphics;
   private ghost!:Phaser.GameObjects.Image;
@@ -29,9 +34,11 @@ export class WorldView {
     generateSiteArt(scene);
     scene.cameras.main.setBackgroundColor(0x789473);
     this.buildLandscape();
+    this.life=new ValleyLife(scene);
     this.preview=scene.add.graphics().setDepth(790);
     this.selection=scene.add.graphics().setDepth(780);
     this.taskGraphics=scene.add.graphics().setDepth(795);
+    this.placementHint=scene.add.text(0,0,'',{fontFamily:'system-ui,sans-serif',fontSize:'12px',resolution:2,color:'#f1e9cd',backgroundColor:'#294c3f',padding:{x:10,y:7}}).setOrigin(.5,1).setDepth(810).setVisible(false);
     this.ghost=scene.add.image(0,0,'site_pv_basic').setDepth(800).setVisible(false);
     this.weatherGraphics=scene.add.graphics().setDepth(900).setScrollFactor(0);
     this.veil=scene.add.rectangle(0,0,1,1,0x182d3d,0).setOrigin(0).setDepth(890).setScrollFactor(0);
@@ -67,12 +74,7 @@ export class WorldView {
   }
   private buildLandscape(){
     const g=this.scene.add.graphics().setDepth(-1000);
-    this.area(g,-.5,-.5,WORLD_W,WORLD_H,0x91a674);
-    // Quiet contiguous land masses; texture is subordinate to the site plan.
-    for(let i=0;i<2600;i++){
-      const x=((i*977)%4180)/100-.4,y=((i*541)%2980)/100-.4;
-      const p=isoToScreen(x,y);g.fillStyle(i%3?0x809767:0xb3bd84,.22);g.fillRect(p.x,p.y,3,1);
-    }
+    this.area(g,-.5,-.5,WORLD_W,WORLD_H,0x91ad70);
     this.area(g,3.5,3.5,14,12,0xa4b680,.48);
     this.area(g,21.5,5.5,12,10,0xa4b680,.4);
     const ribbon=(margin:number,colour:number)=>{
@@ -146,12 +148,13 @@ export class WorldView {
   private entity(id:string,key:string):Entity{
     let e=this.entities.get(id);
     if(!e){
-      e={sprite:this.scene.add.image(0,0,key),shadow:this.scene.add.ellipse(0,0,18,7,0x263d30,.18),
+      e={dust:this.scene.add.image(0,0,'site_dust').setOrigin(.5,100/160).setVisible(false),sprite:this.scene.add.image(0,0,key),shadow:this.scene.add.ellipse(0,0,18,7,0x263d30,.18),
         status:this.scene.add.text(0,0,'',{fontFamily:'system-ui,sans-serif',fontSize:'14px',fontStyle:'bold',color:'#ffe4a1',backgroundColor:'#3d5144',padding:{x:3,y:1}}).setOrigin(.5,1)};
       this.entities.set(id,e);
     }return e;
   }
   sync(snapshot:GameSnapshot){
+    this.life.update(snapshot);
     const seen=new Set<string>();
     const equipKey=snapshot.equipment.map(e=>e.id+':'+e.kind+':'+e.tile.x+','+e.tile.y).join('|');
     if(equipKey!==this.lastEquipmentKey){
@@ -165,6 +168,13 @@ export class WorldView {
       const e=this.entity(eq.id,art.key);
       e.sprite.setTexture(this.texture(eq.kind,eq.tile,snapshot)).setOrigin(.5,art.originY).setPosition(p.x,p.y).setScale(art.scale)
         .setDepth(eq.kind==='road'?-949:depthFor(a.x,a.y,6)).setAlpha(eq.commissioned?1:.4+.6*eq.constructionProgress);
+      const source=e.sprite.texture.getSourceImage();
+      if(!eq.commissioned){const top=Math.floor((1-eq.constructionProgress)*source.height);e.sprite.setCrop(0,top,source.width,source.height-top);}
+      else e.sprite.setCrop();
+      const wasReady=this.commissioned.get(eq.id);
+      if(wasReady===false&&eq.commissioned)this.completionBursts.push({x:p.x,y:p.y,born:this.scene.time.now});
+      this.commissioned.set(eq.id,eq.commissioned);
+      e.dust.setPosition(p.x,p.y).setDepth(e.sprite.depth+.1).setAlpha(Math.min(.8,eq.soiling)).setVisible(pv(eq.kind)&&eq.commissioned&&eq.soiling>.18);
       e.sprite.clearTint();if(eq.faulted)e.sprite.setTint(0xe5a398);else if(pv(eq.kind)&&eq.soiling>.35)e.sprite.setTint(0xd1c49c);
       e.shadow.setVisible(false);
       const badge=eq.faulted?'! FAULT':!eq.commissioned?'BUILD '+Math.floor(eq.constructionProgress*100)+'%':pv(eq.kind)&&eq.soiling>.35?'DUST':'';
@@ -173,6 +183,7 @@ export class WorldView {
         this.outline(this.selection,eq.tile,def.footprint,0xf3d48b);
       }
       if(!eq.commissioned){
+        this.outline(this.taskGraphics,eq.tile,def.footprint,0xd2b57d);
         const c=this.scene.time.now/650,puffX=p.x+Math.sin(c)*20;
         this.taskGraphics.fillStyle(0xd9cc9d,.6);this.taskGraphics.fillRect(puffX,p.y-15-(c%1)*16,4,4);
       }
@@ -184,13 +195,18 @@ export class WorldView {
       e.sprite.setTexture(key).setOrigin(.5,.93).setPosition(p.x,p.y-(traveling?Math.sin(this.scene.time.now/90):0)).setScale(.38).setDepth(depthFor(s.tile.x,s.tile.y,10));
       e.sprite.clearTint();if(s.role==='cleaner')e.sprite.setTint(0xa5dabf);
       e.shadow.setPosition(p.x,p.y+1).setDepth(depthFor(s.tile.x,s.tile.y,8)).setVisible(true);
-      const task=s.task.type==='repair'?'REPAIR':s.task.type==='clean'?'CLEAN':'';
+      const task=s.task.type==='repair'?'REPAIR':s.task.type==='clean'?'CLEAN':s.id===snapshot.selectedId?s.name:'';
       e.status.setText(task).setFontSize(10).setPosition(p.x,p.y-25).setDepth(804).setVisible(!!task);
       if(busy&&s.task.type!=='travel'){
-        for(let i=0;i<3;i++){const t=(this.scene.time.now/400+i*.33)%1;this.taskGraphics.fillStyle(s.task.type==='clean'?0xa5dae0:0xf2cd71,1-t);this.taskGraphics.fillRect(p.x+8+i*3,p.y-12-t*12,2,2);}
+        for(let i=0;i<3;i++){const t=(this.scene.time.now/400+i*.33)%1;this.taskGraphics.fillStyle(s.task.type==='clean'?0xa5dae0:0xf2cd71,1-t);this.taskGraphics.fillRect(p.x+8+i*3-t*14,p.y-12-t*12,2,2);}
       }
     }
-    for(const [id,e]of this.entities)if(!seen.has(id)){e.sprite.destroy();e.shadow.destroy();e.status.destroy();this.entities.delete(id);}
+    for(const [id,e]of this.entities)if(!seen.has(id)){e.sprite.destroy();e.dust.destroy();e.shadow.destroy();e.status.destroy();this.entities.delete(id);this.commissioned.delete(id);}
+    this.completionBursts=this.completionBursts.filter(b=>this.scene.time.now-b.born<950);
+    for(const b of this.completionBursts){
+      const t=(this.scene.time.now-b.born)/950;
+      for(let i=0;i<12;i++){const a=i/12*Math.PI*2,r=12+t*34;this.taskGraphics.fillStyle(i%2?0xe6c579:0xc9deb3,1-t);this.taskGraphics.fillRect(b.x+Math.cos(a)*r,b.y+Math.sin(a)*r*.45-t*20,3,3);}
+    }
     const expanded=!!snapshot.plots.find(p=>p.id==='site_b')?.unlocked;
     this.siteBLabel.setText(expanded?'RIVER BENCH · SITE B':'RIVER BENCH · FUTURE EXPANSION');
     // A closed service route includes the yard exit, avoiding jumps between parked and driving.
@@ -206,7 +222,8 @@ export class WorldView {
   }
   private weather(snapshot:GameSnapshot){
     const cam=this.scene.cameras.main;
-    const night=snapshot.hour<6||snapshot.hour>19?.33:0;
+    const hour=snapshot.hour;
+    const night=hour<5.5||hour>20.5?.43:hour<7?(7-hour)/1.5*.43:hour>18?(hour-18)/2.5*.43:0;
     const wet=snapshot.weather==='rain'||snapshot.weather==='hail';
     const dim=night+(wet?.15:snapshot.weather==='overcast'?.1:0);
     this.veil.setOrigin(.5).setPosition(cam.width/2,cam.height/2).setSize(cam.width/cam.zoom,cam.height/cam.zoom).setAlpha(dim);
@@ -228,14 +245,46 @@ export class WorldView {
     this.hoverTile=this.getTile(pointerWorld);
   }
   updateGhost(snapshot:GameSnapshot,pointerWorld:P){
-    this.preview.clear();this.ghost.setVisible(false);
+    this.preview.clear();this.ghost.setVisible(false);this.placementHint.setVisible(false);
     if(!snapshot.buildMode||!this.pointerInWorld)return;
     const tile=this.getTile(pointerWorld);this.hoverTile=tile;
-    const kind=snapshot.buildMode,plot=this.sim.plotAtTile(tile),ok=!!plot&&this.sim.canPlace(kind,plot,tile)===null;
+    const kind=snapshot.buildMode,plot=this.sim.plotAtTile(tile);
+    const reason=plot?this.sim.canPlace(kind,plot,tile):'Choose a buildable plot';
+    const ok=reason===null;
     const def=EQUIPMENT[kind],a=this.anchor(tile,kind),p=isoToScreen(a.x,a.y),art=SITE_ART[kind];
     const colour=ok?0x82deaa:0xeb8172;
     this.area(this.preview,tile.x-.5,tile.y-.5,def.footprint.x,def.footprint.y,colour,.25);
     this.outline(this.preview,tile,def.footprint,colour);
+    this.placementHint.setText(ok?'.setOrigin(.5,art.originY).setPosition(p.x,p.y).setScale(art.scale).setAlpha(.72).setTint(colour).setVisible(true);
+  }
+  inspectScenery(x:number,y:number):string|null{return this.life.inspect(x,y);}
+  getHoverTile():Vec2|null{return this.hoverTile;}
+  pickEntity(snapshot:GameSnapshot,worldX:number,worldY:number):string|null{
+    // A person at the service edge should remain selectable in front of their array.
+    for(const staff of snapshot.staff){const p=isoToScreen(staff.tile.x,staff.tile.y);if(Math.hypot(worldX-p.x,worldY-p.y+11)<12)return staff.id;}
+    // Hit visible opaque sprite pixels before falling back to ground footprints.
+    // Isometric roofs and racks extend above their ground cells.
+    const visible=[...snapshot.equipment].sort((a,b)=>(this.entities.get(b.id)?.sprite.depth??0)-(this.entities.get(a.id)?.sprite.depth??0));
+    for(const eq of visible){
+      const sprite=this.entities.get(eq.id)?.sprite;if(!sprite)continue;
+      const source=sprite.texture.getSourceImage() as HTMLCanvasElement;
+      const px=Math.floor((worldX-sprite.x)/sprite.scaleX+sprite.displayOriginX);
+      const py=Math.floor((worldY-sprite.y)/sprite.scaleY+sprite.displayOriginY);
+      if(px>=0&&py>=0&&px<source.width&&py<source.height&&source.getContext?.('2d')?.getImageData(px,py,1,1).data[3])return eq.id;
+    }
+    const tile=this.getTile({x:worldX,y:worldY});
+    // Footprint picking uses precisely the same cell convention as drawing/building.
+    for(const eq of [...snapshot.equipment].reverse()){
+      const fp=EQUIPMENT[eq.kind].footprint;
+      if(tile.x>=eq.tile.x&&tile.x<eq.tile.x+fp.x&&tile.y>=eq.tile.y&&tile.y<eq.tile.y+fp.y)return eq.id;
+    }
+    for(const s of snapshot.staff){const p=isoToScreen(s.tile.x,s.tile.y);if(Math.hypot(worldX-p.x,worldY-p.y+10)<18)return s.id;}
+    return null;
+  }
+}
+export {WORLD_W,WORLD_H,TILE_H};
++def.cost.toLocaleString('en-US')+' · Click to build':reason??'Cannot build here')
+      .setPosition(p.x,p.y-76).setScale(1/this.scene.cameras.main.zoom).setBackgroundColor(ok?'#294c3f':'#704b40').setVisible(true);
     this.ghost.setTexture(this.texture(kind,tile,snapshot)).setOrigin(.5,art.originY).setPosition(p.x,p.y).setScale(art.scale).setAlpha(.72).setTint(colour).setVisible(true);
   }
   getHoverTile():Vec2|null{return this.hoverTile;}

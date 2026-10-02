@@ -66,6 +66,7 @@ export class GameScene extends Phaser.Scene {
       }
       const id = this.world.pickEntity(snapshot, worldPoint.x, worldPoint.y);
       this.sim.selectEntity(id);
+      if(!id){const description=this.world.inspectScenery(worldPoint.x,worldPoint.y);if(description)this.sim.message=description;}
     });
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {

@@ -33,3 +33,7 @@ Downloaded under `public/assets/sourced/` for processing:
 
 ## Autonomous visual correction (2026-10-01)
 The revised valley uses original code-generated 2:1 art in src/game/siteArt.ts for solar racks, office, workshop, grid equipment, roads, fences, trees, shrubs, rocks, van and signs. It also uses original terrain geometry. These were made to enforce matching projection and ground anchors where the previously combined assets did not match. The existing technician frames and UI icons retain their prior provenance above. No additional third-party assets or licenses were introduced. Upstream Tiled documentation and Phaser projection code were consulted as research; Tiled is not bundled.
+
+
+## Living-valley additions (2026-10-02)
+Original code-generated flower clusters, reeds, ducks, picnic table, supply pallet, lamps, light texture, panel dirt and office detail were added in siteArt.ts. ValleyLife.ts draws original ground texture, ripples, insects, birds and window lighting. No assets from the indie inspiration games were imported or copied. Existing third-party credits above still apply to the retained staff frames and icons.
