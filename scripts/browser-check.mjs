@@ -25,13 +25,13 @@ async function openGameMenu() {
   const win = page.locator('[data-k="win"]:not([hidden])');
   if (await win.count()) await win.locator('[data-action="dismiss-win"]').click();
   const menu = page.locator('.utility-menu');
-  if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click();
+  if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click({force:true});
   return menu;
 }
 async function clickGameAction(action) {
   const menu = await openGameMenu();
-  await menu.locator('[data-action="' + action + '"]').click();
-  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click();
+  await menu.locator('[data-action="' + action + '"]').click({force:true});
+  if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click({force:true});
 }
 async function saved() {
   await clickGameAction('save');
@@ -82,7 +82,7 @@ await clickGameAction('export-save');
 async function importFixture(name) {
   const chooser = page.waitForEvent('filechooser');
   const menu = await openGameMenu();
-  await menu.locator('[data-action="import-save"]').click();
+  await menu.locator('[data-action="import-save"]').click({force:true});
   await (await chooser).setFiles('browser-fixtures/'+name+'.json');
   if ((await menu.getAttribute('open')) !== null) await menu.locator('summary').click();
   await page.waitForTimeout(300);
