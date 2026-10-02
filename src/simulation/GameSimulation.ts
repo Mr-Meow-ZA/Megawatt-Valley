@@ -839,6 +839,10 @@ export class GameSimulation {
   dismissStaff(id: string): boolean {
     const member = this.staff.find((s) => s.id === id);
     if (!member) return false;
+    if (this.staff.length <= 1) {
+      this.message = 'You need at least one employee to keep the site operational.';
+      return false;
+    }
     this.staff = this.staff.filter((s) => s.id !== id);
     if (this.selectedId === id) this.selectedId = null;
     this.message = member.name + ' left the company. You can hire a replacement at any time.';
