@@ -14,10 +14,20 @@ page.on('request',(request)=>{if(/^https?:/.test(request.url()))errors.push('Une
 page.on('dialog',(dialog)=>dialog.accept());
 const url = pathToFileURL(path.resolve('playable/PLAY-MEGAWATT-VALLEY.html')).href;
 await page.goto(url);
-await page.locator('[data-action="save"]').waitFor({timeout:60000});
+await page.locator('[data-k="management-dock"]').waitFor({timeout:60000});
 await page.locator('[data-speed="0"]').click();
+async function openGameMenu() {
+  const menu = page.locator('.utility-menu');
+  if (!(await menu.getAttribute('open'))) await menu.locator('summary').click();
+  return menu;
+}
+async function clickGameAction(action) {
+  const menu = await openGameMenu();
+  await menu.locator('[data-action="' + action + '"]').click();
+  if (await menu.getAttribute('open')) await menu.locator('summary').click();
+}
 async function saved() {
-  await page.locator('[data-action="save"]').click();
+  await clickGameAction('save');
   return page.evaluate(()=>JSON.parse(localStorage.getItem('megawatt-valley-solar-v1')).state);
 }
 const before = await saved();
@@ -54,17 +64,19 @@ assert.equal(resumed.equipment.length,4); assert.equal(resumed.cash,before.cash-
 await page.locator('[data-action="jump"][data-id="people"]').click();
 await page.locator('[data-action="hire"][data-id="cleaner"]').click();
 assert.equal((await saved()).staff.length,2);
-await page.locator('[data-action="new"]').click();
+await clickGameAction('new');
 assert.equal((await saved()).equipment.length,3);
-await page.locator('[data-action="new"]').click();
+await clickGameAction('new');
 await page.locator('[data-action="hire"][data-id="cleaner"]').scrollIntoViewIfNeeded();
 await page.locator('[data-action="hire"][data-id="cleaner"]').click();
 assert.equal((await saved()).staff.length,2);
-await page.locator('[data-action="export-save"]').click();
+await clickGameAction('export-save');
 async function importFixture(name) {
   const chooser = page.waitForEvent('filechooser');
-  await page.locator('[data-action="import-save"]').click();
+  const menu = await openGameMenu();
+  await menu.locator('[data-action="import-save"]').click();
   await (await chooser).setFiles('browser-fixtures/'+name+'.json');
+  if (await menu.getAttribute('open')) await menu.locator('summary').click();
   await page.waitForTimeout(300);
 }
 await importFixture('storm');
@@ -122,6 +134,7 @@ await page.mouse.wheel(0,170);await page.waitForTimeout(300);
 await nightStyle.evaluate(el=>el.remove());
 await importFixture('one-star');
 await page.setViewportSize({width:1024,height:768});
+await page.locator('[data-action="jump"][data-id="caps"]').click();
 await page.locator('[data-action="capability"][data-id="cleaning_rig"]').scrollIntoViewIfNeeded();
 assert.ok(await page.locator('[data-action="capability"][data-id="cleaning_rig"]').isVisible());
 await page.screenshot({path:'browser-evidence/laptop.png'});
