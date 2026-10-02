@@ -41,7 +41,7 @@ export class WorldView {
     this.placementHint=scene.add.text(0,0,'',{fontFamily:'system-ui,sans-serif',fontSize:'12px',resolution:2,color:'#f1e9cd',backgroundColor:'#294c3f',padding:{x:10,y:7}}).setOrigin(.5,1).setDepth(810).setVisible(false);
     this.ghost=scene.add.image(0,0,'site_pv_basic').setDepth(800).setVisible(false);
     this.weatherGraphics=scene.add.graphics().setDepth(900).setScrollFactor(0);
-    this.veil=scene.add.rectangle(0,0,1,1,0x182d3d,0).setOrigin(0).setDepth(890).setScrollFactor(0);
+    this.veil=scene.add.rectangle(0,0,1,1,0x182d3d,1).setAlpha(0).setOrigin(0).setDepth(890).setScrollFactor(0);
     const cam=scene.cameras.main;
     cam.setBounds(-1800,-500,4300,2800);
     cam.setZoom(.62);cam.centerOn(390,650);

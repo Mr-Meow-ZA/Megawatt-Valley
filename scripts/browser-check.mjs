@@ -79,7 +79,18 @@ await page.screenshot({path:'browser-evidence/one-star.png'});
 console.log('COMPLETION_BASE64:'+(await page.screenshot({type:'jpeg',quality:40})).toString('base64'));
 const detailStyle=await page.addStyleTag({content:'#ui-root { visibility: hidden !important; }'});
 await page.mouse.move(700,420);await page.mouse.wheel(0,-170);await page.waitForTimeout(300);
-await page.screenshot({path:'browser-evidence/infrastructure-detail.png'});
+const dayDetail=await page.screenshot({path:'browser-evidence/infrastructure-detail.png'});
+async function brightness(png) {
+  return page.evaluate(async (base64)=>{
+    const image=new Image();image.src='data:image/png;base64,'+base64;await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;
+    const context=canvas.getContext('2d');context.drawImage(image,0,0);
+    const pixels=context.getImageData(0,0,canvas.width,canvas.height).data;
+    let total=0,count=0;for(let i=0;i<pixels.length;i+=64){total+=pixels[i]*.2126+pixels[i+1]*.7152+pixels[i+2]*.0722;count++;}
+    return total/count;
+  },png.toString('base64'));
+}
+const dayBrightness=await brightness(dayDetail);
 console.log('DETAIL_BASE64:'+(await page.screenshot({type:'jpeg',quality:75})).toString('base64'));
 await page.mouse.wheel(0,170);await page.waitForTimeout(300);
 await detailStyle.evaluate(el=>el.remove());
@@ -91,7 +102,10 @@ await importFixture('night');
 assert.equal((await saved()).hour,22);
 const nightStyle=await page.addStyleTag({content:'#ui-root { visibility: hidden !important; }'});
 await page.mouse.move(700,420);await page.mouse.wheel(0,-170);await page.waitForTimeout(300);
-await page.screenshot({path:'browser-evidence/evening-lights.png'});
+const nightDetail=await page.screenshot({path:'browser-evidence/evening-lights.png'});
+const nightBrightness=await brightness(nightDetail);
+assert.ok(nightBrightness<dayBrightness*.8,'Night must actually darken the world, not only switch on lamps');
+console.log('LIGHTING_CHECK_PASSED: day',dayBrightness.toFixed(1),'night',nightBrightness.toFixed(1));
 console.log('NIGHT_BASE64:'+(await page.screenshot({type:'jpeg',quality:75})).toString('base64'));
 await page.mouse.wheel(0,170);await page.waitForTimeout(300);
 await nightStyle.evaluate(el=>el.remove());
