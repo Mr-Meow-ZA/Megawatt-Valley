@@ -17,6 +17,8 @@ await page.goto(url);
 await page.locator('[data-k="management-dock"]').waitFor({timeout:60000});
 await page.locator('[data-speed="0"]').click();
 async function openGameMenu() {
+  const win = page.locator('[data-k="win"]:not([hidden])');
+  if (await win.count()) await win.locator('[data-action="dismiss-win"]').click();
   const menu = page.locator('.utility-menu');
   if ((await menu.getAttribute('open')) === null) await menu.locator('summary').click();
   return menu;
