@@ -10,7 +10,7 @@ import type { CapabilityId, EquipmentKind, GameSnapshot, StaffMember } from '../
 import { clearSave, loadGame, saveGame } from '../persistence/save';
 import { ROLE_LABEL, staffPortrait, weatherLandscape } from './referenceArt';
 
-const BUILD_LABEL: Partial<Record<EquipmentKind, string>> = { bargain_pv: 'Solar Array', premium_pv: 'Premium Array', inverter: 'Inverter Station', workshop: 'Maintenance Garage', road: 'Service Road', fence: 'Site Fence', gate: 'Service Gate', tree: 'Valley Tree', sign: 'Safety Sign' };
+const BUILD_LABEL: Partial<Record<EquipmentKind, string>> = { bargain_pv: 'Solar Array', premium_pv: 'Premium Array', inverter: 'Inverter Station', workshop: 'Workshop', road: 'Service Road', fence: 'Site Fence', gate: 'Service Gate', tree: 'Valley Tree', sign: 'Safety Sign' };
 function escapeHtml(value: string): string { return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!)); }
 
 function money(n: number): string {
@@ -828,7 +828,7 @@ export class DomHud {
           return `<button type="button" class="build-card ${active} ${locked ? 'locked' : ''}" ${locked || unaffordable ? "disabled" : ""} data-build="${id}" title="${escapeHtml(tip)}" aria-pressed="${snapshot.buildMode === id}">
             <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
             <strong>${BUILD_LABEL[id] ?? def.name}</strong>
-            <span class="price">${money(def.cost)}</span><small>${locked ? 'First repair to unlock' : unaffordable ? 'More cash needed' : def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% reliability" : id === 'workshop' ? 'Faster repairs' : 'Landscape & layout'}</small>
+            <span class="price">${money(def.cost)}</span><small>${locked ? 'First repair to unlock' : unaffordable ? 'More cash needed' : def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% rel." : id === 'workshop' ? 'Faster repairs' : 'Landscape & layout'}</small>
           </button>`;
         })
         .join('');
