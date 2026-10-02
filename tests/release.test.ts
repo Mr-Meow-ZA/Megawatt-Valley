@@ -68,6 +68,23 @@ describe('release safety', () => {
     expect(sim.buyCapability('scheduled_cleaning')).toBe(true);
     const resumed = new GameSimulation(); resumed.load(sim.serialize()); expect(resumed.capabilities).toEqual(sim.capabilities);
   });
+  it('supports playtest funding, positive grant and staff dismissal', () => {
+    const sim = new GameSimulation();
+    const cash = sim.cash;
+    expect(sim.grantPlaytestCash(25_000)).toBe(true);
+    expect(sim.cash).toBe(cash + 25_000);
+    expect(sim.triggerPlaytestGrant()).toBe(true);
+    expect(sim.activeEvent?.id).toBe('green_growth_grant');
+    const beforeGrant = sim.cash;
+    sim.resolveEventChoice('cash');
+    expect(sim.cash).toBe(beforeGrant + 7_500);
+    expect(sim.hireStaff('cleaner')).toBe(true);
+    const cleaner = sim.staff.find((s) => s.role === 'cleaner')!;
+    expect(sim.dismissStaff(cleaner.id)).toBe(true);
+    expect(sim.staff.some((s) => s.id === cleaner.id)).toBe(false);
+    expect(sim.dismissStaff(sim.staff[0].id)).toBe(false);
+    expect(validateState(sim.serialize())).toBe(true);
+  });
   it('releases staff tasks when selling their target and protects last PV', () => {
     const sim = new GameSimulation(); const starter = sim.equipment.find((e) => e.kind === 'bargain_pv')!;
     expect(sim.demolish(starter.id)).toBe(false);
