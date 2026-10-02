@@ -1,3 +1,4 @@
+import { isoToScreen } from './iso';
 import { loadGame, saveGame } from '../persistence/save';
 import Phaser from 'phaser';
 import { GameSimulation } from '../simulation/GameSimulation';
@@ -36,7 +37,7 @@ export class GameScene extends Phaser.Scene {
     let moved = false;
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (this.sim.snapshot().activeEvent) return;
+      if (this.hud.isOverlayOpen()) return;
       pressScreen = { x: pointer.x, y: pointer.y };
       pressWorld = cam.getWorldPoint(pointer.x, pointer.y);
       moved = false;
@@ -45,7 +46,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (this.sim.snapshot().activeEvent) {
+      if (this.hud.isOverlayOpen()) {
         this.dragging = false;
         return;
       }
@@ -60,7 +61,10 @@ export class GameScene extends Phaser.Scene {
         const tile = this.world.getHoverTile();
         if (tile) {
           const plotId = this.sim.plotAtTile(tile);
-          if (plotId) this.sim.placeEquipment(snapshot.buildMode, plotId, tile);
+          if (plotId) {
+            const placed = this.sim.placeEquipment(snapshot.buildMode, plotId, tile);
+            if (placed && (pointer.event as MouseEvent).shiftKey) this.sim.setBuildMode(snapshot.buildMode);
+          }
         }
         return;
       }
@@ -70,7 +74,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (!pointer.isDown || this.sim.snapshot().activeEvent) return;
+      if (!pointer.isDown || this.hud.isOverlayOpen()) return;
       const dx = pointer.x - pressScreen.x;
       const dy = pointer.y - pressScreen.y;
       if (!moved && Math.hypot(dx, dy) > 6) {
@@ -85,6 +89,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _over: unknown, _dx: number, dy: number) => {
+      if (this.hud.isOverlayOpen()) return;
       const next = Phaser.Math.Clamp(cam.zoom - dy * 0.0015, 0.35, 1.8);
       cam.setZoom(next);
     });
@@ -97,14 +102,17 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on('keydown-SPACE', () => {
+      if (this.hud.isOverlayOpen()) return;
       const snap = this.sim.snapshot();
       this.sim.setSpeed(snap.speed === 0 ? 1 : 0);
     });
     this.input.keyboard?.on('keydown-R', () => {
+      if (this.hud.isOverlayOpen()) return;
       const snap = this.sim.snapshot();
       if (snap.selectedId) this.sim.dispatchRepair(snap.selectedId);
     });
     this.input.keyboard?.on('keydown-C', () => {
+      if (this.hud.isOverlayOpen()) return;
       const snap = this.sim.snapshot();
       if (snap.selectedId) this.sim.dispatchClean(snap.selectedId);
     });
@@ -119,7 +127,11 @@ export class GameScene extends Phaser.Scene {
     generateOverlayTextures(this);
     this.sim = new GameSimulation();
     this.world = new WorldView(this, this.sim);
-    this.hud = new DomHud(this.sim, () => this.startNewGame());
+    this.hud = new DomHud(this.sim, () => this.startNewGame(), tile => {
+      const camera = this.cameras.main;
+      if (!tile) { camera.setZoom(.62); camera.centerOn(390,650); }
+      else { const point = isoToScreen(tile.x,tile.y); camera.centerOn(point.x,point.y + 80); }
+    });
   }
 
   update(_t: number, delta: number): void {

@@ -1,3 +1,4 @@
+import { RESEARCH, type ResearchId, type ResearchProject } from '../content/research';
 import { isMainRoad, isWater, isBank, alongPath, staffRoute } from '../content/valleyLayout';
 import { validateState } from '../persistence/validate';
 import { EQUIPMENT } from '../content/equipment';
@@ -33,6 +34,8 @@ function isPv(kind: EquipmentKind): boolean {
 }
 
 export class GameSimulation {
+  researched: ResearchId[] = [];
+  activeResearch: ResearchProject | null = null;
   cash = STARTING_CASH;
   day = 1;
   hour = 8;
@@ -61,6 +64,7 @@ export class GameSimulation {
   faultsRepaired = 0;
   cleansCompleted = 0;
   scenarioComplete = false;
+  completionAcknowledged = false;
   tickAccumulator = 0;
   nextFaultCheck = 12;
   nextSoilTick = 6;
@@ -162,7 +166,7 @@ export class GameSimulation {
     const extra = this.equipment
       .filter((e) => e.kind === 'inverter' && e.commissioned && !e.faulted)
       .reduce((sum, e) => sum + EQUIPMENT.inverter.nameplateKw * e.condition, 0);
-    return starter + extra;
+    return (starter + extra) * (this.researched.includes('smart_inverters') ? 1.2 : 1);
   }
 
   computePower(): { generationKw: number; exportedKw: number } {
@@ -175,10 +179,49 @@ export class GameSimulation {
       if (!plot?.unlocked || !plot.gridConnected) continue;
       const soilPenalty = 1 - eq.soiling * 0.45;
       generationKw +=
-        def.nameplateKw * def.efficiency * eq.condition * soilPenalty * irradiance * plot.solarResource;
+        def.nameplateKw * def.efficiency * eq.condition * soilPenalty * irradiance * plot.solarResource
+        * (this.researched.includes('precision_wiring') ? 1.08 : 1)
+        * (eq.kind === 'premium_pv' && this.researched.includes('advanced_cells') ? 1.12 : 1);
     }
     const exportedKw = Math.min(generationKw, this.inverterCapacity()) * this.curtailmentFactor;
     return { generationKw, exportedKw };
+  }
+
+  researchBlockedReason(id: ResearchId): string | null {
+    if (!Object.prototype.hasOwnProperty.call(RESEARCH,id)) return 'Unknown research';
+    const def = RESEARCH[id];
+    if (this.researched.includes(id)) return 'Completed';
+    if (this.activeResearch?.id === id) return 'Researching';
+    if (def.prerequisite && !this.researched.includes(def.prerequisite)) return `Requires ${RESEARCH[def.prerequisite].name}`;
+    if (def.gate === 'power' && !this.objectives.some(o => o.id === 'first_power' && o.complete)) return 'Export your first power';
+    if (def.gate === 'repair' && !this.capabilities.includes('radio_dispatch')) return 'Complete your first repair';
+    if (def.gate === 'clean' && !this.capabilities.includes('cleaning_kit')) return 'Complete your first clean';
+    if (def.gate === 'expansion' && !this.plots[1].unlocked) return 'Unlock Site B';
+    if (this.activeResearch) return 'Finish the current project';
+    if (this.cash < def.cost) return 'Not enough cash';
+    return null;
+  }
+
+  startResearch(id: ResearchId): boolean {
+    const reason = this.researchBlockedReason(id);
+    if (reason) { this.message = reason; return false; }
+    this.cash -= RESEARCH[id].cost;
+    this.activeResearch = { id, progress: 0 };
+    this.message = `Research started: ${RESEARCH[id].name}. Keep the park running.`;
+    return true;
+  }
+
+  private advanceResearch(hours: number): void {
+    if (!this.activeResearch) return;
+    // Office research is available without a hire; engineers help without leaving their service role.
+    const support = Math.min(1, this.staff.filter(s => s.role === 'engineer').reduce((n,s) => n + .1 * (s.skill ?? 1), 0));
+    const project = this.activeResearch;
+    project.progress = Math.min(1, project.progress + hours * (1 + support) / RESEARCH[project.id].hours);
+    if (project.progress >= 1) {
+      this.researched.push(project.id);
+      this.activeResearch = null;
+      this.message = `Research complete: ${RESEARCH[project.id].name}. ${RESEARCH[project.id].effect}`;
+    }
   }
 
   setSpeed(speed: 0 | 1 | 2 | 4): void {
@@ -417,7 +460,7 @@ export class GameSimulation {
       if (!isPv(eq.kind) || !eq.commissioned) continue;
       const base = this.hailPrepared ? 0.12 : 0.35;
       const reliability = EQUIPMENT[eq.kind].reliability;
-      const hit = base * (1.15 - reliability);
+      const hit = base * (1.15 - reliability) * (this.researched.includes('storm_hardening') ? .75 : 1);
       eq.condition = clamp(eq.condition - hit, 0.2, 1);
       if (!this.hailPrepared && this.random() < 0.45) {
         eq.faulted = true;
@@ -510,6 +553,7 @@ export class GameSimulation {
       if (this.curtailmentTimer <= 0) this.curtailmentFactor = 1;
     }
 
+    this.advanceResearch(1 / 60);
     this.advanceConstruction();
     this.advanceStaff(1 / 60);
     this.updateWeather();
@@ -551,9 +595,9 @@ export class GameSimulation {
       if (tech.task.type === 'idle') continue;
       const task = tech.task;
       if (!this.equipment.some((e) => e.id === task.targetId)) { tech.task = { type: 'idle' }; continue; }
-      const workRate = 1 + ((tech.skill ?? 1) - 1) * 0.2 + (this.staff.some((s) => s.role === 'manager') ? 0.2 : 0);
+      const workRate = (1 + ((tech.skill ?? 1) - 1) * 0.2 + (this.staff.some((s) => s.role === 'manager') ? 0.2 : 0)) * (this.researched.includes('field_toolkits') ? 1.2 : 1);
       if (task.type === 'travel') {
-        task.progress += hours / 0.35;
+        task.progress += hours * (this.researched.includes('crew_logistics') ? 1.25 : 1) / 0.35;
         const target = this.equipment.find((e) => e.id === task.targetId);
         if (target) {
           const t = Math.min(1, task.progress);
@@ -640,7 +684,7 @@ export class GameSimulation {
     this.totalEnergyKwh += energy;
     const revenue = energy * this.tariffPerKwh;
     const payroll = this.staff.reduce((sum, member) => sum + (member.salary ?? 1), 0);
-    const opex = this.equipment.filter((e) => isPv(e.kind) && e.commissioned).length * 0.12;
+    const opex = this.equipment.filter((e) => isPv(e.kind) && e.commissioned).length * 0.12 * (this.researched.includes('efficient_operations') ? .7 : 1);
     const expense = Math.min(this.cash + revenue, (payroll + opex) * hours);
     this.cash += revenue - expense;
     this.totalExpenses += expense;
@@ -664,7 +708,7 @@ export class GameSimulation {
       if (!eq.commissioned || eq.faulted) continue;
       if (!isPv(eq.kind) && eq.kind !== 'inverter') continue;
       const reliability = EQUIPMENT[eq.kind].reliability;
-      const chance = (1 - reliability) * 0.08 * (this.capabilities.includes('remote_monitoring') ? 0.5 : 1) * (this.staff.some((s) => s.role === 'engineer') ? 0.7 : 1);
+      const chance = (1 - reliability) * 0.08 * (this.researched.includes('predictive_diagnostics') ? .75 : 1) * (this.capabilities.includes('remote_monitoring') ? 0.5 : 1) * (this.staff.some((s) => s.role === 'engineer') ? 0.7 : 1);
       if (this.random() < chance) {
         eq.faulted = true;
         eq.condition = clamp(eq.condition - 0.08, 0.25, 1);
@@ -676,7 +720,7 @@ export class GameSimulation {
 
   private accumulateSoiling(): void {
     const kit = this.capabilities.includes('cleaning_kit');
-    const rate = kit ? 0.012 : 0.02;
+    const rate = (kit ? 0.012 : 0.02) * (this.researched.includes('dust_coating') ? .8 : 1);
     for (const eq of this.equipment) {
       if (!isPv(eq.kind) || !eq.commissioned) continue;
       eq.soiling = clamp(eq.soiling + rate * (this.weather === 'rain' ? 0.3 : 1), 0, 1);
@@ -907,10 +951,14 @@ export class GameSimulation {
   snapshot(): GameSnapshot {
     const { generationKw, exportedKw } = this.computePower();
     return {
+      researched: [...this.researched],
+      activeResearch: this.activeResearch ? { ...this.activeResearch } : null,
       cash: this.cash,
       revenuePerHour: this.revenuePerHour,
       powerKw: generationKw,
       exportedKw,
+      inverterCapacityKw: this.inverterCapacity(),
+      clippedKw: Math.max(0, generationKw - this.inverterCapacity()),
       day: this.day,
       hour: this.hour,
       speed: this.speed,
@@ -938,11 +986,14 @@ export class GameSimulation {
       faultsRepaired: this.faultsRepaired,
       cleansCompleted: this.cleansCompleted,
       scenarioComplete: this.scenarioComplete,
+      completionAcknowledged: this.completionAcknowledged,
     };
   }
 
   serialize(): SerializedGameState {
     return {
+      researched: [...this.researched],
+      activeResearch: this.activeResearch ? { ...this.activeResearch } : null,
       cash: this.cash,
       day: this.day,
       hour: this.hour,
@@ -969,6 +1020,7 @@ export class GameSimulation {
       faultsRepaired: this.faultsRepaired,
       cleansCompleted: this.cleansCompleted,
       scenarioComplete: this.scenarioComplete,
+      completionAcknowledged: this.completionAcknowledged,
       tickAccumulator: this.tickAccumulator,
       nextFaultCheck: this.nextFaultCheck,
       nextSoilTick: this.nextSoilTick,
@@ -992,6 +1044,8 @@ export class GameSimulation {
     this.manualRepairs = data.capabilities.includes('radio_dispatch') ? 1 : 0;
     this.manualCleans = data.capabilities.includes('cleaning_kit') ? 1 : 0;
     this.speedBeforeEvent = 1;
+    this.researched = []; this.activeResearch = null;
+    this.completionAcknowledged = data.scenarioComplete;
     Object.assign(this, copy);
     // Apply current balance tuning to older playtest saves instead of preserving the slower legacy tariff.
     this.tariffPerKwh = Math.max(this.tariffPerKwh, TARIFF_PER_KWH);

@@ -1,3 +1,4 @@
+import type { ResearchId, ResearchProject } from '../content/research';
 /** Shared simulation types for Megawatt Valley: Solar Level 1. */
 
 export type EquipmentKind = 'bargain_pv' | 'premium_pv' | 'inverter' | 'office' | 'substation' | 'road' | 'fence' | 'gate' | 'tree' | 'workshop' | 'sign';
@@ -119,6 +120,10 @@ export interface ActiveEvent {
 }
 
 export interface GameSnapshot {
+  researched: ResearchId[];
+  activeResearch: ResearchProject | null;
+  inverterCapacityKw: number;
+  clippedKw: number;
   cash: number;
   revenuePerHour: number;
   powerKw: number;
@@ -144,6 +149,7 @@ export interface GameSnapshot {
   faultsRepaired: number;
   cleansCompleted: number;
   scenarioComplete: boolean;
+  completionAcknowledged: boolean;
 }
 
 export interface SaveData {
@@ -153,6 +159,8 @@ export interface SaveData {
 }
 
 export interface SerializedGameState {
+  researched?: ResearchId[];
+  activeResearch?: ResearchProject | null;
   cash: number;
   day: number;
   hour: number;
@@ -179,6 +187,7 @@ export interface SerializedGameState {
   faultsRepaired: number;
   cleansCompleted: number;
   scenarioComplete: boolean;
+  completionAcknowledged?: boolean;
   tickAccumulator: number;
   nextFaultCheck: number;
   nextSoilTick: number;

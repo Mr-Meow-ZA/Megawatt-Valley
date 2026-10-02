@@ -37,3 +37,13 @@ The revised valley uses original code-generated 2:1 art in src/game/siteArt.ts f
 
 ## Living-valley additions (2026-10-02)
 Original code-generated flower clusters, reeds, ducks, picnic table, supply pallet, lamps, light texture, panel dirt and office detail were added in siteArt.ts. ValleyLife.ts draws original ground texture, ripples, insects, birds and window lighting. No assets from the indie inspiration games were imported or copied. Existing third-party credits above still apply to the retained staff frames and icons.
+
+
+## Original improvement-pass art — 2 October 2026
+
+`src/game/ValleyBackdrop.ts` draws decorative faceted mountain ridges, lake, distant
+village and conifers in world coordinates. `src/game/siteArt.ts` now includes four
+original staff uniforms (technician, cleaner, engineer, manager), walking poses and
+roster portraits. Brighter roofs, cells and vegetation extend the existing original
+canvas art. No new third-party image dependency or license was introduced. The
+supplied reference was used for direction, not copied into the distributed build.

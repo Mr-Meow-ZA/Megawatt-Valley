@@ -12,6 +12,15 @@ Drag the world to pan, use the mouse wheel to zoom, and choose speed at top righ
 Select an object for details/actions; × closes its inspector. The bottom dock has
 Build, Team, Upgrades and Finance tabs. The arrow collapses the dock to show more
 of the valley; any tab reopens it. Switching away from Build cancels placement.
+Click a fault/dust alert to select and find the equipment. Click the minimap to
+centre the camera. **H** restores the home view; **F** finds the selected object.
+**Shift-click** a valid tile to place equipment and keep building the same kind.
+
+**Upgrades → Open tech tree** (or **U**) opens nine working research upgrades.
+Choose a branch and pay to start one project. It advances with park time; pausing
+or an event pauses research. Engineers assist while keeping their field duties.
+**Esc** closes the tree. Finance shows clipping, capacity and exact star requirements.
+
 The top-right gear menu provides save/load, restart, portable saves and sound.
 Loaded/imported companies start paused so you can inspect before pressing Play.
 

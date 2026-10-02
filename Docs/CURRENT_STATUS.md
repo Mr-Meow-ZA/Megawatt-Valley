@@ -24,13 +24,32 @@ The separate Cursor PR #8 remains independent.
 - Net-positive supplier/sponsorship rewards work even with zero cash.
 - Browser verification uses ordinary visible clicks, without bypassing modal overlays.
 
+### Latest improvement pass
+
+- Honest evaluation: **5.5/10 baseline → approximately 6.3/10 after this pass**.
+  Scores assess a prototype against the supplied cozy low-poly reference; automated
+  checks do not establish enjoyment or commercial polish.
+- Nine working, paid and timed research upgrades across Generation, Operations and
+  Resilience. All have real effects, prerequisites and save support. The former
+  future-feature tree preview is removed.
+- Brighter original terrain/art, blue roofs/panels, distant mountains/lake/village,
+  four role-specific staff uniforms and roster portraits.
+- Click-to-find fault/dust/clipping alerts, minimap navigation, H/F/U camera/research
+  controls, Shift-click repeat placement, clearer finance/star progress and persistent
+  completion acknowledgement.
+- 34 simulation tests plus expanded standalone browser verification.
+
+Read [the honest review and prioritised continuation](HONEST_REVIEW_2026-10-02.md)
+for scores, what actually works, remaining gaps and measurable next steps.
+
 Run the [Solar release checks](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/workflows/solar-release.yml)
 and use the latest successful **PLAY-MEGAWATT-VALLEY** artifact. Unzip and open
 `PLAY-MEGAWATT-VALLEY.html` in desktop Chrome/Edge; no server or installation needed.
 See `AUTONOMOUS-PLAY.md` for controls and `Docs/HANDOVER_2026-10-02_UI_BALANCE.md`
 for the current continuation notes.
 
-Remaining: richer scenery/art polish, independent playtesting, later-star pacing,
+Remaining: a stronger art slice, staff wellbeing/facilities, solar layout decisions,
+independent playtesting, later-star pacing,
 and a stable hosted release URL. Scenario 2 is an unlock marker, not a playable map.
 
 ## Archive
@@ -54,7 +73,7 @@ Tracked by GitHub issue **#6**. Implementation plan: `Docs/PHASER_IMPLEMENTATION
 | Milestone | Status |
 |-----------|--------|
 | M0 Rebaseline (Phaser+Vite+TS) | Done |
-| M1 Visual proof + HUD/build | Kenney + procedural polish through Loops 1–11; quality scorecard target ≥9.5/10 |
+| M1 Visual proof + HUD/build | Kenney + procedural polish through Loops 1–11; earlier ≥9.5 aspiration was not a validated quality score |
 | M2 Core solar loop | Done |
 | M3 Ops / staff / automation | Done (fault→Radio Dispatch, soiling→Cleaning Kit) |
 | M4 Full Level 1 scenario | In progress (objectives, events, stars, hail; automated 1★ smoke passes) |

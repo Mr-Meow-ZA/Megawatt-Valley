@@ -1,3 +1,4 @@
+import { buildValleyBackdrop } from './ValleyBackdrop';
 import { ValleyLife } from './ValleyLife';
 import Phaser from 'phaser';
 import { EQUIPMENT } from '../content/equipment';
@@ -33,6 +34,7 @@ export class WorldView {
   constructor(private readonly scene:Phaser.Scene,private readonly sim:GameSimulation){
     generateSiteArt(scene);
     scene.cameras.main.setBackgroundColor(0x789473);
+    buildValleyBackdrop(scene);
     this.buildLandscape();
     this.life=new ValleyLife(scene);
     this.preview=scene.add.graphics().setDepth(790);
@@ -74,15 +76,15 @@ export class WorldView {
   }
   private buildLandscape(){
     const g=this.scene.add.graphics().setDepth(-1000);
-    this.area(g,-.5,-.5,WORLD_W,WORLD_H,0x91ad70);
-    this.area(g,3.5,3.5,14,12,0xa4b680,.48);
-    this.area(g,21.5,5.5,12,10,0xa4b680,.4);
+    this.area(g,-.5,-.5,WORLD_W,WORLD_H,0x9abe74);
+    this.area(g,3.5,3.5,14,12,0xb7cc87,.48);
+    this.area(g,21.5,5.5,12,10,0xb7cc87,.4);
     const ribbon=(margin:number,colour:number)=>{
       const left:P[]=[],right:P[]=[];
       for(let y=-.5;y<=WORLD_H-.5;y+=.25){const half=riverHalfWidth(y)+margin;left.push(isoToScreen(riverCenterX(y)-half,y));right.push(isoToScreen(riverCenterX(y)+half,y));}
       this.polygon(g,[...left,...right.reverse()],colour);
     };
-    ribbon(.5,0xc4c29a);ribbon(.18,0x88b2a5);ribbon(0,0x5d9f9e);
+    ribbon(.5,0xd0cba2);ribbon(.18,0x91c7bc);ribbon(0,0x60aebe);ribbon(-.42,0x4693b0);
     for(let y=0;y<WORLD_H;y+=1.6){
       const x=riverCenterX(y)+(Math.sin(y*2)*.65);
       this.line(g,{x:x-.15,y},{x:x+.24,y:y+.1},0xc0d8bf,1,.55);
@@ -190,10 +192,10 @@ export class WorldView {
     }
     for(const s of snapshot.staff){
       seen.add(s.id);const traveling=s.task.type==='travel',busy=s.task.type!=='idle';
-      const p=isoToScreen(s.tile.x,s.tile.y),e=this.entity(s.id,'tech');
-      const key=traveling?'tech_walk_'+Math.floor(this.scene.time.now/150)%2:'tech';
-      e.sprite.setTexture(key).setOrigin(.5,.93).setPosition(p.x,p.y-(traveling?Math.sin(this.scene.time.now/90):0)).setScale(.38).setDepth(depthFor(s.tile.x,s.tile.y,10));
-      e.sprite.clearTint();if(s.role==='cleaner')e.sprite.setTint(0xa5dabf);
+      const p=isoToScreen(s.tile.x,s.tile.y),e=this.entity(s.id,'staff_'+s.role+'_0');
+      const key='staff_'+s.role+'_'+(traveling?Math.floor(this.scene.time.now/150)%2:0);
+      e.sprite.setTexture(key).setOrigin(.5,44/48).setPosition(p.x,p.y-(traveling?Math.sin(this.scene.time.now/90):0)).setScale(.75).setDepth(depthFor(s.tile.x,s.tile.y,10));
+      e.sprite.clearTint();
       e.shadow.setPosition(p.x,p.y+1).setDepth(depthFor(s.tile.x,s.tile.y,8)).setVisible(true);
       const task=s.task.type==='repair'?'REPAIR':s.task.type==='clean'?'CLEAN':s.id===snapshot.selectedId?s.name:'';
       e.status.setText(task).setFontSize(10).setPosition(p.x,p.y-25).setDepth(804).setVisible(!!task);

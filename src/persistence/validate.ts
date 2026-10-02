@@ -1,3 +1,4 @@
+import { RESEARCH, type ResearchId } from '../content/research';
 import { EQUIPMENT } from '../content/equipment';
 import { EVENTS } from '../content/events';
 import { CAPABILITY_INFO, createInitialObjectives } from '../content/scenario';
@@ -13,7 +14,7 @@ const keys = Object.keys;
 const requiredNumbers = ['cash','day','hour','weatherTimer','tariffPerKwh','nextEntityId','totalEnergyKwh','faultsRepaired','cleansCompleted','tickAccumulator','nextFaultCheck','nextSoilTick','lifetimeRevenue','peakExportKw'];
 const optionalNumbers = ['curtailmentFactor','curtailmentTimer','eventClock','rngState','totalExpenses','manualRepairs','manualCleans'];
 const requiredBooleans = ['hailPrepared','hailSurvived','scenarioComplete','scriptedFirstFault'];
-const allowed = new Set([...requiredNumbers,...optionalNumbers,...requiredBooleans,'speed','speedBeforeEvent','weather','plots','equipment','staff','capabilities','objectives','stars','triggeredEvents','pendingEventQueue','activeEvent','selectedId','buildMode','message','revenuePerHour','eventDelays']);
+const allowed = new Set([...requiredNumbers,...optionalNumbers,...requiredBooleans,'completionAcknowledged','researched','activeResearch','speed','speedBeforeEvent','weather','plots','equipment','staff','capabilities','objectives','stars','triggeredEvents','pendingEventQueue','activeEvent','selectedId','buildMode','message','revenuePerHour','eventDelays']);
 const plots = ['site_a','site_b'];
 
 /** Validate before state enters the simulation; never trust a cast after JSON.parse. */
@@ -22,6 +23,7 @@ export function validateState(value: unknown): value is SerializedGameState {
   if (requiredNumbers.some((k) => !num(value[k], k === 'nextFaultCheck' || k === 'nextSoilTick' ? -1 : 0))) return false;
   if (optionalNumbers.some((k) => value[k] !== undefined && !num(value[k], k === 'curtailmentTimer' ? -1 : 0))) return false;
   if (!num(value.revenuePerHour, -1e9) || requiredBooleans.some((k) => typeof value[k] !== 'boolean')) return false;
+  if (value.completionAcknowledged !== undefined && typeof value.completionAcknowledged !== 'boolean') return false;
   if (!enumValue(value.speed,[0,1,2,4]) || (value.speedBeforeEvent !== undefined && !enumValue(value.speedBeforeEvent,[0,1,2,4]))) return false;
   if (!enumValue(value.weather,['clear','partly_cloudy','overcast','rain','hail']) || !enumValue(value.stars,[0,1,2,3])) return false;
   if (value.curtailmentFactor !== undefined && !num(value.curtailmentFactor,0,1)) return false;
@@ -46,6 +48,18 @@ export function validateState(value: unknown): value is SerializedGameState {
   for (const key of ['capabilities','triggeredEvents','pendingEventQueue']) {
     const a = value[key];
     if (!Array.isArray(a) || a.length > 30 || !a.every((id) => enumValue(id, keys(key === 'capabilities' ? CAPABILITY_INFO : EVENTS))) || new Set(a).size !== a.length) return false;
+  }
+  if (value.researched !== undefined) {
+    if (!Array.isArray(value.researched) || value.researched.length > keys(RESEARCH).length || new Set(value.researched).size !== value.researched.length || !value.researched.every(id => enumValue(id, keys(RESEARCH)))) return false;
+    const completed = value.researched as ResearchId[];
+    if (completed.some(id => RESEARCH[id].prerequisite && !completed.includes(RESEARCH[id].prerequisite as ResearchId))) return false;
+  }
+  if (value.activeResearch !== undefined && value.activeResearch !== null) {
+    const project = value.activeResearch;
+    if (!object(project) || keys(project).some(k => !['id','progress'].includes(k)) || !enumValue(project.id, keys(RESEARCH)) || !num(project.progress,0,1)) return false;
+    const completed = (value.researched ?? []) as ResearchId[];
+    const id = project.id as ResearchId;
+    if (completed.includes(id) || (RESEARCH[id].prerequisite && !completed.includes(RESEARCH[id].prerequisite as ResearchId))) return false;
   }
   const objectives = createInitialObjectives();
   if (!Array.isArray(value.objectives) || value.objectives.length !== objectives.length || new Set(value.objectives.map((o) => object(o) ? o.id : null)).size !== objectives.length) return false;

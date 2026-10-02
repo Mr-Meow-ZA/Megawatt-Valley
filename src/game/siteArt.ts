@@ -36,7 +36,7 @@ export function generateSiteArt(scene:Phaser.Scene):void {
     rect(c,x,y,w,d,z+height,top,cx,cy);
   };
   for(const premium of [false,true])make(premium?'site_pv_premium':'site_pv_basic',200,160,c=>{
-    rect(c,-.92,-.92,1.84,1.84,0,'#a7ae8b');
+    rect(c,-.92,-.92,1.84,1.84,0,'#b9c393');
     for(let row=0;row<3;row++){
       const y=-.73+row*.52;
       // Small ground shadow, galvanized supports, and a continuous tilted rack.
@@ -44,24 +44,25 @@ export function generateSiteArt(scene:Phaser.Scene):void {
       for(const x of [-.64,.64])line(c,iso(x,y+.27),iso(x,y+.27,13),'#707f7b',3);
       const plane=(x:number,t:number)=>iso(x,y+t,21-t*22);
       poly(c,[plane(-.78,0),plane(.78,0),plane(.78,.34),plane(-.78,.34)],'#abbfc1');
-      poly(c,[plane(-.75,.025),plane(.75,.025),plane(.75,.31),plane(-.75,.31)],premium?'#173e59':'#284f70');
-      for(let cell=1;cell<8;cell++)line(c,plane(-.75+cell*1.5/8,.025),plane(-.75+cell*1.5/8,.31),premium?'#4e8394':'#668da2',1);
+      poly(c,[plane(-.75,.025),plane(.75,.025),plane(.75,.31),plane(-.75,.31)],premium?'#245992':'#356ea9');
+      for(let cell=1;cell<8;cell++)line(c,plane(-.75+cell*1.5/8,.025),plane(-.75+cell*1.5/8,.31),premium?'#6fb3d5':'#8bb6d8',1);
       line(c,plane(-.75,.17),plane(.75,.17),'#567e94',1);
-      line(c,plane(-.78,0),plane(.78,0),'#d0dddd',2);
+      line(c,plane(-.78,0),plane(.78,0),'#e6eeee',2);
+      poly(c,[plane(-.68,.03),plane(-.25,.03),plane(.12,.30),plane(-.32,.30)],'#b5d8ed25');
     }
   });
   for(const workshop of [false,true])make(workshop?'site_workshop':'site_office',200,170,c=>{
     const cy=110;
     rect(c,-.94,-.94,1.88,1.88,0,'#b9b49e',100,cy);
-    box(c,-.66,-.55,1.30,1.12,0,35,'#cbd3c1','#d7d1b1','#a6b7a4',100,cy);
-    box(c,-.76,-.65,1.5,1.32,35,6,'#52776b','#395c51','#2e4c43',100,cy);
+    box(c,-.66,-.55,1.30,1.12,0,35,'#e6e5c8','#f3e5bc','#c4cba9',100,cy);
+    box(c,-.76,-.65,1.5,1.32,35,6,'#577eb1','#3e6597','#2c4b7b',100,cy);
     // Ribbed roof, a vent, doorstep and flower box give this tiny office a lived-in scale.
     if(!workshop){
       box(c,-.49,.61,.76,.15,6,7,'#9a7950','#816644','#68573f',100,cy);
       for(let i=0;i<5;i++){const p=iso(-.41+i*.13,.66,16,100,cy);c.fillStyle=i%2?'#e4c679':'#afbe77';c.fillRect(p[0],p[1],4,4);}
       box(c,.76,.27,.22,.25,0,4,'#dfd4ad','#b4b096','#9ca78c',100,cy);
     }
-    for(let i=1;i<6;i++)line(c,iso(-.76+i*.25,-.65,42,100,cy),iso(-.76+i*.25,.67,42,100,cy),'#67887b',2);
+    for(let i=1;i<6;i++)line(c,iso(-.76+i*.25,-.65,42,100,cy),iso(-.76+i*.25,.67,42,100,cy),'#7d9ec4',2);
     box(c,-.48,-.38,.22,.23,42,8,'#b9bfa5','#929f87','#6c8270',100,cy);
 
     if(workshop){
@@ -94,7 +95,7 @@ export function generateSiteArt(scene:Phaser.Scene):void {
     // One broadleaf family with variations in crown colour and height.
     c.fillStyle='#40533a55';c.beginPath();c.ellipse(45,90,25,10,0,0,Math.PI*2);c.fill();
     c.fillStyle='#756a49';c.fillRect(36,57,8,33);c.fillStyle='#ad9465';c.fillRect(36,59,3,30);
-    const leaf=[['#466c46','#648749','#8a9e5b'],['#426d51','#608a59','#89a36b'],['#547646','#759153','#99ad69']][variant];
+    const leaf=[['#3e744c','#62934c','#9db765'],['#347758','#5d9966','#9bc77b'],['#507e42','#81a551','#b3c977']][variant];
     poly(c,[[7,48],[12,30],[24,28],[25,15],[40,8],[55,18],[57,27],[69,33],[74,51],[62,66],[47,72],[27,67],[12,62]],leaf[0]);
     poly(c,[[10,43],[18,28],[29,28],[31,16],[42,12],[54,21],[53,34],[64,36],[67,48],[52,54],[38,63],[22,56]],leaf[1]);
     poly(c,[[19,35],[29,31],[33,20],[42,17],[50,23],[47,34],[37,40],[27,42]],leaf[2]);
@@ -195,6 +196,28 @@ export function generateSiteArt(scene:Phaser.Scene):void {
       const p=iso(x,y,19);c.fillStyle=i%3?'#c5b07c88':'#e1cca177';c.fillRect(p[0],p[1],4+(i%3)*2,2);
     }
   });
+
+  // Four readable uniforms, two walking poses. Original pixel characters share a ground anchor.
+  for(const [role,shirt,hat,skin]of [
+    ['technician','#e4a046','#f2cf62','#c38e67'],
+    ['cleaner','#64ad9c','#e4efdb','#9d6953'],
+    ['engineer','#668fbc','#f6edce','#d5a27c'],
+    ['manager','#826a9b','#735b4b','#bd845f'],
+  ]) for(let frame=0;frame<2;frame++) make('staff_'+role+'_'+frame,32,48,c=>{
+    const fill=(x:number,y:number,w:number,h:number,col:string)=>{c.fillStyle=col;c.fillRect(x,y,w,h);};
+    fill(10,30,6,12,'#34526d');fill(18,30,6,12,'#294056');
+    fill(8,40+frame*2,9,4,'#384747');fill(18,42-frame*2,9,4,'#384747');
+    fill(8,18,18,16,shirt);fill(8,29,18,3,'#eff0ca');
+    fill(5,20+frame*2,5,12,shirt);fill(24,20-frame*2,5,12,shirt);
+    fill(5,30+frame*2,5,4,skin);fill(24,30-frame*2,5,4,skin);
+    fill(11,8,13,13,skin);fill(11,16,3,5,'#926348');
+    fill(10,5,16,6,hat);fill(8,10,20,3,hat);
+    fill(13,4,10,2,role==='manager'?'#5e4b40':'#fff0b4');
+    fill(21,13,2,2,'#35424a');
+    if(role==='engineer'||role==='manager'){fill(24,25,6,9,'#dbe6cf');fill(25,27,3,2,'#7b9c9f');}
+    else {fill(26,30,4,8,role==='cleaner'?'#7ab5c6':'#b4babc');}
+  });
+  for(const role of ['technician','cleaner','engineer','manager']) SITE_ICONS['staff_'+role]=(scene.textures.get('staff_'+role+'_0').getSourceImage() as HTMLCanvasElement).toDataURL();
 
   for(const [kind,art]of Object.entries(SITE_ART)){
     SITE_ICONS[kind]=(scene.textures.get(art.key).getSourceImage() as HTMLCanvasElement).toDataURL();

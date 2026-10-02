@@ -1,8 +1,10 @@
+import { RESEARCH, RESEARCH_BRANCHES, type ResearchId } from '../content/research';
+import type { Vec2 } from '../simulation/types';
 import { SITE_ICONS } from '../game/siteArt';
 import { ROAD_TILES, riverCenterX } from '../content/valleyLayout';
 import { sound } from '../audio/sound';
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
-import { CAPABILITY_INFO } from '../content/scenario';
+import { CAPABILITY_INFO, STAR_THRESHOLDS } from '../content/scenario';
 import type { GameSimulation } from '../simulation/GameSimulation';
 import type { CapabilityId, EquipmentKind, GameSnapshot, StaffMember } from '../simulation/types';
 import { clearSave, loadGame, saveGame } from '../persistence/save';
@@ -100,6 +102,11 @@ export class DomHud {
   private readonly listeners = new AbortController();
   destroy(): void { this.listeners.abort(); }
 
+  private lastFinanceHtml = '';
+  private lastResearchHtml = '';
+  private lastAlertHtml = '';
+  private researchReturnFocus: HTMLElement | null = null;
+  isOverlayOpen(): boolean { return !!this.root.querySelector('.research-modal:not([hidden]), .modal:not([hidden]), .win:not([hidden])'); }
   private lastEventId: string | null = null;
   private lastObjectivesKey = '__uninit__';
   private lastBuildKey = '__uninit__';
@@ -125,6 +132,7 @@ export class DomHud {
   constructor(
     private readonly sim: GameSimulation,
     private readonly onNewGame: () => void,
+    private readonly onCamera: (tile: Vec2 | null) => void = () => {},
   ) {
     for(const [kind,uri]of Object.entries(SITE_ICONS)) BUILD_ICONS[kind]='<img src="'+uri+'" alt="" width="48" height="38" style="object-fit:contain;image-rendering:pixelated"/>';
     const el = document.getElementById('ui-root');
@@ -228,7 +236,7 @@ export class DomHud {
           <button type="button" data-action="jump" data-id="people"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="6" r="3"/><path d="M1 17v-2a6 6 0 0 1 12 0v2M13 3a3 3 0 0 1 0 6M15 12a5 5 0 0 1 4 5"/></svg> Team</button>
           <button type="button" data-action="jump" data-id="caps"><span>⚙</span> Upgrades</button>
           <button type="button" data-action="jump" data-id="finance"><span>▥</span> Finance</button>
-          <div class="dock-hint">Drag to pan · Wheel to zoom · R repair · C clean</div>
+          <div class="dock-hint">Drag to pan · Wheel zoom · H home · F find · U research</div>
           <button type="button" class="dock-toggle" data-action="toggle-dock" aria-expanded="true" aria-controls="management-content" title="Collapse management panel">⌄</button>
         </nav>
 
@@ -268,6 +276,7 @@ export class DomHud {
               <div><h2>Company Upgrades</h2><span>Move work from manual to automated</span></div>
             </div>
             <ul data-k="caps"><li class="muted">None yet — earn them in play.</li></ul>
+            <button type="button" class="research-launch" data-action="open-research">Open tech tree · 9 upgrades</button><small data-k="research-summary">Office research · one project at a time</small>
             <div class="capability-grid" data-k="capability-actions"></div>
           </aside>
 
@@ -297,14 +306,26 @@ export class DomHud {
           <button type="button" data-action="new">New Game</button>
           <button type="button" data-action="export-save">Export save</button>
           <button type="button" data-action="import-save">Import save</button>
+          <button type="button" data-action="home-camera">Home view · H</button>
+          <button type="button" data-action="focus-selected">Find selected · F</button>
+          <button type="button" data-action="open-research">Tech tree · U</button>
           <button type="button" data-action="audio">Sound: off</button>
         </div>
       </details>
 
+      <div class="park-alerts" data-k="park-alerts" aria-label="Park alerts"></div>
+      <div class="research-modal" data-k="research-modal" role="dialog" aria-modal="true" aria-labelledby="research-title" hidden>
+        <section class="research-board">
+          <header><div><span class="research-eyebrow">COMPANY DEVELOPMENT</span><h2 id="research-title">A brighter tomorrow</h2><p>Choose what your park gets better at. Every upgrade below works.</p></div><button type="button" data-action="close-research" aria-label="Close tech tree">×</button></header>
+          <div class="research-office"><span data-k="research-office">Office research</span><strong data-k="research-cash"></strong></div>
+          <div class="research-columns" data-k="research-tree"></div>
+          <footer>One project at a time · Paid when started · Progress uses park hours and pauses with the game<br>Engineers add 10% research speed per skill point, up to +100%. They still service your park.</footer>
+        </section>
+      </div>
       <div class="toast" data-k="toast" hidden></div>
       <div class="build-banner" data-k="build-banner" hidden>
         <strong data-k="build-banner-label">Placing…</strong>
-        <span>Click a valid meadow tile · Esc / Cancel to abort</span>
+        <span>Click a valid tile · Shift-click to keep building · Esc to cancel</span>
       </div>
 
 
@@ -328,11 +349,18 @@ export class DomHud {
     const canvas = this.root.querySelector('[data-k="minimap"]') as HTMLCanvasElement;
     this.minimapCtx = canvas.getContext('2d');
 
+    canvas.tabIndex = 0;
+    canvas.setAttribute('aria-label', 'Valley map. Click a position to centre the camera.');
+    canvas.addEventListener('click', ev => {
+      const rect = canvas.getBoundingClientRect();
+      this.onCamera({ x: ((ev.clientX - rect.left) * 220 / rect.width - 8) / 4.8, y: ((ev.clientY - rect.top) * 120 / rect.height - 6) / 3.5 });
+    }, { signal: this.listeners.signal });
+
     const handleUiAction = (ev: Event) => {
       const t = (ev.target as HTMLElement).closest(
         '[data-speed],[data-build],[data-action],[data-cat]',
       ) as HTMLElement | null;
-      if (!t) return;
+      if (!t || (t as HTMLButtonElement).disabled) return;
       ev.preventDefault();
       ev.stopPropagation();
       if ((t as HTMLButtonElement).disabled) return;
@@ -386,6 +414,12 @@ export class DomHud {
           });
         }
       }
+      if (action === 'open-research') this.openResearch();
+      if (action === 'close-research') this.closeResearch();
+      if (action === 'research') { this.sim.startResearch(t.getAttribute('data-id') as ResearchId); this.render(this.sim.snapshot()); }
+      if (action === 'home-camera') this.onCamera(null);
+      if (action === 'focus-selected') this.focusEntity(this.sim.selectedId);
+      if (action === 'locate') this.focusEntity(t.getAttribute('data-id'));
       if (action === 'cancel-build') this.sim.setBuildMode(null);
       if (action === 'save') {
         this.sim.message = saveGame(this.sim.serialize()) ? 'Game saved.' : 'Could not save. Use Export save to keep your progress.';
@@ -459,6 +493,7 @@ export class DomHud {
         if (id) { this.sim.resolveEventChoice(id); this.render(this.sim.snapshot()); }
       }
       if (action === 'dismiss-win') {
+        this.sim.completionAcknowledged = true;
         const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
         win.hidden = true;
       }
@@ -466,7 +501,22 @@ export class DomHud {
     this.root.addEventListener('click', handleUiAction, { signal: this.listeners.signal });
 
     window.addEventListener('keydown', (ev) => {
-      if (ev.repeat || (ev.target as HTMLElement)?.closest('input,textarea,button')) return;
+      const researchModal = this.root.querySelector('[data-k="research-modal"]') as HTMLElement;
+      if (!researchModal.hidden && ev.key === 'Tab') {
+        const controls = [...researchModal.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
+        const first = controls[0], last = controls[controls.length - 1];
+        if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last?.focus(); }
+        else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first?.focus(); }
+        return;
+      }
+      if (ev.key === 'Escape' && !researchModal.hidden) { this.closeResearch(); return; }
+      if (ev.repeat || (ev.target as HTMLElement)?.closest('input,textarea,select,[contenteditable="true"]')) return;
+      if (!ev.ctrlKey && !ev.metaKey && !ev.altKey && !this.sim.activeEvent && researchModal.hidden) {
+        if (ev.key.toLowerCase() === 'u') { this.openResearch(); return; }
+        if (ev.key.toLowerCase() === 'h') { this.onCamera(null); return; }
+        if (ev.key.toLowerCase() === 'f') { this.focusEntity(this.sim.selectedId); return; }
+      }
+      if (!researchModal.hidden) return;
       if (ev.ctrlKey && ev.shiftKey && ev.key.toLowerCase() === 'm') {
         ev.preventDefault();
         this.sim.grantPlaytestCash(25_000);
@@ -488,6 +538,58 @@ export class DomHud {
         if (choice) this.sim.resolveEventChoice(choice.id);
       }
     }, { signal: this.listeners.signal });
+  }
+
+  private openResearch(): void {
+    if (this.sim.activeEvent) return;
+    this.sim.setBuildMode(null);
+    this.researchReturnFocus = document.activeElement as HTMLElement | null;
+    (this.root.querySelector('[data-k="research-modal"]') as HTMLElement).hidden = false;
+    this.render(this.sim.snapshot());
+    (this.root.querySelector('[data-action="close-research"]') as HTMLButtonElement).focus();
+  }
+
+  private closeResearch(): void {
+    (this.root.querySelector('[data-k="research-modal"]') as HTMLElement).hidden = true;
+    this.researchReturnFocus?.focus();
+  }
+
+  private focusEntity(id: string | null): void {
+    const entity = this.sim.equipment.find(e => e.id === id) ?? this.sim.staff.find(s => s.id === id);
+    if (!entity) { this.sim.message = 'Select equipment or a person to find them.'; return; }
+    this.sim.selectEntity(entity.id);
+    this.onCamera(entity.tile);
+  }
+
+  private renderResearch(snapshot: GameSnapshot): void {
+    const project = snapshot.activeResearch;
+    const summary = project ? `${RESEARCH[project.id].name} · ${Math.floor(project.progress * 100)}%` : `${snapshot.researched.length}/9 upgrades researched · Choose your next project`;
+    (this.root.querySelector('[data-k="research-summary"]') as HTMLElement).textContent = summary;
+    if ((this.root.querySelector('[data-k="research-modal"]') as HTMLElement).hidden) return;
+    if (snapshot.activeEvent) { this.closeResearch(); return; }
+    (this.root.querySelector('[data-k="research-cash"]') as HTMLElement).textContent = money(snapshot.cash);
+    (this.root.querySelector('[data-k="research-office"]') as HTMLElement).textContent = project ? `In progress: ${summary}` : 'Office ready · Research is optional; choose the branch that suits your park.';
+    const html = RESEARCH_BRANCHES.map(branch => `<section class="research-branch ${branch.id}"><h3><span>${branch.icon}</span>${branch.name}</h3><p>${branch.subtitle}</p>` + Object.entries(RESEARCH).filter(([,def]) => def.branch === branch.id).map(([key,def]) => {
+      const id = key as ResearchId;
+      const completed = snapshot.researched.includes(id), active = project?.id === id;
+      const reason = this.sim.researchBlockedReason(id);
+      return `<article class="research-node ${completed ? 'completed' : active ? 'researching' : reason ? 'locked' : 'available'}" data-research-node="${id}"><div class="research-status">${completed ? '✓ COMPLETE' : active ? 'IN PROGRESS' : reason ? 'LOCKED' : 'AVAILABLE'}</div><h4>${def.name}</h4><p>${def.description}</p><strong>${def.effect}</strong><small>${money(def.cost)} · ${def.hours} park hours${def.prerequisite ? `<br>Requires ${RESEARCH[def.prerequisite].name}` : ''}</small><progress data-research-progress="${id}" value="0" max="1" ${active ? '' : 'hidden'}></progress><button type="button" data-action="research" data-id="${id}" ${reason ? 'disabled' : ''}>${completed ? 'Applied to your park' : active ? 'Researching…' : reason ?? 'Start research'}</button></article>`;
+    }).join('<div class="research-link" aria-hidden="true">↓</div>') + '</section>').join('');
+    if (html !== this.lastResearchHtml) { this.lastResearchHtml = html; (this.root.querySelector('[data-k="research-tree"]') as HTMLElement).innerHTML = html; }
+    if (project) {
+      const progress = this.root.querySelector(`[data-research-progress="${project.id}"]`) as HTMLProgressElement;
+      progress.value = project.progress;
+      progress.setAttribute('aria-label', `${RESEARCH[project.id].name}: ${Math.floor(project.progress * 100)}% complete`);
+    }
+  }
+
+  private renderAlerts(snapshot: GameSnapshot): void {
+    const faults = snapshot.equipment.filter(e => e.faulted);
+    const dirty = snapshot.equipment.filter(e => e.kind.includes('pv') && !e.faulted && e.soiling > .35).sort((a,b) => b.soiling - a.soiling);
+    const html = (faults.length ? `<button type="button" class="fault" data-action="locate" data-id="${faults[0].id}"><b>! ${faults.length} equipment fault${faults.length === 1 ? '' : 's'}</b><span>Find the first fault →</span></button>` : '')
+      + (dirty.length ? `<button type="button" data-action="locate" data-id="${dirty[0].id}"><b>${dirty.length} dusty array${dirty.length === 1 ? '' : 's'}</b><span>Find the dirtiest →</span></button>` : '')
+      + (snapshot.clippedKw > .5 ? `<button type="button" data-action="locate" data-id="${snapshot.equipment.find(e => e.kind === 'substation')?.id}"><b>Grid limit: ${Math.round(snapshot.clippedKw)} kW lost</b><span>Add an inverter or research capacity →</span></button>` : '');
+    if (html !== this.lastAlertHtml) { this.lastAlertHtml = html; (this.root.querySelector('[data-k="park-alerts"]') as HTMLElement).innerHTML = html; }
   }
 
   private drawMinimap(snapshot: GameSnapshot): void {
@@ -556,6 +658,8 @@ export class DomHud {
   }
 
   render(snapshot: GameSnapshot): void {
+    this.renderResearch(snapshot);
+    this.renderAlerts(snapshot);
     const setText = (k: string, text: string) => {
       const el = this.root.querySelector(`[data-k="${k}"]`) as HTMLElement | null;
       if (el && el.textContent !== text) el.textContent = text;
@@ -728,13 +832,39 @@ export class DomHud {
       const owned = snapshot.capabilities.includes(id);
       const locked = !snapshot.plots[1].unlocked || (id === 'scheduled_cleaning' && !snapshot.capabilities.includes('cleaning_rig'));
       return '<button type="button" data-action="capability" data-id="' + id + '" ' + (owned || locked ? 'disabled' : '') + ' title="' + CAPABILITY_INFO[id].description + '">' + (owned ? '✓ ' : locked ? 'Locked · ' : '') + CAPABILITY_INFO[id].name + '</button><small>' + CAPABILITY_INFO[id].description + '</small>';
-    }).join('') + '<details><summary>Company capability tree</summary><h3>Generation technology</h3><small>✓ Fixed tilt → ✓ Premium PV → 🔒 Bifacial → 🔒 Trackers → 🔒 Wind</small><h3>Operations & reliability</h3><small>✓ Manual repairs → Earn Radio Dispatch + Workshop → Cleaning Kit → Cleaning Rig → Scheduled Cleaning → 🔒 Predictive Maintenance</small><h3>Digital & automation</h3><small>✓ Basic monitoring → Radio Dispatch → Remote Monitoring → 🔒 SCADA → 🔒 Robots → 🔒 Command Centre</small><h3>People & organisation</h3><small>✓ Technician → Hire Cleaner / Engineer / Manager → Train skills → 🔒 Regional O&M</small><h3>Grid & flexibility</h3><small>✓ Basic grid → Build Inverter → 🔒 BESS → 🔒 Hybrid systems</small><h3>Development & commercial</h3><small>✓ Site A → Earn Site B → 🔒 Site studies → 🔒 PPAs → 🔒 Multi-project finance</small><small>Locked future nodes are previews for later scenarios.</small></details>';
+    }).join('');
     if (this.lastCapabilityHtml !== capHtml) { this.lastCapabilityHtml = capHtml; capActions.innerHTML = capHtml; }
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
-    const rosterHtml = snapshot.staff.map((s) => '<div><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '">Train · $800</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="' + s.id + '">Dismiss</button></div>').join('');
+    const rosterHtml = snapshot.staff.map((s) => '<div><img class="staff-portrait" src="' + SITE_ICONS['staff_' + s.role] + '" alt=""/><strong>' + s.name + '</strong><small>' + s.role + ' · ' + (s.trait ?? 'Panel Whisperer') + ' · skill ' + (s.skill ?? 1).toFixed(1) + ' · ' + s.task.type + '</small><button type="button" data-action="train" data-id="' + s.id + '" ' + ((s.skill ?? 1) >= 5 || snapshot.cash < 800 ? 'disabled' : '') + '>Train · $800</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="' + s.id + '" ' + (snapshot.staff.length <= 1 ? 'disabled title="Keep at least one staff member"' : '') + '>Dismiss</button></div>').join('');
     if (this.lastRosterHtml !== rosterHtml) { this.lastRosterHtml = rosterHtml; roster.innerHTML = rosterHtml; }
     const finance = this.root.querySelector('[data-k="finance"]') as HTMLElement;
-    finance.textContent = 'Sales ' + money(this.sim.lifetimeRevenue) + ' · Operating expenses ' + money(this.sim.totalExpenses) + ' · Energy ' + Math.round(snapshot.totalEnergyKwh) + ' kWh · Peak ' + Math.round(this.sim.peakExportKw) + ' kW · Staff ' + snapshot.staff.length;
+    const panels = snapshot.equipment.filter(e => e.kind.includes('pv') && e.commissioned);
+    const availability = panels.length ? Math.round(panels.filter(e => !e.faulted).length / panels.length * 100) : 100;
+    const cleanliness = panels.length ? Math.round(panels.reduce((sum,e) => sum + 1 - e.soiling,0) / panels.length * 100) : 100;
+    const cards = [
+      ['Lifetime sales',money(this.sim.lifetimeRevenue)], ['Operating expenses',money(this.sim.totalExpenses)],
+      ['Energy exported',`${Math.round(snapshot.totalEnergyKwh).toLocaleString()} kWh`], ['Peak export',`${Math.round(this.sim.peakExportKw)} kW`],
+      ['Inverter capacity',`${Math.round(snapshot.inverterCapacityKw)} kW`], ['Clipping now',`${snapshot.clippedKw.toFixed(1)} kW`],
+      ['Array availability',`${availability}%`], ['Cleanliness',`${cleanliness}%`],
+    ];
+    const criteria = snapshot.stars < 1 ? [
+      [this.sim.peakExportKw >= STAR_THRESHOLDS.star1PeakKw,`Peak export: ${Math.round(this.sim.peakExportKw)} / ${STAR_THRESHOLDS.star1PeakKw} kW`],
+      [this.sim.lifetimeRevenue >= STAR_THRESHOLDS.star1Revenue,`Sales: ${money(this.sim.lifetimeRevenue)} / ${money(STAR_THRESHOLDS.star1Revenue)}`],
+      [this.sim.manualRepairs > 0 && this.sim.manualCleans > 0,'Complete a manual repair and clean'],
+      [this.sim.hailSurvived,'Resolve the hailstorm'],
+      [panels.some(e => e.plotId === 'site_b'),'Commission a solar array on Site B'],
+    ] : snapshot.stars < 2 ? [
+      [this.sim.peakExportKw >= STAR_THRESHOLDS.star2PeakKw,`Peak export: ${Math.round(this.sim.peakExportKw)} / ${STAR_THRESHOLDS.star2PeakKw} kW`],
+      [panels.some(e => e.plotId === 'site_b'),'Commission a solar array on Site B'],
+      [snapshot.capabilities.includes('radio_dispatch'),'Unlock Radio Dispatch'],
+    ] : [
+      [this.sim.peakExportKw >= STAR_THRESHOLDS.star3PeakKw,`Peak export: ${Math.round(this.sim.peakExportKw)} / ${STAR_THRESHOLDS.star3PeakKw} kW`],
+      [snapshot.hailPrepared && this.sim.hailSurvived,'Prepare for hail and survive it'],
+      [snapshot.capabilities.includes('cleaning_kit'),'Earn the Cleaning Kit'],
+    ];
+    const financeHtml = '<div class="finance-cards">' + cards.map(([label,value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join('') + '</div>'
+      + `<div class="star-checklist"><b>${snapshot.stars === 3 ? '3★ mastery achieved' : `Next award: ${snapshot.stars+1}★`}</b>` + criteria.map(([done,label]) => `<span class="${done ? 'done' : ''}">${done ? '✓' : '○'} ${label}</span>`).join('') + '</div>';
+    if (financeHtml !== this.lastFinanceHtml) { this.lastFinanceHtml = financeHtml; finance.innerHTML = financeHtml; }
     sound.update(snapshot.weather, snapshot.faultsRepaired, snapshot.cleansCompleted, snapshot.stars);
 
     const toast = this.root.querySelector('[data-k="toast"]') as HTMLElement;
@@ -842,7 +972,7 @@ export class DomHud {
     }
 
     const win = this.root.querySelector('[data-k="win"]') as HTMLElement;
-    if (snapshot.scenarioComplete && snapshot.stars >= 1 && !win.dataset.shown) {
+    if (snapshot.scenarioComplete && !snapshot.completionAcknowledged && snapshot.stars >= 1 && !win.dataset.shown) {
       win.hidden = false;
       win.dataset.shown = '1';
     }
