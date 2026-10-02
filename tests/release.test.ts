@@ -71,6 +71,7 @@ describe('release safety', () => {
   it('supports playtest funding, positive grant and staff dismissal', () => {
     const sim = new GameSimulation();
     const cash = sim.cash;
+    expect(sim.tariffPerKwh).toBeGreaterThanOrEqual(0.45);
     expect(sim.grantPlaytestCash(25_000)).toBe(true);
     expect(sim.cash).toBe(cash + 25_000);
     expect(sim.triggerPlaytestGrant()).toBe(true);
