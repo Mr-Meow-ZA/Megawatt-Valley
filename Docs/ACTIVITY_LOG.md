@@ -1555,3 +1555,12 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 **Git / References**
 - Commit: this entry ships with the gameplay progression commit.
 - Branch / PR: codex/solar-release-hardening / #10, still stacked on PR #7.
+
+
+### Gameplay release verification follow-up
+
+The first Actions run passed all simulation/build/package steps but its software-rendered
+browser timed out on the 20-second training wait. The same full course completed locally.
+Browser verification now allows 60 seconds on the slower runner, still requires the full
+four park hours and actual skill improvement, and captures task/skill/speed/event state
+plus a screenshot on failure. No gameplay timers or training-save progress were shortened.

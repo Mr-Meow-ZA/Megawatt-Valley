@@ -152,9 +152,25 @@ await page.locator('[data-k="worker-zone"]').selectOption('site_a');
 await page.locator('[data-k="worker-duty"]').selectOption('repair');
 assert.equal((await saved()).staff.find(s=>s.id===worker.id).workZone,'site_a');
 await page.locator('[data-speed="4"]').click();
-await page.waitForFunction(target=>parseFloat(document.querySelector('.worker-skill b')?.textContent ?? '0')>=target,Number((worker.skill+1).toFixed(1)),{timeout:20000});
+// Software rendering on a two-core Actions runner advances fewer park frames.
+// Keep the full course and assert park-time completion, rather than speeding up the save.
+try {
+  await page.waitForFunction(target=>parseFloat(document.querySelector('.worker-skill b')?.textContent ?? '0')>=target,Number((worker.skill+1).toFixed(1)),{timeout:60000});
+} catch(error) {
+  console.log('TRAINING_TIMEOUT_DIAGNOSTICS:'+JSON.stringify(await page.evaluate(()=>({
+    task:document.querySelector('.worker-status')?.textContent,
+    skill:document.querySelector('.worker-skill b')?.textContent,
+    calendar:document.querySelector('[data-k="time-clock"]')?.textContent,
+    activeSpeed:document.querySelector('[data-speed].active')?.getAttribute('data-speed'),
+    event:document.querySelector('[data-k="modal"]')?.hidden===false
+  }))));
+  await page.screenshot({path:'browser-evidence/training-timeout.png'});
+  throw error;
+}
 await page.locator('[data-speed="0"]').click();
-assert.ok((await saved()).staff.find(s=>s.id===worker.id).skill>=worker.skill+1,'Training completes over park time');
+const trainingComplete=await saved();
+assert.ok(trainingComplete.staff.find(s=>s.id===worker.id).skill>=worker.skill+1,'Training completes over park time');
+assert.ok((trainingComplete.day-trained.day)*24+trainingComplete.hour-trained.hour>=4-1/60,'A complete course uses four park hours');
 await page.locator('[data-k="worker-zone"]').selectOption('all');
 await page.locator('[data-k="worker-duty"]').selectOption('auto');
 await page.locator('[data-k="selection"]').evaluate(el=>el.scrollTop=0);
