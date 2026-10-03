@@ -1,3 +1,4 @@
+import type { ContractProgress, ContractResult } from '../content/contracts';
 import type { ResearchId, ResearchProject } from '../content/research';
 /** Shared simulation types for Megawatt Valley: Solar Level 1. */
 
@@ -7,11 +8,16 @@ export type PlotId = 'site_a' | 'site_b';
 
 export type WeatherKind = 'clear' | 'partly_cloudy' | 'overcast' | 'rain' | 'hail';
 
+export type WorkKind = 'repair' | 'clean' | 'service';
+export interface WorkOrder { targetId: string; kind: WorkKind; manual: boolean; }
+export interface DailyReport { day:number; energyKwh:number; revenue:number; expenses:number; bonuses:number; jobs:number; }
+
 export type StaffTask =
   | { type: 'idle' }
-  | { type: 'travel'; targetId: string; progress: number; from: Vec2 }
+  | { type: 'travel'; targetId: string; progress: number; from: Vec2; intent?: WorkKind; duration?: number }
   | { type: 'repair'; targetId: string; progress: number }
-  | { type: 'clean'; targetId: string; progress: number };
+  | { type: 'clean'; targetId: string; progress: number }
+  | { type: 'service'; targetId: string; progress: number };
 
 export type CapabilityId = 'radio_dispatch' | 'cleaning_kit' | 'cleaning_rig' | 'remote_monitoring' | 'scheduled_cleaning';
 
@@ -80,6 +86,11 @@ export interface StaffMember {
   skill?: number;
   salary?: number;
   trait?: string;
+  energy?: number;
+  trainingHoursLeft?: number;
+  onBreak?: boolean;
+  workZone?: PlotId | 'all';
+  preference?: 'auto' | 'repair' | 'clean' | 'research';
   plotId: PlotId;
   tile: Vec2;
   task: StaffTask;
@@ -120,6 +131,22 @@ export interface ActiveEvent {
 }
 
 export interface GameSnapshot {
+  contract: ContractProgress | null;
+  contractHistory: ContractResult[];
+  contractRenewals: number;
+  contractCooldown: number;
+  contractsCompleted: number;
+  workOrders: WorkOrder[];
+  cleaningThreshold: number;
+  preventiveMaintenance: boolean;
+  stabilityHours: number;
+  servicesCompleted: number;
+  dailyReports: DailyReport[];
+  currentReport: DailyReport;
+  peakExportKw: number;
+  lifetimeRevenue: number;
+  nextNarrativeAt: number;
+  eventClock: number;
   researched: ResearchId[];
   activeResearch: ResearchProject | null;
   inverterCapacityKw: number;
@@ -159,6 +186,19 @@ export interface SaveData {
 }
 
 export interface SerializedGameState {
+  contract?: ContractProgress | null;
+  contractHistory?: ContractResult[];
+  contractRenewals?: number;
+  contractCooldown?: number;
+  contractsCompleted?: number;
+  workOrders?: WorkOrder[];
+  cleaningThreshold?: number;
+  preventiveMaintenance?: boolean;
+  stabilityHours?: number;
+  servicesCompleted?: number;
+  dailyReports?: DailyReport[];
+  currentReport?: DailyReport;
+  nextNarrativeAt?: number;
   researched?: ResearchId[];
   activeResearch?: ResearchProject | null;
   cash: number;

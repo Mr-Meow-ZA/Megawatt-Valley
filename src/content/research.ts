@@ -7,7 +7,7 @@ export const RESEARCH = {
   crew_logistics: { name: 'Crew logistics', branch: 'operations', cost: 3000, hours: 10, prerequisite: 'field_toolkits', gate: 'repair', effect: '+25% staff travel speed.', description: 'Plan service routes and get people to the work sooner.' },
   efficient_operations: { name: 'Lean operations', branch: 'operations', cost: 4500, hours: 16, prerequisite: 'crew_logistics', gate: 'expansion', effect: '−30% solar equipment operating costs. Salaries stay the same.', description: 'Standardise spares and reduce wasted supplies.' },
   dust_coating: { name: 'Dust-resistant coating', branch: 'resilience', cost: 1800, hours: 6, prerequisite: null, gate: 'clean', effect: '−20% dust accumulation.', description: 'Keep more sunlight reaching the cells between cleaning visits.' },
-  predictive_diagnostics: { name: 'Predictive diagnostics', branch: 'resilience', cost: 3500, hours: 12, prerequisite: 'dust_coating', gate: 'clean', effect: '−25% routine fault probability.', description: 'Catch emerging problems. The first repair lesson still happens.' },
+  predictive_diagnostics: { name: 'Predictive diagnostics', branch: 'resilience', cost: 3500, hours: 12, prerequisite: 'dust_coating', gate: 'clean', effect: '−25% routine fault probability; unlock automatic paid preventive service.', description: 'Catch emerging problems. The first repair lesson still happens.' },
   storm_hardening: { name: 'Storm hardening', branch: 'resilience', cost: 4500, hours: 16, prerequisite: 'predictive_diagnostics', gate: 'expansion', effect: '−25% hail condition damage. Storm preparation still matters.', description: 'Reinforce mounts and protect exposed components.' },
 } as const;
 

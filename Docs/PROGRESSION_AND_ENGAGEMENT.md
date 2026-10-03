@@ -1,5 +1,14 @@
 # Megawatt Valley — Progression, Unlocks & Engagement Design v0.1
 
+> **Implemented Phaser update — 3 October 2026:** See
+> [GAMEPLAY_RESEARCH_2026-10-03.md](GAMEPLAY_RESEARCH_2026-10-03.md) and
+> [CURRENT_STATUS.md](CURRENT_STATUS.md) for the running candidate. It has two
+> playable sites, optional contracts, crew assignments/energy/timed training,
+> work queues/policies, local infrastructure effects and sustained-reliability
+> star goals. Three-star mastery no longer permanently requires hail preparation.
+> Older future-scope / Unity thin-slice text below is historical design intent.
+
+
 ## Purpose
 
 Megawatt Valley should not feel like a technically correct renewable-energy sandbox with a checklist attached.

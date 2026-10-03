@@ -222,3 +222,75 @@
   .reference-hud .catalogue-tools .cancel-build { display: none; }
   .reference-hud .catalogue-footer span { max-width: 80%; font-size: 9px; }
 }
+
+/* Gameplay tools share the approved visual language; they stay contextual. */
+.reference-hud[data-tool="operations"], .reference-hud[data-tool="contracts"] { --workbench-height: min(380px, calc(100vh - 230px)); }
+.reference-hud .management-dock .operations, .reference-hud .management-dock .contracts { overflow-y: auto; }
+.reference-hud .dock-nav button { min-width: 88px; padding-left: 10px; padding-right: 10px; }
+.reference-hud .scenario-guide { padding: 9px; margin-bottom: 8px; border-radius: 7px; background: #ffffff09; }
+.reference-hud .scenario-guide small { color: #b8d8e8; font-size: 8px; letter-spacing: .08em; }
+.reference-hud .scenario-guide h3 { margin: 5px 0; font-size: 13px; color: white; }
+.reference-hud .scenario-guide p { margin: 0 0 8px; font-size: 11px; line-height: 1.45; color: #cce0e9; }
+.reference-hud .scenario-guide button { padding: 5px 9px; border: 1px solid #84bd9a; border-radius: 5px; background: #448560; color: white; font: inherit; font-size: 11px; cursor: pointer; }
+.reference-hud .objective-history { font-size: 10px; color: #c9dfeb; padding: 8px 2px 2px; }
+.reference-hud .objective-history summary { cursor: pointer; }
+.reference-hud .objective-history span { display: block; margin-top: 6px; }
+.reference-hud .operations-policies { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 12px; border-bottom: 1px solid #d6e7ef; color: #42677d; font-size: 11px; }
+.reference-hud .operations-policies label { display: flex; align-items: center; gap: 6px; }
+.reference-hud .operations-policies select, .reference-hud .worker-assignment select { color: #254d67; background: white; border: 1px solid #bdd5e3; border-radius: 5px; padding: 5px; font: inherit; }
+.reference-hud .operations-policies > span { font-size: 10px; color: #658292; }
+.reference-hud .operations-bulk { padding: 8px 12px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.reference-hud .operations-bulk button, .reference-hud .work-order button, .reference-hud .contract-card button, .reference-hud .active-contract button { color: #24516b; background: #dcecf5; border: 1px solid #b5d3e2; border-radius: 5px; padding: 6px 8px; font: inherit; font-size: 11px; cursor: pointer; }
+.reference-hud .operations-bulk small { color: #668193; font-size: 10px; }
+.reference-hud .operations-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; padding: 9px 12px 0; }
+.reference-hud .operations-metrics > div { background: #e8f2f7; border: 1px solid #d0e5ef; border-radius: 6px; padding: 8px; }
+.reference-hud .operations-metrics span { display: block; color: #628195; font-size: 10px; }
+.reference-hud .operations-metrics b { display: block; color: #27546e; font-size: 18px; margin-top: 4px; }
+.reference-hud .gameplay-footnote { margin: 8px 12px; font-size: 10px; line-height: 1.45; color: #637f91; }
+.reference-hud .gameplay-heading { margin: 12px 12px 6px; font-size: 13px; color: #305c74; }
+.reference-hud .work-order-list { padding: 0 12px; }
+.reference-hud .work-order { display: flex; align-items: center; gap: 8px; padding: 7px; border-bottom: 1px solid #d6e6ed; background: #edf5f9; font-size: 11px; color: #527389; }
+.reference-hud .work-order > span:not(.job-state) { flex: 1; }
+.reference-hud .work-order b { color: #315c74; }
+.reference-hud .job-state { font-size: 8px; letter-spacing: .04em; color: #438269; }
+.reference-hud .daily-review { padding: 0 12px; overflow-x: auto; }
+.reference-hud .daily-review table { border-collapse: collapse; width: 100%; min-width: 650px; color: #4b7086; font-size: 11px; }
+.reference-hud .daily-review th { text-align: left; font-size: 9px; color: #75909f; padding: 7px; border-bottom: 1px solid #cde0e8; }
+.reference-hud .daily-review td { padding: 7px; border-bottom: 1px solid #dbe8ee; }
+.reference-hud .contract-offers { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding: 0 12px; }
+.reference-hud .contract-card { display: flex; flex-direction: column; padding: 11px; background: white; border: 1px solid #d1e4ec; border-radius: 9px; }
+.reference-hud .contract-card > small, .reference-hud .active-contract small { font-size: 9px; color: #68879a; letter-spacing: .04em; }
+.reference-hud .contract-card h3, .reference-hud .active-contract h3 { font-size: 15px; margin: 6px 0; color: #315b75; }
+.reference-hud .contract-card p, .reference-hud .active-contract p { font-size: 11px; line-height: 1.4; color: #627f90; margin: 0 0 9px; }
+.reference-hud .contract-terms { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 8px 0; margin-top: auto; }
+.reference-hud .contract-terms span { color: #79919f; font-size: 9px; }
+.reference-hud .contract-terms b { display: block; color: #315d72; font-size: 12px; margin-top: 2px; }
+.reference-hud .contract-card button { background: #e0f0e4; border-color: #b3d6bf; color: #32684a; }
+.reference-hud .contract-card button:disabled { color: #6d8390; background: #eef3f5; border-color: #d3e1e8; cursor: not-allowed; }
+.reference-hud .contracts-summary { margin: 9px 12px; font-size: 11px; color: #567b91; }
+.reference-hud .active-contract { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; margin: 10px 12px; background: #e6f2ea; border: 1px solid #b9dbc5; border-radius: 9px; }
+.reference-hud .active-contract > div:first-child { flex: 1; }
+.reference-hud .active-contract > div:last-child { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.reference-hud .active-contract .contract-ready { color: #367250; margin-bottom: 0; }
+.reference-hud .active-contract .contract-held { color: #906729; margin-bottom: 0; }
+.reference-hud .contract-progress { height: 6px; background: #c4ddce; border-radius: 6px; margin: 7px 0; overflow: hidden; }
+.reference-hud .contract-progress i { height: 100%; display: block; background: #45a96d; border-radius: inherit; }
+.reference-hud .contract-history { padding: 0 12px 12px; }
+.reference-hud .contract-history span { display: block; color: #678598; font-size: 10px; padding: 4px 0; }
+.reference-hud .worker-assignment { display: grid; grid-template-columns: 1fr 1fr; flex-basis: 100%; gap: 8px; margin-top: 5px; padding-top: 10px; border-top: 1px solid #d7e6ed; }
+.reference-hud .worker-assignment label { display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: #6a8799; min-width: 0; }
+.reference-hud .worker-assignment select { width: 100%; min-width: 0; font-size: 11px; }
+.reference-hud .worker-assignment small { grid-column: 1 / -1; color: #668193; font-size: 10px; }
+@media (max-width: 900px) {
+  .reference-hud .contract-offers { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .reference-hud .work-order { flex-wrap: wrap; }
+}
+@media (max-width: 720px) {
+  .reference-hud .contract-offers { grid-template-columns: minmax(0,1fr); }
+  .reference-hud .operations-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .reference-hud .active-contract { align-items: flex-start; flex-direction: column; }
+}
+
+/* Keep confirmations between the two sidebars on laptop screens. */
+.reference-hud .toast { max-width: min(540px,calc(100vw - 620px)); }
+@media (max-width: 840px) { .reference-hud .toast { max-width: calc(100vw - 32px); } }

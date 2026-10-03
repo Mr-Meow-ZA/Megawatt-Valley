@@ -1,3 +1,5 @@
+import { CONTRACTS, contractOffer, type ContractId, type ContractProgress, type ContractResult } from '../content/contracts';
+import { parkMetrics, nearbyWorkshop, travelHours, workerCanDo } from './operations';
 import { RESEARCH, type ResearchId, type ResearchProject } from '../content/research';
 import { isMainRoad, isWater, isBank, alongPath, staffRoute } from '../content/valleyLayout';
 import { validateState } from '../persistence/validate';
@@ -23,6 +25,9 @@ import type {
   StaffMember,
   Vec2,
   WeatherKind,
+  WorkOrder,
+  WorkKind,
+  DailyReport,
 } from './types';
 
 function clamp(n: number, min: number, max: number): number {
@@ -36,6 +41,19 @@ function isPv(kind: EquipmentKind): boolean {
 export class GameSimulation {
   researched: ResearchId[] = [];
   activeResearch: ResearchProject | null = null;
+  contract: ContractProgress | null = null;
+  contractHistory: ContractResult[] = [];
+  contractRenewals = 0;
+  contractCooldown = 0;
+  contractsCompleted = 0;
+  workOrders: WorkOrder[] = [];
+  cleaningThreshold = .35;
+  preventiveMaintenance = false;
+  stabilityHours = 0;
+  servicesCompleted = 0;
+  dailyReports: DailyReport[] = [];
+  currentReport: DailyReport = { day:1, energyKwh:0, revenue:0, expenses:0, bonuses:0, jobs:0 };
+  nextNarrativeAt = 0;
   cash = STARTING_CASH;
   day = 1;
   hour = 8;
@@ -136,7 +154,7 @@ export class GameSimulation {
       role: 'technician', skill: 1, salary: 1, trait: 'Panel Whisperer',
       plotId: 'site_a',
       tile: { x: siteA.origin.x + 2, y: siteA.origin.y + 3 },
-      task: { type: 'idle' },
+      task: { type: 'idle' }, energy:1, onBreak:false, workZone:'all', preference:'auto',
     });
   }
 
@@ -213,8 +231,8 @@ export class GameSimulation {
 
   private advanceResearch(hours: number): void {
     if (!this.activeResearch) return;
-    // Office research is available without a hire; engineers help without leaving their service role.
-    const support = Math.min(1, this.staff.filter(s => s.role === 'engineer').reduce((n,s) => n + .1 * (s.skill ?? 1), 0));
+    // Office research has a baseline; available engineers can add assistance.
+    const support = Math.min(1, this.staff.filter(s => s.role === 'engineer' && s.task.type === 'idle' && !s.onBreak && !(s.trainingHoursLeft ?? 0)).reduce((n,s) => n + (s.preference === 'research' ? .2 : .1) * (s.skill ?? 1), 0));
     const project = this.activeResearch;
     project.progress = Math.min(1, project.progress + hours * (1 + support) / RESEARCH[project.id].hours);
     if (project.progress >= 1) {
@@ -296,51 +314,106 @@ export class GameSimulation {
     return true;
   }
 
-  dispatchRepair(equipmentId: string): boolean {
-    if (this.capabilities.includes('radio_dispatch')) {
-      this.message = 'Radio Dispatch handles routine faults automatically.';
-      return false;
-    }
-    const eq = this.equipment.find((e) => e.id === equipmentId);
-    if (!eq?.faulted) {
-      this.message = 'Nothing to repair there.';
-      return false;
-    }
-    const tech = this.staff.find((s) => s.task.type === 'idle' && (s.role === 'technician' || s.role === 'engineer'));
-    if (!tech) {
-      this.message = 'Technician is busy.';
-      return false;
-    }
-    tech.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...tech.tile } };
-    this.message = `${tech.name} is on the way.`;
+  private queueWork(targetId: string, kind: WorkKind, manual: boolean): boolean {
+    if (this.workOrders.some(o => o.targetId===targetId && o.kind===kind) || this.staff.some(m => m.task.type!=='idle' && m.task.targetId===targetId && (m.task.type===kind || m.task.type==='travel' && m.task.intent===kind))) return false;
+    if (this.workOrders.length >= 500) return false;
+    this.workOrders.push({targetId,kind,manual});
+    this.autoDispatch();
     return true;
+  }
+
+  dispatchRepair(equipmentId: string): boolean {
+    const eq = this.equipment.find(e => e.id===equipmentId);
+    if (!eq?.faulted) { this.message='Nothing to repair there.'; return false; }
+    const queued=this.queueWork(equipmentId,'repair',true);
+    if(queued) this.message='Repair ordered. The next eligible crew member will respond.';
+    return queued;
   }
 
   dispatchClean(equipmentId: string): boolean {
-    const eq = this.equipment.find((e) => e.id === equipmentId);
-    if (!eq || !isPv(eq.kind) || eq.soiling < 0.15) {
-      this.message = 'That array is clean enough.';
-      return false;
-    }
-    const tech = this.staff.find((s) => s.task.type === 'idle' && s.role !== 'manager');
-    if (!tech) {
-      this.message = 'Technician is busy.';
-      return false;
-    }
-    tech.task = { type: 'travel', targetId: eq.id, progress: 0, from: { ...tech.tile } };
-    // Mark clean intent via soiling threshold; travel then clean.
-    (tech as StaffMember & { _intent?: 'clean' | 'repair' })._intent = 'clean';
-    this.message = `${tech.name} heading out with a mop.`;
-    this.activateObjective('first_clean');
+    const eq = this.equipment.find(e => e.id===equipmentId);
+    if(!eq || !isPv(eq.kind) || !eq.commissioned || eq.soiling<.15) { this.message='That array is clean enough.'; return false; }
+    const queued=this.queueWork(equipmentId,'clean',true);
+    if(queued) { this.activateObjective('first_clean'); this.message='Cleaning ordered. Busy crews keep it in the work queue.'; }
+    return queued;
+  }
+
+  dispatchService(equipmentId: string): boolean {
+    const eq=this.equipment.find(e=>e.id===equipmentId);
+    if(!this.capabilities.includes('radio_dispatch') || !eq || !eq.commissioned || !isPv(eq.kind) || eq.faulted || eq.condition>=.95 || this.cash<450) return false;
+    const queued=this.queueWork(equipmentId,'service',true);
+    if(queued) this.message='Service ordered: $450 is charged when a crew starts. Condition will be restored.';
+    return queued;
+  }
+
+  setStaffAssignment(id: string, zone: StaffMember['workZone'], preference: StaffMember['preference']): boolean {
+    const member=this.staff.find(m=>m.id===id);
+    if(!member || member.role==='manager' || !['all','site_a','site_b'].includes(zone ?? '') || !['auto','repair','clean','research'].includes(preference ?? '')) return false;
+    if(zone!=='all' && !this.plots.some(p=>p.id===zone && p.unlocked)) return false;
+    if(member.role==='cleaner' && preference!=='auto' && preference!=='clean' || preference==='research' && member.role!=='engineer') return false;
+    member.workZone=zone; member.preference=preference;
+    this.message='Crew assignment updated. Current jobs finish before the new assignment applies.';
+    this.autoDispatch(); return true;
+  }
+
+  cancelWorkOrder(targetId:string,kind:WorkKind): boolean {
+    const index=this.workOrders.findIndex(o=>o.targetId===targetId && o.kind===kind && o.manual);
+    if(index<0) return false;
+    this.workOrders.splice(index,1); this.message='Queued manual order cancelled. Automatic orders follow their policy.'; return true;
+  }
+
+  setCleaningThreshold(value: number): boolean {
+    if(!this.capabilities.includes('scheduled_cleaning') || ![.2,.35,.5].includes(value)) return false;
+    this.cleaningThreshold=value; this.message='Cleaning policy updated.'; return true;
+  }
+
+  setPreventiveMaintenance(enabled: boolean): boolean {
+    if(!this.researched.includes('predictive_diagnostics')) return false;
+    this.preventiveMaintenance=enabled; this.message=enabled ? 'Preventive service enabled below 85% condition; $450 per job, with a $1,500 reserve.' : 'Preventive service disabled.'; return true;
+  }
+
+  contractBlockedReason(id: ContractId): string | null {
+    if(!Object.prototype.hasOwnProperty.call(CONTRACTS,id)) return 'Unknown contract';
+    if(this.contract) return 'Finish or cancel the current contract';
+    if(this.contractCooldown>0) return 'New offers arrive after the renewal break';
+    if(!this.objectives.some(o=>o.id==='first_power' && o.complete)) return 'Build and export your first power';
+    if(id==='grid' && !this.capabilities.includes('radio_dispatch')) return 'Complete the first repair';
+    if(id==='valley' && (!this.equipment.some(e=>e.plotId==='site_b' && isPv(e.kind) && e.commissioned) || !this.researched.length)) return 'Commission Site B solar and finish one research project';
+    if(this.cash<CONTRACTS[id].deposit) return 'Not enough cash for the deposit';
+    return null;
+  }
+
+  acceptContract(id: ContractId): boolean {
+    const reason=this.contractBlockedReason(id);
+    if(reason) { this.message=reason; return false; }
+    const offer=contractOffer(id,this.contractRenewals);
+    this.cash-=offer.deposit; this.totalExpenses+=offer.deposit; this.currentReport.expenses+=offer.deposit;
+    this.contract={...offer,deliveredKwh:0,elapsedHours:0};
+    this.message='Supply contract accepted. Ordinary electricity sales continue; delivery earns an extra bonus.';
     return true;
   }
 
-  private staffIntent(staff: StaffMember): 'clean' | 'repair' {
-    const tagged = staff as StaffMember & { _intent?: 'clean' | 'repair' };
-    if (tagged._intent) return tagged._intent;
-    const target = this.equipment.find((e) => e.id === (staff.task.type === 'travel' || staff.task.type === 'repair' || staff.task.type === 'clean' ? staff.task.targetId : ''));
-    if (target?.faulted) return 'repair';
-    return 'clean';
+  cancelContract(): void { if(this.contract) this.finishContract('cancelled'); }
+
+  private finishContract(outcome: ContractResult['outcome']): void {
+    const contract=this.contract!;
+    const payment=outcome==='completed' ? contract.reward+contract.deposit : 0;
+    this.cash+=payment; this.currentReport.bonuses+=payment;
+    if(outcome==='completed') { this.contractsCompleted++; this.contractRenewals++; }
+    this.contractHistory.push({id:contract.id,title:contract.title,outcome,day:this.day,reward:outcome==='completed'?contract.reward:0});
+    this.contractHistory=this.contractHistory.slice(-6);
+    this.contractCooldown=12; this.contract=null;
+    this.message=outcome==='completed' ? `Contract complete: +$${contract.reward.toLocaleString()} bonus; deposit returned.` : `Contract ${outcome}. No further penalty; the deposit is forfeited. New offers in 12 park hours.`;
+  }
+
+  private advanceContract(hours: number, energy: number): void {
+    this.contractCooldown=Math.max(0,this.contractCooldown-hours);
+    if(!this.contract) return;
+    const metrics=parkMetrics(this.equipment), contract=this.contract;
+    contract.elapsedHours+=hours;
+    if(metrics.availability+1e-8>=contract.minimumAvailability && metrics.condition+1e-8>=contract.minimumCondition) contract.deliveredKwh+=energy;
+    if(contract.deliveredKwh+1e-8>=contract.energyKwh) this.finishContract('completed');
+    else if(contract.elapsedHours+1e-8>=contract.hours) this.finishContract('expired');
   }
 
   resolveEventChoice(choiceId: string): void {
@@ -353,6 +426,7 @@ export class GameSimulation {
       return;
     }
     this.activeEvent = null;
+    this.nextNarrativeAt = this.eventClock + 8;
     this.speed = this.speedBeforeEvent;
 
     switch (eventId) {
@@ -486,10 +560,9 @@ export class GameSimulation {
 
   private maybeOpenQueuedEvent(): void {
     if (this.activeEvent || this.pendingEventQueue.length === 0) return;
-    const next = this.pendingEventQueue[0];
-    const delayUntil = this.eventDelays[next];
-    if (delayUntil !== undefined && this.eventClock < delayUntil) return;
-    this.pendingEventQueue.shift();
+    const index=this.pendingEventQueue.findIndex(id => (this.eventDelays[id] ?? 0)<=this.eventClock && (id==='hail_warning' || id==='hail_climax' || this.eventClock>=this.nextNarrativeAt));
+    if(index<0) return;
+    const [next]=this.pendingEventQueue.splice(index,1);
     delete this.eventDelays[next];
     this.openEvent(next);
   }
@@ -545,6 +618,9 @@ export class GameSimulation {
     if (this.hour >= 24) {
       this.hour -= 24;
       this.day += 1;
+      this.dailyReports.push({...this.currentReport});
+      this.dailyReports=this.dailyReports.slice(-5);
+      this.currentReport={day:this.day,energyKwh:0,revenue:0,expenses:0,bonuses:0,jobs:0};
     }
     this.eventClock += 1 / 60;
     this.weatherTimer += 1 / 60;
@@ -591,75 +667,60 @@ export class GameSimulation {
   }
 
   private advanceStaff(hours: number): void {
-    for (const tech of this.staff) {
-      if (tech.task.type === 'idle') continue;
-      const task = tech.task;
-      if (!this.equipment.some((e) => e.id === task.targetId)) { tech.task = { type: 'idle' }; continue; }
-      const workRate = (1 + ((tech.skill ?? 1) - 1) * 0.2 + (this.staff.some((s) => s.role === 'manager') ? 0.2 : 0)) * (this.researched.includes('field_toolkits') ? 1.2 : 1);
-      if (task.type === 'travel') {
-        task.progress += hours * (this.researched.includes('crew_logistics') ? 1.25 : 1) / 0.35;
-        const target = this.equipment.find((e) => e.id === task.targetId);
-        if (target) {
-          const t = Math.min(1, task.progress);
-          tech.tile = alongPath(staffRoute(task.from,this.workPosition(target)),t);
-          tech.plotId = target.plotId;
+    for(const member of this.staff) {
+      member.energy ??= 1;
+      if(member.task.type==='idle') {
+        const hub=this.equipment.some(e=>(e.kind==='office' || e.kind==='workshop') && e.commissioned && e.plotId===member.plotId);
+        member.energy=clamp(member.energy+hours*(hub?.3:.2),0,1);
+        if(member.onBreak && member.energy>=.65) member.onBreak=false;
+        if((member.trainingHoursLeft ?? 0)>0) {
+          member.trainingHoursLeft=Math.max(0,member.trainingHoursLeft!-hours);
+          if(member.trainingHoursLeft<1e-8) { member.trainingHoursLeft=0; member.skill=Math.min(5,(member.skill ?? 1)+1); this.message=member.name+' completed training. Field work is faster.'; }
         }
-        if (task.progress >= 1 && target) {
-          tech.tile = this.workPosition(target);
-          const intent = this.staffIntent(tech);
-          delete (tech as StaffMember & { _intent?: string })._intent;
-          if (intent === 'repair' && target.faulted) {
-            tech.task = { type: 'repair', targetId: target.id, progress: 0 };
-          } else if (intent === 'clean' || target.soiling > 0.1) {
-            tech.task = { type: 'clean', targetId: target.id, progress: 0 };
-          } else if (target.faulted) {
-            tech.task = { type: 'repair', targetId: target.id, progress: 0 };
-          } else {
-            tech.task = { type: 'idle' };
-          }
-        }
-      } else if (task.type === 'repair') {
-        task.progress += hours * workRate / (this.equipment.some((e) => e.kind === 'workshop' && e.commissioned) ? 0.33 : 0.5);
-        if (task.progress >= 1) {
-          const target = this.equipment.find((e) => e.id === task.targetId);
-          if (target) {
-            target.faulted = false;
-            target.condition = clamp(target.condition + 0.15, 0, 1);
-            this.faultsRepaired += 1;
-            if (!this.capabilities.includes('radio_dispatch')) { this.manualRepairs += 1; this.cash += 2000; }
-            tech.skill = Math.min(5, (tech.skill ?? 1) + 0.04);
-            this.completeObjective('first_repair');
-            if (!this.capabilities.includes('radio_dispatch')) {
-              this.capabilities.push('radio_dispatch');
-              this.completeObjective('unlock_radio');
-              this.message = 'Radio Dispatch unlocked! Routine faults auto-assign.';
-            }
-          }
-          tech.task = { type: 'idle' };
-        }
-      } else if (task.type === 'clean') {
-        const kit = this.capabilities.includes('cleaning_kit');
-        task.progress += hours * workRate * (tech.trait === 'Panel Whisperer' ? 1.15 : 1) / (kit ? 0.25 : 0.45);
-        if (task.progress >= 1) {
-          const target = this.equipment.find((e) => e.id === task.targetId);
-          if (target) {
-            target.soiling = 0;
-            this.cleansCompleted += 1;
-            if (!this.capabilities.includes('cleaning_kit')) { this.manualCleans += 1; this.cash += 2000; }
-            tech.skill = Math.min(5, (tech.skill ?? 1) + 0.04);
-            if (this.capabilities.includes('cleaning_rig')) for (const nearby of this.equipment) {
-              if (isPv(nearby.kind) && nearby.plotId === target.plotId && Math.hypot(nearby.tile.x - target.tile.x, nearby.tile.y - target.tile.y) <= 4) nearby.soiling = 0;
-            }
-            this.completeObjective('first_clean');
-            if (!this.capabilities.includes('cleaning_kit')) {
-              this.capabilities.push('cleaning_kit');
-              this.completeObjective('unlock_cleaning');
-              this.message = 'Cleaning Kit unlocked! Faster cleans, slower dust.';
-            }
-          }
-          tech.task = { type: 'idle' };
-        }
+        continue;
       }
+      const task=member.task, target=this.equipment.find(e=>e.id===task.targetId);
+      if(!target) { member.task={type:'idle'}; continue; }
+      member.energy=clamp(member.energy-hours*(task.type==='travel'?.04:.12),0,1);
+      const specialist=task.type==='clean' && member.role==='cleaner' ? 1.4 : (task.type==='repair' || task.type==='service') && member.role==='engineer' ? 1.2 : 1;
+      const workRate=(1+((member.skill ?? 1)-1)*.2+(this.staff.some(m=>m.role==='manager')?.2:0))*(this.researched.includes('field_toolkits')?1.2:1)*specialist*(member.energy<.2?.8:1);
+      if(task.type==='travel') {
+        const tagged=member as StaffMember & {_intent?: WorkKind};
+        const intent=task.intent ?? tagged._intent ?? (target.faulted?'repair':'clean');
+        task.duration ??= travelHours({...member,tile:task.from},target,this.equipment);
+        task.progress+=hours*(this.researched.includes('crew_logistics')?1.25:1)/task.duration;
+        member.tile=alongPath(staffRoute(task.from,this.workPosition(target)),Math.min(1,task.progress)); member.plotId=target.plotId;
+        if(task.progress>=1) {
+          member.tile=this.workPosition(target); delete tagged._intent;
+          if(intent==='repair' && !target.faulted || intent==='clean' && target.soiling<.15 || intent==='service' && target.condition>=.95) member.task={type:'idle'};
+          else member.task={type:intent,targetId:target.id,progress:0};
+        }
+        continue;
+      }
+      const duration=task.type==='clean' ? (this.capabilities.includes('cleaning_kit')?.25:.45) : task.type==='service' ? .8 : nearbyWorkshop(this.equipment,target) ? .33 : .5;
+      task.progress+=hours*workRate*(task.type==='clean' && member.trait==='Panel Whisperer'?1.15:1)/duration;
+      if(task.progress<1) continue;
+      this.currentReport.jobs++;
+      if(task.type==='repair' && target.faulted) {
+        target.faulted=false; target.condition=clamp(target.condition+.15,0,1); this.faultsRepaired++;
+        if(!this.capabilities.includes('radio_dispatch')) {
+          this.manualRepairs++; this.cash+=2000; this.currentReport.bonuses+=2000;
+          this.completeObjective('first_repair'); this.capabilities.push('radio_dispatch'); this.completeObjective('unlock_radio');
+          const dusty=this.equipment.find(e=>isPv(e.kind) && e.commissioned && !e.faulted);
+          if(dusty) dusty.soiling=Math.max(.22,dusty.soiling);
+          this.activateObjective('first_clean'); this.message='Radio Dispatch earned. Dust is now costing power: queue your first clean.';
+        }
+      } else if(task.type==='clean') {
+        target.soiling=0; this.cleansCompleted++;
+        if(!this.capabilities.includes('cleaning_kit')) {
+          this.manualCleans++; this.cash+=2000; this.currentReport.bonuses+=2000;
+          this.completeObjective('first_clean'); this.capabilities.push('cleaning_kit'); this.completeObjective('unlock_cleaning');
+          this.message='Cleaning Kit earned: faster cleaning and slower dust. Plan your expansion.';
+        }
+        if(this.capabilities.includes('cleaning_rig')) for(const nearby of this.equipment) if(isPv(nearby.kind) && nearby.plotId===target.plotId && Math.hypot(nearby.tile.x-target.tile.x,nearby.tile.y-target.tile.y)<=4) nearby.soiling=0;
+      } else if(task.type==='service') { target.condition=1; this.servicesCompleted++; this.message='Service complete. Equipment condition restored to 100%.'; }
+      member.skill=Math.min(5,(member.skill ?? 1)+.04); member.task={type:'idle'};
+      if(member.energy<.2) member.onBreak=true;
     }
   }
 
@@ -688,6 +749,11 @@ export class GameSimulation {
     const expense = Math.min(this.cash + revenue, (payroll + opex) * hours);
     this.cash += revenue - expense;
     this.totalExpenses += expense;
+    this.currentReport.energyKwh+=energy; this.currentReport.revenue+=revenue; this.currentReport.expenses+=expense;
+    this.advanceContract(hours,energy);
+    const metrics=parkMetrics(this.equipment);
+    if(this.stars>=1 && this.getIrradiance()>0 && metrics.availability>=.9 && metrics.cleanliness>=.75 && this.curtailmentFactor>=.85 && exportedKw>1) this.stabilityHours=Math.min(12,this.stabilityHours+hours);
+    else if(this.getIrradiance()>0) this.stabilityHours=0;
     this.lifetimeRevenue += revenue;
     this.revenuePerHour = exportedKw * this.tariffPerKwh - payroll - opex;
   }
@@ -729,18 +795,31 @@ export class GameSimulation {
   }
 
   private autoDispatch(): void {
-    const assigned = new Set(this.staff.flatMap((s) => s.task.type === 'idle' ? [] : [s.task.targetId]));
-    for (const member of this.staff) {
-      if (member.task.type !== 'idle' || member.role === 'manager') continue;
-      const fault = this.capabilities.includes('radio_dispatch') && member.role !== 'cleaner'
-        ? this.equipment.find((e) => e.faulted && e.commissioned && !assigned.has(e.id)) : undefined;
-      const dirty = this.capabilities.includes('scheduled_cleaning')
-        ? this.equipment.filter((e) => isPv(e.kind) && e.soiling > 0.35 && e.commissioned && !assigned.has(e.id)).sort((a, b) => b.soiling - a.soiling)[0] : undefined;
-      const target = fault ?? dirty;
-      if (!target) continue;
-      member.task = { type: 'travel', targetId: target.id, progress: 0, from: { ...member.tile } };
-      (member as StaffMember & { _intent?: string })._intent = fault ? 'repair' : 'clean';
-      assigned.add(target.id);
+    const busy=new Set(this.staff.flatMap(m=>m.task.type==='idle'?[]:[m.task.targetId]));
+    const has=(id:string,kind:WorkKind)=>this.workOrders.some(o=>o.targetId===id && o.kind===kind) || this.staff.some(m=>m.task.type!=='idle' && m.task.targetId===id && (m.task.type===kind || m.task.type==='travel' && m.task.intent===kind));
+    for(const target of this.equipment) {
+      if(!target.commissioned) continue;
+      if(target.faulted && this.capabilities.includes('radio_dispatch') && !has(target.id,'repair')) this.workOrders.push({targetId:target.id,kind:'repair',manual:false});
+      if(isPv(target.kind) && target.soiling>=this.cleaningThreshold && this.capabilities.includes('scheduled_cleaning') && !has(target.id,'clean')) this.workOrders.push({targetId:target.id,kind:'clean',manual:false});
+      if(isPv(target.kind) && !target.faulted && target.condition<.85 && this.preventiveMaintenance && this.researched.includes('predictive_diagnostics') && this.cash>=1950 && !has(target.id,'service')) this.workOrders.push({targetId:target.id,kind:'service',manual:false});
+    }
+    this.workOrders=this.workOrders.filter(o=>{
+      const target=this.equipment.find(e=>e.id===o.targetId);
+      return target && target.commissioned && (o.kind==='repair'?target.faulted:o.kind==='clean'?isPv(target.kind) && target.soiling>=.15:target.condition<.95);
+    }).slice(0,500);
+    for(const member of [...this.staff].sort((a,b)=>(a.role==='cleaner'?-1:0)-(b.role==='cleaner'?-1:0))) {
+      if(member.task.type!=='idle' || member.role==='manager') continue;
+      if((member.energy ?? 1)<.2) member.onBreak=true;
+      const eligible=this.workOrders.filter(o=>{
+        const target=this.equipment.find(e=>e.id===o.targetId)!;
+        return !busy.has(target.id) && workerCanDo(member,o,target) && (o.kind!=='service' || !target.faulted && this.cash>=(o.manual?450:1950));
+      });
+      const order=eligible.sort((a,b)=> (a.kind==='repair'?0:a.manual?1:2)-(b.kind==='repair'?0:b.manual?1:2) || travelHours(member,this.equipment.find(e=>e.id===a.targetId)!,this.equipment)-travelHours(member,this.equipment.find(e=>e.id===b.targetId)!,this.equipment))[0];
+      if(!order) continue;
+      const target=this.equipment.find(e=>e.id===order.targetId)!;
+      if(order.kind==='service') { this.cash-=450; this.totalExpenses+=450; this.currentReport.expenses+=450; }
+      member.task={type:'travel',targetId:target.id,progress:0,from:{...member.tile},intent:order.kind,duration:travelHours(member,target,this.equipment)};
+      this.workOrders.splice(this.workOrders.indexOf(order),1); busy.add(target.id);
     }
   }
 
@@ -826,7 +905,7 @@ export class GameSimulation {
     const siteBPv = this.equipment.some((e) => e.plotId === 'site_b' && isPv(e.kind) && e.commissioned);
     if (
       this.stars >= 1 && siteBPv &&
-      this.capabilities.includes('radio_dispatch') &&
+      this.capabilities.includes('radio_dispatch') && this.stabilityHours+1e-8>=6 &&
       this.peakExportKw >= STAR_THRESHOLDS.star2PeakKw
     ) {
       if (this.stars < 2) this.cash += 12000;
@@ -836,7 +915,8 @@ export class GameSimulation {
 
     if (
       this.stars >= 2 && this.hailSurvived &&
-      this.hailPrepared &&
+      parkMetrics(this.equipment).condition>=.85 && this.stabilityHours+1e-8>=12 &&
+      this.researched.length>=2 && this.staff.some(m=>(m.skill ?? 1)>=2) &&
       this.capabilities.includes('cleaning_kit') &&
       this.peakExportKw >= STAR_THRESHOLDS.star3PeakKw
     ) {
@@ -873,7 +953,7 @@ export class GameSimulation {
     const names = { technician: 'Amir Watts', cleaner: 'Nia Shine', engineer: 'Morgan Ohm', manager: 'Sam Ledger' };
     const traits = { technician: 'Safety First-ish', cleaner: 'Panel Whisperer', engineer: 'Weather Worrier', manager: 'Spreadsheet Enthusiast' };
     this.staff.push({ id: this.uid('staff'), name: names[role], role, skill: 1, salary: role === 'engineer' ? 2 : 1,
-      trait: traits[role], plotId: 'site_a', tile: { x: 6, y: 7 }, task: { type: 'idle' } });
+      trait: traits[role], plotId: 'site_a', tile: { x: 6, y: 7 }, task: { type: 'idle' }, energy:1, onBreak:false, workZone:'all', preference:'auto' });
     this.message = names[role] + ' joined the team.';
     return true;
   }
@@ -881,8 +961,8 @@ export class GameSimulation {
   dismissStaff(id: string): boolean {
     const member = this.staff.find((s) => s.id === id);
     if (!member) return false;
-    if (this.staff.length <= 1) {
-      this.message = 'You need at least one employee to keep the site operational.';
+    if (this.staff.length <= 1 || (member.role==='technician' || member.role==='engineer') && !this.staff.some(m=>m.id!==id && (m.role==='technician' || m.role==='engineer'))) {
+      this.message = 'Keep at least one technician or engineer so the company can repair equipment.';
       return false;
     }
     this.staff = this.staff.filter((s) => s.id !== id);
@@ -914,9 +994,9 @@ export class GameSimulation {
 
   trainStaff(id: string): boolean {
     const member = this.staff.find((s) => s.id === id);
-    if (!member || (member.skill ?? 1) >= 5 || this.cash < 800) return false;
-    this.cash -= 800; member.skill = Math.min(5, (member.skill ?? 1) + 1);
-    this.message = member.name + ' completed training. Faster field work unlocked.';
+    if (!member || (member.skill ?? 1) >= 5 || (member.trainingHoursLeft ?? 0)>0 || this.cash < 800) return false;
+    this.cash -= 800; member.trainingHoursLeft=4;
+    this.message = member.name + ' booked four park hours of training. Current field work finishes first.';
     return true;
   }
 
@@ -929,6 +1009,7 @@ export class GameSimulation {
     this.cash += Math.floor(EQUIPMENT[eq.kind].cost * 0.6 * eq.condition);
     this.equipment = this.equipment.filter((e) => e.id !== id);
     for (const member of this.staff) if (member.task.type !== 'idle' && member.task.targetId === id) member.task = { type: 'idle' };
+    this.workOrders=this.workOrders.filter(o=>o.targetId!==id);
     this.selectedId = null; this.message = 'Equipment removed; 60% condition-adjusted resale returned.';
     return true;
   }
@@ -951,12 +1032,18 @@ export class GameSimulation {
   snapshot(): GameSnapshot {
     const { generationKw, exportedKw } = this.computePower();
     return {
+      contract:this.contract ? {...this.contract} : null, contractHistory:this.contractHistory.map(c=>({...c})),
+      contractRenewals:this.contractRenewals, contractCooldown:this.contractCooldown, contractsCompleted:this.contractsCompleted,
+      workOrders:this.workOrders.map(o=>({...o})), cleaningThreshold:this.cleaningThreshold, preventiveMaintenance:this.preventiveMaintenance,
+      stabilityHours:this.stabilityHours, servicesCompleted:this.servicesCompleted,
+      dailyReports:this.dailyReports.map(r=>({...r})), currentReport:{...this.currentReport}, nextNarrativeAt:this.nextNarrativeAt,
       researched: [...this.researched],
       activeResearch: this.activeResearch ? { ...this.activeResearch } : null,
       cash: this.cash,
       revenuePerHour: this.revenuePerHour,
       powerKw: generationKw,
       exportedKw,
+      peakExportKw:this.peakExportKw, lifetimeRevenue:this.lifetimeRevenue, eventClock:this.eventClock,
       inverterCapacityKw: this.inverterCapacity(),
       clippedKw: Math.max(0, generationKw - this.inverterCapacity()),
       day: this.day,
@@ -992,6 +1079,11 @@ export class GameSimulation {
 
   serialize(): SerializedGameState {
     return {
+      contract:this.contract ? {...this.contract} : null, contractHistory:this.contractHistory.map(c=>({...c})),
+      contractRenewals:this.contractRenewals, contractCooldown:this.contractCooldown, contractsCompleted:this.contractsCompleted,
+      workOrders:this.workOrders.map(o=>({...o})), cleaningThreshold:this.cleaningThreshold, preventiveMaintenance:this.preventiveMaintenance,
+      stabilityHours:this.stabilityHours, servicesCompleted:this.servicesCompleted,
+      dailyReports:this.dailyReports.map(r=>({...r})), currentReport:{...this.currentReport}, nextNarrativeAt:this.nextNarrativeAt,
       researched: [...this.researched],
       activeResearch: this.activeResearch ? { ...this.activeResearch } : null,
       cash: this.cash,
@@ -1045,8 +1137,13 @@ export class GameSimulation {
     this.manualCleans = data.capabilities.includes('cleaning_kit') ? 1 : 0;
     this.speedBeforeEvent = 1;
     this.researched = []; this.activeResearch = null;
+    this.contract=null; this.contractHistory=[]; this.contractRenewals=0; this.contractCooldown=0; this.contractsCompleted=0;
+    this.workOrders=[]; this.cleaningThreshold=.35; this.preventiveMaintenance=false; this.stabilityHours=0; this.servicesCompleted=0; this.nextNarrativeAt=0;
+    this.dailyReports=[]; this.currentReport={day:data.day,energyKwh:0,revenue:0,expenses:0,bonuses:0,jobs:0};
     this.completionAcknowledged = data.scenarioComplete;
     Object.assign(this, copy);
+    this.objectives=createInitialObjectives().map(def=>({...def,complete:data.objectives.find(o=>o.id===def.id)?.complete ?? false,active:data.objectives.find(o=>o.id===def.id)?.active ?? false}));
+    for(const member of this.staff) { member.energy ??= 1; member.onBreak ??= false; member.workZone ??= 'all'; member.preference ??= 'auto'; }
     // Apply current balance tuning to older playtest saves instead of preserving the slower legacy tariff.
     this.tariffPerKwh = Math.max(this.tariffPerKwh, TARIFF_PER_KWH);
     this.lifetimeRevenue = data.lifetimeRevenue ?? this.lifetimeRevenue;

@@ -1,91 +1,59 @@
 # Megawatt Valley — Current Status
 
-## Status
+## Current playable candidate — 3 October 2026
 
-**PRIMARY DIRECTION — Phaser Level 1 release candidate — updated 2 October 2026**
+Megawatt Valley is an autonomous **Phaser / TypeScript solar park simulator**.
+Active Codex work is on `codex/solar-release-hardening`, draft PR #10 stacked on
+Cursor PR #7. It is not merged into main; separate Cursor PR #8 remains independent.
 
-Megawatt Valley is an **AI-autonomous Phaser / TypeScript production project**.
+### Gameplay and progression pass
 
-## Current playable candidate
+The approved visual theme, CC0 solar/building/nature sprites, contextual worker
+portraits and one-drawer interface are retained. The latest changes are:
 
-Active Codex work is on **`codex/solar-release-hardening`**, draft **PR #10**,
-stacked on the original Cursor build in PR #7. It is not merged into main.
-The separate Cursor PR #8 remains independent.
+- A next-decision guide introduces generation, repairs, dust, expansion, upgrades,
+  storm readiness and operating mastery according to company readiness.
+- Operations drawer: persistent repair/clean/service queue, bulk orders, cancellation,
+  capacity-weighted health figures, cleaning policies and daily operating reviews.
+- Worker profiles: site/duty assignments, energy and breaks; paid training takes four
+  park hours. Specialist roles and dedicated engineer research have real effects.
+- Travel follows distance and the bridge route. Nearby roads reduce journey time;
+  local workshops shorten repairs and site facilities improve idle recovery.
+- Three optional supply contracts count actual exported energy, with explicit
+  quality criteria, park-time deadlines, deposits, bonuses and renewal breaks.
+- Later stars require sustained daylight reliability. Mastery also requires fleet
+  condition, research and crew development; skipping hail preparation is recoverable.
+- Non-urgent event choices are spaced out; urgent hail decisions bypass the gap.
+- Optional new version-1 save fields preserve old companies and already earned stars.
 
-- Level 1 includes ordinary-budget progression through manual repair/cleaning,
-  automation, expansion, decision events, hail and three-star continuation.
-- Faster economy: $0.24/kWh. Reference strategy completes 1★ in 1,353 real seconds
-  at 1x (22.6 minutes), then mastery after another 347 seconds. This is simulation
-  evidence, not a first-player engagement verdict; alternative choices take longer.
-- Compact Build/Staff/Upgrades/Finance/Events toolbar, contextual inspector and top utility menu.
-- Dock can collapse; inspector can close; switching away from Build cancels placement.
-- Load/import starts paused. Event choices immediately refresh the overlay.
-- Staff dismissal, positive grants and optional playtest cash controls are implemented.
-- Net-positive supplier/sponsorship rewards work even with zero cash.
-- Browser verification uses ordinary visible clicks, without bypassing modal overlays.
+See [GAMEPLAY_RESEARCH_2026-10-03.md](GAMEPLAY_RESEARCH_2026-10-03.md) for the
+reference-game comparison, implementation choices, terms and remaining design gaps.
+It supersedes earlier candidate pacing figures and the old hail-prepared mastery gate.
 
-### Research-led tycoon interface pass
+### Verification and playing
 
-The permanent illustrated Staff/Events/Build dashboard is superseded. Reference
-images guide palette and art, rather than a fixed screen layout. Research into
-Two Point Campus, Planet Zoo, Parkitect and Planet Coaster supports separating
-management lists from contextual worker profiles. See
-[TYCOON_UI_RESEARCH_2026-10-02.md](TYCOON_UI_RESEARCH_2026-10-02.md) for sources,
-interpretation and implemented decisions.
+53 tests pass. Real-budget reference strategy: 1★ in 1,576 seconds at 1x (26.3
+minutes), then 3★ another 123 seconds later. A frugal strategy using contracts and
+recovering from unprepared hail reaches 3★ in 1,451 seconds (24.2 minutes), with six
+contracts and five services. Both keep cash non-negative and exercise save/resume.
+These are deterministic simulations, not independent player enjoyment evidence.
 
-- Tools start closed, leaving a compact toolbar and more visible park.
-- One Build/Staff/Upgrades/Finance/Events drawer opens at a time.
-- Worker selection in the world or roster opens a character profile; portraits
-  appear only there, never in the bottom toolbar or roster.
-- Profile actions use real training costs, skill limits and dismissal rules.
-- Staff has search, role filters, sorting and actual total payroll.
-- Build has larger horizontal equipment cards, search, categories and browse arrows.
-- B/T toggle tools; search typing does not trigger simulation shortcuts.
-- Objectives, alerts and minimap remain outside management drawers.
+Standalone browser verification covers closed tools, build/placement, contextual
+portraits, timed training, assignments, contracts, queue cancellation/service fees,
+save/load, nine technologies, night lighting and laptop layouts. See release workflow
+browser evidence for the latest commit's result. No new enjoyment score is claimed.
 
-34 simulation tests and offline browser checks cover these interactions as well
-as existing progression, saving, research and laptop layouts. No new commercial
-quality score is claimed from this pass. The world still needs stronger terrain,
-lighting, campus assets and expressive character art.
+Use the latest successful [Solar release checks](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/workflows/solar-release.yml)
+**PLAY-MEGAWATT-VALLEY** artifact. Unzip and open `PLAY-MEGAWATT-VALLEY.html` in
+desktop Chrome/Edge. No server or install is needed. See `AUTONOMOUS-PLAY.md`.
 
-### Visual-first asset pass
+Earlier [UI research](TYCOON_UI_RESEARCH_2026-10-02.md),
+[visual asset pass](VISUAL_ASSET_PASS_2026-10-02.md) and
+[honest visual review](HONEST_REVIEW_2026-10-02.md) remain useful background.
 
-Nine solar/building/nature sprites now derive from verified free CC0 Kenney models.
-They share the park's 2:1 projection, palette, light and ground anchors. Generated
-SVGs rasterise once during preload and are embedded in the offline HTML. This adds
-richer geometry while retaining Phaser and existing placement/selection behavior.
-Original pack licences ship in the playable package. See
-[VISUAL_ASSET_PASS_2026-10-02.md](VISUAL_ASSET_PASS_2026-10-02.md) for the asset
-shortlist, selected models and next art priorities. No new score is claimed solely
-from asset count; terrain composition and the remaining equipment/staff still need work.
-
-### Latest improvement pass
-
-- Honest evaluation: **5.5/10 baseline → approximately 6.3/10 after this pass**.
-  Scores assess a prototype against the supplied cozy low-poly reference; automated
-  checks do not establish enjoyment or commercial polish.
-- Nine working, paid and timed research upgrades across Generation, Operations and
-  Resilience. All have real effects, prerequisites and save support. The former
-  future-feature tree preview is removed.
-- Brighter original terrain/art, blue roofs/panels, distant mountains/lake/village,
-  four role-specific staff uniforms and contextual portraits.
-- Click-to-find fault/dust/clipping alerts, minimap navigation, H/F/U camera/research
-  controls, Shift-click repeat placement, clearer finance/star progress and persistent
-  completion acknowledgement.
-- 34 simulation tests plus expanded standalone browser verification.
-
-Read [the honest review and prioritised continuation](HONEST_REVIEW_2026-10-02.md)
-for scores, what actually works, remaining gaps and measurable next steps.
-
-Run the [Solar release checks](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/workflows/solar-release.yml)
-and use the latest successful **PLAY-MEGAWATT-VALLEY** artifact. Unzip and open
-`PLAY-MEGAWATT-VALLEY.html` in desktop Chrome/Edge; no server or installation needed.
-See `AUTONOMOUS-PLAY.md` for controls and `Docs/HANDOVER_2026-10-02_UI_BALANCE.md`
-for the current continuation notes.
-
-Remaining: a stronger art slice, staff wellbeing/facilities, solar layout decisions,
-independent playtesting, later-star pacing,
-and a stable hosted release URL. Scenario 2 is an unlock marker, not a playable map.
+Remaining: independent player tests, stronger post-1★ pacing, another playable
+scenario, physical staff facilities, richer solar layout decisions and a stable
+hosted release URL. Scenario 2 remains an unlock marker, not a playable map.
 
 ## Archive
 

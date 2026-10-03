@@ -197,7 +197,7 @@ export class WorldView {
       e.sprite.setTexture(key).setOrigin(.5,44/48).setPosition(p.x,p.y-(traveling?Math.sin(this.scene.time.now/90):0)).setScale(.75).setDepth(depthFor(s.tile.x,s.tile.y,10));
       e.sprite.clearTint();
       e.shadow.setPosition(p.x,p.y+1).setDepth(depthFor(s.tile.x,s.tile.y,8)).setVisible(true);
-      const task=s.task.type==='repair'?'REPAIR':s.task.type==='clean'?'CLEAN':s.id===snapshot.selectedId?s.name:'';
+      const task=s.task.type==='repair'?'REPAIR':s.task.type==='clean'?'CLEAN':s.task.type==='service'?'SERVICE':s.onBreak?'BREAK':(s.trainingHoursLeft ?? 0)>0?'TRAIN':s.id===snapshot.selectedId?s.name:'';
       e.status.setText(task).setFontSize(10).setPosition(p.x,p.y-25).setDepth(804).setVisible(!!task);
       if(busy&&s.task.type!=='travel'){
         for(let i=0;i<3;i++){const t=(this.scene.time.now/400+i*.33)%1;this.taskGraphics.fillStyle(s.task.type==='clean'?0xa5dae0:0xf2cd71,1-t);this.taskGraphics.fillRect(p.x+8+i*3-t*14,p.y-12-t*12,2,2);}

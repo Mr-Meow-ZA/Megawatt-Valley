@@ -2,12 +2,14 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { GameSimulation } from '../src/simulation/GameSimulation';
 import { STAR_THRESHOLDS } from '../src/content/scenario';
+import { validateState } from '../src/persistence/validate';
 
 describe('Level 1 with real starting budget and normal time', () => {
   it('can finish through ordinary player actions, including mid-storm save/resume', () => {
     let sim = new GameSimulation();
     const captured = new Set<string>();
     const capture = (name: string) => {
+      expect(validateState(sim.serialize()),`${name} must be a valid portable save`).toBe(true);
       if (!process.env.CI || captured.has(name)) return;
       captured.add(name); mkdirSync('browser-fixtures',{recursive:true});
       writeFileSync('browser-fixtures/' + name + '.json',JSON.stringify({version:1,state:sim.serialize()}));
@@ -44,6 +46,11 @@ describe('Level 1 with real starting budget and normal time', () => {
         if (!sim.equipment.some((e) => e.plotId === 'site_b') && sim.cash >= 10500) sim.placeEquipment('bargain_pv','site_b',{x:24,y:10});
       }
       if (sim.cash >= 16000 && slot < slots.length) sim.placeEquipment('bargain_pv','site_a',slots[slot++]);
+      if(sim.cash>=6000 && !sim.activeResearch) {
+        if(!sim.researched.includes('precision_wiring')) sim.startResearch('precision_wiring');
+        else if(!sim.researched.includes('field_toolkits')) sim.startResearch('field_toolkits');
+      }
+      if((sim.staff[0].skill ?? 1)<2 && sim.cash>=6000) sim.trainStaff(sim.staff[0].id);
       sim.update(1);
       expect(Number.isFinite(sim.cash)).toBe(true); expect(sim.cash).toBeGreaterThanOrEqual(0);
       if (sim.stars >= 1) break;
@@ -66,6 +73,7 @@ describe('Level 1 with real starting budget and normal time', () => {
     for (; masterySeconds < 30000 && sim.stars < 3; masterySeconds++) {
       if (sim.activeEvent) sim.resolveEventChoice(sim.activeEvent.choices[sim.activeEvent.choices.length - 1].id);
       if (slot < slots.length && sim.cash >= 8500) sim.placeEquipment('bargain_pv','site_a',slots[slot++]);
+      for(const eq of sim.equipment) if(eq.kind.includes('pv') && eq.condition<.85 && !eq.faulted && sim.cash>=2000) sim.dispatchService(eq.id);
       sim.update(1);
     }
     console.log('Mastery continuation:',masterySeconds,'seconds at 1x');

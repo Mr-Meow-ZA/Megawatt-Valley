@@ -115,14 +115,14 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'star_2',
       title: '2★ Strong Operator',
-      description: 'Own Site B PV, Radio Dispatch, and 220 kW peak.',
+      description: 'Reach 220 kW peak on two sites, with Radio Dispatch and 6 stable daylight hours: 90% availability, 75% cleanliness.',
       rewardText: 'Mastery · $12,000 growth investment',
     },
     {
       id: 'star_3',
       title: '3★ Valley Pro',
-      description: 'Survive hail prepared, hold Cleaning Kit, and 300 kW peak.',
-      rewardText: 'Full mastery',
+      description: 'Reach 300 kW peak, 12 stable daylight hours, 85% fleet condition, two completed research projects and a crew member at skill 2.',
+      rewardText: 'Operational mastery · recover from the storm',
     },
   ];
 

@@ -1,3 +1,7 @@
+import { scenarioBriefing } from '../content/progression';
+import { contractsHtml, operationsHtml, assignmentHtml } from './gameplayPanels';
+import { parkMetrics, taskLabel, hasServiceAccess, nearbyWorkshop } from '../simulation/operations';
+import type { ContractId } from '../content/contracts';
 import { RESEARCH, RESEARCH_BRANCHES, type ResearchId } from '../content/research';
 import type { Vec2 } from '../simulation/types';
 import { SITE_ICONS } from '../game/siteArt';
@@ -6,7 +10,7 @@ import { sound } from '../audio/sound';
 import { BUILD_MENU_ORDER, EQUIPMENT } from '../content/equipment';
 import { CAPABILITY_INFO, STAR_THRESHOLDS } from '../content/scenario';
 import type { GameSimulation } from '../simulation/GameSimulation';
-import type { CapabilityId, EquipmentKind, GameSnapshot, StaffMember } from '../simulation/types';
+import type { CapabilityId, EquipmentKind, GameSnapshot, StaffMember, WorkKind } from '../simulation/types';
 import { clearSave, loadGame, saveGame } from '../persistence/save';
 import { ROLE_LABEL, staffPortrait, weatherLandscape } from './referenceArt';
 
@@ -123,6 +127,8 @@ export class DomHud {
   private staffSearch = '';
   private staffRole = 'all';
   private staffSort = 'name';
+  private lastOperationsHtml='';
+  private lastContractsHtml='';
   private lastSelectedStaffId: string | null = null;
   private lastWeatherScene = '';
   private lastSelectionKey = '__uninit__';
@@ -130,7 +136,7 @@ export class DomHud {
   private lastMessage: string | null = '__uninit__';
   private toastClearAt = 0;
   private buildCategory: 'all' | 'generation' | 'grid' | 'support' | 'decor' = 'all';
-  private managementView: 'build' | 'people' | 'caps' | 'finance' | 'events' = 'build';
+  private managementView: 'build' | 'people' | 'caps' | 'finance' | 'events' | 'operations' | 'contracts' = 'build';
   private minimapCtx: CanvasRenderingContext2D | null = null;
   private lastCash = -1;
   private cashFloatUntil = 0;
@@ -217,7 +223,8 @@ export class DomHud {
           <h2><span class="objective-star">★</span> Objectives</h2>
           <span class="panel-kicker">Here Comes the Sun</span>
         </div>
-        <ul data-k="objectives"></ul>
+        <div class="scenario-guide"><small>YOUR NEXT DECISION</small><h3 data-k="guide-title"></h3><p data-k="guide-copy"></p><button type="button" data-action="guide" data-k="guide-button">Continue</button></div>
+        <ul data-k="objectives"></ul><details class="objective-history"><summary>Milestones earned</summary><div data-k="objective-history"></div></details>
       </aside>
 
       <aside class="panel selection contextual-panel" data-k="selection" hidden>
@@ -250,6 +257,8 @@ export class DomHud {
           <button type="button" data-action="jump" data-id="caps"><span>⚙</span> Upgrades</button>
           <button type="button" data-action="jump" data-id="finance"><span>▥</span> Finance</button>
           <button type="button" data-action="jump" data-id="events" aria-expanded="false"><span>⚑</span> Events</button>
+          <button type="button" data-action="jump" data-id="operations"><span>⚒</span> Operations</button>
+          <button type="button" data-action="jump" data-id="contracts"><span>◈</span> Contracts</button>
           <div class="dock-hint">B build · T staff · U research · H home · F find</div>
           <button type="button" class="dock-toggle" data-action="toggle-dock" aria-expanded="false" aria-controls="management-content" title="Open management tools">⌃</button>
         </nav>
@@ -300,7 +309,7 @@ export class DomHud {
               <div><h2>Finance & Reports</h2><span>Cash flow, output and playtest tools</span></div>
             </div>
             <div class="finance-summary" data-k="finance"></div>
-            <small>1★ Complete the core lessons and storm · 2★ 220 kW + Site B + Radio · 3★ 300 kW + prepared hail + Cleaning Kit.</small>
+            <small>1★ Lessons, expansion & storm · 2★ 220 kW + reliable operation · 3★ 300 kW + restored fleet, research & skilled crew.</small>
             <details class="playtest-tools">
               <summary>Playtest cheats</summary>
               <button type="button" data-action="cheat-cash" data-amount="25000">+$25,000 cash</button>
@@ -308,6 +317,14 @@ export class DomHud {
               <button type="button" data-action="cheat-event">Trigger positive event</button>
               <small>Ctrl+Shift+M = +$25k · Ctrl+Shift+G = positive event.</small>
             </details>
+          </aside>
+          <aside class="panel operations dock-panel" data-panel="operations" hidden>
+            <div class="dock-panel-header"><div><h2>Operations & daily review</h2><span>Assign people, set policies, maintain the fleet</span></div></div>
+            <div class="operations-policies"><label>Scheduled cleaning<select data-k="cleaning-policy" aria-label="Scheduled cleaning threshold"><option value="0.2">20% dust · high output</option><option value="0.35" selected>35% dust · balanced</option><option value="0.5">50% dust · fewer jobs</option></select></label><label><input type="checkbox" data-k="preventive-policy"/>Preventive service · $450/job</label><span data-k="policy-status"></span></div>
+            <div class="operations-bulk"><button type="button" data-action="clean-all">Queue all dirty arrays</button><button type="button" data-action="service-all">Queue worn arrays · $450/job</button><small>Orders wait for eligible crew. Service fees apply when work starts.</small></div><div data-k="operations"></div>
+          </aside>
+          <aside class="panel contracts dock-panel" data-panel="contracts" hidden>
+            <div class="dock-panel-header"><div><h2>Valley supply contracts</h2><span>Optional challenges · one active delivery</span></div></div><div data-k="contracts"></div>
           </aside>
           <aside class="panel events dock-panel" data-panel="events" hidden>
             <div class="dock-panel-header"><div><h2>Valley events</h2><span>Weather, notices & development</span></div></div>
@@ -339,7 +356,7 @@ export class DomHud {
           <header><div><span class="research-eyebrow">COMPANY DEVELOPMENT</span><h2 id="research-title">A brighter tomorrow</h2><p>Choose what your park gets better at. Every upgrade below works.</p></div><button type="button" data-action="close-research" aria-label="Close tech tree">×</button></header>
           <div class="research-office"><span data-k="research-office">Office research</span><strong data-k="research-cash"></strong></div>
           <div class="research-columns" data-k="research-tree"></div>
-          <footer>One project at a time · Paid when started · Progress uses park hours and pauses with the game<br>Engineers add 10% research speed per skill point, up to +100%. They still service your park.</footer>
+          <footer>One project at a time · Paid when started · Progress uses park hours and pauses with the game<br>Idle engineers add 10% research speed per skill point. Dedicated research duty doubles their contribution; field work and breaks pause their assistance. Maximum +100%.</footer>
         </section>
       </div>
       <div class="toast" data-k="toast" hidden></div>
@@ -412,10 +429,21 @@ export class DomHud {
       }
       if (action === 'jump' || action === 'manage-upgrades') {
         const id = (action === 'manage-upgrades' ? 'caps' : t.getAttribute('data-id')) as typeof this.managementView;
-        if (['build','people','caps','finance','events'].includes(id)) {
+        if (['build','people','caps','finance','events','operations','contracts'].includes(id)) {
           const open = !this.root.querySelector('.management-dock')!.classList.contains('collapsed');
           this.setManagementView(open && this.managementView === id && action === 'jump' ? null : id);
         }
+      }
+      if(action==='accept-contract') { this.sim.acceptContract(t.getAttribute('data-id') as ContractId); this.render(this.sim.snapshot()); }
+      if(action==='cancel-contract') { this.sim.cancelContract(); this.render(this.sim.snapshot()); }
+      if(action==='cancel-job') { this.sim.cancelWorkOrder(t.getAttribute('data-id') ?? '',t.getAttribute('data-kind') as WorkKind); this.render(this.sim.snapshot()); }
+      if(action==='clean-all') for(const eq of this.sim.equipment) if(eq.kind.includes('pv') && eq.soiling>=.15) this.sim.dispatchClean(eq.id);
+      if(action==='service-all') for(const eq of this.sim.equipment) if(eq.kind.includes('pv') && eq.condition<.85 && !eq.faulted) this.sim.dispatchService(eq.id);
+      if(action==='service') this.sim.dispatchService(t.getAttribute('data-id') ?? '');
+      if(action==='guide') {
+        const briefing=scenarioBriefing(this.sim.snapshot());
+        if(briefing.action==='locate') this.focusEntity(briefing.target ?? null);
+        else this.setManagementView(briefing.action as typeof this.managementView);
       }
       if (action === 'inspect-worker') {
         this.sim.selectEntity(t.getAttribute('data-id'));
@@ -513,6 +541,7 @@ export class DomHud {
     this.root.addEventListener('click', handleUiAction, { signal: this.listeners.signal });
     this.root.addEventListener('input', ev => {
       const input = ev.target as HTMLInputElement;
+      if(input.dataset.k!=='build-search' && input.dataset.k!=='staff-search') return;
       if (input.dataset.k === 'build-search') { this.buildSearch = input.value.trim().toLowerCase(); this.sim.setBuildMode(null); }
       if (input.dataset.k === 'staff-search') this.staffSearch = input.value.trim().toLowerCase();
       this.render(this.sim.snapshot());
@@ -521,6 +550,12 @@ export class DomHud {
       const input = ev.target as HTMLSelectElement;
       if (input.dataset.k === 'staff-role') this.staffRole = input.value;
       if (input.dataset.k === 'staff-sort') this.staffSort = input.value;
+      if(input.dataset.k==='cleaning-policy') this.sim.setCleaningThreshold(Number(input.value));
+      if(input.dataset.k==='preventive-policy') this.sim.setPreventiveMaintenance((input as unknown as HTMLInputElement).checked);
+      if(input.dataset.k==='worker-zone' || input.dataset.k==='worker-duty') {
+        const member=this.sim.staff.find(m=>m.id===this.sim.selectedId);
+        if(member) this.sim.setStaffAssignment(member.id,input.dataset.k==='worker-zone'?input.value as StaffMember['workZone']:member.workZone ?? 'all',input.dataset.k==='worker-duty'?input.value as StaffMember['preference']:member.preference ?? 'auto');
+      }
       this.render(this.sim.snapshot());
     }, { signal: this.listeners.signal });
     this.setManagementView(null);
@@ -579,6 +614,7 @@ export class DomHud {
     if (view) this.managementView = view;
     dock.classList.toggle('collapsed', !view);
     this.root.classList.toggle('tools-open', !!view);
+    this.root.dataset.tool=view ?? 'none';
     if (view !== 'build') this.sim.setBuildMode(null);
     this.root.querySelectorAll<HTMLElement>('[data-panel]').forEach(panel => {
       panel.hidden = panel.dataset.panel !== view;
@@ -810,6 +846,8 @@ export class DomHud {
       b.classList.toggle('active', Number(b.getAttribute('data-speed')) === snapshot.speed);
     });
 
+    const briefing=scenarioBriefing(snapshot);
+    setText('guide-title',briefing.title); setText('guide-copy',briefing.body); setText('guide-button',briefing.label);
     const activeObjs = snapshot.objectives.filter((o) => o.active || o.complete);
     const doneCount = activeObjs.filter((o) => o.complete).length;
     const objectivesKey = `${doneCount}/${activeObjs.length}|` + activeObjs.map((o) => `${o.id}:${o.complete}:${o.active}`).join('|');
@@ -817,12 +855,13 @@ export class DomHud {
       const newlyDone = activeObjs.filter((o) => o.complete && !this.completedObjectiveIds.has(o.id));
       this.lastObjectivesKey = objectivesKey;
       const objList = this.root.querySelector('[data-k="objectives"]') as HTMLElement;
+      (this.root.querySelector('[data-k="objective-history"]') as HTMLElement).innerHTML=snapshot.objectives.filter(o=>o.complete).map(o=>`<span>✓ ${escapeHtml(o.title)}</span>`).join('') || '<span>Your first award is ahead.</span>';
       const progressPct = activeObjs.length ? Math.round((doneCount / activeObjs.length) * 100) : 0;
       objList.innerHTML =
         `<li class="obj-progress"><div class="bar"><i style="width:${progressPct}%"></i></div><span>${doneCount}/${activeObjs.length} complete</span></li>` +
         activeObjs
           .sort((a, b) => Number(a.complete) - Number(b.complete))
-          .slice(0, 3)
+          .slice(0, 1)
           .map((o) => {
             const mark = o.complete ? '✓' : '○';
             const pulse = o.complete && newlyDone.some((n) => n.id === o.id) ? ' check-pulse' : '';
@@ -862,7 +901,7 @@ export class DomHud {
           return `<button type="button" class="build-card ${active} ${locked ? 'locked' : ''}" ${locked || unaffordable ? "disabled" : ""} data-build="${id}" title="${escapeHtml(tip)}" aria-pressed="${snapshot.buildMode === id}">
             <span class="build-icon">${BUILD_ICONS[id] ?? '■'}</span>
             <strong>${BUILD_LABEL[id] ?? def.name}</strong>
-            <span class="price">${money(def.cost)}</span><small>${locked ? 'First repair to unlock' : unaffordable ? 'More cash needed' : def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% rel." : id === 'workshop' ? 'Faster repairs' : 'Landscape & layout'}</small>
+            <span class="price">${money(def.cost)}</span><small>${locked ? 'First repair to unlock' : unaffordable ? 'More cash needed' : def.nameplateKw ? def.nameplateKw + " kW · " + Math.round(def.reliability * 100) + "% rel." : id === 'workshop' ? 'Local repair hub · 8 tiles' : id === 'road' ? '25% faster crew access' : 'Landscape & layout'}</small>
           </button>`;
         })
         .join('');
@@ -908,10 +947,20 @@ export class DomHud {
       return '<button type="button" data-action="capability" data-id="' + id + '" ' + (owned || locked ? 'disabled' : '') + ' title="' + CAPABILITY_INFO[id].description + '">' + (owned ? '✓ ' : locked ? 'Locked · ' : '') + CAPABILITY_INFO[id].name + '</button><small>' + CAPABILITY_INFO[id].description + '</small>';
     }).join('');
     if (this.lastCapabilityHtml !== capHtml) { this.lastCapabilityHtml = capHtml; capActions.innerHTML = capHtml; }
+    this.root.querySelectorAll<HTMLButtonElement>('[data-action="hire"]').forEach(b=>b.disabled=snapshot.staff.length>=5 || snapshot.cash<1500);
+    const opsHtml=operationsHtml(snapshot);
+    if(opsHtml!==this.lastOperationsHtml) { this.lastOperationsHtml=opsHtml; (this.root.querySelector('[data-k="operations"]') as HTMLElement).innerHTML=opsHtml; }
+    const contractHtml=contractsHtml(snapshot,id=>this.sim.contractBlockedReason(id));
+    if(contractHtml!==this.lastContractsHtml) { this.lastContractsHtml=contractHtml; (this.root.querySelector('[data-k="contracts"]') as HTMLElement).innerHTML=contractHtml; }
+    const threshold=this.root.querySelector('[data-k="cleaning-policy"]') as HTMLSelectElement;
+    threshold.disabled=!snapshot.capabilities.includes('scheduled_cleaning'); threshold.value=String(snapshot.cleaningThreshold);
+    const prevention=this.root.querySelector('[data-k="preventive-policy"]') as HTMLInputElement;
+    prevention.disabled=!snapshot.researched.includes('predictive_diagnostics'); prevention.checked=snapshot.preventiveMaintenance;
+    setText('policy-status',(!threshold.disabled?'Cleaning policy active. ':'Earn Scheduled Cleaning for threshold control. ')+(!prevention.disabled?'Preventive service keeps a $1,500 reserve.':'Research Predictive Diagnostics for preventive scheduling.'));
     const roster = this.root.querySelector('[data-k="roster"]') as HTMLElement;
-    const staffRows = snapshot.staff.filter(member => (this.staffRole === 'all' || member.role === this.staffRole) && `${member.name} ${ROLE_LABEL[member.role]} ${member.trait ?? ''}`.toLowerCase().includes(this.staffSearch)).sort((a,b) => this.staffSort === 'skill' ? (b.skill ?? 1) - (a.skill ?? 1) : this.staffSort === 'task' ? a.task.type.localeCompare(b.task.type) : a.name.localeCompare(b.name));
+    const staffRows = snapshot.staff.filter(member => (this.staffRole === 'all' || member.role === this.staffRole) && `${member.name} ${member.role} ${ROLE_LABEL[member.role]} ${member.trait ?? ''} ${taskLabel(member)} ${member.workZone ?? 'all'} ${member.preference ?? 'auto'}`.toLowerCase().includes(this.staffSearch)).sort((a,b) => this.staffSort === 'skill' ? (b.skill ?? 1) - (a.skill ?? 1) : this.staffSort === 'task' ? taskLabel(a).localeCompare(taskLabel(b)) : a.name.localeCompare(b.name));
     setText('staff-summary', `${staffRows.length} / ${snapshot.staff.length} workers · ${money(snapshot.staff.reduce((sum,member) => sum + (member.salary ?? 1),0))} payroll / park hour`);
-    const rosterHtml = '<div class="staff-table-head"><span>Worker</span><span>Role</span><span>Skill</span><span>Current task</span><span>Wage / park hour</span><span></span></div>' + staffRows.map(member => `<div class="staff-table-row ${member.id === snapshot.selectedId ? 'selected' : ''}"><button type="button" class="staff-name" data-action="inspect-worker" data-id="${member.id}"><span class="staff-role-marker ${member.role}">${ROLE_LABEL[member.role].charAt(0)}</span><strong>${escapeHtml(member.name)}</strong></button><span>${ROLE_LABEL[member.role]}</span><div><b>${(member.skill ?? 1).toFixed(1)} / 5</b><div class="skill-track"><i style="width:${(member.skill ?? 1) / 5 * 100}%"></i></div></div><span>${member.task.type === 'idle' ? 'Ready for a job' : member.task.type === 'travel' ? 'Travelling' : member.task.type === 'repair' ? 'Repairing' : 'Cleaning'}</span><span>${money(member.salary ?? 1)}</span><button type="button" class="inspect-worker" data-action="inspect-worker" data-id="${member.id}" aria-label="Inspect ${escapeHtml(member.name)}">Inspect →</button></div>`).join('') + (staffRows.length ? '' : '<p class="roster-empty">No workers match this filter.</p>');
+    const rosterHtml = '<div class="staff-table-head"><span>Worker</span><span>Role</span><span>Skill</span><span>Current task</span><span>Wage / park hour</span><span></span></div>' + staffRows.map(member => `<div class="staff-table-row ${member.id === snapshot.selectedId ? 'selected' : ''}"><button type="button" class="staff-name" data-action="inspect-worker" data-id="${member.id}"><span class="staff-role-marker ${member.role}">${ROLE_LABEL[member.role].charAt(0)}</span><strong>${escapeHtml(member.name)}</strong></button><span>${ROLE_LABEL[member.role]}</span><div><b>${(member.skill ?? 1).toFixed(1)} / 5</b><div class="skill-track"><i style="width:${(member.skill ?? 1) / 5 * 100}%"></i></div></div><span>${taskLabel(member)}</span><span>${money(member.salary ?? 1)}</span><button type="button" class="inspect-worker" data-action="inspect-worker" data-id="${member.id}" aria-label="Inspect ${escapeHtml(member.name)}">Inspect →</button></div>`).join('') + (staffRows.length ? '' : '<p class="roster-empty">No workers match this filter.</p>');
     if (this.lastRosterHtml !== rosterHtml) { this.lastRosterHtml = rosterHtml; roster.innerHTML = rosterHtml; }
     const night = snapshot.irradiance < 0.05;
     const sceneKey = `${snapshot.weather}|${night}`;
@@ -926,10 +975,11 @@ export class DomHud {
     setText('development-status', snapshot.activeResearch ? `Researching ${RESEARCH[snapshot.activeResearch.id].name}` : `${snapshot.researched.length} / 9 technologies researched`);
     const finance = this.root.querySelector('[data-k="finance"]') as HTMLElement;
     const panels = snapshot.equipment.filter(e => e.kind.includes('pv') && e.commissioned);
-    const availability = panels.length ? Math.round(panels.filter(e => !e.faulted).length / panels.length * 100) : 100;
-    const cleanliness = panels.length ? Math.round(panels.reduce((sum,e) => sum + 1 - e.soiling,0) / panels.length * 100) : 100;
+    const metrics = parkMetrics(snapshot.equipment);
+    const availability = Math.round(metrics.availability*100);
+    const cleanliness = Math.round(metrics.cleanliness*100);
     const cards = [
-      ['Lifetime sales',money(this.sim.lifetimeRevenue)], ['Operating expenses',money(this.sim.totalExpenses)],
+      ['Lifetime sales',money(this.sim.lifetimeRevenue)], ['Operating costs / deposits',money(this.sim.totalExpenses)],
       ['Energy exported',`${Math.round(snapshot.totalEnergyKwh).toLocaleString()} kWh`], ['Peak export',`${Math.round(this.sim.peakExportKw)} kW`],
       ['Inverter capacity',`${Math.round(snapshot.inverterCapacityKw)} kW`], ['Clipping now',`${snapshot.clippedKw.toFixed(1)} kW`],
       ['Array availability',`${availability}%`], ['Cleanliness',`${cleanliness}%`],
@@ -944,9 +994,14 @@ export class DomHud {
       [this.sim.peakExportKw >= STAR_THRESHOLDS.star2PeakKw,`Peak export: ${Math.round(this.sim.peakExportKw)} / ${STAR_THRESHOLDS.star2PeakKw} kW`],
       [panels.some(e => e.plotId === 'site_b'),'Commission a solar array on Site B'],
       [snapshot.capabilities.includes('radio_dispatch'),'Unlock Radio Dispatch'],
+      [snapshot.stabilityHours>=6,`Stable daylight: ${snapshot.stabilityHours.toFixed(1)} / 6 hours`],
     ] : [
       [this.sim.peakExportKw >= STAR_THRESHOLDS.star3PeakKw,`Peak export: ${Math.round(this.sim.peakExportKw)} / ${STAR_THRESHOLDS.star3PeakKw} kW`],
-      [snapshot.hailPrepared && this.sim.hailSurvived,'Prepare for hail and survive it'],
+      [this.sim.hailSurvived,'Resolve the hailstorm'],
+      [snapshot.stabilityHours>=12,`Stable daylight: ${snapshot.stabilityHours.toFixed(1)} / 12 hours`],
+      [parkMetrics(snapshot.equipment).condition>=.85,`Fleet condition: ${Math.round(parkMetrics(snapshot.equipment).condition*100)}% / 85%`],
+      [snapshot.researched.length>=2,`Research: ${snapshot.researched.length} / 2 technologies`],
+      [snapshot.staff.some(m=>(m.skill ?? 1)>=2),'Develop a crew member to skill 2'],
       [snapshot.capabilities.includes('cleaning_kit'),'Earn the Cleaning Kit'],
     ];
     const financeHtml = '<div class="finance-cards">' + cards.map(([label,value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join('') + '</div>'
@@ -988,14 +1043,16 @@ export class DomHud {
     selectionPanel.hidden = !selected && !staff;
     (this.root.querySelector('[data-k="selection-title"]') as HTMLElement).textContent = staff ? 'Staff member' : 'Equipment';
     const selectionBodyKey = selected
-      ? `eq:${selected.id}:${Math.floor(selected.soiling * 10)}:${Math.floor(selected.condition * 10)}:${selected.faulted}:${selected.commissioned}`
+      ? `eq:${selected.id}:${Math.floor(selected.soiling * 10)}:${Math.floor(selected.condition * 10)}:${selected.faulted}:${selected.commissioned}:${hasServiceAccess(snapshot.equipment,selected)}:${nearbyWorkshop(snapshot.equipment,selected)}`
       : staff
-        ? `staff:${staff.id}:${staff.name}:${staff.role}:${staff.skill}:${staff.salary}:${staff.trait}:${staff.task.type}`
+        ? `staff:${staff.id}:${staff.name}:${staff.role}:${staff.skill}:${staff.salary}:${staff.trait}:${staff.task.type}:${staff.onBreak}:${Math.floor((staff.energy ?? 1)*10)}:${(staff.trainingHoursLeft ?? 0).toFixed(1)}`
         : 'none';
+    const serviceQueued=selected && (snapshot.workOrders.some(o=>o.targetId===selected.id && o.kind==='service') || snapshot.staff.some(m=>m.task.type!=='idle' && m.task.targetId===selected.id && (m.task.type==='service' || m.task.type==='travel' && m.task.intent==='service')));
+    const canDismiss=staff && snapshot.staff.length>1 && ((staff.role!=='technician' && staff.role!=='engineer') || snapshot.staff.some(m=>m.id!==staff.id && (m.role==='technician' || m.role==='engineer')));
     const selectionActionsKey = selected
-      ? `act:${selected.id}:${selected.faulted}:${selected.soiling >= 0.15}:${snapshot.capabilities.includes('radio_dispatch')}:${selected.kind}`
+      ? `act:${selected.id}:${selected.faulted}:${selected.soiling >= 0.15}:${snapshot.capabilities.includes('radio_dispatch')}:${selected.kind}:${selected.condition>=.95}:${snapshot.cash>=450}:${serviceQueued}`
       : staff
-        ? `act:staff:${staff.id}:${staff.skill}:${snapshot.cash >= 800}:${snapshot.staff.length > 1}`
+        ? `act:staff:${staff.id}:${staff.skill}:${snapshot.cash >= 800}:${canDismiss}:${staff.workZone}:${staff.preference}:${snapshot.plots[1].unlocked}:${(staff.trainingHoursLeft ?? 0)>0}`
         : 'act:none';
 
     if (selectionBodyKey !== this.lastSelectionKey) {
@@ -1009,10 +1066,10 @@ export class DomHud {
           <span>Condition</span><b>${(selected.condition * 100).toFixed(0)}%</b>
           <span>Soiling</span><b>${(selected.soiling * 100).toFixed(0)}%</b>
           <span>Status</span><b class="${selected.faulted ? 'bad' : 'ok'}">${selected.faulted ? 'FAULTED' : selected.commissioned ? 'Online' : 'Building…'}</b>
-          <span>Plot</span><b>${selected.plotId}</b>
+          <span>Plot</span><b>${selected.plotId}</b><span>Service access</span><b>${hasServiceAccess(snapshot.equipment,selected)?'Road access · faster travel':'Meadow access'}</b><span>Repair hub</span><b>${nearbyWorkshop(snapshot.equipment,selected)?'Nearby workshop':'Field tools'}</b>
         </div>`;
       } else if (staff) {
-        selBody.innerHTML = `<div class="worker-profile"><div class="worker-portrait" role="img" aria-label="${ROLE_LABEL[staff.role]} character">${staffPortrait(staff.role)}</div><div class="worker-identity"><small>${ROLE_LABEL[staff.role]}</small><h3>${escapeHtml(staff.name)}</h3><span class="worker-status">${staff.task.type === 'idle' ? '● Ready for a job' : staff.task.type === 'travel' ? '→ Travelling to a job' : staff.task.type === 'repair' ? '⚒ Repairing equipment' : '✦ Cleaning an array'}</span></div></div><div class="worker-facts"><div class="worker-skill"><span>Skill</span><b>${(staff.skill ?? 1).toFixed(1)} / 5</b><div class="skill-track"><i style="width:${(staff.skill ?? 1) / 5 * 100}%"></i></div></div><div><span>Wage / park hour</span><b>${money(staff.salary ?? 1)}</b></div><div><span>Trait</span><b>${escapeHtml(staff.trait ?? '—')}</b></div></div>`;
+        selBody.innerHTML = `<div class="worker-profile"><div class="worker-portrait" role="img" aria-label="${ROLE_LABEL[staff.role]} character">${staffPortrait(staff.role)}</div><div class="worker-identity"><small>${ROLE_LABEL[staff.role]}</small><h3>${escapeHtml(staff.name)}</h3><span class="worker-status">${taskLabel(staff)}</span></div></div><div class="worker-facts"><div><span>Energy</span><b>${Math.round((staff.energy ?? 1)*100)}%${staff.onBreak?' · recovering':''}</b></div><div class="worker-skill"><span>Skill</span><b>${(staff.skill ?? 1).toFixed(1)} / 5</b><div class="skill-track"><i style="width:${(staff.skill ?? 1) / 5 * 100}%"></i></div></div><div><span>Wage / park hour</span><b>${money(staff.salary ?? 1)}</b></div><div><span>Trait</span><b>${escapeHtml(staff.trait ?? '—')}</b></div></div>`;
       } else {
         selBody.textContent = 'Click equipment or staff.';
       }
@@ -1029,10 +1086,11 @@ export class DomHud {
         if ((selected.kind === 'bargain_pv' || selected.kind === 'premium_pv') && selected.soiling >= 0.15) {
           actions += `<button type="button" data-action="clean" data-id="${selected.id}">Clean Array</button>`;
         }
+        if((selected.kind==='bargain_pv' || selected.kind==='premium_pv') && snapshot.capabilities.includes('radio_dispatch')) actions+=`<button type="button" data-action="service" data-id="${selected.id}" ${selected.condition>=.95 || selected.faulted || !selected.commissioned || snapshot.cash<450 || serviceQueued?'disabled':''}>${serviceQueued?'Service ordered':'Service · $450'}</button>`;
         selActions.innerHTML = actions || `<span class="muted">No actions</span>`;
       } else if (staff) {
         selActions.innerHTML =
-          `<button type="button" data-action="focus-selected">Find in park · F</button><button type="button" data-action="train" data-id="${staff.id}" ${(staff.skill ?? 1) >= 5 || snapshot.cash < 800 ? 'disabled' : ''}>${(staff.skill ?? 1) >= 5 ? 'Fully trained' : 'Train · $800'}</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="${staff.id}" ${snapshot.staff.length <= 1 ? 'disabled title="Keep at least one worker in the park"' : ''}>Dismiss</button>`;
+          `<button type="button" data-action="focus-selected">Find in park · F</button><button type="button" data-action="train" data-id="${staff.id}" ${(staff.skill ?? 1) >= 5 || (staff.trainingHoursLeft ?? 0)>0 || snapshot.cash < 800 ? 'disabled' : ''}>${(staff.trainingHoursLeft ?? 0)>0?'Training booked':(staff.skill ?? 1) >= 5 ? 'Fully trained' : 'Train · $800 · 4 h'}</button><button type="button" class="ghost" data-action="dismiss-staff" data-id="${staff.id}" ${!canDismiss ? 'disabled title="Keep at least one technician or engineer"' : ''}>Dismiss</button>`+assignmentHtml(staff,snapshot);
       } else {
         selActions.innerHTML = '';
       }
@@ -1068,13 +1126,20 @@ export class DomHud {
 
     // Alerts and inspection live opposite the objective/map sidebar.
     const dock = this.root.querySelector('[data-k="management-dock"]') as HTMLElement;
-    const alertLayoutKey = `${window.innerWidth},${window.innerHeight}|${this.lastSelectionKey}|${this.lastSelectionActionsKey}|${dock.classList.contains('collapsed')}`;
+    const alertLayoutKey = `${window.innerWidth},${window.innerHeight}|${this.lastSelectionKey}|${this.lastSelectionActionsKey}|${dock.classList.contains('collapsed')}|${this.managementView}`;
     if (alertLayoutKey !== this.alertLayoutKey) {
       this.alertLayoutKey = alertLayoutKey;
       const alerts = this.root.querySelector('[data-k="park-alerts"]') as HTMLElement;
       const inspector = this.root.querySelector('[data-k="selection"]') as HTMLElement;
       const dockTop = dock.getBoundingClientRect().top;
-      const top = inspector.hidden ? 76 : Math.min(inspector.getBoundingClientRect().bottom + 8, dockTop - 60);
+      const rect=inspector.getBoundingClientRect();
+      const fitsBelow=inspector.hidden || dockTop-rect.bottom>=64;
+      const sidebarLeft=this.root.querySelector('.objectives')!.getBoundingClientRect().left;
+      const sideSpace=sidebarLeft-rect.right-24;
+      alerts.hidden=!fitsBelow && sideSpace<160;
+      alerts.style.left=fitsBelow?'12px':`${rect.right+12}px`;
+      alerts.style.width=fitsBelow?'':`${Math.min(278,sideSpace)}px`;
+      const top = inspector.hidden ? 76 : fitsBelow ? rect.bottom+8 : 78;
       alerts.style.top = `${top}px`;
       alerts.style.bottom = 'auto';
       alerts.style.maxHeight = `${Math.max(48,dockTop - top - 8)}px`;

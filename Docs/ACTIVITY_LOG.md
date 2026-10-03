@@ -1521,3 +1521,37 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 **Git / References**
 - Commit: this entry ships with the contextual tycoon UI commit.
 - Branch / PR: codex/solar-release-hardening / #10, still stacked on PR #7.
+
+## 2026-10-03 — Support — Research-led gameplay and operational progression
+
+**Agent:** ChatGPT / Codex
+**Status:** Complete
+
+**Changed / Produced**
+- Researched Two Point Hospital/Campus, Planet Zoo, Parkitect and Anno 1800 developer descriptions/notes and published player guides. GAMEPLAY_RESEARCH_2026-10-03.md distinguishes source evidence, design inference and remaining gaps.
+- Added a readiness-based next-decision guide, earned milestone history and spacing between non-urgent decision events.
+- Implemented persistent repair/clean/service queues, bulk orders, cancellation of unstarted manual jobs, cleaning thresholds and research-gated preventive service with cash reserve.
+- Added worker site/duty assignments, specialist work rates, energy/breaks, paid four-hour training and available/dedicated engineer research assistance. Final repair specialist cannot be dismissed.
+- Made bridge/distance travel, nearby road access and local workshop repair meaningful. Retained approved art/theme and contextual portraits.
+- Added three optional supply contracts using actual exported energy, quality gates, deadlines, deposits, bonuses, history and renewal breaks. Balanced initial overgenerous rewards against normal-economy runs.
+- Added capacity-weighted health figures and daily operating reviews. Later stars now reward sustained reliability, research, crew development and recoverable equipment condition; skipped hail preparation no longer permanently blocks mastery.
+- Extended optional version-1 save validation/migration and portable save coverage. Updated player instructions, current status, progression/level notes and architecture.
+
+**Tested / Verified**
+- 53 simulation/layout/research/release/gameplay/playthrough tests pass; TypeScript and Vite build pass.
+- Prepared reference company completes 1★ in 1,576 seconds at 1x, then 3★ after another 123 seconds. Frugal unprepared company completes 3★ in 1,451 seconds with six contracts, five services and $16,147 remaining cash. Both use real starting funds/actions and save/resume without economy/time/unlock overrides.
+- Offline Chromium interactions verify timed training, assignment controls, accepted contract pause/reload/cancellation, bulk job queue/cancellation, service fees, cleaning policy and laptop Operations layout, plus existing build/placement/research/lighting/save checks.
+- Inspected desktop Operations/Contracts/worker screenshots and 1024×768 Operations layout. Browser testing caught and fixed a policy selection reset before change handling. Visual inspection also caught laptop alerts/toasts covering assignment controls; alerts now move beside a tall inspector and confirmations fit between sidebars.
+
+**Known issues / limitations**
+- Deterministic completion is not independent player engagement evidence. Higher awards can follow 1★ quickly if research/training/capacity are already developed.
+- One playable solar scenario. Road access uses a proximity bonus, not a connected-road routing graph; breaks recover in place rather than physical staff-room trips. No staff happiness, terrain/shading model or second campaign map is claimed.
+- Existing Vite bundle-size advisory remains. No backend, engine change or paid dependency added.
+- The legacy Polaris vault is inaccessible from this Linux workspace; repo documentation is updated.
+
+**Next recommended step**
+- Independent fresh-player sessions to tune tutorial comprehension, contract challenge and post-1★ pacing; then a distinct second scenario and clearer service-coverage planning tools.
+
+**Git / References**
+- Commit: this entry ships with the gameplay progression commit.
+- Branch / PR: codex/solar-release-hardening / #10, still stacked on PR #7.
