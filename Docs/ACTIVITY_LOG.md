@@ -1488,3 +1488,79 @@ This file is not a replacement for commits, pull requests, `CURRENT_STATUS.md`, 
 **Git / References**
 - Commit: `feat: Loop 14 — bank foam, lighting tints, denser sparks`
 - Branch / PR / Issue: `cursor/phaser-level1-build-5938`
+
+
+## 2026-10-02 — Support — Contextual tycoon UI after simulator research
+
+**Agent:** ChatGPT / Codex
+**Status:** Complete
+
+**Changed / Produced**
+- Researched published Two Point Campus, Planet Zoo, Parkitect and Planet Coaster interface guides before changing the game; documented sources and design inference in TYCOON_UI_RESEARCH_2026-10-02.md.
+- Replaced the permanent Staff/Events/Build dashboard with a closed compact toolbar and one management drawer at a time.
+- Added a selected worker character profile with actual task, skill, trait, salary, Find/Train/Dismiss. Portraits appear only in this profile, not in the bottom bar or roster.
+- Staff roster supports search, role filtering and name/skill/task sorting. Build supports large horizontal equipment cards, search, categories and browse arrows. Weather/notices moved to an optional Events drawer.
+- Added B/T tool shortcuts, guarded simulation shortcuts during text entry, and Escape handling for selection/tools. Updated play instructions, current status and visual direction.
+
+**Tested / Verified**
+- 34 simulation/layout/research/release/playthrough tests passed; TypeScript and Vite production build passed.
+- Standalone offline Chromium checks passed: default closed tools, one drawer, searchable/browsable catalogue, map separation, world worker selection, portrait only on selection, training cost/skill/profile refresh, roster filters/sort/inspection, and existing save/load/placement/research/day-night/gameplay checks.
+- Inspected desktop default/build/worker/staff screenshots and 1024×768 build/finance layouts; release workflow captures browser evidence.
+
+**Known issues / limitations**
+- Portraits use the existing original role art, not individual animated models. Terrain, lighting, character animation and facilities remain below the reference's production quality.
+- Independent player evaluation still needed; no new enjoyment or commercial polish score is asserted.
+- The legacy Polaris vault is not accessible from this Linux workspace; repo documentation is updated.
+
+**Decisions / assumptions / recommendations**
+- Reference images guide art direction, not permanent screen occupancy. Global staff management and selected-worker profiles serve separate jobs.
+
+**Next recommended step**
+- Improve the park art slice (terrain depth, lighting, expressive staff motion), then evaluate with an independent playtest.
+
+**Git / References**
+- Commit: this entry ships with the contextual tycoon UI commit.
+- Branch / PR: codex/solar-release-hardening / #10, still stacked on PR #7.
+
+## 2026-10-03 — Support — Research-led gameplay and operational progression
+
+**Agent:** ChatGPT / Codex
+**Status:** Complete
+
+**Changed / Produced**
+- Researched Two Point Hospital/Campus, Planet Zoo, Parkitect and Anno 1800 developer descriptions/notes and published player guides. GAMEPLAY_RESEARCH_2026-10-03.md distinguishes source evidence, design inference and remaining gaps.
+- Added a readiness-based next-decision guide, earned milestone history and spacing between non-urgent decision events.
+- Implemented persistent repair/clean/service queues, bulk orders, cancellation of unstarted manual jobs, cleaning thresholds and research-gated preventive service with cash reserve.
+- Added worker site/duty assignments, specialist work rates, energy/breaks, paid four-hour training and available/dedicated engineer research assistance. Final repair specialist cannot be dismissed.
+- Made bridge/distance travel, nearby road access and local workshop repair meaningful. Retained approved art/theme and contextual portraits.
+- Added three optional supply contracts using actual exported energy, quality gates, deadlines, deposits, bonuses, history and renewal breaks. Balanced initial overgenerous rewards against normal-economy runs.
+- Added capacity-weighted health figures and daily operating reviews. Later stars now reward sustained reliability, research, crew development and recoverable equipment condition; skipped hail preparation no longer permanently blocks mastery.
+- Extended optional version-1 save validation/migration and portable save coverage. Updated player instructions, current status, progression/level notes and architecture.
+
+**Tested / Verified**
+- 53 simulation/layout/research/release/gameplay/playthrough tests pass; TypeScript and Vite build pass.
+- Prepared reference company completes 1★ in 1,576 seconds at 1x, then 3★ after another 123 seconds. Frugal unprepared company completes 3★ in 1,451 seconds with six contracts, five services and $16,147 remaining cash. Both use real starting funds/actions and save/resume without economy/time/unlock overrides.
+- Offline Chromium interactions verify timed training, assignment controls, accepted contract pause/reload/cancellation, bulk job queue/cancellation, service fees, cleaning policy and laptop Operations layout, plus existing build/placement/research/lighting/save checks.
+- Inspected desktop Operations/Contracts/worker screenshots and 1024×768 Operations layout. Browser testing caught and fixed a policy selection reset before change handling. Visual inspection also caught laptop alerts/toasts covering assignment controls; alerts now move beside a tall inspector and confirmations fit between sidebars.
+
+**Known issues / limitations**
+- Deterministic completion is not independent player engagement evidence. Higher awards can follow 1★ quickly if research/training/capacity are already developed.
+- One playable solar scenario. Road access uses a proximity bonus, not a connected-road routing graph; breaks recover in place rather than physical staff-room trips. No staff happiness, terrain/shading model or second campaign map is claimed.
+- Existing Vite bundle-size advisory remains. No backend, engine change or paid dependency added.
+- The legacy Polaris vault is inaccessible from this Linux workspace; repo documentation is updated.
+
+**Next recommended step**
+- Independent fresh-player sessions to tune tutorial comprehension, contract challenge and post-1★ pacing; then a distinct second scenario and clearer service-coverage planning tools.
+
+**Git / References**
+- Commit: this entry ships with the gameplay progression commit.
+- Branch / PR: codex/solar-release-hardening / #10, still stacked on PR #7.
+
+
+### Gameplay release verification follow-up
+
+The first Actions run passed all simulation/build/package steps but its software-rendered
+browser timed out on the 20-second training wait. The same full course completed locally.
+Browser verification now allows 60 seconds on the slower runner, still requires the full
+four park hours and actual skill improvement, and captures task/skill/speed/event state
+plus a screenshot on failure. No gameplay timers or training-save progress were shortened.

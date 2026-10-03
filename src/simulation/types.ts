@@ -1,18 +1,25 @@
+import type { ContractProgress, ContractResult } from '../content/contracts';
+import type { ResearchId, ResearchProject } from '../content/research';
 /** Shared simulation types for Megawatt Valley: Solar Level 1. */
 
-export type EquipmentKind = 'bargain_pv' | 'premium_pv' | 'inverter' | 'office' | 'substation';
+export type EquipmentKind = 'bargain_pv' | 'premium_pv' | 'inverter' | 'office' | 'substation' | 'road' | 'fence' | 'gate' | 'tree' | 'workshop' | 'sign';
 
 export type PlotId = 'site_a' | 'site_b';
 
 export type WeatherKind = 'clear' | 'partly_cloudy' | 'overcast' | 'rain' | 'hail';
 
+export type WorkKind = 'repair' | 'clean' | 'service';
+export interface WorkOrder { targetId: string; kind: WorkKind; manual: boolean; }
+export interface DailyReport { day:number; energyKwh:number; revenue:number; expenses:number; bonuses:number; jobs:number; }
+
 export type StaffTask =
   | { type: 'idle' }
-  | { type: 'travel'; targetId: string; progress: number; from: Vec2 }
+  | { type: 'travel'; targetId: string; progress: number; from: Vec2; intent?: WorkKind; duration?: number }
   | { type: 'repair'; targetId: string; progress: number }
-  | { type: 'clean'; targetId: string; progress: number };
+  | { type: 'clean'; targetId: string; progress: number }
+  | { type: 'service'; targetId: string; progress: number };
 
-export type CapabilityId = 'radio_dispatch' | 'cleaning_kit';
+export type CapabilityId = 'radio_dispatch' | 'cleaning_kit' | 'cleaning_rig' | 'remote_monitoring' | 'scheduled_cleaning';
 
 export type ObjectiveId =
   | 'first_power'
@@ -30,6 +37,7 @@ export type ObjectiveId =
 
 export type EventId =
   | 'community_meeting'
+  | 'green_growth_grant'
   | 'bargain_batch'
   | 'grid_curtailment'
   | 'temp_worker'
@@ -74,7 +82,15 @@ export interface PlacedEquipment {
 export interface StaffMember {
   id: string;
   name: string;
-  role: 'technician';
+  role: 'technician' | 'cleaner' | 'engineer' | 'manager';
+  skill?: number;
+  salary?: number;
+  trait?: string;
+  energy?: number;
+  trainingHoursLeft?: number;
+  onBreak?: boolean;
+  workZone?: PlotId | 'all';
+  preference?: 'auto' | 'repair' | 'clean' | 'research';
   plotId: PlotId;
   tile: Vec2;
   task: StaffTask;
@@ -115,6 +131,26 @@ export interface ActiveEvent {
 }
 
 export interface GameSnapshot {
+  contract: ContractProgress | null;
+  contractHistory: ContractResult[];
+  contractRenewals: number;
+  contractCooldown: number;
+  contractsCompleted: number;
+  workOrders: WorkOrder[];
+  cleaningThreshold: number;
+  preventiveMaintenance: boolean;
+  stabilityHours: number;
+  servicesCompleted: number;
+  dailyReports: DailyReport[];
+  currentReport: DailyReport;
+  peakExportKw: number;
+  lifetimeRevenue: number;
+  nextNarrativeAt: number;
+  eventClock: number;
+  researched: ResearchId[];
+  activeResearch: ResearchProject | null;
+  inverterCapacityKw: number;
+  clippedKw: number;
   cash: number;
   revenuePerHour: number;
   powerKw: number;
@@ -140,6 +176,7 @@ export interface GameSnapshot {
   faultsRepaired: number;
   cleansCompleted: number;
   scenarioComplete: boolean;
+  completionAcknowledged: boolean;
 }
 
 export interface SaveData {
@@ -149,6 +186,21 @@ export interface SaveData {
 }
 
 export interface SerializedGameState {
+  contract?: ContractProgress | null;
+  contractHistory?: ContractResult[];
+  contractRenewals?: number;
+  contractCooldown?: number;
+  contractsCompleted?: number;
+  workOrders?: WorkOrder[];
+  cleaningThreshold?: number;
+  preventiveMaintenance?: boolean;
+  stabilityHours?: number;
+  servicesCompleted?: number;
+  dailyReports?: DailyReport[];
+  currentReport?: DailyReport;
+  nextNarrativeAt?: number;
+  researched?: ResearchId[];
+  activeResearch?: ResearchProject | null;
   cash: number;
   day: number;
   hour: number;
@@ -175,6 +227,7 @@ export interface SerializedGameState {
   faultsRepaired: number;
   cleansCompleted: number;
   scenarioComplete: boolean;
+  completionAcknowledged?: boolean;
   tickAccumulator: number;
   nextFaultCheck: number;
   nextSoilTick: number;
@@ -182,4 +235,13 @@ export interface SerializedGameState {
   lifetimeRevenue: number;
   peakExportKw: number;
   scriptedFirstFault: boolean;
+  curtailmentFactor?: number;
+  curtailmentTimer?: number;
+  eventClock?: number;
+  eventDelays?: Partial<Record<EventId, number>>;
+  rngState?: number;
+  totalExpenses?: number;
+  manualRepairs?: number;
+  manualCleans?: number;
+  speedBeforeEvent?: 0 | 1 | 2 | 4;
 }

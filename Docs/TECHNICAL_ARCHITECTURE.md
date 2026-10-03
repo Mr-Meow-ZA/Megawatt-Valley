@@ -186,3 +186,21 @@ Escalate before introducing:
 - a change that conflicts with the primary build specification.
 
 The product requirements own the architecture, not the other way around.
+
+
+## Implemented gameplay modules — 3 October 2026
+
+`src/content/contracts.ts` owns validated frozen contract terms;
+`src/content/progression.ts` derives readiness-based next decisions;
+`src/simulation/operations.ts` shares weighted metrics, service access, travel and
+crew eligibility across simulation/UI. `src/ui/gameplayPanels.ts` renders contextual
+operations/contracts/assignment controls. GameSimulation remains the authoritative
+state owner; gameplay timers advance from park time and pause with events.
+
+Version-1 saves gain optional contracts/history/renewal fields, crew energy/duty/
+zone/training, work orders, policies, stability and daily reports. Validation runs
+before load mutates the company; old saves initialise defaults. Already completed
+awards remain earned, while objective descriptions use current definitions.
+Reports represent operations rather than full accounting. Road access and staff
+break recovery are documented abstractions; no path network or physical rest-room
+simulation is claimed.

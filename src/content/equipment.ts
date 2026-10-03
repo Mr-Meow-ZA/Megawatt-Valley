@@ -1,9 +1,16 @@
 import type { EquipmentDef, EquipmentKind } from '../simulation/types';
 
 export const EQUIPMENT: Record<EquipmentKind, EquipmentDef> = {
+  road: { id:'road',name:'Service Road',description:'Within 2.5 tiles of an equipment service edge: 25% shorter crew travel time. Staff can still cross meadow.',cost:100,footprint:{x:1,y:1},nameplateKw:0,reliability:1,efficiency:1,buildable:true,category:'building' },
+  fence: { id:'fence',name:'Site Fence',description:'Marks your boundary. No security bonus in this solar scenario.',cost:75,footprint:{x:1,y:1},nameplateKw:0,reliability:1,efficiency:1,buildable:true,category:'building' },
+  gate: { id:'gate',name:'Service Gate',description:'A welcoming entrance for maintenance crews.',cost:125,footprint:{x:1,y:1},nameplateKw:0,reliability:1,efficiency:1,buildable:true,category:'building' },
+  tree: { id:'tree',name:'Valley Tree',description:'A little shade for the landscape. Place away from future array footprints.',cost:100,footprint:{x:1,y:1},nameplateKw:0,reliability:1,efficiency:1,buildable:true,category:'building' },
+  sign: { id:'sign',name:'Safety-ish Sign',description:'DAYS SINCE LAST COFFEE: 0. A morale landmark; purely decorative.',cost:50,footprint:{x:1,y:1},nameplateKw:0,reliability:1,efficiency:1,buildable:true,category:'building' },
+  workshop: { id:'workshop',name:'Maintenance Workshop',description:'After first repair: repairs are one third faster within 8 tiles on the same site. Crews recover energy faster on that site.',cost:2500,footprint:{x:2,y:2},nameplateKw:0,reliability:1,efficiency:1,buildable:true,category:'building' },
+
   bargain_pv: {
     id: 'bargain_pv',
-    name: 'Bargain PV Array',
+    name: 'Sun-ish Bargain PV',
     description: 'Cheaper panels. Weaker output and more faults.',
     cost: 8000,
     footprint: { x: 2, y: 2 },
@@ -15,7 +22,7 @@ export const EQUIPMENT: Record<EquipmentKind, EquipmentDef> = {
   },
   premium_pv: {
     id: 'premium_pv',
-    name: 'Premium PV Array',
+    name: 'HelioSure Premium PV',
     description: 'Costlier panels. Stronger output and higher reliability.',
     cost: 14000,
     footprint: { x: 2, y: 2 },
@@ -63,4 +70,4 @@ export const EQUIPMENT: Record<EquipmentKind, EquipmentDef> = {
   },
 };
 
-export const BUILD_MENU_ORDER: EquipmentKind[] = ['bargain_pv', 'premium_pv', 'inverter'];
+export const BUILD_MENU_ORDER: EquipmentKind[] = ['bargain_pv', 'premium_pv', 'inverter', 'workshop', 'road', 'fence', 'gate', 'tree', 'sign'];

@@ -1,9 +1,18 @@
 # Megawatt Valley — Phaser Level 1 Implementation Plan
 
-**Branch:** `cursor/phaser-level1-build-5938`  
+**Active branch:** `codex/solar-release-hardening` (PR #10, stacked on PR #7)
+**Original baseline:** `cursor/phaser-level1-build-5938`
 **Tracker:** GitHub issue #6  
 **Spec:** `Docs/CURSOR_PRIMARY_BUILD_SPEC.md`  
 **Constraint:** Do not alter or delete Unity folders on this branch (`Assets/`, `Packages/`, `ProjectSettings/`). Phaser lives alongside them. Archive branch remains historical.
+
+## Current assessment
+
+See [HONEST_REVIEW_2026-10-02.md](HONEST_REVIEW_2026-10-02.md). Implementation is
+not equivalent to finished quality. A functional nine-node research tree, visual
+pass and navigation/reporting improvements are now present. Next work should
+prioritise staff/facilities and stronger solar layout decisions, with actual game
+screenshots and first-player evidence as the quality gates.
 
 ## Goal
 

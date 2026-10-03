@@ -16,12 +16,29 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'sponsor',
         label: 'Sponsor tea & biscuits (−$2,000)',
-        description: 'Spend cash now for smoother relations.',
+        description: 'Pay $2,000 to keep the crew generating without a public tour interruption.',
       },
       {
         id: 'promise',
         label: 'Promise a public tour',
-        description: 'No cash cost, but staff stay busy next week.',
+        description: 'Free, but export falls 10% for 12 simulation hours while the crew hosts.',
+      },
+    ],
+  },
+  green_growth_grant: {
+    id: 'green_growth_grant',
+    title: 'Green Growth Grant',
+    body: 'A regional clean-energy fund likes what it sees. For once, the paperwork comes with money attached.',
+    choices: [
+      {
+        id: 'cash',
+        label: 'Take the growth grant (+$7,500)',
+        description: 'Immediate expansion cash. No strings, apart from one very smug press release.',
+      },
+      {
+        id: 'training',
+        label: 'Fund the team (+$4,000 + training)',
+        description: 'Receive $4,000 and give every current staff member +0.5 skill.',
       },
     ],
   },
@@ -32,8 +49,8 @@ export const EVENTS: Record<EventId, EventDef> = {
     choices: [
       {
         id: 'buy',
-        label: 'Buy the batch (−$5,000, +cash cushion later)',
-        description: 'Immediate discount voucher equivalent.',
+        label: 'Take the supplier rebate (+$2,500 net)',
+        description: 'Net +$2,500 now; supplier trial reduces the oldest bargain array condition by 8%.',
       },
       {
         id: 'pass',
@@ -50,7 +67,7 @@ export const EVENTS: Record<EventId, EventDef> = {
       {
         id: 'accept',
         label: 'Accept temporary curtailment',
-        description: 'Irradiance effective −15% for a while.',
+        description: 'Grid export −15% for 36 simulation hours; sunlight and generation are unchanged.',
       },
       {
         id: 'upgrade_talk',
@@ -100,8 +117,8 @@ export const EVENTS: Record<EventId, EventDef> = {
     choices: [
       {
         id: 'host',
-        label: 'Host the shoot (−$1,500)',
-        description: '+$4,000 sponsorship lands after the edit.',
+        label: 'Host the sponsored shoot (+$2,500 net)',
+        description: 'Net +$2,500 now; export reduced 30% for 8 simulation hours for drone safety.',
       },
       {
         id: 'busy',

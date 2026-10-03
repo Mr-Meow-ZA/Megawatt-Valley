@@ -2,7 +2,25 @@
 
 ## Status
 
-**Primary roadmap — 29 September 2026**
+**Primary roadmap — updated 2 October 2026**
+
+## Current quality priorities
+
+Use [HONEST_REVIEW_2026-10-02.md](HONEST_REVIEW_2026-10-02.md) for the current
+scorecard and detailed exit criteria. Existing milestone completion below indicates
+implemented scope, not commercial polish. The active release candidate is PR #10
+on `codex/solar-release-hardening`, stacked on PR #7.
+
+Delivered in the current improvement pass: original visual enrichment, nine real
+research upgrades, staff role art, actionable alerts, camera/minimap controls,
+repeat placement and clearer finance/mastery reporting.
+
+Continue in this order: (1) composed art slice against the reference; (2) staff
+wellbeing, facilities and workload; (3) placement forecasting and reusable layouts;
+(4) distinct sustained mastery goals; (5) research specialisations and genuine
+new-equipment unlocks; (6) personality/audio; (7) hosted release and first-player
+validation. Maintain a complete playable build after each slice. Later renewable
+technologies should introduce real decisions before their UI is advertised.
 
 This roadmap replaces the Unity phase plan.
 

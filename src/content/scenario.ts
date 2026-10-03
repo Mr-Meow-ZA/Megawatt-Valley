@@ -1,7 +1,8 @@
 import type { CapabilityId, ObjectiveId, ObjectiveState, PlotState } from '../simulation/types';
 
 export const STARTING_CASH = 50_000;
-export const TARIFF_PER_KWH = 0.12;
+// Gameplay tariff is intentionally boosted for tycoon pacing.
+export const TARIFF_PER_KWH = 0.24;
 export const SAVE_VERSION = 1;
 export const SAVE_KEY = 'megawatt-valley-solar-v1';
 
@@ -12,6 +13,9 @@ export const CAPABILITY_INFO: Record<
   CapabilityId,
   { name: string; description: string }
 > = {
+  cleaning_rig: { name: 'Mobile Cleaning Rig', description: 'Group cleaning: also cleans adjacent arrays. First expansion upgrade free; second $4,000.' },
+  remote_monitoring: { name: 'Remote Monitoring', description: 'Inspections halve random fault risk. First expansion upgrade free; second $4,000.' },
+  scheduled_cleaning: { name: 'Scheduled Cleaning', description: 'Automatically sends staff above 35% soiling. Requires Cleaning Rig; $3,000.' },
   radio_dispatch: {
     name: 'Radio Dispatch',
     description: 'Technicians auto-respond to routine faults.',
@@ -87,14 +91,14 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'unlock_site_b',
       title: 'Growing Up',
-      description: 'Reach 120 kW peak export and hold $25,000 cash.',
+      description: 'Reach 120 kW peak export and hold $5,000 cash.',
       rewardText: 'Unlock Site B',
     },
     {
       id: 'expand_site_b',
       title: 'Second Plot',
       description: 'Commission any PV array on Site B.',
-      rewardText: 'Company expands',
+      rewardText: 'Company expands · $5,000 organisation grant',
     },
     {
       id: 'survive_hail',
@@ -105,20 +109,20 @@ export function createInitialObjectives(): ObjectiveState[] {
     {
       id: 'star_1',
       title: '1★ Here Comes the Sun',
-      description: 'Export 120 kW peak and earn $12,000 lifetime revenue.',
-      rewardText: 'Scenario complete — continue for mastery',
+      description: 'Export 120 kW peak and earn $3,500 lifetime revenue, repair and clean manually, expand Site B, choose an upgrade, and weather the hail.',
+      rewardText: 'Scenario 2 unlocked · $12,000 growth investment',
     },
     {
       id: 'star_2',
       title: '2★ Strong Operator',
-      description: 'Own Site B PV, Radio Dispatch, and 220 kW peak.',
-      rewardText: 'Mastery',
+      description: 'Reach 220 kW peak on two sites, with Radio Dispatch and 6 stable daylight hours: 90% availability, 75% cleanliness.',
+      rewardText: 'Mastery · $12,000 growth investment',
     },
     {
       id: 'star_3',
       title: '3★ Valley Pro',
-      description: 'Survive hail prepared, hold Cleaning Kit, and 300 kW peak.',
-      rewardText: 'Full mastery',
+      description: 'Reach 300 kW peak, 12 stable daylight hours, 85% fleet condition, two completed research projects and a crew member at skill 2.',
+      rewardText: 'Operational mastery · recover from the storm',
     },
   ];
 
@@ -134,7 +138,7 @@ export function createInitialObjectives(): ObjectiveState[] {
 
 export const STAR_THRESHOLDS = {
   star1PeakKw: 120,
-  star1Revenue: 12_000,
+  star1Revenue: 3_500,
   star2PeakKw: 220,
   star3PeakKw: 300,
 };

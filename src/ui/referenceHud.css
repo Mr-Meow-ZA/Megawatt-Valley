@@ -1,0 +1,296 @@
+/* Contextual tycoon HUD: park first, one management tool at a time. */
+.reference-hud {
+  --workbench-height: 42px;
+  --ink: #173954;
+  --blue: #245b87;
+  --paper: #f6fbfd;
+  --line: #c9e0e9;
+  --green: #35a96a;
+  font-family: "Segoe UI", sans-serif;
+}
+.reference-hud button { font-family: inherit; }
+.reference-hud button:focus-visible { outline: 3px solid #ffd45e; outline-offset: -3px; }
+.reference-hud .hud-top {
+  top: 12px; left: 12px; right: 62px; height: 54px; min-height: 54px;
+  padding: 5px 12px; gap: 8px; border-radius: 12px;
+  background: linear-gradient(120deg,#173d59f5,#142c40f5);
+  border: 1px solid #c3dbea; box-shadow: 0 3px 9px #18395230;
+}
+.reference-hud .brand-block { min-width: 180px; padding: 0 12px 0 0; }
+.reference-hud .brand { font-size: 16px; }
+.reference-hud .brand-sub { font-size: 9px; color: #a8d2e7; letter-spacing: .07em; }
+.reference-hud .chip { background: transparent; border: 0; border-left: 1px solid #ffffff1f; border-radius: 0; padding: 2px 12px; min-width: 106px; }
+.reference-hud .chip.power { min-width: 163px; }
+.reference-hud .chip.time { min-width: 175px; }
+.reference-hud .chip-label { font-size: 9px; color: #bedae7; }
+.reference-hud .chip strong { font-size: 14px; color: white; }
+.reference-hud .chip em { font-size: 10px; color: #93dba7; }
+.reference-hud .chip-icon { width: 27px; height: 27px; border-radius: 50%; background-color: #42725f; }
+.reference-hud .cash .chip-icon { background: #3fa562; }
+.reference-hud .power .chip-icon { background: #6e6534; }
+.reference-hud .speed-group { margin-left: auto; gap: 4px; }
+.reference-hud .speed-group button { width: 34px; min-width: 34px; padding: 5px 3px; border: 1px solid #5d8198; border-radius: 6px; background: #22445b; }
+.reference-hud .speed-group button.active { background: #4a9c63; border-color: #b9e1b0; color: white; }
+.reference-hud .stars { font-size: 20px; color: #ffda58; min-width: 68px; }
+.reference-hud .panel:not(.dock-panel) { background: #183348ed; border: 1px solid #c7e1ec; border-radius: 12px; box-shadow: 0 5px 14px #19384c25; }
+.reference-hud .panel-title-row h2 { font-size: 15px; letter-spacing: 0; text-transform: none; color: #fff; }
+.reference-hud .panel-kicker { font-size: 10px; color: #bfd8e5; }
+.reference-hud .objective-star { color: #ffd440; font-size: 22px; vertical-align: -1px; margin-right: 5px; }
+.reference-hud .objectives {
+  top: 78px; left: auto; right: 12px; width: 250px; padding: 10px;
+  max-height: min(280px,calc(100vh - 340px)); overflow-y: auto;
+}
+.reference-hud .objectives .panel-title-row { flex-wrap: wrap; gap: 2px; margin-bottom: 8px; }
+.reference-hud .objectives .panel-kicker { display: none; }
+.reference-hud .objectives ul { margin: 0; padding: 0; display: grid; gap: 6px; }
+.reference-hud .objectives li { background: #ffffff09; padding: 7px 6px; border: 0; border-radius: 6px; }
+.reference-hud .objectives li strong { font-size: 12px; color: #fff; }
+.reference-hud .objectives li div > span { color: #c2d5df; font-size: 11px; line-height: 1.4; }
+.reference-hud .objectives .check { border-radius: 5px; width: 19px; height: 19px; min-width: 19px; background: #ffffff0d; border: 1px solid #8caabc; color: #e7f3fc; }
+.reference-hud .objectives .done .check { background: #3caa58; border-color: #8cd58e; color: white; }
+.reference-hud .obj-progress { padding: 5px 7px !important; color: #d3e7ec; font-size: 10px; }
+.reference-hud .obj-progress .bar { height: 5px; background: #395468; }
+.reference-hud .obj-progress .bar i { background: #58c17c; }
+.reference-hud .minimap-panel { display: block; left: auto; right: 12px; bottom: 68px; width: 250px; padding: 8px; height: 178px; }
+.reference-hud .minimap-panel .panel-title-row { margin-bottom: 6px; }
+.reference-hud .minimap-panel .panel-title-row h2 { font-size: 12px; }
+.reference-hud .map-home { width: 24px; height: 22px; padding: 0; background: #315d75; color: white; border: 1px solid #8ab2c8; border-radius: 5px; cursor: pointer; font-size: 19px; }
+.reference-hud .minimap-panel canvas { width: 100%; height: 120px; border-radius: 7px; border: 2px solid #9ccd77; image-rendering: auto; }
+.reference-hud .minimap-legend { font-size: 8px; padding-top: 3px; }
+.reference-hud .contextual-panel { top: 78px; left: 12px; right: auto; bottom: auto; width: 278px; max-height: calc(100vh - var(--workbench-height) - 108px); overflow-y: auto; padding: 12px; }
+.reference-hud .park-alerts { left: 12px; right: auto; width: 278px; gap: 6px; }
+.reference-hud .park-alerts button { border-radius: 9px; background: #19384cee; border: 1px solid #bad0dc; padding: 9px 11px; }
+
+.reference-hud.tools-open { --workbench-height: 294px; }
+.reference-hud .management-dock { position: absolute; left: 12px; right: 12px; bottom: 12px; width: auto; height: var(--workbench-height); padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: visible; display: flex; flex-direction: column; gap: 8px; }
+.reference-hud .dock-nav { order: 2; flex: 0 0 42px; min-height: 42px; max-height: 42px; margin: 0; padding: 4px 6px; align-items: center; border-radius: 10px; background: #17394bf2; border: 1px solid #b2ced9; }
+.reference-hud .dock-nav button { min-width: 94px; font-size: 12px; padding: 5px 12px; color: #d2e6ef; height: 32px; border-radius: 7px; }
+.reference-hud .dock-nav button.active { background: #4a9c69; border-color: #99d8a5; color: #fff; }
+.reference-hud .dock-nav button:hover:not(.active) { background: #2b5b73; border-color: #6c99af; }
+.reference-hud .dock-hint { color: #bbd5df; font-size: 10px; }
+.reference-hud .dock-nav .dock-toggle { min-width: 32px; margin-left: auto; }
+.reference-hud .dock-content { order: 1; display: block; flex: 1; width: calc(100% - 270px); min-height: 0; background: transparent; overflow: visible; }
+.reference-hud .management-dock.collapsed .dock-content { display: none; }
+.reference-hud .management-dock .dock-panel { position: relative; inset: auto; width: 100%; height: 100%; min-width: 0; min-height: 0; border: 1px solid #e1f3fc; border-radius: 12px; background: var(--paper); color: var(--ink); box-shadow: 0 5px 16px #1d425340; overflow: hidden; padding: 0; pointer-events: auto; }
+.reference-hud .dock-panel-header { height: 44px; min-height: 44px; margin: 0; padding: 7px 12px; background: linear-gradient(110deg,#286697,#20446b); color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.reference-hud .dock-panel-header h2 { margin: 0; font-size: 18px; color: #fff; letter-spacing: -.02em; text-transform: none; white-space: nowrap; }
+.reference-hud .dock-panel-header > div:first-child { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 10px; }
+.reference-hud .dock-panel-header > div:first-child > span { font-size: 10px; color: #d0e6f4; }
+.reference-hud .catalogue-tools { display: flex; gap: 8px; align-items: center; }
+.reference-hud .search-field { display: flex; align-items: center; gap: 4px; padding: 4px 7px; border: 1px solid #719bb7; background: #193d58; border-radius: 6px; }
+.reference-hud .search-field input { width: 150px; border: 0; background: transparent; color: white; font: inherit; font-size: 12px; outline: none; }
+.reference-hud .search-field input::placeholder { color: #c1d6e4; }
+.reference-hud .search-field:focus-within { outline: 2px solid #ffd45e; }
+.reference-hud .management-dock .build-tabs { display: flex; height: 31px; margin: 0; gap: 4px; padding: 4px 8px 0; }
+.reference-hud .management-dock .build-tabs button { flex: 0 1 auto; padding: 4px 14px; min-width: 0; border-radius: 6px 6px 0 0; background: #e4eff5; border: 1px solid #d3e4ed; color: #224a68; font-size: 11px; white-space: nowrap; font-weight: 600; }
+.reference-hud .management-dock .build-tabs button.active { background: #71d88b; border-color: #53c472; color: #154b2e; }
+.reference-hud .management-dock .build-grid { display: flex; gap: 8px; padding: 8px; width: 100%; height: calc(100% - 103px); overflow-x: auto; overflow-y: hidden; align-items: stretch; scrollbar-width: thin; scroll-snap-type: x proximity; }
+.reference-hud .management-dock .build-card { position: relative; flex: 0 0 146px; width: 146px; height: 100%; display: flex; flex-direction: column; gap: 0; align-items: center; justify-content: flex-end; padding: 5px; background: #fff; border: 1px solid #d8e7ee; border-radius: 8px; box-shadow: none; text-align: center; color: var(--ink); cursor: pointer; overflow: hidden; scroll-snap-align: start; }
+.reference-hud .management-dock .build-card:hover { background: #eef9ee; border-color: #59be7a; transform: none; }
+.reference-hud .management-dock .build-card.active { background: #e7f8eb; border: 2px solid #43ad6e; }
+.reference-hud .management-dock .build-card:disabled { opacity: 1; cursor: not-allowed; background: #eef2f4; }
+.reference-hud .management-dock .build-card:disabled .build-icon { opacity: .57; }
+.reference-hud .management-dock .build-card.locked::before { content: 'LOCKED'; position: absolute; top: 5px; right: 5px; z-index: 1; font-size: 9px; padding: 2px 4px; background: #36556ee6; color: #fff; border-radius: 4px; }
+.reference-hud .management-dock .build-card .build-icon { display: flex; flex: 1 1 auto; align-items: center; justify-content: center; width: 100%; height: 70px; min-height: 0; margin: 0; background: radial-gradient(ellipse at 50% 72%,#dcecb8 0,#edf6e5 38%,#f7fbfd00 64%); }
+.reference-hud .management-dock .build-card .build-icon img, .reference-hud .management-dock .build-card .build-icon svg { width: 100%; max-width: 132px; height: 100%; max-height: 84px; object-fit: contain; image-rendering: auto; }
+.reference-hud .management-dock .build-card strong { font-size: 12px; width: 100%; margin: 0; line-height: 1.3; color: #1e4260; }
+.reference-hud .management-dock .build-card .price { font-size: 13px; font-weight: 800; color: #23874d; line-height: 1.4; margin: 0; align-self: center; }
+.reference-hud .management-dock .build-card small { display: block; margin: 2px 0 0; font-size: 9px; line-height: 1.3; color: #647c87; }
+.reference-hud .management-dock .cancel-build { width: auto; min-width: 106px; height: 28px; margin: 0; padding: 4px 8px; border: 1px solid #85b5cd; background: #386481; color: white; border-radius: 6px; font-size: 10px; }
+.reference-hud .catalogue-footer { height: 28px; padding: 2px 9px; display: flex; justify-content: space-between; align-items: center; color: #557386; font-size: 10px; }
+.reference-hud .catalogue-footer button { width: 30px; height: 23px; padding: 0; font-size: 20px; color: #24516d; background: #e2eff5; border: 1px solid #bdd8e5; border-radius: 5px; }
+.reference-hud .catalogue-empty, .reference-hud .roster-empty { margin: 14px; color: #557386; }
+.reference-hud .management-dock .people, .reference-hud .management-dock .caps, .reference-hud .management-dock .finance, .reference-hud .management-dock .events { overflow-y: auto; }
+.reference-hud .hire-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.reference-hud .hire-actions button { padding: 4px 6px; background: #e4f5e8; color: #245c3d; border: 1px solid #a9d5b2; font-size: 10px; border-radius: 5px; }
+.reference-hud .people .dock-panel-header { height: auto; min-height: 44px; }
+.reference-hud .staff-filters { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #577386; font-size: 11px; flex-wrap: wrap; }
+.reference-hud .staff-filters input, .reference-hud .staff-filters select { min-width: 0; padding: 5px 7px; border: 1px solid #bbd7e4; border-radius: 5px; color: #234b66; background: #fff; font: inherit; }
+.reference-hud .staff-filters input { width: 170px; }
+.reference-hud .staff-filters > span { margin-left: auto; }
+.reference-hud .roster-grid { display: block; margin: 0; padding: 0 12px 12px; overflow-x: auto; }
+.reference-hud .staff-table-row, .reference-hud .staff-table-head { display: grid; grid-template-columns: minmax(145px,1.3fr) 100px 80px minmax(110px,1fr) 100px 76px; align-items: center; gap: 10px; min-width: 670px; padding: 8px; font-size: 11px; }
+.reference-hud .staff-table-head { font-size: 9px; color: #6a8494; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #cfdee7; }
+.reference-hud .staff-table-row { background: #edf5f9; border-bottom: 1px solid #d8e7ef; }
+.reference-hud .staff-table-row.selected { background: #dbefdf; }
+.reference-hud .staff-name { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0; border: 0; color: #244963; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.reference-hud .staff-role-marker { display: grid; place-items: center; flex: 0 0 28px; height: 28px; border-radius: 7px; background: #cfdfed; color: #31577a; font-weight: 800; }
+.reference-hud .staff-role-marker.cleaner { background: #d5e8db; color: #2e7559; }
+.reference-hud .staff-role-marker.engineer { background: #ece2c6; color: #826127; }
+.reference-hud .inspect-worker { padding: 6px; border: 1px solid #afcddd; border-radius: 5px; background: #dfeef6; color: #24506d; font: inherit; cursor: pointer; }
+.reference-hud .skill-track { height: 5px; background: #c6dce5; border-radius: 5px; margin: 5px 0; overflow: hidden; }
+.reference-hud .skill-track i { display: block; height: 100%; background: #39a96a; border-radius: inherit; }
+.reference-hud .contextual-panel { padding: 0; color: var(--ink); background: var(--paper) !important; }
+.reference-hud .contextual-panel > .panel-title-row { margin: 0; padding: 9px 12px; background: #214d71; }
+.reference-hud .contextual-panel [data-k="selection-body"] { padding: 12px; }
+.reference-hud .contextual-panel .sel-grid { color: #54758b; }
+.reference-hud .contextual-panel .sel-grid b { color: #244b65; }
+.reference-hud .worker-profile { text-align: center; }
+.reference-hud .worker-portrait { width: 100%; height: 166px; background: radial-gradient(ellipse at 50% 80%,#c5dea4,#eaf5e0 40%,#e6f1f7 80%); border: 1px solid #d1e3eb; border-radius: 9px; }
+.reference-hud .worker-portrait svg { width: 148px; height: 166px; }
+.reference-hud .worker-identity { padding: 8px 0 9px; }
+.reference-hud .worker-identity small { color: #648197; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+.reference-hud .worker-identity h3 { margin: 3px 0 7px; font-size: 21px; color: #204765; }
+.reference-hud .worker-status { display: inline-block; padding: 4px 9px; border-radius: 12px; background: #deefdf; color: #2f7248; font-size: 11px; }
+.reference-hud .worker-facts > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; padding: 8px 0; border-top: 1px solid #d8e6ed; font-size: 12px; color: #668294; }
+.reference-hud .worker-facts b { color: #284b66; }
+.reference-hud .worker-skill .skill-track { flex-basis: 100%; }
+.reference-hud .contextual-panel [data-k="selection-actions"] { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px 12px; }
+.reference-hud .contextual-panel [data-k="selection-actions"] button { padding: 7px 9px; font-size: 11px; border: 1px solid #b5d3e3; border-radius: 6px; background: #dcecf5; color: #254e6a; cursor: pointer; }
+.reference-hud .contextual-panel [data-k="selection-actions"] button:disabled { opacity: .45; cursor: not-allowed; }
+.reference-hud .events-layout { display: grid; grid-template-columns: minmax(240px,1fr) 1fr; gap: 16px; padding: 12px; }
+.reference-hud .weather-scene { height: 114px; overflow: hidden; border-radius: 8px 8px 0 0; background: #d6eaf5; }
+.reference-hud .weather-scene svg { width: 100%; height: 100%; display: block; }
+.reference-hud .weather-report { padding: 8px 10px; background: #244c67; color: white; border-radius: 0 0 8px 8px; }
+.reference-hud .weather-report p { font-size: 11px; margin: 4px 0 0; color: #d5e6ed; }
+.reference-hud .event-notices article { display: flex; gap: 10px; padding: 5px 0 10px; }
+.reference-hud .event-notices h3 { font-size: 13px; margin: 0 0 5px; }
+.reference-hud .event-notices p, .reference-hud .event-notices small { font-size: 11px; line-height: 1.4; color: #5c798c; margin: 0; }
+.reference-hud .notice-icon { font-size: 28px; color: #478097; }
+.reference-hud .development-launch { display: flex; gap: 10px; align-items: center; text-align: left; width: 100%; padding: 9px; margin-bottom: 9px; background: #e6f2ea; border: 1px solid #bfdcc8; border-radius: 7px; color: #315b4b; cursor: pointer; }
+.reference-hud .development-launch > span { font-size: 24px; }
+.reference-hud .development-launch small { display: block; margin-top: 3px; }
+.reference-hud .development-launch b { margin-left: auto; font-size: 22px; }
+.reference-hud .management-dock .caps ul { color: #23475f; margin: 7px 12px; padding: 0; }
+.reference-hud .management-dock .caps li { color: #567082; background: #edf5f9; border: 1px solid #d1e5ed; padding: 6px 8px; }
+.reference-hud .management-dock .caps li strong { color: #234b68; }
+.reference-hud .management-dock .caps ul { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 6px; overflow: visible; list-style: none; }
+.reference-hud .management-dock .caps li { display: block; min-width: 0; }
+.reference-hud .management-dock .caps li strong { display: block; margin-bottom: 4px; font-size: 12px; }
+.reference-hud .management-dock .caps li span { display: block; color: #587286; font-size: 11px; line-height: 1.35; }
+.reference-hud .caps .research-launch { background: #338a63; color: white; border: 1px solid #2d7556; margin: 5px 12px; padding: 7px 12px; border-radius: 7px; }
+.reference-hud .caps > small { color: #5a7484; }
+.reference-hud .capability-grid { padding: 5px 12px; color: #567083; }
+.reference-hud .capability-grid button { background: #e0eef6; color: #23516e; border: 1px solid #afcfe0; }
+.reference-hud .capability-grid small { color: #526f82; }
+.reference-hud .finance-summary { padding: 8px 12px; }
+.reference-hud .finance-cards > div { background: #e9f3f8; border: 1px solid #d2e5ee; }
+.reference-hud .finance-cards span { color: #607c8f; }
+.reference-hud .finance-cards strong { color: #214b64; }
+.reference-hud .star-checklist { color: #617888; }
+.reference-hud .star-checklist b { color: #254d6a; }
+.reference-hud .star-checklist .done { color: #288d52; }
+.reference-hud .management-dock .finance > small { color: #637c8a; margin: 0 12px; }
+.reference-hud .playtest-tools { color: #456a82; margin: 8px 12px; }
+.reference-hud .playtest-tools button { color: #224b68; background: #e1eff6; border: 1px solid #b1d1e0; }
+.reference-hud .toast { bottom: calc(var(--workbench-height) + 27px); border: 1px solid #c2dbe4; background: #183b50ef; color: white; }
+.reference-hud .build-banner { top: 78px; left: 310px; right: 278px; max-width: 500px; width: auto; transform: none; padding: 8px 12px; background: #18415aeb; border: 1px solid #a6d0df; }
+.reference-hud .build-banner strong { font-size: 12px; }
+.reference-hud .build-banner span { font-size: 10px; }
+.reference-hud .utility-menu { top: 13px; right: 12px; }
+.reference-hud .utility-menu > summary { background: #173b55; border: 1px solid #bad7e4; border-radius: 10px; height: 42px; }
+.reference-hud .utility-popover { background: #f5fbfd; color: var(--ink); border: 1px solid #b4d7e6; }
+.reference-hud .utility-popover strong { color: var(--ink); }
+.reference-hud .utility-popover button { background: #e4f1f7; color: var(--ink); border: 1px solid #c5dfeb; }
+.reference-hud .modal-card { background: #f4fbfe; border: 2px solid #d9edf9; color: #214760; }
+.reference-hud .modal-card h2 { color: #245577; }
+.reference-hud .modal-card p { color: #54748c; }
+.reference-hud .modal-actions button { background: #e5f3f8; color: #244c68; border: 1px solid #b6d6e6; }
+.reference-hud .modal-actions button strong { color: #224a69; }
+.reference-hud .modal-actions button span { color: #547185; }
+.reference-hud .research-board > header { background: linear-gradient(110deg,#286697,#20446b); }
+
+@media (max-width: 1220px) {
+  .reference-hud .brand-block { min-width: 150px; }
+  .reference-hud .brand { font-size: 14px; }
+  .reference-hud .chip { padding: 2px 8px; }
+  .reference-hud .chip.weather { display: flex; min-width: 100px; }
+  .reference-hud .chip.time { min-width: 150px; }
+  .reference-hud .dock-hint { display: none; }
+  .reference-hud .dock-panel-header > div:first-child > span { display: none; }
+  .reference-hud .people .dock-panel-header { flex-wrap: wrap; }
+}
+@media (max-width: 1000px) {
+  .reference-hud .brand-block { display: block; min-width: 155px; }
+  .reference-hud .chip.time { display: none; }
+  .reference-hud .build-banner { left: 306px; right: 278px; }
+  .reference-hud .catalogue-tools input { width: 110px; }
+}
+@media (max-width: 720px) {
+  .reference-hud .brand-block, .reference-hud .chip.weather, .reference-hud .stars { display: none; }
+  .reference-hud .chip.power { min-width: 130px; }
+  .reference-hud .chip { padding: 2px 5px; min-width: 92px; }
+  .reference-hud .chip strong { font-size: 12px; }
+  .reference-hud .hud-top { gap: 2px; padding: 5px; }
+  .reference-hud .speed-group button { width: 27px; min-width: 27px; }
+  .reference-hud .objectives { width: 210px; max-height: 158px; }
+  .reference-hud .minimap-panel { display: none; }
+  .reference-hud .dock-content { width: 100%; }
+  .reference-hud .dock-nav button { min-width: 0; padding: 3px 8px; }
+  .reference-hud .build-banner { left: 12px; top: 78px; right: 234px; }
+  .reference-hud .contextual-panel, .reference-hud .park-alerts { width: 210px; }
+  .reference-hud .catalogue-tools .cancel-build { display: none; }
+  .reference-hud .catalogue-footer span { max-width: 80%; font-size: 9px; }
+}
+
+/* Gameplay tools share the approved visual language; they stay contextual. */
+.reference-hud[data-tool="operations"], .reference-hud[data-tool="contracts"] { --workbench-height: min(380px, calc(100vh - 230px)); }
+.reference-hud .management-dock .operations, .reference-hud .management-dock .contracts { overflow-y: auto; }
+.reference-hud .dock-nav button { min-width: 88px; padding-left: 10px; padding-right: 10px; }
+.reference-hud .scenario-guide { padding: 9px; margin-bottom: 8px; border-radius: 7px; background: #ffffff09; }
+.reference-hud .scenario-guide small { color: #b8d8e8; font-size: 8px; letter-spacing: .08em; }
+.reference-hud .scenario-guide h3 { margin: 5px 0; font-size: 13px; color: white; }
+.reference-hud .scenario-guide p { margin: 0 0 8px; font-size: 11px; line-height: 1.45; color: #cce0e9; }
+.reference-hud .scenario-guide button { padding: 5px 9px; border: 1px solid #84bd9a; border-radius: 5px; background: #448560; color: white; font: inherit; font-size: 11px; cursor: pointer; }
+.reference-hud .objective-history { font-size: 10px; color: #c9dfeb; padding: 8px 2px 2px; }
+.reference-hud .objective-history summary { cursor: pointer; }
+.reference-hud .objective-history span { display: block; margin-top: 6px; }
+.reference-hud .operations-policies { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 12px; border-bottom: 1px solid #d6e7ef; color: #42677d; font-size: 11px; }
+.reference-hud .operations-policies label { display: flex; align-items: center; gap: 6px; }
+.reference-hud .operations-policies select, .reference-hud .worker-assignment select { color: #254d67; background: white; border: 1px solid #bdd5e3; border-radius: 5px; padding: 5px; font: inherit; }
+.reference-hud .operations-policies > span { font-size: 10px; color: #658292; }
+.reference-hud .operations-bulk { padding: 8px 12px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.reference-hud .operations-bulk button, .reference-hud .work-order button, .reference-hud .contract-card button, .reference-hud .active-contract button { color: #24516b; background: #dcecf5; border: 1px solid #b5d3e2; border-radius: 5px; padding: 6px 8px; font: inherit; font-size: 11px; cursor: pointer; }
+.reference-hud .operations-bulk small { color: #668193; font-size: 10px; }
+.reference-hud .operations-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; padding: 9px 12px 0; }
+.reference-hud .operations-metrics > div { background: #e8f2f7; border: 1px solid #d0e5ef; border-radius: 6px; padding: 8px; }
+.reference-hud .operations-metrics span { display: block; color: #628195; font-size: 10px; }
+.reference-hud .operations-metrics b { display: block; color: #27546e; font-size: 18px; margin-top: 4px; }
+.reference-hud .gameplay-footnote { margin: 8px 12px; font-size: 10px; line-height: 1.45; color: #637f91; }
+.reference-hud .gameplay-heading { margin: 12px 12px 6px; font-size: 13px; color: #305c74; }
+.reference-hud .work-order-list { padding: 0 12px; }
+.reference-hud .work-order { display: flex; align-items: center; gap: 8px; padding: 7px; border-bottom: 1px solid #d6e6ed; background: #edf5f9; font-size: 11px; color: #527389; }
+.reference-hud .work-order > span:not(.job-state) { flex: 1; }
+.reference-hud .work-order b { color: #315c74; }
+.reference-hud .job-state { font-size: 8px; letter-spacing: .04em; color: #438269; }
+.reference-hud .daily-review { padding: 0 12px; overflow-x: auto; }
+.reference-hud .daily-review table { border-collapse: collapse; width: 100%; min-width: 650px; color: #4b7086; font-size: 11px; }
+.reference-hud .daily-review th { text-align: left; font-size: 9px; color: #75909f; padding: 7px; border-bottom: 1px solid #cde0e8; }
+.reference-hud .daily-review td { padding: 7px; border-bottom: 1px solid #dbe8ee; }
+.reference-hud .contract-offers { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding: 0 12px; }
+.reference-hud .contract-card { display: flex; flex-direction: column; padding: 11px; background: white; border: 1px solid #d1e4ec; border-radius: 9px; }
+.reference-hud .contract-card > small, .reference-hud .active-contract small { font-size: 9px; color: #68879a; letter-spacing: .04em; }
+.reference-hud .contract-card h3, .reference-hud .active-contract h3 { font-size: 15px; margin: 6px 0; color: #315b75; }
+.reference-hud .contract-card p, .reference-hud .active-contract p { font-size: 11px; line-height: 1.4; color: #627f90; margin: 0 0 9px; }
+.reference-hud .contract-terms { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 8px 0; margin-top: auto; }
+.reference-hud .contract-terms span { color: #79919f; font-size: 9px; }
+.reference-hud .contract-terms b { display: block; color: #315d72; font-size: 12px; margin-top: 2px; }
+.reference-hud .contract-card button { background: #e0f0e4; border-color: #b3d6bf; color: #32684a; }
+.reference-hud .contract-card button:disabled { color: #6d8390; background: #eef3f5; border-color: #d3e1e8; cursor: not-allowed; }
+.reference-hud .contracts-summary { margin: 9px 12px; font-size: 11px; color: #567b91; }
+.reference-hud .active-contract { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; margin: 10px 12px; background: #e6f2ea; border: 1px solid #b9dbc5; border-radius: 9px; }
+.reference-hud .active-contract > div:first-child { flex: 1; }
+.reference-hud .active-contract > div:last-child { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.reference-hud .active-contract .contract-ready { color: #367250; margin-bottom: 0; }
+.reference-hud .active-contract .contract-held { color: #906729; margin-bottom: 0; }
+.reference-hud .contract-progress { height: 6px; background: #c4ddce; border-radius: 6px; margin: 7px 0; overflow: hidden; }
+.reference-hud .contract-progress i { height: 100%; display: block; background: #45a96d; border-radius: inherit; }
+.reference-hud .contract-history { padding: 0 12px 12px; }
+.reference-hud .contract-history span { display: block; color: #678598; font-size: 10px; padding: 4px 0; }
+.reference-hud .worker-assignment { display: grid; grid-template-columns: 1fr 1fr; flex-basis: 100%; gap: 8px; margin-top: 5px; padding-top: 10px; border-top: 1px solid #d7e6ed; }
+.reference-hud .worker-assignment label { display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: #6a8799; min-width: 0; }
+.reference-hud .worker-assignment select { width: 100%; min-width: 0; font-size: 11px; }
+.reference-hud .worker-assignment small { grid-column: 1 / -1; color: #668193; font-size: 10px; }
+@media (max-width: 900px) {
+  .reference-hud .contract-offers { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .reference-hud .work-order { flex-wrap: wrap; }
+}
+@media (max-width: 720px) {
+  .reference-hud .contract-offers { grid-template-columns: minmax(0,1fr); }
+  .reference-hud .operations-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .reference-hud .active-contract { align-items: flex-start; flex-direction: column; }
+}
+
+/* Keep confirmations between the two sidebars on laptop screens. */
+.reference-hud .toast { max-width: min(540px,calc(100vw - 620px)); }
+@media (max-width: 840px) { .reference-hud .toast { max-width: calc(100vw - 32px); } }
