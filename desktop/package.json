@@ -11,7 +11,8 @@
   },
   "scripts": {
     "start": "electron .",
-    "package": "electron-builder --win nsis zip --x64 --publish never"
+    "package": "electron-builder --win nsis zip --x64 --prepackaged release/win-unpacked --publish never",
+    "package:dir": "electron-builder --win dir --x64 --publish never"
   },
   "build": {
     "appId": "com.megawattvalley.game",
@@ -25,7 +26,8 @@
       "save-store.cjs",
       "validate.cjs",
       "game/**",
-      "package.json"
+      "package.json",
+      "icon.png"
     ],
     "asar": true,
     "win": {
@@ -34,7 +36,7 @@
         "zip"
       ],
       "artifactName": "Megawatt-Valley-${version}-Windows-${arch}.${ext}",
-      "signAndEditExecutable": false
+      "icon": "icon.ico"
     },
     "nsis": {
       "oneClick": false,

@@ -482,7 +482,7 @@ export class DomHud {
       }
       if (action === 'new') {
         if (!window.confirm('Start a new company? This replaces the local save. Export first to keep a copy.')) return;
-        clearSave();
+        if (!clearSave()) { this.sim.message='Could not clear the old save. Your current company is unchanged; export a copy before retrying.'; return; }
         this.onNewGame();
       }
       if (action === 'demolish') this.sim.demolish(t.getAttribute('data-id') ?? '');

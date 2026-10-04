@@ -26,6 +26,8 @@ function createSaveStore(directory, validate) {
     save(raw) {
       if(!valid(raw))return false;
       try {
+        // Never overwrite the only remaining evidence of an unreadable company.
+        if((fs.existsSync(primary)||fs.existsSync(backup))&&candidates().length===0)return false;
         let old;try{old=fs.readFileSync(primary,'utf8');}catch{}
         if(valid(old))atomic(backup,old);
         atomic(primary,raw);return true;

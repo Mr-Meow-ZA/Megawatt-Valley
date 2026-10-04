@@ -9,9 +9,10 @@ const executablePath=path.resolve('desktop/release/win-unpacked/Megawatt Valley.
 let application;
 const errors=[];
 async function launch(){
-  application=await electron.launch({executablePath,args:['--smoke-test','--disable-gpu'],env:{...process.env,MW_TEST_USER_DATA:dir},timeout:60000});
+  application=await electron.launch({executablePath,args:['--smoke-test','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'],env:{...process.env,MW_TEST_USER_DATA:dir},timeout:60000});
   const page=await application.firstWindow();
   page.on('pageerror',error=>errors.push(error.message));
+  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
   await page.waitForSelector('[data-action="save"]',{state:'attached',timeout:60000});
   await page.waitForFunction(()=>document.querySelector('#game-root canvas'));
   return page;
@@ -36,9 +37,13 @@ try {
   await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.send('game:command','save'));
   // Use the shipped portable-import action to transfer an existing real-playthrough company.
   const chooser=page.waitForEvent('filechooser');
-  await page.evaluate(()=>document.querySelector('[data-action="import-save"]').click());
+  await page.locator('.utility-menu summary').click();
+  await page.locator('[data-action="import-save"]').click();
   await (await chooser).setFiles(path.resolve('browser-fixtures/one-star.json'));
   await page.waitForFunction(()=>document.querySelector('[data-k="toast"]')?.textContent.includes('import'));
+  const winDialog=page.locator('[data-k="win"]');
+  if(await winDialog.isVisible())await page.locator('[data-action="dismiss-win"]').click();
+  const menu=page.locator('.utility-menu');if(await menu.getAttribute('open')!==null)await menu.locator('summary').click();
   const progressed=await state(page);
   assert.ok(progressed.stars>=1);assert.ok(progressed.equipment.length>3);
   await page.screenshot({path:'desktop-evidence/windows-company.png'});

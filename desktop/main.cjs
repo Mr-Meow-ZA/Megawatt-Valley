@@ -77,7 +77,7 @@ app.whenReady().then(async()=>{
     }});
   });
   win=new BrowserWindow({width:prefs.width,height:prefs.height,minWidth:1024,minHeight:720,show:false,
-    title:'Megawatt Valley',backgroundColor:'#263f37',fullscreen:prefs.fullscreen,
+    title:'Megawatt Valley',icon:path.join(__dirname,'icon.png'),backgroundColor:'#263f37',fullscreen:prefs.fullscreen,
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',e=>e.preventDefault());

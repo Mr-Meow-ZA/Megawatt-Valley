@@ -1,5 +1,7 @@
 import {readFile,writeFile,mkdir,cp} from 'node:fs/promises';
 import {build} from 'esbuild';
+import {writeDesktopIcons} from './desktop-icon.mjs';
+await writeDesktopIcons('desktop');
 const html=await readFile('playable/PLAY-MEGAWATT-VALLEY.html','utf8');
 const css=html.match(/<style>([\s\S]*?)<\/style>/)?.[1];
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);

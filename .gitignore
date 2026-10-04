@@ -84,3 +84,11 @@ dist/
 coverage/
 playwright-report/
 test-results/
+
+# Independent desktop build outputs
+/desktop/game/
+/desktop/release/
+/desktop/validate.cjs
+/desktop/icon.ico
+/desktop/icon.png
+/desktop-evidence/

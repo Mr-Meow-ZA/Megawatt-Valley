@@ -99,3 +99,22 @@ One-star pacing remains 3,264 seconds at 1x. Day/night screenshot comparison cau
 and fixed a transparent dimming layer; measured luminance fell from 146.3 to 108.5.
 Final browser checks also exercise staff picking and the coffee-table inspection.
 Existing Unity files and concurrent implementation branches remain untouched.
+
+## Desktop application path — 2026-10-04
+Added a separate desktop/ Electron host around the current Phaser implementation.
+The Windows pipeline produces an NSIS installer and portable ZIP, with original
+application icon, native window/fullscreen controls, persistent frame cap, screenshot
+export and pause on focus loss. No browser or local server is required to play.
+
+Native saves use the same validated company format and add atomic disk replacement,
+a previous-valid-save backup, recovery and save-on-close. Browser companies transfer
+through portable export/import. Corrupt save files are preserved if recovery fails;
+creating a new company explicitly clears them. Desktop isolation and local-content
+restrictions follow upstream Electron guidance.
+
+The desktop check launches the packaged Windows executable, imports a company from
+the normal-budget playthrough, saves, closes, resumes and corrupts the primary file
+to exercise backup recovery. Store failure-path and bridge tests accompany it.
+See DESKTOP_RELEASE.md for launch instructions, architecture and honest scope.
+This desktop migration retains web rendering internally; it is not a native-engine
+rewrite or a claim that commercial game quality follows from packaging.

@@ -29,3 +29,15 @@ test('failed atomic replacement preserves recoverable data',t=>{
   assert.equal(store.save(JSON.stringify({version:1,state:{cash:99}})),false);
   assert.equal(JSON.parse(store.candidates()[0]).state.cash,20);
 });
+
+test('unreadable primary and backup require explicit new-company clearing',t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mw-store-'));
+  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  fs.writeFileSync(path.join(dir,'company.json'),'damaged');
+  fs.writeFileSync(path.join(dir,'company.backup.json'),'damaged backup');
+  const store=createSaveStore(dir,()=>true);
+  assert.equal(store.save(JSON.stringify({version:1,state:{cash:1}})),false);
+  assert.equal(fs.readFileSync(path.join(dir,'company.json'),'utf8'),'damaged');
+  assert.equal(store.clear(),true);
+  assert.equal(store.save(JSON.stringify({version:1,state:{cash:1}})),true);
+});

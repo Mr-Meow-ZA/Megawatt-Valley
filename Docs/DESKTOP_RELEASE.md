@@ -61,6 +61,7 @@ node scripts/package-playable.mjs
 node scripts/package-desktop.mjs
 npm install --prefix desktop
 npm run start --prefix desktop
+npm run package:dir --prefix desktop
 npm run package --prefix desktop
 
 The next quality work should be driven by playtest findings: readable construction/
