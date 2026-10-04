@@ -1,0 +1,15 @@
+import {readFile,writeFile,mkdir,cp} from 'node:fs/promises';
+import {build} from 'esbuild';
+const html=await readFile('playable/PLAY-MEGAWATT-VALLEY.html','utf8');
+const css=html.match(/<style>([\s\S]*?)<\/style>/)?.[1];
+const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
+if(!css||scripts.length!==2)throw Error('Standalone package structure changed; refusing incomplete desktop build.');
+await mkdir('desktop/game',{recursive:true});
+await writeFile('desktop/game/game.css',css);
+await writeFile('desktop/game/assets.js',scripts[0]);
+await writeFile('desktop/game/game.js',scripts[1]);
+await writeFile('desktop/game/index.html','<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Megawatt Valley</title><link rel="stylesheet" href="game.css"></head><body><div id="app"><div id="game-root"></div><div id="ui-root"></div></div><script src="assets.js"></script><script src="game.js"></script></body></html>');
+await cp('playable/licenses','desktop/game/licenses',{recursive:true});
+await cp('playable/ASSET-CREDITS.md','desktop/game/ASSET-CREDITS.md');
+await build({entryPoints:['src/persistence/validate.ts'],bundle:true,platform:'node',format:'cjs',outfile:'desktop/validate.cjs',target:'node22'});
+console.log('Desktop game assets and save validator packaged.');

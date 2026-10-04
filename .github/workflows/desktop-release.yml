@@ -1,0 +1,53 @@
+name: Desktop release
+on:
+  push:
+    branches: [codex/solar-release-hardening]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: desktop-release
+  cancel-in-progress: true
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch runtime art
+        run: git lfs pull --include="public/assets/game/**"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: node --test desktop/save-store.test.cjs
+      - run: node scripts/package-playable.mjs
+      - run: node scripts/package-desktop.mjs
+      - name: Install pinned desktop tools
+        run: npm install --prefix desktop --no-audit --no-fund
+      - name: Package Windows installer and portable application
+        run: npm run package --prefix desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Install desktop test driver
+        run: npm install --no-save --package-lock=false playwright@1.56.1
+      - name: Exercise the packaged Windows executable
+        run: node scripts/desktop-check.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-evidence
+          path: desktop-evidence/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MEGAWATT-VALLEY-WINDOWS
+          path: |
+            desktop/release/*.exe
+            desktop/release/*.zip
+            Docs/DESKTOP_RELEASE.md
+            desktop/package-lock.json
+          retention-days: 30

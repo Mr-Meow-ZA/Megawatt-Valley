@@ -27,6 +27,17 @@ export class GameScene extends Phaser.Scene {
     this.startNewGame();
     const saved = loadGame();
     if (saved) { this.sim.load(saved); this.sim.speed = 0; this.sim.message = 'Company restored. Press Play when ready.'; }
+    const desktop = window.megawattDesktop;
+    const unsubscribeDesktop = desktop?.onCommand(command => {
+      if(command === 'save-close') {
+        desktop.confirmClose(saveGame(this.sim.serialize()));
+      } else if(command === 'pause') {
+        this.sim.setSpeed(0);
+      } else if(command === 'save' || command === 'load') {
+        (document.querySelector('[data-action="'+command+'"]') as HTMLButtonElement | null)?.click();
+      }
+    });
+    this.events.once('shutdown', () => unsubscribeDesktop?.());
     const saveOnExit = () => { saveGame(this.sim.serialize()); };
     window.addEventListener('pagehide', saveOnExit);
     this.events.once('shutdown', () => { window.removeEventListener('pagehide', saveOnExit); this.hud.destroy(); });

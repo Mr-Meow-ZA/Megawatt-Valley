@@ -1,0 +1,48 @@
+{
+  "name": "megawatt-valley-desktop",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Megawatt Valley — Here Comes the Sun",
+  "author": "Megawatt Valley",
+  "main": "main.cjs",
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.17.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "package": "electron-builder --win nsis zip --x64 --publish never"
+  },
+  "build": {
+    "appId": "com.megawattvalley.game",
+    "productName": "Megawatt Valley",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "save-store.cjs",
+      "validate.cjs",
+      "game/**",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "artifactName": "Megawatt-Valley-${version}-Windows-${arch}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Megawatt-Valley-${version}-Setup.${ext}"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const os=require('node:os');
+const path=require('node:path');
+const {createSaveStore}=require('./save-store.cjs');
+test('durable saves recover the previous company and reject corrupt writes',t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mw-store-'));
+  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  const store=createSaveStore(dir,state=>state&&Number.isFinite(state.cash));
+  const payload=cash=>JSON.stringify({version:1,state:{cash}});
+  assert.equal(store.save(payload(50000)),true);
+  assert.equal(store.save(payload(42000)),true);
+  assert.equal(store.save('invalid'),false);
+  assert.equal(store.save(payload('bad')),false);
+  assert.deepEqual(store.candidates().map(x=>JSON.parse(x).state.cash),[42000,50000]);
+  fs.writeFileSync(path.join(dir,'company.json'),'broken disk write');
+  assert.deepEqual(store.candidates().map(x=>JSON.parse(x).state.cash),[50000]);
+  assert.equal(store.save(payload(45000)),true);
+  assert.deepEqual(store.candidates().map(x=>JSON.parse(x).state.cash),[45000,50000]);
+  assert.equal(store.clear(),true);assert.deepEqual(store.candidates(),[]);
+});
+test('failed atomic replacement preserves recoverable data',t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mw-store-'));
+  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  const store=createSaveStore(dir,()=>true),raw=JSON.stringify({version:1,state:{cash:20}});
+  store.save(raw);
+  fs.mkdirSync(path.join(dir,'company.json.tmp'));
+  assert.equal(store.save(JSON.stringify({version:1,state:{cash:99}})),false);
+  assert.equal(JSON.parse(store.candidates()[0]).state.cash,20);
+});

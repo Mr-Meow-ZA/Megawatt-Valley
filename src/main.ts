@@ -8,6 +8,7 @@ if (!parent) {
 
 new Phaser.Game({
   type: Phaser.AUTO,
+  fps: { target: window.megawattDesktop?.preferences().fps ?? 60, forceSetTimeOut: Boolean(window.megawattDesktop) },
   parent,
   width: window.innerWidth,
   height: window.innerHeight,
