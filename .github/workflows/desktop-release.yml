@@ -2,6 +2,9 @@ name: Desktop release
 on:
   push:
     branches: [codex/solar-release-hardening]
+    # Browser-only checks and documentation do not rebuild an identical installer.
+    # Use workflow_dispatch when changing only this workflow.
+    paths: ['src/**', 'desktop/**', 'tests/**', 'public/assets/**', 'package*.json', 'scripts/package-playable.mjs', 'scripts/package-desktop.mjs', 'scripts/desktop*.mjs']
   workflow_dispatch:
 permissions:
   contents: read

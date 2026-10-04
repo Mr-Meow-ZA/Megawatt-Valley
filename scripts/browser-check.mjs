@@ -155,7 +155,7 @@ await page.locator('[data-speed="4"]').click();
 // Software rendering on a two-core Actions runner advances fewer park frames.
 // Keep the full course and assert park-time completion, rather than speeding up the save.
 try {
-  await page.waitForFunction(target=>parseFloat(document.querySelector('.worker-skill b')?.textContent ?? '0')>=target,Number((worker.skill+1).toFixed(1)),{timeout:60000});
+  await page.waitForFunction(target=>parseFloat(document.querySelector('.worker-skill b')?.textContent ?? '0')>=target,Number((worker.skill+1).toFixed(1)),{timeout:180000});
 } catch(error) {
   console.log('TRAINING_TIMEOUT_DIAGNOSTICS:'+JSON.stringify(await page.evaluate(()=>({
     task:document.querySelector('.worker-status')?.textContent,
