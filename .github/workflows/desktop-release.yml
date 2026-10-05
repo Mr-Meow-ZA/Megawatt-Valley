@@ -1,15 +1,15 @@
 name: Desktop release
 on:
   push:
-    branches: [codex/solar-release-hardening]
+    branches: [codex/3d-isometric]
     # Browser-only checks and documentation do not rebuild an identical installer.
     # Use workflow_dispatch when changing only this workflow.
-    paths: ['src/**', 'desktop/**', 'tests/**', 'public/assets/**', 'package*.json', 'scripts/package-playable.mjs', 'scripts/package-desktop.mjs', 'scripts/desktop*.mjs']
+    paths: ['desktop/**', 'scripts/desktop*.mjs', '.github/workflows/desktop-release.yml']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: desktop-release
+  group: desktop-3d-release
   cancel-in-progress: true
 jobs:
   windows:
@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Fetch runtime art
-        run: git lfs pull --include="public/assets/game/**"
+        run: git lfs pull --include="public/assets/game/**,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/Textures/**,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/solar-panel-landscape-group.glb,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-p.glb,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-i.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_pineRoundA.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak_dark.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/plant_bush.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/stone_largeA.glb"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -53,10 +53,10 @@ jobs:
           retention-days: 14
       - uses: actions/upload-artifact@v4
         with:
-          name: MEGAWATT-VALLEY-WINDOWS
+          name: MEGAWATT-VALLEY-3D-WINDOWS
           path: |
             desktop/release/*.exe
             desktop/release/*.zip
-            Docs/DESKTOP_RELEASE.md
+            Docs/TRUE_3D_DESKTOP.md
             desktop/package-lock.json
           retention-days: 30

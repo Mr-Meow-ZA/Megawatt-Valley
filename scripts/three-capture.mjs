@@ -5,8 +5,9 @@ import path from 'node:path';
 await mkdir('three-evidence',{recursive:true});
 const browser=await chromium.launch({channel:'chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const page=await browser.newPage({viewport:{width:1440,height:900}});
-page.on('pageerror',e=>console.log('PAGE_ERROR:'+e.message));
-page.on('console',m=>{if(m.type()==='error')console.log('RENDER_ERROR:'+m.text());});
+const errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 await page.goto(pathToFileURL(path.resolve('playable/PLAY-MEGAWATT-VALLEY.html')).href);
 await page.locator('[data-k="management-dock"]').waitFor({timeout:90000});
 await page.locator('[data-speed="0"]').click();await page.waitForTimeout(500);
@@ -20,3 +21,4 @@ await page.mouse.move(650,420);await page.mouse.wheel(0,-230);await page.waitFor
 await page.screenshot({path:'three-evidence/3d-closeup.png'});
 console.log('THREE_DETAIL_BASE64:'+(await page.screenshot({type:'jpeg',quality:70})).toString('base64'));
 await browser.close();
+if(errors.length)throw new Error(errors.join('\n'));

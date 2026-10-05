@@ -30,8 +30,11 @@ try {
   let page=await launch();
   await page.evaluate(()=>document.querySelector('[data-speed="0"]').click());
   assert.equal(await page.evaluate(()=>typeof window.require),'undefined');
-  assert.equal(await page.evaluate(()=>window.megawattDesktop.version),'0.2.0');
+  assert.equal(await page.evaluate(()=>window.megawattDesktop.version),'0.3.0');
   assert.equal(await page.evaluate(()=>window.megawattDesktop.writeSave('{"version":1,"state":{"cash":1}}')),false);
+  const info=await page.evaluate(()=>window.megawattRenderInfo());
+  assert.equal(info.orthographic,true);assert.equal(info.models,8);assert.ok(info.triangles>10000);
+  console.log('DESKTOP_3D_INFO:'+JSON.stringify(info));
   const start=await state(page);assert.equal(start.equipment.length,3);
   // A native menu command reaches the current game without exposing Node to it.
   await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.send('game:command','save'));

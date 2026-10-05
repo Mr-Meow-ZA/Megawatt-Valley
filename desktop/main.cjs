@@ -55,8 +55,8 @@ function menus(){
     ]},
     {label:'Help',submenu:[
       {label:'Controls & playing guide',click:()=>dialog.showMessageBox(win,{title:'Megawatt Valley controls',message:'Here Comes the Sun',
-        detail:'Drag: pan · Wheel: zoom · Space: pause\nB: Build · T: Staff · U: research · H: home · F: selected\nR: repair · C: clean · Shift-click: repeat placement\nCtrl+S: save · F11: fullscreen · F12: screenshot\n\nFollow the next-decision guide. The bottom toolbar opens management tools. The gear menu contains portable save import/export. Closing the window saves your company. Saves stay available after installing a newer version.\n\nDesktop 0.2.0 · Phaser game rendering with Electron. Scenario 2 remains future content.'})},
-      {label:'About Megawatt Valley',click:()=>dialog.showMessageBox(win,{title:'Megawatt Valley',message:'Megawatt Valley · Desktop 0.2.0',detail:'Here Comes the Sun\nIndependent desktop development build.\nOriginal game code and licensed CC0 art. Credits and licenses are included in the application package.'})}
+        detail:'Drag: pan · Wheel: zoom · Space: pause\nB: Build · T: Staff · U: research · H: home · F: selected\nR: repair · C: clean · Shift-click: repeat placement\nCtrl+S: save · F11: fullscreen · F12: screenshot\n\nFollow the next-decision guide. The bottom toolbar opens management tools. The gear menu contains portable save import/export. Closing the window saves your company. Saves stay available after installing a newer version.\n\nDesktop 0.3.0 · True 3D isometric rendering with Three.js and Electron. Scenario 2 remains future content.'})},
+      {label:'About Megawatt Valley',click:()=>dialog.showMessageBox(win,{title:'Megawatt Valley',message:'Megawatt Valley · Desktop 0.3.0',detail:'Here Comes the Sun\nIndependent desktop development build.\nOriginal game code and licensed CC0 art. Credits and licenses are included in the application package.'})}
     ]}
   ];
   if(process.platform==='darwin')template.unshift({role:'appMenu'});
@@ -73,7 +73,7 @@ app.whenReady().then(async()=>{
     const url=new URL(request.url),entry=url.hostname==='game'?files[url.pathname]:undefined;
     if(!entry)return new Response('Not found',{status:404});
     return new Response(fs.readFileSync(path.join(__dirname,'game',entry[1])),{headers:{
-      'Content-Type':entry[0], 'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src data: blob:; font-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-src 'none';"
+      'Content-Type':entry[0], 'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src data: blob:; font-src 'self' data:; connect-src blob:; object-src 'none'; base-uri 'none'; frame-src 'none';"
     }});
   });
   win=new BrowserWindow({width:prefs.width,height:prefs.height,minWidth:1024,minHeight:720,show:false,

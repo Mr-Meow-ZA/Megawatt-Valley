@@ -10,13 +10,14 @@ export const MODEL_FILES: Record<string,string> = {
   oak: nature+'tree_oak.glb', pine: nature+'tree_pineRoundA.glb', alder: nature+'tree_oak_dark.glb',
   shrub: nature+'plant_bush.glb', rock: nature+'stone_largeA.glb',
 };
-const cube = new T.BoxGeometry(1,1,1);
+export const sharedCube = new T.BoxGeometry(1,1,1);
 const materials = new Map<number,T.MeshStandardMaterial>();
+export function isSharedMaterial(m:T.Material):boolean{return [...materials.values()].includes(m as T.MeshStandardMaterial);}
 export function material(color:number):T.MeshStandardMaterial {
   let m=materials.get(color); if(!m){m=new T.MeshStandardMaterial({color,roughness:.86});materials.set(color,m);}return m;
 }
 export function box(parent:T.Object3D,x:number,y:number,z:number,w:number,h:number,d:number,color:number):T.Mesh {
-  const mesh=new T.Mesh(cube,material(color)); mesh.position.set(x,y,z);mesh.scale.set(w,h,d);
+  const mesh=new T.Mesh(sharedCube,material(color)); mesh.position.set(x,y,z);mesh.scale.set(w,h,d);
   mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;
 }
 export function beam(parent:T.Object3D,a:T.Vector3,b:T.Vector3,width:number,color:number):T.Mesh {
@@ -37,7 +38,10 @@ export class ModelLibrary {
       if(data){const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));model=await loader.parseAsync(bytes.buffer,'');}
       else model=await loader.loadAsync(url);
       const group=model.scene;
-      group.traverse(o=>{if(o instanceof T.Mesh){o.castShadow=true;o.receiveShadow=true;}});
+      group.traverse(o=>{if(o instanceof T.Mesh){o.castShadow=true;o.receiveShadow=true;
+        for(const m of Array.isArray(o.material)?o.material:[o.material]){
+          if(m instanceof T.MeshStandardMaterial){m.metalness=0;m.roughness=.86;}
+        }}});
       this.templates.set(key,group);
     }));
   }

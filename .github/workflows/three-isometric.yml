@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Fetch runtime images and curated source models
-        run: git lfs pull --include="public/assets/game/**,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/solar-panel-landscape-group.glb,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-p.glb,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-i.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_pineRoundA.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak_dark.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/plant_bush.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/stone_largeA.glb"
+        run: git lfs pull --include="public/assets/game/**,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/Textures/**,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/solar-panel-landscape-group.glb,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-p.glb,public/assets/sourced/kenney-city-kit-industrial/Models/GLB format/building-i.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_pineRoundA.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/tree_oak_dark.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/plant_bush.glb,public/assets/sourced/kenney-nature-kit/Models/GLTF format/stone_largeA.glb"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

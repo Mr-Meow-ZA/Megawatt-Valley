@@ -1,3 +1,4 @@
+import { selfContainedGlb } from './embed-glb.mjs';
 import { models as modelFiles } from './model-manifest.mjs';
 import { build } from 'esbuild';
 import { readFile, readdir, mkdir, writeFile, copyFile } from 'node:fs/promises';
@@ -18,8 +19,7 @@ for (const file of await readdir('public/assets/low-poly')) {
 }
 const models = {};
 for (const [key,file] of Object.entries(modelFiles)) {
-  const bytes=await readFile(file);
-  if(bytes.readUInt32LE(0)!==0x46546c67)throw new Error('Missing LFS GLB: '+file);
+  const bytes=await selfContainedGlb(file);
   models[key]=bytes.toString('base64');
 }
 const output = await build({

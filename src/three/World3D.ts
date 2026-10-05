@@ -3,7 +3,7 @@ import { GameSimulation } from '../simulation/GameSimulation';
 import type { GameSnapshot,EquipmentKind,PlacedEquipment,StaffMember,Vec2 } from '../simulation/types';
 import { EQUIPMENT, BUILD_MENU_ORDER } from '../content/equipment';
 import { SITE_ICONS } from '../game/siteArt';
-import { ModelLibrary,makeStaff } from './models';
+import { ModelLibrary,makeStaff,sharedCube,isSharedMaterial } from './models';
 import { buildLandscape,type Landscape } from './landscape';
 import { frameCamera, HOME, PIXELS_PER_UNIT } from './projection';
 
@@ -97,6 +97,7 @@ export class World3D {
     el.style.visibility=x<0||x>this.width||y<0||y>this.height?'hidden':'visible';
   }
   private footprint(group:T.Group,w:number,d:number,mat:T.Material,filled=false):void{
+    for(const child of group.children)if(child instanceof T.Mesh)child.geometry.dispose();
     group.clear();
     if(filled){const mesh=new T.Mesh(new T.PlaneGeometry(w,d),mat);mesh.rotation.x=-Math.PI/2;mesh.position.y=.075;group.add(mesh);return;}
     for(const z of [-d/2,d/2]){const mesh=new T.Mesh(new T.BoxGeometry(w,.018,.025),mat);mesh.position.set(0,.06,z);mesh.renderOrder=10;group.add(mesh);}
@@ -210,6 +211,16 @@ export class World3D {
     this.labelLayer.remove();
     this.scene.traverse(o=>{if(o instanceof T.PointLight)o.dispose();});
     this.sun.dispose();
+    const sharedGeometries=new Set<T.BufferGeometry>([sharedCube]),sharedMaterials=new Set<T.Material>();
+    for(const model of this.models.templates.values())model.traverse(o=>{if(o instanceof T.Mesh){sharedGeometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])sharedMaterials.add(m);}});
+    const geometries=new Set<T.BufferGeometry>(),materials=new Set<T.Material>();
+    this.scene.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.Points){
+      if(o instanceof T.InstancedMesh)o.dispose();
+      if(!sharedGeometries.has(o.geometry))geometries.add(o.geometry);
+      for(const m of Array.isArray(o.material)?o.material:[o.material])if(!sharedMaterials.has(m)&&!isSharedMaterial(m))materials.add(m);
+    }});
+    geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+    this.renderer.renderLists.dispose();
   }
 }
 export function renderCatalogue(renderer:T.WebGLRenderer,models:ModelLibrary):void{

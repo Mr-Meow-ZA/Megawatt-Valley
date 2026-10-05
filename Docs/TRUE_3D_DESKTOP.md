@@ -12,7 +12,7 @@ Packaging embeds GLB bytes so both the Electron app and standalone review build 
 
 ## Current checkpoint
 
-First 3D rendering implementation; automated build, gameplay regression and visual review pending. This is not yet a visual-quality sign-off. No claims of completed desktop validation until the new renderer has passed the packaged Windows checks.
+First 3D implementation compiles and passes 58 unit tests. Its UI regression reached the final assertions: staff selection/training, jobs, contracts, research, placement, saves and day/night all passed. The final error check caught external GLB palette references in the offline package; packaging now embeds them into each GLB BIN chunk, and source metallic materials are adapted for diffuse stylised lighting. Full checks are being rerun, followed by packaged Windows verification. This is not yet a visual-quality sign-off. No claims of completed desktop validation until the new renderer has passed the packaged Windows checks.
 
 ## Validation
 
