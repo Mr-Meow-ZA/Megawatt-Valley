@@ -4,7 +4,7 @@ on:
     branches: [codex/3d-isometric]
     # Browser-only checks and documentation do not rebuild an identical installer.
     # Use workflow_dispatch when changing only this workflow.
-    paths: ['desktop/**', 'scripts/desktop*.mjs', '.github/workflows/desktop-release.yml']
+    paths: ['src/**', 'desktop/**', 'tests/**', 'public/assets/**', 'package*.json', 'scripts/package-*.mjs', 'scripts/model-manifest.mjs', 'scripts/embed-glb.mjs', 'scripts/desktop*.mjs', '.github/workflows/desktop-release.yml']
   workflow_dispatch:
 permissions:
   contents: read

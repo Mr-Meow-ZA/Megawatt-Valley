@@ -12,9 +12,22 @@ Packaging embeds GLB bytes so both the Electron app and standalone review build 
 
 ## Current checkpoint
 
-First 3D implementation compiles and passes 58 unit tests. Its UI regression reached the final assertions: staff selection/training, jobs, contracts, research, placement, saves and day/night all passed. The final error check caught external GLB palette references in the offline package; packaging now embeds them into each GLB BIN chunk, and source metallic materials are adapted for diffuse stylised lighting. Full checks are being rerun, followed by packaged Windows verification. This is not yet a visual-quality sign-off. No claims of completed desktop validation until the new renderer has passed the packaged Windows checks.
+Desktop 0.3.0 uses the true 3D renderer. The playable simulation and management features carry over from Desktop 0.2.0. This is the first 3D delivery, not final art-quality sign-off.
+
+The first offline run exposed external palette references in industrial GLBs. The packager now embeds palette PNGs into GLB BIN chunks; no source asset is altered. Materials use diffuse lighting rather than environment-only metallic shading. Renderer resources are released on New Game.
+
+## Play the Windows build
+
+Download the `MEGAWATT-VALLEY-3D-WINDOWS` artifact from the Desktop release run linked in the release log. Extract the artifact, then either run the included installer or extract the portable ZIP and launch `Megawatt Valley.exe`. The installer remains unsigned.
+
+Existing desktop companies resume from the same application save directory. A browser company can be transferred through the gear menu's Export / Import save controls. Imported companies start paused.
+
+Drag to pan, wheel to zoom. B opens Build, T Staff, U research, H resets the camera, F centres the selected asset, Space pauses. R orders repair and C cleaning on selected equipment. Ctrl+S saves, F11 toggles fullscreen and F12 saves a screenshot.
 
 ## Validation
+
+The texture-complete build passed all 58 unit tests and the full offline UI regression (run 37331406547). Packaged Windows runtime checks passed on the same renderer; the final palette/orientation and shadow-cache pass is being revalidated before delivery.
+
 
 `npm ci && npm test && npm run build`
 `node scripts/package-playable.mjs`

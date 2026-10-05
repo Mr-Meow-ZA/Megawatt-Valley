@@ -31,6 +31,7 @@ export class World3D {
   private pointer={x:-1,y:-1,inside:false};
   private elapsed=0;
   private lastShadow=0;
+  private shadowKey='';
   private width=innerWidth;
   private height=innerHeight;
   private weatherKey='';
@@ -157,7 +158,11 @@ export class World3D {
     this.placeLabel(this.labelB,new T.Vector3(27.5,.06,16.25));
     this.placeLabel(this.labelLayer.querySelector('[data-site="a"]')!,new T.Vector3(11,.06,16.25));
     this.updateWeather(snapshot,delta);this.updatePreview(snapshot);
-    if(this.elapsed-this.lastShadow>.12||snapshot.speed===0){this.renderer.shadowMap.needsUpdate=true;this.lastShadow=this.elapsed;}
+    const shadowKey=snapshot.equipment.map(e=>[e.id,e.kind,e.tile.x,e.tile.y,e.constructionProgress.toFixed(2)].join(':')).join('|')
+      +snapshot.staff.map(s=>[s.id,s.tile.x.toFixed(2),s.tile.y.toFixed(2),s.task.type].join(':')).join('|');
+    if(shadowKey!==this.shadowKey&&(this.elapsed-this.lastShadow>.12||snapshot.speed===0||!this.shadowKey)){
+      this.renderer.shadowMap.needsUpdate=true;this.lastShadow=this.elapsed;this.shadowKey=shadowKey;
+    }
     this.scene.updateMatrixWorld(true);
   }
   private updateWeather(s:GameSnapshot,delta:number):void{

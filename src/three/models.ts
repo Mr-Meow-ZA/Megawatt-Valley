@@ -40,14 +40,24 @@ export class ModelLibrary {
       const group=model.scene;
       group.traverse(o=>{if(o instanceof T.Mesh){o.castShadow=true;o.receiveShadow=true;
         for(const m of Array.isArray(o.material)?o.material:[o.material]){
-          if(m instanceof T.MeshStandardMaterial){m.metalness=0;m.roughness=.86;}
+          if(m instanceof T.MeshStandardMaterial){
+            m.metalness=0;m.roughness=.86;
+            const name=m.name.toLowerCase();
+            if(['oak','pine','alder','shrub'].includes(key)){
+              if(name.includes('leaf')||name.includes('grass'))m.color.set(key==='pine'?0x568358:key==='alder'?0x8b9b50:0x71964c);
+              else if(name.includes('wood'))m.color.set(0x806347);
+            }
+          }
         }}});
       this.templates.set(key,group);
     }));
   }
   model(key:string,width:number,depth?:number,height?:number):T.Group {
     const source=this.templates.get(key);if(!source)throw new Error('Missing 3D model: '+key);
-    const root=new T.Group(),inner=source.clone(true),bounds=new T.Box3().setFromObject(inner),size=bounds.getSize(new T.Vector3());
+    const root=new T.Group(),inner=source.clone(true);
+    // Source facades and tilted module faces point away from the default camera.
+    if(['solar','office','workshop'].includes(key))inner.rotation.y+=Math.PI;
+    const bounds=new T.Box3().setFromObject(inner),size=bounds.getSize(new T.Vector3());
     const scale=height?height/size.y:width/Math.max(size.x,size.z);
     inner.scale.setScalar(scale);
     if(depth)inner.scale.set(width/size.x,scale,depth/size.z);
