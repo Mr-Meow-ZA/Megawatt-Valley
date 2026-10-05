@@ -1,0 +1,9 @@
+#game-root canvas{display:block;width:100%;height:100%;touch-action:none}
+.world-loading{position:absolute;inset:0;display:grid;place-content:center;background:#243e38;color:#efead5;font:20px system-ui;padding:50px;text-align:center}
+.world-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.world-labels>div{position:absolute;left:0;top:0;white-space:nowrap;font-family:system-ui,sans-serif}
+.plot-label{color:#f0edce;background:#334f40c9;border:1px solid #e1dfa347;font-size:10px;font-weight:700;letter-spacing:1.2px;padding:5px 9px;border-radius:4px}
+.equipment-status{color:#fff5db;background:#597966eb;padding:3px 7px;border-radius:4px;font-size:9px;letter-spacing:.6px;font-weight:700}
+.equipment-status.fault{background:#a14d3a}.worker-job{background:#3b6e7feb}
+.placement-label{font-size:12px;background:#284f40;color:#f0efd5;padding:8px 12px;border:1px solid #8bc4a1;border-radius:6px;box-shadow:0 4px 16px #213b3f35}
+.placement-label.invalid{background:#743f34;border-color:#d38d6b}
