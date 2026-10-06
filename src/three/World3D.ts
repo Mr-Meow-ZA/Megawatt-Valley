@@ -1,13 +1,15 @@
 import * as T from 'three';
+import { ValleyActivity } from './ValleyActivity';
+import { constructionSite,workParticles,updateWorkParticles } from './worksite';
 import { GameSimulation } from '../simulation/GameSimulation';
 import type { GameSnapshot,EquipmentKind,PlacedEquipment,StaffMember,Vec2 } from '../simulation/types';
 import { EQUIPMENT, BUILD_MENU_ORDER } from '../content/equipment';
 import { SITE_ICONS } from '../game/siteArt';
 import { ModelLibrary,makeStaff,sharedCube,isSharedMaterial } from './models';
 import { buildLandscape,type Landscape } from './landscape';
-import { frameCamera, HOME, PIXELS_PER_UNIT } from './projection';
+import { frameCamera, HOME, PIXELS_PER_UNIT,anchoredZoom } from './projection';
 
-interface Visual { root:T.Group; model:T.Group; status:HTMLDivElement; kind:string; }
+interface Visual { root:T.Group; model:T.Group; status:HTMLDivElement; kind:string; construction?:T.Group; particles?:T.Points; }
 export class World3D {
   readonly scene=new T.Scene();
   readonly camera=new T.OrthographicCamera(-10,10,10,-10,.1,180);
@@ -25,6 +27,7 @@ export class World3D {
   private ghost:T.Group|null=null;
   private ghostKind:EquipmentKind|null=null;
   private readonly landscape:Landscape;
+  private readonly activity:ValleyActivity;
   private readonly rain:T.Points;
   private readonly rainPositions=new Float32Array(420*3);
   private readonly labelB:HTMLDivElement;
@@ -47,6 +50,7 @@ export class World3D {
     this.sun.shadow.bias=-.0003;this.sun.shadow.normalBias=.025;this.sun.shadow.radius=2;
     this.scene.add(this.sun,this.sun.target,this.sky);
     this.landscape=buildLandscape(this.scene,models);
+    this.activity=new ValleyActivity(this.scene);
     this.scene.add(this.selection,this.preview);
     this.labelLayer.className='world-labels';document.getElementById('game-root')!.append(this.labelLayer);
     this.hint.className='placement-label';this.hint.hidden=true;this.labelLayer.append(this.hint);
@@ -67,7 +71,10 @@ export class World3D {
     this.target.x=T.MathUtils.clamp(this.target.x,-8,48);this.target.z=T.MathUtils.clamp(this.target.z,-8,38);
     this.resize(this.width,this.height);
   }
-  zoomBy(delta:number):void{this.zoom=T.MathUtils.clamp(this.zoom-delta*.0015,.35,1.8);this.resize(this.width,this.height);}
+  zoomBy(delta:number,x=this.width/2,y=this.height/2):void{
+    this.zoom=T.MathUtils.clamp(this.zoom-delta*.0015,.35,1.8);
+    anchoredZoom(this.camera,this.width,this.height,this.target,this.zoom,x,y);
+  }
   setPointer(x:number,y:number,inside:boolean):void{this.pointer={x,y,inside};}
   private ray(x:number,y:number):void{this.raycaster.setFromCamera(new T.Vector2(x/this.width*2-1,1-y/this.height*2),this.camera);}
   tileAt(x:number,y:number):Vec2|null{
@@ -111,7 +118,8 @@ export class World3D {
   private addWorker(s:StaffMember):Visual{
     const root=makeStaff(s.role);root.userData.entityId=s.id;this.scene.add(root);
     const hitbox=new T.Mesh(new T.BoxGeometry(.35,.56,.35),new T.MeshBasicMaterial({visible:false}));hitbox.position.y=.28;root.add(hitbox);
-    const visual={root,model:root,status:this.label('','equipment-status worker-job'),kind:'staff'};this.entities.set(s.id,visual);return visual;
+    const particles=workParticles();root.add(particles);
+    const visual={root,model:root,status:this.label('','equipment-status worker-job'),kind:'staff',particles};this.entities.set(s.id,visual);return visual;
   }
   private updateStaff(s:StaffMember,v:Visual,dt:number):void{
     const moving=s.task.type==='travel',working=['clean','repair','service'].includes(s.task.type);
@@ -128,16 +136,19 @@ export class World3D {
     if(working&&s.task.type!=='idle'&&s.task.type!=='travel'){const targetId=s.task.targetId;const target=this.sim.equipment.find(e=>e.id===targetId);if(target)v.root.rotation.y=Math.atan2(target.tile.x+.5-s.tile.x,target.tile.y+.5-s.tile.y);}
     v.status.textContent=working?(s.task.type==='clean'?'CLEANING':s.task.type==='service'?'SERVICING':'REPAIRING'):s.trainingHoursLeft?'TRAINING':s.onBreak?'COFFEE BREAK':'';
     v.status.hidden=!v.status.textContent;this.placeLabel(v.status,new T.Vector3(s.tile.x,.73,s.tile.y));
+    if(v.particles)updateWorkParticles(v.particles,s.task.type,this.elapsed);
     void dt;
   }
   sync(snapshot:GameSnapshot,delta:number,overlay:boolean):void{
     this.overlay=overlay;this.elapsed+=snapshot.speed&& !snapshot.activeEvent?delta:0;
     const ids=new Set([...snapshot.equipment,...snapshot.staff].map(e=>e.id));
-    for(const [id,v]of this.entities)if(!ids.has(id)){this.scene.remove(v.root);v.status.remove();this.entities.delete(id);}
+    for(const [id,v]of this.entities)if(!ids.has(id)){this.scene.remove(v.root);this.releaseObject(v.root);v.status.remove();this.entities.delete(id);}
     for(const e of snapshot.equipment){
-      let v=this.entities.get(e.id);if(v&&v.kind!==e.kind){this.scene.remove(v.root);v.status.remove();this.entities.delete(e.id);v=undefined;}
+      let v=this.entities.get(e.id);if(v&&v.kind!==e.kind){this.scene.remove(v.root);this.releaseObject(v.root);v.status.remove();this.entities.delete(e.id);v=undefined;}
       v??=this.addEquipment(e);const def=EQUIPMENT[e.kind];v.root.position.set(e.tile.x+(def.footprint.x-1)/2,0,e.tile.y+(def.footprint.y-1)/2);
       v.model.scale.y=e.commissioned?1:Math.max(.07,e.constructionProgress);
+      if(!e.commissioned&&!v.construction){v.construction=constructionSite(def.footprint.x,def.footprint.y);v.root.add(v.construction);}
+      if(e.commissioned&&v.construction){v.root.remove(v.construction);this.releaseObject(v.construction);v.construction=undefined;}
       if(e.kind.includes('pv'))v.model.traverse(o=>{if(o instanceof T.Mesh){for(const m of Array.isArray(o.material)?o.material:[o.material]){
         const mat=m as T.MeshStandardMaterial,base=mat.userData.baseColor as T.Color|undefined;
         if(base)mat.color.copy(base).lerp(new T.Color(0xb8a575),e.soiling*.62).multiplyScalar(e.faulted?.7:1);
@@ -146,7 +157,7 @@ export class World3D {
       v.status.classList.toggle('fault',e.faulted);v.status.hidden=!v.status.textContent;
       this.placeLabel(v.status,new T.Vector3(v.root.position.x,.95,v.root.position.z));
     }
-    for(const s of snapshot.staff){let v=this.entities.get(s.id);if(v&&v.kind!=='staff'){this.scene.remove(v.root);v.status.remove();this.entities.delete(s.id);v=undefined;}v??=this.addWorker(s);this.updateStaff(s,v,delta);}
+    for(const s of snapshot.staff){let v=this.entities.get(s.id);if(v&&v.kind!=='staff'){this.scene.remove(v.root);this.releaseObject(v.root);v.status.remove();this.entities.delete(s.id);v=undefined;}v??=this.addWorker(s);this.updateStaff(s,v,delta);}
     const selected=snapshot.selectedId?this.entities.get(snapshot.selectedId):null;this.selection.visible=!!selected&&!snapshot.buildMode;
     if(selected){
       const eq=snapshot.equipment.find(e=>e.id===snapshot.selectedId),key=snapshot.selectedId+':'+(eq?.kind??'staff');
@@ -157,9 +168,10 @@ export class World3D {
     this.labelB.textContent=b.unlocked?'SUNMEADOW EAST · SITE B':'SITE B · FUTURE EXPANSION';
     this.placeLabel(this.labelB,new T.Vector3(27.5,.06,16.25));
     this.placeLabel(this.labelLayer.querySelector('[data-site="a"]')!,new T.Vector3(11,.06,16.25));
-    this.updateWeather(snapshot,delta);this.updatePreview(snapshot);
+    this.updateWeather(snapshot,delta);this.updatePreview(snapshot);this.activity.update(this.elapsed,snapshot);
     const shadowKey=snapshot.equipment.map(e=>[e.id,e.kind,e.tile.x,e.tile.y,e.constructionProgress.toFixed(2)].join(':')).join('|')
-      +snapshot.staff.map(s=>[s.id,s.tile.x.toFixed(2),s.tile.y.toFixed(2),s.task.type].join(':')).join('|');
+      +snapshot.staff.map(s=>[s.id,s.tile.x.toFixed(2),s.tile.y.toFixed(2),s.task.type].join(':')).join('|')
+      +':activity:'+Math.floor(this.elapsed*5);
     if(shadowKey!==this.shadowKey&&(this.elapsed-this.lastShadow>.12||snapshot.speed===0||!this.shadowKey)){
       this.renderer.shadowMap.needsUpdate=true;this.lastShadow=this.elapsed;this.shadowKey=shadowKey;
     }
@@ -192,7 +204,7 @@ export class World3D {
     const def=EQUIPMENT[s.buildMode],plot=this.sim.plotAtTile(tile);
     const invalid=plot?this.sim.canPlace(s.buildMode,plot,tile):'Outside buildable land';
     if(this.ghostKind!==s.buildMode){
-      if(this.ghost)this.scene.remove(this.ghost);
+      if(this.ghost){this.scene.remove(this.ghost);this.releaseObject(this.ghost);}
       this.ghost=this.models.equipment(s.buildMode);this.ghostKind=s.buildMode;
       this.ghost.traverse(o=>{if(o instanceof T.Mesh){const ghost=(m:T.Material)=>{const n=m.clone();n.transparent=true;n.opacity=.55;n.depthWrite=false;return n;};o.material=Array.isArray(o.material)?o.material.map(ghost):ghost(o.material);o.castShadow=false;}});
       this.scene.add(this.ghost);
@@ -210,21 +222,24 @@ export class World3D {
   stats():Record<string,unknown>{
     let meshes=0,instances=0,triangles=0;
     this.scene.traverse(o=>{if(o instanceof T.Mesh){meshes++;const count=o instanceof T.InstancedMesh?o.count:1;instances+=count;triangles+=(o.geometry.index?.count??o.geometry.getAttribute('position').count)/3*count;}});
-    return {renderer:'Three.js WebGL 3D',orthographic:this.camera.isOrthographicCamera,models:this.models.templates.size,meshes,instances,triangles,drawCalls:this.renderer.info.render.calls,shadows:this.renderer.shadowMap.enabled,entities:this.entities.size};
+    return {renderer:'Three.js WebGL 3D',orthographic:this.camera.isOrthographicCamera,models:this.models.templates.size,meshes,instances,triangles,drawCalls:this.renderer.info.render.calls,shadows:this.renderer.shadowMap.enabled,entities:this.entities.size,activity:this.activity.state(),view:{zoom:this.zoom,target:[this.target.x,this.target.z]},gpuMemory:{geometries:this.renderer.info.memory.geometries,textures:this.renderer.info.memory.textures}};
   }
-  destroy():void{
-    this.labelLayer.remove();
-    this.scene.traverse(o=>{if(o instanceof T.PointLight)o.dispose();});
-    this.sun.dispose();
+  private releaseObject(root:T.Object3D):void{
     const sharedGeometries=new Set<T.BufferGeometry>([sharedCube]),sharedMaterials=new Set<T.Material>();
     for(const model of this.models.templates.values())model.traverse(o=>{if(o instanceof T.Mesh){sharedGeometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])sharedMaterials.add(m);}});
     const geometries=new Set<T.BufferGeometry>(),materials=new Set<T.Material>();
-    this.scene.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.Points){
+    root.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.Points){
       if(o instanceof T.InstancedMesh)o.dispose();
       if(!sharedGeometries.has(o.geometry))geometries.add(o.geometry);
       for(const m of Array.isArray(o.material)?o.material:[o.material])if(!sharedMaterials.has(m)&&!isSharedMaterial(m))materials.add(m);
     }});
     geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+  }
+  destroy():void{
+    this.labelLayer.remove();
+    this.scene.traverse(o=>{if(o instanceof T.PointLight)o.dispose();});
+    this.sun.dispose();
+    this.releaseObject(this.scene);
     this.renderer.renderLists.dispose();
   }
 }

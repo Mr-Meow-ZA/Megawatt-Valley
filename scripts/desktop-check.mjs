@@ -30,7 +30,7 @@ try {
   let page=await launch();
   await page.evaluate(()=>document.querySelector('[data-speed="0"]').click());
   assert.equal(await page.evaluate(()=>typeof window.require),'undefined');
-  assert.equal(await page.evaluate(()=>window.megawattDesktop.version),'0.3.0');
+  assert.equal(await page.evaluate(()=>window.megawattDesktop.version),'0.3.1');
   assert.equal(await page.evaluate(()=>window.megawattDesktop.writeSave('{"version":1,"state":{"cash":1}}')),false);
   const info=await page.evaluate(()=>window.megawattRenderInfo());
   assert.equal(info.orthographic,true);assert.equal(info.models,8);assert.ok(info.triangles>10000);

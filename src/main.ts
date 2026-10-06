@@ -55,7 +55,7 @@ async function start():Promise<void>{
   });
   canvas.addEventListener('pointercancel',()=>{down=null;});
   canvas.addEventListener('pointerleave',()=>world.setPointer(-1,-1,false));
-  canvas.addEventListener('wheel',e=>{e.preventDefault();if(!hud.isOverlayOpen())world.zoomBy(e.deltaY);},{passive:false});
+  canvas.addEventListener('wheel',e=>{e.preventDefault();if(!hud.isOverlayOpen())world.zoomBy(e.deltaY,e.clientX,e.clientY);},{passive:false});
   window.addEventListener('keydown',e=>{
     if(hud.isOverlayOpen()||hud.isTextEntryFocused())return;
     if(e.code==='Space'){e.preventDefault();sim.setSpeed(sim.speed===0?1:0);}

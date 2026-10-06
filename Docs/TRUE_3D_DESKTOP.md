@@ -39,3 +39,12 @@ Use `npm run dev` with the curated GLBs hydrated by Git LFS. Release packaging r
 ## Next
 
 Inspect actual frames and fix visual issues; validate interactions/performance; package and test the Windows 3D app. Continue refinement of building silhouettes, terrain detail and character animation. The transition uses stylised low-poly geometry; a final pixel treatment remains an art-direction task and should not be confused with merely wrapping the former 2D version.
+
+
+## Living-valley pass — 6 October 2026
+
+Desktop 0.3.1 adds cursor-centred zoom, moving public-road traffic, a small duck group with wakes, clustered reeds and subtle meadow grain. Roads continue beyond the playable plots so traffic enters from the valley outskirts. Wildlife and roadside props have explicit water/road/plot constraints.
+
+Under-construction equipment now has a foundation, cones and stored materials, removed when commissioned. Cleaning, repair and service animations have task-driven particles. Ambient motion respects pause and decision events. Simulation balance and save format remain unchanged.
+
+This pass also releases removed equipment and preview GPU resources. Unit coverage checks cursor anchoring and environmental paths; the runtime capture checks movement and pause. Full UI and Windows checks are required before sharing the new build. The previously shared 0.3.0 artifact remains available for the ongoing playtest.

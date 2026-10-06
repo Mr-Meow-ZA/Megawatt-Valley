@@ -1,10 +1,12 @@
 import * as T from 'three';
+import { reedPosition } from './motion';
 import { ROAD_TILES,FENCE_EDGES,SCENERY,riverCenterX,riverHalfWidth, inRect,SITE_A,SITE_B,isMainRoad } from '../content/valleyLayout';
 import { ModelLibrary,box,beam,fence,batchStatic,makeVan } from './models';
 const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 export function groundHeight(x:number,z:number):number{
   const river=Math.abs(x-riverCenterX(z)),water=riverHalfWidth(z);
   if(river<water+.4)return -.32+.32*clamp((river-water+.15)/.55);
+  if(Math.abs(z-1)<.75&&x>=-12&&x<=54)return 0;
   if(x>=-.5&&x<=41.5&&z>=-.5&&z<=29.5){
     if(inRect(x,z,{x0:2,x1:19,y0:2,y1:18})||inRect(x,z,{x0:21,x1:35,y0:4,y1:18})||Math.abs(z-1)<1||isMainRoad(x,z))return 0;
     return .22*Math.pow(Math.sin(x*.23)*Math.sin(z*.26),2);
@@ -13,6 +15,22 @@ export function groundHeight(x:number,z:number):number{
   return Math.min(9,distance*.29)*( .72+.23*Math.sin(x*.15+z*.11) )+Math.sin(x*.18)*Math.sin(z*.17)*.25;
 }
 function random(n:number):number{const v=Math.sin(n*127.1+19.7)*43758.5453;return v-Math.floor(v);}
+let meadowTexture:T.CanvasTexture|undefined;
+function meadowGrain():T.CanvasTexture{
+  if(meadowTexture)return meadowTexture;
+  const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
+  const context=canvas.getContext('2d')!,pixels=context.createImageData(128,128);
+  for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+    const i=(y*128+x)*4;
+    const broad=Math.sin(x*.14+Math.sin(y*.09))*Math.sin(y*.11)*4;
+    const value=238+Math.floor(random(x+y*128)*12+broad);
+    pixels.data[i]=value;pixels.data[i+1]=Math.min(255,value+2);pixels.data[i+2]=value-4;pixels.data[i+3]=255;
+  }
+  context.putImageData(pixels,0,0);
+  meadowTexture=new T.CanvasTexture(canvas);meadowTexture.wrapS=meadowTexture.wrapT=T.RepeatWrapping;
+  meadowTexture.repeat.set(22,22);meadowTexture.colorSpace=T.SRGBColorSpace;meadowTexture.anisotropy=4;
+  return meadowTexture;
+}
 function terrain():T.Mesh{
   const geometry=new T.PlaneGeometry(102,102,153,153);geometry.rotateX(-Math.PI/2);geometry.translate(19,0,13);
   const positions=geometry.getAttribute('position'),colors=new Float32Array(positions.count*3);
@@ -28,7 +46,7 @@ function terrain():T.Mesh{
     colors.set([base.r,base.g,base.b],i*3);
   }
   geometry.setAttribute('color',new T.BufferAttribute(colors,3));geometry.computeVertexNormals();
-  const mesh=new T.Mesh(geometry,new T.MeshStandardMaterial({vertexColors:true,roughness:1}));mesh.receiveShadow=true;mesh.name='Continuous sculpted terrain';return mesh;
+  const mesh=new T.Mesh(geometry,new T.MeshStandardMaterial({vertexColors:true,map:meadowGrain(),roughness:1}));mesh.receiveShadow=true;mesh.name='Continuous sculpted terrain';return mesh;
 }
 export interface Landscape {water:T.Mesh;van:T.Group;staticGroup:T.Group;lamps:T.PointLight[];ripples:T.Group;picnic:T.Group;}
 export function buildLandscape(scene:T.Scene,models:ModelLibrary):Landscape {
@@ -44,6 +62,17 @@ export function buildLandscape(scene:T.Scene,models:ModelLibrary):Landscape {
   const ripples=new T.Group();scene.add(ripples);
   for(let i=0;i<54;i++){const z=-10+i*.85,x=riverCenterX(z)+(random(i)-.5)*1.4;box(ripples,x,-.151,z,.12+random(i+20)*.3,.005,.016,0xb4d3c5);}
   for(const p of ROAD_TILES)box(staticObjects,p.x,.018,p.y,1,.035,1,0xb8ab88);
+  for(let x=-11;x<=53;x++)if(x<0||x>=42)box(staticObjects,x,.018,1,1,.035,1,0xb8ab88);
+  // Dense riparian pockets stay outside fences and away from the bridge approach.
+  for(const centre of [9,18.8,25.5])for(const side of [-1,1])for(let i=0;i<12;i++){
+    const z=centre+(random(i+centre*12)-.5)*1.1;
+    const p=reedPosition(z,side,random(i+41)*.12),y=groundHeight(p.x,p.z);
+    for(let blade=0;blade<3;blade++){
+      const stem=box(staticObjects,p.x+(blade-1)*.045,y+.13,p.z,.025,.26,.025,0x708751);
+      stem.rotation.z=(blade-1)*.16;
+    }
+    if(i%4===0)box(staticObjects,p.x,y+.28,p.z,.038,.1,.038,0x9b8052);
+  }
   // One unbroken bridge deck follows the public road. Its guardrails meet dry land.
   box(staticObjects,19.8,.014,1,4.7,.09,.95,0x9aa99b);
   for(let x=17.45;x<22.15;x+=.25)box(staticObjects,x,.066,1,.012,.008,.94,0x81988e);
