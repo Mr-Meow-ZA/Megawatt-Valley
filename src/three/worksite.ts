@@ -15,7 +15,7 @@ export function constructionSite(width:number,depth:number):T.Group{
 export function workParticles():T.Points{
   const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(new Float32Array(18*3),3));
   const points=new T.Points(geometry,new T.PointsMaterial({color:0xbbe7e6,size:.035,transparent:true,opacity:.8,depthWrite:false}));
-  points.visible=false;return points;
+  points.visible=false;points.raycast=()=>{};return points;
 }
 export function updateWorkParticles(points:T.Points,kind:string,time:number):void{
   points.visible=['clean','repair','service'].includes(kind);if(!points.visible)return;
