@@ -115,7 +115,9 @@ describe('crew, queues and useful park layouts',()=>{
     expect(travelHours(s.staff[0],remote,s.equipment)).toBeGreaterThan(travelHours(s.staff[0],source,s.equipment)*2);
     expect(hasServiceAccess(s.equipment,source)).toBe(false);
     const road={...source,id:'eq_999',kind:'road',tile:{x:12,y:10}} as PlacedEquipment;
-    expect(travelHours(s.staff[0],source,[...s.equipment,road])).toBeCloseTo(travelHours(s.staff[0],source,s.equipment)*.75);
+    expect(travelHours(s.staff[0],source,[...s.equipment,road])).toBeCloseTo(travelHours(s.staff[0],source,s.equipment));
+    const connected=[...Array.from({length:6},(_,i)=>({...road,id:'r'+i,tile:{x:10,y:5+i}})),{...road,id:'link',tile:{x:11,y:10}},road];
+    expect(travelHours(s.staff[0],source,[...s.equipment,...connected])).toBeCloseTo(travelHours(s.staff[0],source,s.equipment)*.75);
     const hub={...source,id:'eq_998',kind:'workshop',tile:{x:8,y:11}} as PlacedEquipment;
     expect(nearbyWorkshop([...s.equipment,hub],source)).toBe(true);
     expect(nearbyWorkshop([...s.equipment,hub],remote)).toBe(false);

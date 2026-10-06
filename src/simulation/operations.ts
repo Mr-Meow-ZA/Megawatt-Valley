@@ -1,5 +1,6 @@
 import { EQUIPMENT } from '../content/equipment';
-import { ROAD_TILES, staffRoute } from '../content/valleyLayout';
+import { connectedRoads } from './roads';
+import { staffRoute } from '../content/valleyLayout';
 import type { PlacedEquipment, StaffMember, WorkOrder, WorkKind } from './types';
 
 export function isSolar(e: PlacedEquipment): boolean { return e.kind === 'bargain_pv' || e.kind === 'premium_pv'; }
@@ -18,7 +19,7 @@ export function nearbyWorkshop(equipment: PlacedEquipment[], target: PlacedEquip
 }
 export function hasServiceAccess(equipment: PlacedEquipment[], target: PlacedEquipment): boolean {
   const front = { x:target.tile.x+(EQUIPMENT[target.kind].footprint.x-1)/2, y:target.tile.y+EQUIPMENT[target.kind].footprint.y-.65 };
-  return ROAD_TILES.some(p => Math.hypot(p.x-front.x,p.y-front.y)<=2.5) || equipment.some(e => e.kind==='road' && e.commissioned && Math.hypot(e.tile.x-front.x,e.tile.y-front.y)<=2.5);
+  return [...connectedRoads(equipment).values()].some(p=>Math.hypot(p.x-front.x,p.y-front.y)<=2.5);
 }
 export function travelHours(member: StaffMember, target: PlacedEquipment, equipment: PlacedEquipment[]): number {
   const end={x:target.tile.x+(EQUIPMENT[target.kind].footprint.x-1)/2,y:target.tile.y+EQUIPMENT[target.kind].footprint.y-.65};

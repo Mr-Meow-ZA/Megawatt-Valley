@@ -1,7 +1,9 @@
+import { roadRoute,roadKey } from './roads';
+import { ROAD_TILES } from '../content/valleyLayout';
 import { CONTRACTS, contractOffer, type ContractId, type ContractProgress, type ContractResult } from '../content/contracts';
 import { parkMetrics, nearbyWorkshop, travelHours, workerCanDo } from './operations';
 import { RESEARCH, type ResearchId, type ResearchProject } from '../content/research';
-import { isMainRoad, isWater, isBank, alongPath, staffRoute } from '../content/valleyLayout';
+import { isMainRoad, isWater, isBank, alongPath } from '../content/valleyLayout';
 import { validateState } from '../persistence/validate';
 import { EQUIPMENT } from '../content/equipment';
 import { EVENTS } from '../content/events';
@@ -311,6 +313,26 @@ export class GameSimulation {
     this.message = `Building ${def.name}…`;
     this.buildMode = null;
     this.activateObjective('choose_equipment');
+    return true;
+  }
+
+  roadPlan(path:Vec2[]):{tiles:Vec2[];cost:number;error:string|null}{
+    const existing=new Set([...ROAD_TILES,...this.equipment.filter(e=>e.kind==='road').map(e=>e.tile)].map(roadKey));
+    const seen=new Set<string>(),tiles:Vec2[]=[];
+    for(const tile of path){
+      const key=roadKey(tile);if(existing.has(key)||seen.has(key))continue;seen.add(key);
+      const plot=this.plotAtTile(tile),error=plot?this.canPlace('road',plot,tile):'Outside unlocked land';
+      if(error)return {tiles,cost:tiles.length*100,error};
+      tiles.push(tile);
+    }
+    const cost=tiles.length*100;return {tiles,cost,error:cost>this.cash?'Not enough cash for this road':null};
+  }
+  placeRoadStroke(path:Vec2[]):boolean{
+    const plan=this.roadPlan(path);
+    if(plan.error){this.message=plan.error;return false;}
+    if(!plan.tiles.length){this.message='This road already exists.';return false;}
+    for(const tile of plan.tiles)this.placeEquipment('road',this.plotAtTile(tile)!,tile);
+    this.setBuildMode('road');this.message=plan.tiles.length+' road tiles planned · $'+plan.cost+'. Connected roads speed up nearby crew travel.';
     return true;
   }
 
@@ -689,7 +711,7 @@ export class GameSimulation {
         const intent=task.intent ?? tagged._intent ?? (target.faulted?'repair':'clean');
         task.duration ??= travelHours({...member,tile:task.from},target,this.equipment);
         task.progress+=hours*(this.researched.includes('crew_logistics')?1.25:1)/task.duration;
-        member.tile=alongPath(staffRoute(task.from,this.workPosition(target)),Math.min(1,task.progress)); member.plotId=target.plotId;
+        member.tile=alongPath(roadRoute(task.from,this.workPosition(target),this.equipment),Math.min(1,task.progress)); member.plotId=target.plotId;
         if(task.progress>=1) {
           member.tile=this.workPosition(target); delete tagged._intent;
           if(intent==='repair' && !target.faulted || intent==='clean' && target.soiling<.15 || intent==='service' && target.condition>=.95) member.task={type:'idle'};

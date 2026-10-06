@@ -1,7 +1,10 @@
 import './three/world.css';
 import * as T from 'three';
 import { GameSimulation } from './simulation/GameSimulation';
-import { DomHud } from './ui/DomHud';
+import { TycoonHud } from './ui/tycoon/TycoonHud';
+import './ui/tycoon/tycoon.css';
+import {roadStroke} from './simulation/roads';
+import type {Vec2} from './simulation/types';
 import { loadGame,saveGame } from './persistence/save';
 import { ModelLibrary } from './three/models';
 import { World3D,renderCatalogue } from './three/World3D';
@@ -14,11 +17,11 @@ async function start():Promise<void>{
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate=false;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   const models=new ModelLibrary();await models.load();renderCatalogue(renderer,models);parent.append(renderer.domElement);
-  let sim:GameSimulation,world:World3D,hud:DomHud;
+  let sim:GameSimulation,world:World3D,hud:TycoonHud;
   function resize():void{renderer.setSize(innerWidth,innerHeight);world.resize(innerWidth,innerHeight);}
   function newGame():void{
     hud?.destroy();world?.destroy();sim=new GameSimulation();world=new World3D(renderer,models,sim);
-    hud=new DomHud(sim,newGame,tile=>world.focus(tile));resize();
+    hud=new TycoonHud(sim,newGame,tile=>world.focus(tile),view=>world.setViewMode(view));resize();
   }
   newGame();const saved=loadGame();if(saved){sim!.load(saved);sim!.speed=0;sim!.message='Company restored. Press Play when ready.';}
   loading.remove();
@@ -26,37 +29,51 @@ async function start():Promise<void>{
   desktop?.onCommand(command=>{
     if(command==='save-close')desktop.confirmClose(saveGame(sim.serialize()));
     else if(command==='pause')sim.setSpeed(0);
-    else if(command==='save'||command==='load')(document.querySelector('[data-action="'+command+'"]') as HTMLButtonElement|null)?.click();
+    else if(command==='save')hud.saveCompany();
+    else if(command==='load')hud.loadCompany();
   });
   window.addEventListener('resize',resize);window.addEventListener('pagehide',()=>saveGame(sim.serialize()));
   const canvas=renderer.domElement;
-  let down:{x:number;y:number;lastX:number;lastY:number;moved:boolean}|null=null;
-  canvas.addEventListener('pointerdown',e=>{if(hud.isOverlayOpen()||e.button!==0)return;canvas.setPointerCapture(e.pointerId);down={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};});
+  let down:{x:number;y:number;lastX:number;lastY:number;moved:boolean;button:number;roadStart:Vec2|null}|null=null;
+  const clearStroke=()=>{down=null;world.setRoadPreview(null);};
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  canvas.addEventListener('pointerdown',e=>{
+    if(e.button===2){e.preventDefault();clearStroke();if(!hud.isOverlayOpen())hud.cancelTool();return;}
+    if(hud.isOverlayOpen()||(e.button!==0&&e.button!==1))return;
+    e.preventDefault();canvas.setPointerCapture(e.pointerId);
+    down={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false,button:e.button,roadStart:e.button===0&&sim.buildMode==='road'?world.tileAt(e.clientX,e.clientY):null};
+    if(down.roadStart)world.setRoadPreview([down.roadStart]);
+  });
   canvas.addEventListener('pointermove',e=>{
-    world.setPointer(e.clientX,e.clientY,true);
-    if(!down||hud.isOverlayOpen())return;
+    world.setPointer(e.clientX,e.clientY,true);if(!down||hud.isOverlayOpen())return;
+    if(down.roadStart){const end=world.tileAt(e.clientX,e.clientY);if(end)world.setRoadPreview(roadStroke(down.roadStart,end,e.shiftKey));return;}
     if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>6)down.moved=true;
     if(down.moved)world.pan(e.clientX-down.lastX,e.clientY-down.lastY);
     down.lastX=e.clientX;down.lastY=e.clientY;
   });
   canvas.addEventListener('pointerup',e=>{
-    if(!down)return;const clicked=!down.moved;down=null;
+    if(!down||e.button!==down.button)return;
+    const gesture=down;clearStroke();
     if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
-    if(!clicked||hud.isOverlayOpen())return;
+    if(hud.isOverlayOpen())return;
+    if(gesture.roadStart){const end=world.tileAt(e.clientX,e.clientY);if(end&&sim.buildMode==='road')sim.placeRoadStroke(roadStroke(gesture.roadStart,end,e.shiftKey));return;}
+    if(gesture.moved||gesture.button!==0)return;
     const snapshot=sim.snapshot();
     if(snapshot.buildMode){
       const tile=world.tileAt(e.clientX,e.clientY),plot=tile?sim.plotAtTile(tile):null;
-      if(tile&&plot){const placed=sim.placeEquipment(snapshot.buildMode,plot,tile);if(placed&&e.shiftKey)sim.setBuildMode(snapshot.buildMode);}
+      if(tile&&plot){const kind=snapshot.buildMode;if(sim.placeEquipment(kind,plot,tile))sim.setBuildMode(kind);}
       else sim.message='Choose an unlocked building plot.';return;
     }
     const description=world.inspect(e.clientX,e.clientY);
     if(description){sim.selectEntity(null);sim.message=description;return;}
     sim.selectEntity(world.pick(e.clientX,e.clientY));
   });
-  canvas.addEventListener('pointercancel',()=>{down=null;});
+  canvas.addEventListener('pointercancel',clearStroke);
+  window.addEventListener('blur',clearStroke);
   canvas.addEventListener('pointerleave',()=>world.setPointer(-1,-1,false));
   canvas.addEventListener('wheel',e=>{e.preventDefault();if(!hud.isOverlayOpen())world.zoomBy(e.deltaY,e.clientX,e.clientY);},{passive:false});
   window.addEventListener('keydown',e=>{
+    if(e.key==='Escape')clearStroke();
     if(hud.isOverlayOpen()||hud.isTextEntryFocused())return;
     if(e.code==='Space'){e.preventDefault();sim.setSpeed(sim.speed===0?1:0);}
     else if(e.code==='KeyR'&&sim.selectedId)sim.dispatchRepair(sim.selectedId);

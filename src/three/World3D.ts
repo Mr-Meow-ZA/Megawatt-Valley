@@ -1,4 +1,6 @@
 import * as T from 'three';
+import {SiteOverlay} from './SiteOverlay';
+import type {SiteView} from '../ui/tycoon/TycoonHud';
 import { ValleyActivity } from './ValleyActivity';
 import { constructionSite,workParticles,updateWorkParticles } from './worksite';
 import { GameSimulation } from '../simulation/GameSimulation';
@@ -25,6 +27,9 @@ export class World3D {
   private readonly selection=new T.Group();
   private readonly preview=new T.Group();
   private ghost:T.Group|null=null;
+  private roadPath:Vec2[]|null=null;
+  private readonly roadPreview=new T.InstancedMesh(new T.PlaneGeometry(.96,.96),new T.MeshBasicMaterial({transparent:true,opacity:.65,depthWrite:false,side:T.DoubleSide}),160);
+  private readonly dataView:SiteOverlay;
   private ghostKind:EquipmentKind|null=null;
   private readonly landscape:Landscape;
   private readonly activity:ValleyActivity;
@@ -51,6 +56,7 @@ export class World3D {
     this.scene.add(this.sun,this.sun.target,this.sky);
     this.landscape=buildLandscape(this.scene,models);
     this.activity=new ValleyActivity(this.scene);
+    this.dataView=new SiteOverlay(this.scene);this.roadPreview.raycast=()=>{};this.roadPreview.frustumCulled=false;this.roadPreview.visible=false;this.scene.add(this.roadPreview);
     this.scene.add(this.selection,this.preview);
     this.labelLayer.className='world-labels';document.getElementById('game-root')!.append(this.labelLayer);
     this.hint.className='placement-label';this.hint.hidden=true;this.labelLayer.append(this.hint);
@@ -75,6 +81,8 @@ export class World3D {
     this.zoom=T.MathUtils.clamp(this.zoom-delta*.0015,.35,1.8);
     anchoredZoom(this.camera,this.width,this.height,this.target,this.zoom,x,y);
   }
+  setViewMode(view:SiteView):void{this.dataView.setView(view);}
+  setRoadPreview(path:Vec2[]|null):void{this.roadPath=path;}
   setPointer(x:number,y:number,inside:boolean):void{this.pointer={x,y,inside};}
   private ray(x:number,y:number):void{this.raycaster.setFromCamera(new T.Vector2(x/this.width*2-1,1-y/this.height*2),this.camera);}
   tileAt(x:number,y:number):Vec2|null{
@@ -168,7 +176,7 @@ export class World3D {
     this.labelB.textContent=b.unlocked?'SUNMEADOW EAST · SITE B':'SITE B · FUTURE EXPANSION';
     this.placeLabel(this.labelB,new T.Vector3(27.5,.06,16.25));
     this.placeLabel(this.labelLayer.querySelector('[data-site="a"]')!,new T.Vector3(11,.06,16.25));
-    this.updateWeather(snapshot,delta);this.updatePreview(snapshot);this.activity.update(this.elapsed,snapshot);
+    this.dataView.update(snapshot);this.updateWeather(snapshot,delta);this.updatePreview(snapshot);this.activity.update(this.elapsed,snapshot);
     const shadowKey=snapshot.equipment.map(e=>[e.id,e.kind,e.tile.x,e.tile.y,e.constructionProgress.toFixed(2)].join(':')).join('|')
       +snapshot.staff.map(s=>[s.id,s.tile.x.toFixed(2),s.tile.y.toFixed(2),s.task.type].join(':')).join('|')
       +':activity:'+Math.floor(this.elapsed*5);
@@ -198,6 +206,71 @@ export class World3D {
     this.landscape.ripples.visible=!night;
   }
   private updatePreview(s:GameSnapshot):void{
+    this.roadPreview.visible=!!this.roadPath&&s.buildMode==='road'&&!this.overlay;
+    if(this.roadPreview.visible&&this.roadPath?.length){
+      this.preview.visible=false;if(this.ghost)this.ghost.visible=false;
+      const plan=this.sim.roadPlan(this.roadPath),matrix=new T.Matrix4(),rotation=new T.Quaternion().setFromEuler(new T.Euler(-Math.PI/2,0,0));
+      const color=new T.Color(plan.error?0xe67557:0xa4e580);
+      this.roadPath.forEach((tile,i)=>{matrix.compose(new T.Vector3(tile.x,.1,tile.y),rotation,new T.Vector3(1,1,1));this.roadPreview.setMatrixAt(i,matrix);this.roadPreview.setColorAt(i,color);});
+      this.roadPreview.count=this.roadPath.length;this.roadPreview.instanceMatrix.needsUpdate=true;if(this.roadPreview.instanceColor)this.roadPreview.instanceColor.needsUpdate=true;
+      const end=this.roadPath[this.roadPath.length-1];this.hint.hidden=false;
+      this.hint.textContent=plan.error??plan.tiles.length+' road tiles · &&this.pointer.inside&&!this.overlay;this.preview.visible=visible;this.hint.hidden=!visible;
+    if(this.ghost)this.ghost.visible=visible;if(!visible||!s.buildMode)return;
+    const tile=this.tileAt(this.pointer.x,this.pointer.y);if(!tile)return;
+    const def=EQUIPMENT[s.buildMode],plot=this.sim.plotAtTile(tile);
+    const invalid=plot?this.sim.canPlace(s.buildMode,plot,tile):'Outside buildable land';
+    if(this.ghostKind!==s.buildMode){
+      if(this.ghost){this.scene.remove(this.ghost);this.releaseObject(this.ghost);}
+      this.ghost=this.models.equipment(s.buildMode);this.ghostKind=s.buildMode;
+      this.ghost.traverse(o=>{if(o instanceof T.Mesh){const ghost=(m:T.Material)=>{const n=m.clone();n.transparent=true;n.opacity=.55;n.depthWrite=false;return n;};o.material=Array.isArray(o.material)?o.material.map(ghost):ghost(o.material);o.castShadow=false;}});
+      this.scene.add(this.ghost);
+    }
+    const x=tile.x+(def.footprint.x-1)/2,z=tile.y+(def.footprint.y-1)/2;
+    this.ghost!.position.set(x,.015,z);this.ghost!.visible=true;
+    // Reuse footprint meshes until size or validity changes.
+    const key=s.buildMode+':'+!!invalid;
+    if(this.preview.userData.key!==key){this.footprint(this.preview,def.footprint.x,def.footprint.y,invalid?this.invalidMaterial:this.validMaterial,true);this.preview.userData.key=key;}
+    this.preview.position.set(x,0,z);
+    this.hint.textContent=invalid??def.name+' · $'+def.cost.toLocaleString()+' · click to build';
+    this.hint.classList.toggle('invalid',!!invalid);this.placeLabel(this.hint,new T.Vector3(x,1.25,z));
+  }
+  render():void{this.renderer.render(this.scene,this.camera);}
+  stats():Record<string,unknown>{
+    let meshes=0,instances=0,triangles=0;
+    this.scene.traverse(o=>{if(o instanceof T.Mesh){meshes++;const count=o instanceof T.InstancedMesh?o.count:1;instances+=count;triangles+=(o.geometry.index?.count??o.geometry.getAttribute('position').count)/3*count;}});
+    return {renderer:'Three.js WebGL 3D',orthographic:this.camera.isOrthographicCamera,models:this.models.templates.size,meshes,instances,triangles,drawCalls:this.renderer.info.render.calls,shadows:this.renderer.shadowMap.enabled,entities:this.entities.size,activity:this.activity.state(),view:{zoom:this.zoom,target:[this.target.x,this.target.z]},gpuMemory:{geometries:this.renderer.info.memory.geometries,textures:this.renderer.info.memory.textures}};
+  }
+  private releaseObject(root:T.Object3D):void{
+    const sharedGeometries=new Set<T.BufferGeometry>([sharedCube]),sharedMaterials=new Set<T.Material>();
+    for(const model of this.models.templates.values())model.traverse(o=>{if(o instanceof T.Mesh){sharedGeometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])sharedMaterials.add(m);}});
+    const geometries=new Set<T.BufferGeometry>(),materials=new Set<T.Material>();
+    root.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.Points){
+      if(o instanceof T.InstancedMesh)o.dispose();
+      if(!sharedGeometries.has(o.geometry))geometries.add(o.geometry);
+      for(const m of Array.isArray(o.material)?o.material:[o.material])if(!sharedMaterials.has(m)&&!isSharedMaterial(m))materials.add(m);
+    }});
+    geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());
+  }
+  destroy():void{
+    this.labelLayer.remove();
+    this.scene.traverse(o=>{if(o instanceof T.PointLight)o.dispose();});
+    this.sun.dispose();
+    this.releaseObject(this.scene);
+    this.renderer.renderLists.dispose();
+  }
+}
+export function renderCatalogue(renderer:T.WebGLRenderer,models:ModelLibrary):void{
+  const scene=new T.Scene(),camera=new T.OrthographicCamera(-1.5,1.5,1.4,-1.15,.1,20);
+  scene.add(new T.HemisphereLight(0xffffff,0x7e8e73,2.2));
+  const light=new T.DirectionalLight(0xffe8c5,2.8);light.position.set(-3,6,4);scene.add(light);
+  camera.position.set(4,3.27,4);camera.lookAt(0,.5,0);renderer.setSize(240,200,false);renderer.setClearColor(0xabc58b,0);
+  for(const kind of BUILD_MENU_ORDER){
+    const model=models.equipment(kind);scene.add(model);renderer.render(scene,camera);SITE_ICONS[kind]=renderer.domElement.toDataURL('image/png');scene.remove(model);
+  }
+}
++plan.cost.toLocaleString()+' · release to build';
+      this.hint.classList.toggle('invalid',!!plan.error);this.placeLabel(this.hint,new T.Vector3(end.x,1,end.y));return;
+    }
     const visible=!!s.buildMode&&this.pointer.inside&&!this.overlay;this.preview.visible=visible;this.hint.hidden=!visible;
     if(this.ghost)this.ghost.visible=visible;if(!visible||!s.buildMode)return;
     const tile=this.tileAt(this.pointer.x,this.pointer.y);if(!tile)return;
