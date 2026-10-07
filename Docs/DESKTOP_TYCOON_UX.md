@@ -48,10 +48,22 @@ Simulation saves retain version 1 compatibility. Connected service access is der
 
 7 October: the long UI test exposed clock updates replacing speed-button DOM during pointer interactions. Replaced wholesale DOM updates with incremental patching. Also removed irrelevant repair controls from landscaping, cleared road coverage when selecting other build tools, refreshed overlay cache after changed placements, and corrected the road test's screen coordinates to use unobscured ground.
 
-## Remaining validation / next work
+## Delivery and next work
 
-The full new-interface regression passed on 7 October (run 37573680105), covering road drawing/rejection/cancellation, repeated construction, new company, persistence, scenario fixtures, timed training, contracts, research, operations and laptop reachability. Actual catalogue, crew, company, road-preview and laptop screenshots were reviewed. Windows verification found a test race reading the previous save before the native command completed; the test now waits for the new persisted save. Packaged Windows verification passed on commit 7acc58c (run 37574278490); final verification also includes the subsequent mouse-chord fix. The desktop package excludes bundled node_modules: renderer dependencies are already compiled into game.js, while desktop runtime imports use Electron, Node built-ins and local application files. Continue refining scene presentation and player feedback after this interaction foundation is validated. The next campaign scenario is still a future release.
+Desktop 0.4.0 runtime commit `eea87a3cc304a3eeb911afb084b7f945d4973eec` passed all 68 tests, production compilation, the complete UI/gesture/keyboard regression and packaged Windows checks.
+
+- Share/download page: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37576925019
+- Windows artifact: `MEGAWATT-VALLEY-3D-WINDOWS` (installer and portable ZIP).
+- Interface screenshots and offline evidence: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37576925023
+
+The tests cover interrupted road gestures without spending, middle-button panning, stable live controls, topmost confirmation focus, repeated placement, scenario fixtures, real-time staff training, contracts, research, queued work, laptop controls, import/export and save/reload. Windows checks additionally cover native saving, fullscreen, normal close/resume and backup recovery. Screenshots were inspected; no runtime or unexpected network errors were reported.
+
+Existing version-1 saves remain compatible. Unconnected roads in old saves now need a connection for their service benefit. The combined Windows artifact is about 274 MB after excluding duplicate development dependencies. The app uses only bundled renderer code, Electron/Node built-ins and local application modules.
+
+Next: player feedback on navigation and catalogue clarity; further scene and character presentation; later campaign content remains a future release.
 
 ## Verified desktop candidate — 7 October
 
 Commit 1c8f44e passed 68 tests, the full UI/gesture regression (run 37576370380) and packaged Windows checks (run 37576370398). Right-click during a held left-button drag now cancels without placing or spending. Final follow-up adds explicit topmost-dialog focus and a keyboard regression for confirmations opened above the Company sheet.
+
+Final 7 October result: the keyboard-focus follow-up passed both release workflows. The URLs above point to the tested runtime, independent of later documentation-only commits.
