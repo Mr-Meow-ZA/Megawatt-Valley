@@ -379,3 +379,45 @@ A charming miniature world full of purposeful details, individual workers, equip
 And when the player clicks something, the interface should feel as considered as the world itself.
 
 **The long-term target is not simply “good 3D.” It is a renewable-energy tycoon world with enough craft, feedback and personality that managing it is pleasurable and watching it is entertaining.**
+
+
+---
+
+## 15. Approved UI/UX concept — v1
+
+**Decision date:** 2026-10-07  
+**Status:** APPROVED DIRECTION / SOURCE-OF-TRUTH REFERENCE
+
+Rapha approved the first clean-sheet UI/UX concept mockup as the direction to lock in.
+
+### Product decision
+- Keep the current true-3D world direction. It is an acceptable foundation, but still the minimum visual baseline rather than the final world-quality target.
+- **Reject the current in-game UI/UX as a design baseline.** It is functional scaffolding only.
+- The new UI must be designed clean-sheet. Do not preserve current layouts, panel structure, styling, information architecture or interaction patterns merely because they already exist.
+- The approved concept establishes the desired visual/interaction language: polished management-game presentation, readable information hierarchy, generous but efficient spacing, contextual depth, characterful staff presentation, strong previews, useful comparisons and an attractive research/progression view.
+
+### Approved concept covers four anchor surfaces
+1. **Main gameplay HUD** — world remains dominant; compact top-level KPIs, objectives, contextual world labels, minimap/tools and a clear build/category rail.
+2. **Solar building selection & details** — category navigation, multiple panel choices, larger selected preview, price/output/efficiency/maintenance/lifespan/footprint and suitability/trade-off information plus restrained real-world flavour/facts. The player should immediately understand why one panel is preferable to another for a particular strategy.
+3. **Technician profile** — staff list plus large character presentation, name/role/speciality/personality, progression, skills, current work, wellbeing, salary, traits and contextual tabs/actions. Workers are characters, not rows in an admin table.
+4. **Research / technology tree** — technology families, clear tiers/branches/dependencies, current research, research-point economy, completed work, locked future nodes and an immediately readable sense of where each branch leads.
+
+### Codex instruction
+**Codex must read this document before undertaking substantial player-facing UI/UX work.** It should also inspect the approved concept image when present at:
+
+`Docs/References/megawatt-valley-ui-ux-approved-concept-v1.jpg`
+
+The image is a **directional source of truth, not a pixel-perfect implementation contract**. Preserve the principles and quality bar while adapting details to real game systems, resolution, accessibility and implementation constraints.
+
+When an existing UI conflicts with this approved clean-sheet direction, prefer the approved direction unless a later product decision explicitly overrides it.
+
+### Design rule going forward
+For every major player-facing surface ask:
+- What decision is the player trying to make?
+- What information is required to make it confidently?
+- What information can remain secondary/on-demand?
+- What preview, comparison or visualisation would make the choice intuitive?
+- What atmosphere/character can be added without harming readability?
+- Can the player understand progression, consequence and next steps at a glance?
+
+Do not make a screen dense merely because the simulation has many variables. Use progressive disclosure: essential information first, deeper detail when requested.
