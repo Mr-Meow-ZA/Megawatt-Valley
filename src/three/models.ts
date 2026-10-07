@@ -87,7 +87,7 @@ function campusBuilding(kind:'office'|'workshop'):T.Group{
     for(const x of [-.83,.83])box(root,x,.57,-.16,.12,.97,1.35,0xd8d2b8);
     box(root,.5,.57,.45,.5,.97,.11,0xd8d2b8);
     box(root,-.12,.98,.49,1.34,.12,.12,0x547268);
-    box(root,-.17,1.035,-.18,1.85,.11,1.48,0x5a756d);
+    box(root,0,1.035,-.18,1.85,.11,1.48,0x5a756d);
     for(let i=0;i<9;i++)box(root,0,1.102,-.79+i*.15,1.8,.02,.022,0x718980);
     for(const x of [-.74,.25])box(root,x,.53,.53,.09,.87,.085,0xcf975b);
     box(root,-.24,.94,.59,1.13,.14,.09,0xcf975b);
