@@ -28,7 +28,7 @@ export class World3D {
   private readonly preview=new T.Group();
   private ghost:T.Group|null=null;
   private roadPath:Vec2[]|null=null;
-  private readonly roadPreview=new T.InstancedMesh(new T.PlaneGeometry(.96,.96),new T.MeshBasicMaterial({transparent:true,opacity:.65,depthWrite:false,side:T.DoubleSide}),160);
+  private readonly roadPreview=new T.InstancedMesh(new T.PlaneGeometry(.96,.96),new T.MeshBasicMaterial({transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide}),160);
   private readonly dataView:SiteOverlay;
   private ghostKind:EquipmentKind|null=null;
   private readonly landscape:Landscape;
@@ -210,7 +210,7 @@ export class World3D {
     if(this.roadPreview.visible&&this.roadPath?.length){
       this.preview.visible=false;if(this.ghost)this.ghost.visible=false;
       const plan=this.sim.roadPlan(this.roadPath),matrix=new T.Matrix4(),rotation=new T.Quaternion().setFromEuler(new T.Euler(-Math.PI/2,0,0));
-      const color=new T.Color(plan.error?0xe67557:0xa4e580);
+      const color=new T.Color(plan.error?0xe67557:0x71d9ed);
       this.roadPath.forEach((tile,i)=>{matrix.compose(new T.Vector3(tile.x,.1,tile.y),rotation,new T.Vector3(1,1,1));this.roadPreview.setMatrixAt(i,matrix);this.roadPreview.setColorAt(i,color);});
       this.roadPreview.count=this.roadPath.length;this.roadPreview.instanceMatrix.needsUpdate=true;if(this.roadPreview.instanceColor)this.roadPreview.instanceColor.needsUpdate=true;
       const end=this.roadPath[this.roadPath.length-1];this.hint.hidden=false;

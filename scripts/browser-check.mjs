@@ -13,7 +13,11 @@ page.on('request',r=>{if(/^https?:/.test(r.url()))errors.push('Offline network r
 await page.goto(pathToFileURL(path.resolve('playable/PLAY-MEGAWATT-VALLEY.html')).href);
 const q=(action,id)=>page.locator('[data-action="'+action+'"]'+(id?'[data-id="'+id+'"]':''));
 const speed=async n=>q('speed',String(n)).click();
-await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});await speed(0);
+await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});
+const stableControl=await q('speed','0').elementHandle();
+await page.waitForTimeout(700);
+assert.ok(await stableControl.evaluate(el=>el.isConnected),'Time updates preserve live controls');
+await speed(0);
 async function saved(){await page.keyboard.press('Control+s');return page.evaluate(()=>JSON.parse(localStorage.getItem('megawatt-valley-solar-v1')).state);}
 async function shot(name,log=false){await page.screenshot({path:'browser-evidence/'+name+'.png'});if(log)console.log(name.toUpperCase().replaceAll('-','_')+'_BASE64:'+(await page.screenshot({type:'jpeg',quality:65})).toString('base64'));}
 async function closePanels(){if(await page.locator('.sheet-backdrop:not([hidden])').count())await page.keyboard.press('Escape');if(await page.locator('.menu-backdrop:not([hidden])').count())await page.locator('.pause-menu [data-action="menu"]').click();}
@@ -46,7 +50,15 @@ await page.waitForTimeout(200);assert.match(await page.locator('.placement-label
 await shot('tycoon-road-drag',true);await page.mouse.up();
 let state=await saved();assert.equal(state.equipment.filter(e=>e.kind==='road').length,4);assert.equal(state.cash,start.cash-400);
 assert.equal(state.buildMode,'road');
-await page.mouse.click(b.x,b.y,{button:'right'});assert.equal((await saved()).buildMode,null);
+// Cancel an in-progress road gesture, including while left capture is active.
+const cancelEnd=project(10,11);
+await page.mouse.move(b.x,b.y);await page.mouse.down();await page.mouse.move(cancelEnd.x,cancelEnd.y,{steps:6});
+await page.mouse.click(cancelEnd.x,cancelEnd.y,{button:'right'});await page.mouse.up();
+assert.equal((await saved()).buildMode,null);assert.equal((await saved()).cash,state.cash);
+const cameraBefore=await page.evaluate(()=>window.megawattRenderInfo().view.target);
+await page.mouse.move(600,500);await page.mouse.down({button:'middle'});await page.mouse.move(660,530,{steps:5});await page.mouse.up({button:'middle'});
+assert.notDeepEqual(await page.evaluate(()=>window.megawattRenderInfo().view.target),cameraBefore);
+await page.keyboard.press('h');
 await page.keyboard.press('b');await q('category','service').click();await q('build','road').click();
 const occupied=project(12,7),valid=project(10,7);
 await page.mouse.move(valid.x,valid.y);await page.mouse.down();await page.mouse.move(occupied.x,occupied.y,{steps:8});await page.mouse.up();

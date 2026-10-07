@@ -18,9 +18,16 @@ async function launch(){
   return page;
 }
 async function state(page){
+  const file=path.join(dir,'saves/company.json');
+  const before=await readFile(file,'utf8').catch(()=>null);
   await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.send('game:command','save'));
-  await page.waitForTimeout(300);
-  return JSON.parse(await readFile(path.join(dir,'saves/company.json'),'utf8')).state;
+  const deadline=Date.now()+30000;
+  while(Date.now()<deadline){
+    const next=await readFile(file,'utf8').catch(()=>null);
+    if(next&&next!==before)return JSON.parse(next).state;
+    await page.waitForTimeout(100);
+  }
+  throw Error('Native save command did not produce an acknowledged new save');
 }
 async function closeNormally(){
   const closed=application.waitForEvent('close',{timeout:15000});

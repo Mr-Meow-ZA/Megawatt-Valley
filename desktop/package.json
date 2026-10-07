@@ -27,7 +27,9 @@
       "validate.cjs",
       "game/**",
       "package.json",
-      "icon.png"
+      "icon.png",
+      "!node_modules{,/**}",
+      "!**/node_modules{,/**}"
     ],
     "asar": true,
     "win": {
