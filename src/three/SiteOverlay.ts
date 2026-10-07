@@ -12,7 +12,7 @@ export class SiteOverlay {
  setView(view:SiteView):void{this.view=view;this.key='';}
  update(s:GameSnapshot):void{
   this.mesh.visible=this.view!=='normal';if(!this.mesh.visible)return;
-  const key=this.view+JSON.stringify(s.equipment.map(e=>[e.id,e.commissioned,e.faulted,Math.round(e.condition*100),Math.round(e.soiling*100)]))+s.plots[1].unlocked;
+  const key=this.view+JSON.stringify(s.equipment.map(e=>[e.id,e.tile.x,e.tile.y,e.commissioned,e.faulted,Math.round(e.condition*100),Math.round(e.soiling*100)]))+s.plots[1].unlocked;
   if(this.key===key)return;this.key=key;
   const matrix=new T.Matrix4(),rotation=new T.Quaternion().setFromEuler(new T.Euler(-Math.PI/2,0,0)),color=new T.Color();let count=0;
   const add=(x:number,y:number,w:number,d:number,value:number)=>{
