@@ -1,5 +1,7 @@
 # True 3D desktop path — 5 October 2026
 
+**Current desktop interface (0.4.0):** see [Desktop tycoon UX](DESKTOP_TYCOON_UX.md) for the rebuilt menus, connected roads, controls and validation. The initial transition notes below describe the 0.3.x renderer milestone; the legacy DOM management UI is no longer used by the current desktop entry point.
+
 This branch replaces the Phaser world renderer with Three.js WebGL geometry. It is an isolated transition from the working `codex/solar-release-hardening` Windows release. Unity assets, scripts and settings are untouched. The previous browser entry point remains in `src/main-2d.ts` for reference.
 
 ## Architecture

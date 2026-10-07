@@ -89,7 +89,11 @@ assert.ok(await page.locator('.inspector').evaluate(el=>el.getBoundingClientRect
 await shot('tycoon-laptop-worker');await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');
 await company('contracts');await q('contract','school').click();assert.equal((await saved()).contract.id,'school');
 await shot('tycoon-contracts');await page.reload();await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});assert.equal((await saved()).contract.id,'school');
-await company('contracts');await q('cancel-contract').click();await q('confirm-yes').click();assert.equal((await saved()).contract,null);
+await company('contracts');await q('cancel-contract').click();
+assert.ok(await page.locator('.decision-backdrop').evaluate(el=>el.contains(document.activeElement)),'Confirmation receives focus above Company');
+await page.keyboard.press('Shift+Tab');
+assert.ok(await page.locator('.decision-backdrop').evaluate(el=>el.contains(document.activeElement)),'Keyboard focus remains inside the top dialog');
+await q('confirm-yes').click();assert.equal((await saved()).contract,null);
 const ops=JSON.parse(await readFile('browser-fixtures/one-star.json','utf8'));
 ops.state.completionAcknowledged=true;ops.state.speed=0;ops.state.activeEvent=null;ops.state.workOrders=[];
 ops.state.staff.forEach(m=>{m.task={type:'idle'};m.preference='repair';m.workZone='all';m.energy=1;m.onBreak=false;m.trainingHoursLeft=0;});

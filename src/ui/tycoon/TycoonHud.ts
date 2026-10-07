@@ -37,7 +37,7 @@ export class TycoonHud {
  private lastMessage='';
  private toastUntil=0;
  private cache=new Map<string,string>();
- private lastModal=false;
+ private modalKey='';
  private confirmAction:{title:string;body:string;action:()=>void}|null=null;
  constructor(private sim:GameSimulation,private onNew:()=>void,private onCamera:(tile:Vec2|null)=>void,private onView:(view:SiteView)=>void){
   this.root.innerHTML='<div class="tycoon-ui" data-k="tycoon-ui"><header class="resource-strip" data-slot="resources"></header><div class="top-tools">'+button('menu',icon('menu'),'','title="Pause menu" aria-label="Pause menu"')+'</div><aside class="goal-card" data-slot="goal"></aside><aside class="left-panel paper" data-slot="panel" hidden></aside><aside class="inspector paper" data-slot="inspector" hidden></aside><div class="alert-chip" data-slot="alerts"></div><nav class="tool-rail" data-slot="tools"></nav><div class="time-control" data-slot="time"></div><div class="tool-help" data-slot="help" hidden></div><div class="toast" role="status" data-slot="toast" hidden></div><div class="sheet-backdrop" data-slot="sheet" hidden></div><div class="decision-backdrop" data-slot="decision" hidden></div><div class="menu-backdrop" data-slot="menu" hidden></div></div>';
@@ -53,6 +53,10 @@ export class TycoonHud {
  cancelTool():void{this.sim.setBuildMode(null);this.sim.selectEntity(null);this.panel=null;this.setView('normal');this.render(this.sim.snapshot());}
  saveCompany():void{this.sim.message=saveGame(this.sim.serialize())?'Company saved.':'Save failed. Export a backup from the pause menu.';}
  loadCompany():void{const saved=loadGame();if(saved){this.sim.load(saved);this.sim.speed=0;this.panel=null;this.sim.message='Company restored. Press Play when ready.';}else this.sim.message='No valid saved company found.';}
+ private activeDialog():HTMLElement|null{
+  for(const slot of ['decision','menu','sheet']){const el=this.slot(slot);if(!el.hidden)return el;}
+  return null;
+ }
  private slot(name:string):HTMLElement{return this.root.querySelector('[data-slot="'+name+'"]')!;}
  private put(name:string,html:string):void{
   const slot=this.slot(name);slot.hidden=!html;
@@ -143,7 +147,7 @@ export class TycoonHud {
   this.put('menu',this.menu?'<section class="pause-menu paper" role="dialog" aria-modal="true" aria-label="Pause menu"><small>MEGAWATT VALLEY</small><h2>Take a breather.</h2>'+button('menu','Return to valley','','class="primary wide"')+button('save','Save company','','class="wide"')+button('load','Load company','','class="wide"')+'<div class="action-grid">'+button('export','Export save')+button('import','Import save')+'</div>'+button('sound','Sound · '+(sound.enabled?'On':'Off'),'','class="wide"')+button('new','Start a new company','','class="quiet wide"')+'<p class="section-note">Drag: pan · Wheel: zoom · Middle-drag: pan while building · Right-click: cancel · Space: pause · H: home · F: selected</p></section>':'');
   if(s.message&&s.message!==this.lastMessage){this.lastMessage=s.message;this.toastUntil=performance.now()+6500;}
   this.put('toast',performance.now()<this.toastUntil?esc(this.lastMessage):'');
-  const modal=this.isOverlayOpen();if(modal&&!this.lastModal)this.root.querySelector<HTMLElement>('.decision-backdrop:not([hidden]) button,.menu-backdrop:not([hidden]) button,.sheet-backdrop:not([hidden]) button')?.focus({preventScroll:true});this.lastModal=modal;
+  const dialog=this.activeDialog(),modalKey=dialog?.dataset.slot??'';if(modalKey!==this.modalKey)dialog?.querySelector<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled)')?.focus({preventScroll:true});this.modalKey=modalKey;
   sound.update(s.weather,s.faultsRepaired,s.cleansCompleted,s.stars);void metrics;
  }
  private click(e:Event):void{
@@ -201,8 +205,8 @@ export class TycoonHud {
  private key(e:KeyboardEvent):void{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();this.saveCompany();this.render(this.sim.snapshot());return;}
   if(e.key==='Tab'&&this.isOverlayOpen()){
-   const dialog=this.root.querySelector<HTMLElement>('.decision-backdrop:not([hidden]),.menu-backdrop:not([hidden]),.sheet-backdrop:not([hidden])');
-   const controls=dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),input,select');if(!controls?.length)return;
+   const dialog=this.activeDialog();
+   const controls=dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled)');if(!controls?.length)return;
    const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}return;
   }
   if(e.key==='Escape'){e.preventDefault();if(this.confirmAction)this.confirmAction=null;else if(this.sim.activeEvent||this.sim.scenarioComplete&&!this.sim.completionAcknowledged)return;else if(this.menu){this.menu=false;this.sim.setSpeed(this.menuSpeed);}else if(this.panel||this.sim.buildMode||this.sim.selectedId)this.cancelTool();else{this.menuSpeed=this.sim.speed;this.sim.setSpeed(0);this.menu=true;}this.render(this.sim.snapshot());return;}
