@@ -36,9 +36,13 @@ async function start():Promise<void>{
   const canvas=renderer.domElement;
   let down:{x:number;y:number;lastX:number;lastY:number;moved:boolean;button:number;roadStart:Vec2|null}|null=null;
   const clearStroke=()=>{down=null;world.setRoadPreview(null);};
-  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  const cancelPlacement=()=>{clearStroke();if(!hud.isOverlayOpen())hud.cancelTool();};
+  canvas.addEventListener('contextmenu',e=>{e.preventDefault();cancelPlacement();});
+  // Pointer Events emit pointerdown only for the first held mouse button.
+  // mousedown also catches right-click while a left-button road drag is active.
+  canvas.addEventListener('mousedown',e=>{if(e.button===2){e.preventDefault();cancelPlacement();}});
   canvas.addEventListener('pointerdown',e=>{
-    if(e.button===2){e.preventDefault();clearStroke();if(!hud.isOverlayOpen())hud.cancelTool();return;}
+    if(e.button===2){e.preventDefault();return;}
     if(hud.isOverlayOpen()||(e.button!==0&&e.button!==1))return;
     e.preventDefault();canvas.setPointerCapture(e.pointerId);
     down={x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false,button:e.button,roadStart:e.button===0&&sim.buildMode==='road'?world.tileAt(e.clientX,e.clientY):null};
