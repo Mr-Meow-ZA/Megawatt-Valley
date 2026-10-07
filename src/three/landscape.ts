@@ -1,6 +1,6 @@
 import * as T from 'three';
 import { reedPosition } from './motion';
-import { ROAD_TILES,FENCE_EDGES,SCENERY,riverCenterX,riverHalfWidth, inRect,SITE_A,SITE_B,isMainRoad } from '../content/valleyLayout';
+import { ROAD_TILES,FENCE_EDGES,SCENERY,riverCenterX,riverHalfWidth, inRect,SITE_A,SITE_B,isMainRoad,OFFICE_YARD,PICNIC_POINT } from '../content/valleyLayout';
 import { ModelLibrary,box,beam,fence,batchStatic,makeVan } from './models';
 const clamp=(x:number)=>Math.max(0,Math.min(1,x));
 export function groundHeight(x:number,z:number):number{
@@ -78,9 +78,20 @@ export function buildLandscape(scene:T.Scene,models:ModelLibrary):Landscape {
   for(let x=17.45;x<22.15;x+=.25)box(staticObjects,x,.066,1,.012,.008,.94,0x81988e);
   for(const z of [.48,1.52])for(let x=17.45;x<22.1;x+=.5)fence(staticObjects,x,z,x+.5,z,.3);
   for(const {a,b} of FENCE_EDGES)fence(staticObjects,a.x,a.y,b.x,b.y);
-  box(staticObjects,6.15,.015,6.3,3.3,.03,3.6,0xbab79a);
-  for(const x of [6.5,7.5])box(staticObjects,x,.035,7.5,.018,.006,1,0xe4dfba);
-  box(staticObjects,7,.035,8,1,.006,.018,0xe4dfba);
+  // The entire office apron fits the same reservation used by placement validation.
+  box(staticObjects,(OFFICE_YARD.x0+OFFICE_YARD.x1-1)/2,.015,(OFFICE_YARD.y0+OFFICE_YARD.y1-1)/2,
+    OFFICE_YARD.x1-OFFICE_YARD.x0,.03,OFFICE_YARD.y1-OFFICE_YARD.y0,0xbab79a);
+  // Entrance path meets the access road; parking and planting leave its centre clear.
+  box(staticObjects,5.5,.039,6.72,2,.018,.42,0xd3cbb2);
+  for(const x of [4.75,5.25,5.75,6.25])box(staticObjects,x,.049,6.72,.008,.003,.4,0xa9ac94);
+  box(staticObjects,5.45,.08,8.19,1.35,.1,.34,0x9a987d);
+  box(staticObjects,5.45,.135,8.19,1.25,.02,.27,0x76654d);
+  for(let i=0;i<6;i++){
+    const shrub=models.model('shrub',.23,undefined,.18);shrub.position.set(4.92+i*.21,.14,8.19);staticObjects.add(shrub);
+    box(staticObjects,4.92+i*.21,.3,8.19,.035,.025,.035,i%2?0xdfbe78:0xe2d9bd);
+  }
+  for(const x of [6.6,7.4])box(staticObjects,x,.035,7.5,.018,.006,1,0xe4dfba);
+  box(staticObjects,7,.035,8,.8,.006,.018,0xe4dfba);
   for(const p of SCENERY){
     const object=models.model(p.kind==='tree'?['oak','pine','alder'][p.variant]:p.kind,p.kind==='tree'?1.05:.6,undefined,p.kind==='tree'?1.65*p.scale:undefined);
     if(p.kind!=='tree')object.scale.multiplyScalar(p.scale);
@@ -104,7 +115,7 @@ export function buildLandscape(scene:T.Scene,models:ModelLibrary):Landscape {
       beam(staticObjects,point(j/12),point((j+1)/12),.012,0x5f6b60);
     }
   }
-  const picnic=new T.Group();picnic.position.set(7.35,0,5.25);picnic.userData.description='Company headquarters: one picnic table, three mugs, and an ambitious spreadsheet.';
+  const picnic=new T.Group();picnic.position.set(PICNIC_POINT.x,0,PICNIC_POINT.y);picnic.userData.description='Company headquarters: one picnic table, three mugs, and an ambitious spreadsheet.';
   box(picnic,0,.27,0,.63,.055,.34,0xc69c6a);
   for(const x of [-.22,.22])box(picnic,x,.12,0,.045,.25,.24,0x697c69);
   for(const z of [-.29,.29])box(picnic,0,.16,z,.66,.045,.13,0xc69c6a);
@@ -112,7 +123,7 @@ export function buildLandscape(scene:T.Scene,models:ModelLibrary):Landscape {
   for(const [x,z]of [[4.8,3.8],[22.8,5.8]]){const sign=models.equipment('sign');sign.position.set(x,0,z);staticObjects.add(sign);}
   const van=makeVan();van.position.set(7,.025,7.4);scene.add(van);
   const lamps:T.PointLight[]=[];
-  for(const [x,z]of [[4.7,5],[14.8,5.5],[22.7,6.8]]){
+  for(const [x,z]of [[4.62,7.95],[16.1,5.5],[22.7,6.8]]){
     box(staticObjects,x,.58,z,.025,1.16,.025,0x748077);box(staticObjects,x,1.18,z,.15,.075,.1,0xf3ddab);
     const light=new T.PointLight(0xffce83,0,3,2);light.position.set(x,1.12,z);scene.add(light);lamps.push(light);
   }

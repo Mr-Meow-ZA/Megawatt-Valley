@@ -30,5 +30,23 @@ console.log('THREE_WORLD_BASE64:'+(await page.screenshot({type:'jpeg',quality:70
 await page.mouse.move(650,420);await page.mouse.wheel(0,-230);await page.waitForTimeout(300);
 await page.screenshot({path:'three-evidence/3d-closeup.png'});
 console.log('THREE_DETAIL_BASE64:'+(await page.screenshot({type:'jpeg',quality:70})).toString('base64'));
+// Inspect real starter assets at working distance, with the same in-game camera controls.
+await page.keyboard.press('h');
+await page.mouse.click(478,190);await page.keyboard.press('f');
+await page.mouse.move(720,450);await page.mouse.wheel(0,-620);await page.waitForTimeout(350);
+await page.screenshot({path:'three-evidence/campus-office-detail.png'});
+console.log('CAMPUS_OFFICE_BASE64:'+(await page.screenshot({type:'jpeg',quality:80})).toString('base64'));
+await page.keyboard.press('h');
+await page.mouse.click(633,343);await page.keyboard.press('f');
+await page.mouse.move(720,450);await page.mouse.wheel(0,-620);await page.waitForTimeout(350);
+await page.screenshot({path:'three-evidence/campus-solar-detail.png'});
+console.log('CAMPUS_SOLAR_BASE64:'+(await page.screenshot({type:'jpeg',quality:80})).toString('base64'));
+const timing=await page.evaluate(async()=>{
+ const frames=[];let previous=performance.now();
+ for(let i=0;i<30;i++){const now=await new Promise(resolve=>requestAnimationFrame(resolve));frames.push(now-previous);previous=now;}
+ frames.sort((a,b)=>a-b);
+ return {sampleFrames:frames.length,medianMs:frames[15],p95Ms:frames[28],userAgent:navigator.userAgent,logicalCores:navigator.hardwareConcurrency,viewport:[innerWidth,innerHeight],render:window.megawattRenderInfo()};
+});
+console.log('CAMPUS_PERFORMANCE_DIAGNOSTIC:'+JSON.stringify({backend:'CI Chrome SwiftShader software rendering; not a player GPU benchmark',...timing}));
 await browser.close();
 if(errors.length)throw new Error(errors.join('\n'));

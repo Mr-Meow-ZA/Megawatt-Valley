@@ -15,3 +15,6 @@ Model footprint/grounding and soiling isolation tests; existing full simulation/
 
 ## Remaining gaps
 Reference-level character detail and animation, landscape depth, vehicle destinations and curated campus approaches still need work. The new assets and catalogue alone do not meet the complete visual target. Record actual evidence and issues in RESUME_CHECKPOINT.md.
+
+## Follow-up
+Fence runs now derive straight/corner geometry from adjacent fence/gate tiles; previews and demolition recalculate connections. Gate openings align to vertical runs. The starter apron shares the simulation's reserved-yard bounds; picnic furniture, parking lines and lamps are placed within clear usable areas. Crew gain rounded heads, helmets and bodies with reflective workwear; vans gain glazing, mirrors, handles and roof racks.

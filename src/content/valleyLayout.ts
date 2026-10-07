@@ -5,6 +5,8 @@
 export const WORLD_W = 42, WORLD_H = 30;
 export const ACCESS_Y = 1;
 export const SITE_A = { x0:4, x1:18, y0:4, y1:16 };
+export const OFFICE_YARD = { x0:5, x1:8, y0:5, y1:9 };
+export const PICNIC_POINT = { x:7, y:5.3 };
 export const SITE_B = { x0:22, x1:34, y0:6, y1:16 };
 export type Point = { x:number; y:number };
 export type Boundary = { a:Point; b:Point };

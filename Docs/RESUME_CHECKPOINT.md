@@ -26,3 +26,8 @@ In progress: original detailed office/workshop/substation/solar racks with insta
 
 ## Available tools / pitfalls
 This cloud chat has GitHub connector tools but no local shell/browser. Read source through GitHub; batch file edits in a Git tree, create commit, then update branch with expected SHA. Run tests/captures through the existing GitHub Actions workflows. Do not issue a duplicate mutation while an approval is pending. Mandatory platform permission prompts cannot be disabled by project instructions.
+
+## Geometry follow-up
+First candidate 66b19d5 failed the new workshop footprint test; roof extended 0.095 tile outside its lot. Fixed in ffe0092. That commit passed all 75 tests, compilation, complete UI/gesture/scenario regression (run 37688174077), and packaged Windows checks (run 37688173824). Its screenshots were reviewed: improved asset detail/catalogue; panel glare in daylight needs correction. Added neighbour-connected fence/gate geometry (including live preview and removal), a shared office-yard reservation, and corrected apron/picnic/parking/lamp placement. Verify latest workflow results before publishing a build.
+
+The current follow-up also adds rounded staff/helmet shapes, detailed van surfaces, reduced panel glare and closer asset captures with a clearly labelled CI software-rendering timing diagnostic. These follow-up changes are not verified until their own workflows pass. Next: inspect new screenshots, resolve any failures/glare, update exact successful build links and remaining gaps here.

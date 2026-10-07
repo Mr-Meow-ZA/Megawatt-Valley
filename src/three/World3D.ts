@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {fenceConnections} from './connections';
 import {SiteOverlay} from './SiteOverlay';
 import type {SiteView} from '../ui/tycoon/TycoonHud';
 import { ValleyActivity } from './ValleyActivity';
@@ -11,7 +12,7 @@ import { ModelLibrary,makeStaff,sharedCube,isSharedMaterial } from './models';
 import { buildLandscape,type Landscape } from './landscape';
 import { frameCamera, HOME, PIXELS_PER_UNIT,anchoredZoom } from './projection';
 
-interface Visual { root:T.Group; model:T.Group; status:HTMLDivElement; kind:string; construction?:T.Group; particles?:T.Points; }
+interface Visual { root:T.Group; model:T.Group; status:HTMLDivElement; kind:string; connections?:number; construction?:T.Group; particles?:T.Points; }
 export class World3D {
   readonly scene=new T.Scene();
   readonly camera=new T.OrthographicCamera(-10,10,10,-10,.1,180);
@@ -30,7 +31,7 @@ export class World3D {
   private roadPath:Vec2[]|null=null;
   private readonly roadPreview=new T.InstancedMesh(new T.PlaneGeometry(.96,.96),new T.MeshBasicMaterial({transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide}),160);
   private readonly dataView:SiteOverlay;
-  private ghostKind:EquipmentKind|null=null;
+  private ghostKey='';
   private readonly landscape:Landscape;
   private readonly activity:ValleyActivity;
   private readonly rain:T.Points;
@@ -101,7 +102,7 @@ export class World3D {
   inspect(x:number,y:number):string|null{
     this.ray(x,y);if(this.raycaster.intersectObject(this.landscape.picnic,true).length)return this.landscape.picnic.userData.description as string;
     const p=this.raycaster.ray.intersectPlane(this.ground,new T.Vector3());
-    if(p&&Math.hypot(p.x-7.35,p.z-5.25)<.65)return this.landscape.picnic.userData.description as string;
+    if(p&&Math.hypot(p.x-this.landscape.picnic.position.x,p.z-this.landscape.picnic.position.z)<.65)return this.landscape.picnic.userData.description as string;
     return null;
   }
   private label(text:string,className:string):HTMLDivElement{
@@ -119,9 +120,9 @@ export class World3D {
     for(const z of [-d/2,d/2]){const mesh=new T.Mesh(new T.BoxGeometry(w,.018,.025),mat);mesh.position.set(0,.06,z);mesh.renderOrder=10;group.add(mesh);}
     for(const x of [-w/2,w/2]){const mesh=new T.Mesh(new T.BoxGeometry(.025,.018,d),mat);mesh.position.set(x,.06,0);mesh.renderOrder=10;group.add(mesh);}
   }
-  private addEquipment(e:PlacedEquipment):Visual{
-    const root=new T.Group(),model=this.models.equipment(e.kind);root.userData.entityId=e.id;root.add(model);this.scene.add(root);
-    const visual={root,model,status:this.label('','equipment-status'),kind:e.kind};this.entities.set(e.id,visual);return visual;
+  private addEquipment(e:PlacedEquipment,connections:number):Visual{
+    const root=new T.Group(),model=this.models.equipment(e.kind,connections);root.userData.entityId=e.id;root.add(model);this.scene.add(root);
+    const visual={root,model,status:this.label('','equipment-status'),kind:e.kind,connections};this.entities.set(e.id,visual);return visual;
   }
   private addWorker(s:StaffMember):Visual{
     const root=makeStaff(s.role);root.userData.entityId=s.id;this.scene.add(root);
@@ -152,8 +153,9 @@ export class World3D {
     const ids=new Set([...snapshot.equipment,...snapshot.staff].map(e=>e.id));
     for(const [id,v]of this.entities)if(!ids.has(id)){this.scene.remove(v.root);this.releaseObject(v.root);v.status.remove();this.entities.delete(id);}
     for(const e of snapshot.equipment){
-      let v=this.entities.get(e.id);if(v&&v.kind!==e.kind){this.scene.remove(v.root);this.releaseObject(v.root);v.status.remove();this.entities.delete(e.id);v=undefined;}
-      v??=this.addEquipment(e);const def=EQUIPMENT[e.kind];v.root.position.set(e.tile.x+(def.footprint.x-1)/2,0,e.tile.y+(def.footprint.y-1)/2);
+      const connections=fenceConnections(e.kind,e.tile,snapshot.equipment);
+      let v=this.entities.get(e.id);if(v&&(v.kind!==e.kind||v.connections!==connections)){this.scene.remove(v.root);this.releaseObject(v.root);v.status.remove();this.entities.delete(e.id);v=undefined;}
+      v??=this.addEquipment(e,connections);const def=EQUIPMENT[e.kind];v.root.position.set(e.tile.x+(def.footprint.x-1)/2,0,e.tile.y+(def.footprint.y-1)/2);
       v.model.scale.y=e.commissioned?1:Math.max(.07,e.constructionProgress);
       if(!e.commissioned&&!v.construction){v.construction=constructionSite(def.footprint.x,def.footprint.y);v.root.add(v.construction);}
       if(e.commissioned&&v.construction){v.root.remove(v.construction);this.releaseObject(v.construction);v.construction=undefined;}
@@ -222,9 +224,10 @@ export class World3D {
     const tile=this.tileAt(this.pointer.x,this.pointer.y);if(!tile)return;
     const def=EQUIPMENT[s.buildMode],plot=this.sim.plotAtTile(tile);
     const invalid=plot?this.sim.canPlace(s.buildMode,plot,tile):'Outside buildable land';
-    if(this.ghostKind!==s.buildMode){
+    const connections=fenceConnections(s.buildMode,tile,s.equipment),ghostKey=s.buildMode+':'+connections;
+    if(this.ghostKey!==ghostKey){
       if(this.ghost){this.scene.remove(this.ghost);this.releaseObject(this.ghost);}
-      this.ghost=this.models.equipment(s.buildMode);this.ghostKind=s.buildMode;
+      this.ghost=this.models.equipment(s.buildMode,connections);this.ghostKey=ghostKey;
       this.ghost.traverse(o=>{if(o instanceof T.Mesh){const ghost=(m:T.Material)=>{const n=m.clone();n.transparent=true;n.opacity=.55;n.depthWrite=false;return n;};o.material=Array.isArray(o.material)?o.material.map(ghost):ghost(o.material);o.castShadow=false;}});
       this.scene.add(this.ghost);
     }

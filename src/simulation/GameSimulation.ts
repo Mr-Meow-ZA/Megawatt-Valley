@@ -1,5 +1,5 @@
 import { roadRoute,roadKey } from './roads';
-import { ROAD_TILES } from '../content/valleyLayout';
+import { ROAD_TILES,OFFICE_YARD,inRect } from '../content/valleyLayout';
 import { CONTRACTS, contractOffer, type ContractId, type ContractProgress, type ContractResult } from '../content/contracts';
 import { parkMetrics, nearbyWorkshop, travelHours, workerCanDo } from './operations';
 import { RESEARCH, type ResearchId, type ResearchProject } from '../content/research';
@@ -277,7 +277,7 @@ export class GameSimulation {
     for (let y=tile.y;y<tile.y+def.footprint.y;y++) for(let x=tile.x;x<tile.x+def.footprint.x;x++) {
       if(isMainRoad(x,y)) return 'Keep the access road clear';
       if(isWater(x,y)||isBank(x,y)) return 'River setback: keep infrastructure on dry land';
-      if(x>=5&&x<=7&&y>=5&&y<=8) return 'Reserved office and parking yard';
+      if(inRect(x,y,OFFICE_YARD)) return 'Reserved office and parking yard';
     }
     for (const other of this.equipment) {
       const odef = EQUIPMENT[other.kind];

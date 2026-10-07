@@ -1,5 +1,6 @@
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DIRECTIONS } from '../content/valleyLayout';
 import type { EquipmentKind } from '../simulation/types';
 declare global { interface Window { __MW_MODELS__?: Record<string,string>; } }
 const industrial = '/assets/sourced/kenney-city-kit-industrial/Models/GLB format/';
@@ -115,7 +116,7 @@ function campusBuilding(kind:'office'|'workshop'):T.Group{
 }
 function solarRack(premium:boolean):T.Group{
   const root=new T.Group();
-  const blue=premium?0x315d78:0x466b87;
+  const blue=premium?0x24495f:0x335c77;
   for(const z of [-.57,0,.57]){
     for(const x of [-.64,.64]){
       box(root,x,.035,z,.15,.07,.23,0xc1bea8);
@@ -127,9 +128,9 @@ function solarRack(premium:boolean):T.Group{
     for(let i=0;i<4;i++){
       const x=-.645+i*.43;
       box(row,x,0,0,.414,.045,.5,premium?0xbdc9c4:0x8faaa9);
-      box(row,x,.026,0,.38,.012,.466,blue);
-      for(let cell=0;cell<3;cell++)box(row,x-.127+cell*.127,.034,0,.006,.003,.46,0x7da0b2);
-      for(let cell=0;cell<5;cell++)box(row,x,.034,-.185+cell*.093,.376,.003,.005,0x7da0b2);
+      box(row,x,.032,0,.38,.016,.466,blue);
+      for(let cell=0;cell<3;cell++)box(row,x-.127+cell*.127,.045,0,.006,.003,.46,0x7da0b2);
+      for(let cell=0;cell<5;cell++)box(row,x,.045,-.185+cell*.093,.376,.003,.005,0x7da0b2);
     }
   }
   box(root,.83,.15,.75,.17,.24,.12,0xb5c3b5);
@@ -137,7 +138,7 @@ function solarRack(premium:boolean):T.Group{
   result.traverse(o=>{if(o instanceof T.Mesh){
     const convert=(m:T.Material)=>{const mat=m as T.MeshStandardMaterial;
       if(mat.color.getHex()!==blue&&mat.color.getHex()!==0x7da0b2)return m;
-      const copy=mat.clone();copy.roughness=.43;copy.userData.baseColor=copy.color.clone();return copy;};
+      const copy=mat.clone();copy.roughness=.88;copy.userData.baseColor=copy.color.clone();return copy;};
     o.material=Array.isArray(o.material)?o.material.map(convert):convert(o.material);
   }});
   return result;
@@ -208,15 +209,21 @@ export class ModelLibrary {
     inner.position.set(-(bounds.min.x+size.x/2)*inner.scale.x,-bounds.min.y*inner.scale.y,-(bounds.min.z+size.z/2)*inner.scale.z);
     root.add(inner);return root;
   }
-  equipment(kind:EquipmentKind):T.Group {
+  equipment(kind:EquipmentKind,connections=5):T.Group {
     if(kind==='office'||kind==='workshop')return campusBuilding(kind);
     if(kind==='tree')return this.model('oak',1.2,undefined,1.9);
     if(kind==='bargain_pv'||kind==='premium_pv')return solarRack(kind==='premium_pv');
     if(kind==='inverter'||kind==='substation')return gridEquipment(kind==='substation');
     const root=new T.Group();
     if(kind==='road'){box(root,0,.025,0,1,.05,1,0xb8ab88);}
-    else if(kind==='fence')fence(root,-.5,0,.5,0);
-    else if(kind==='gate'){fence(root,-.5,0,-.5,.55);fence(root,.5,0,.5,.55);box(root,0,.34,.53,1,.025,.025,0xd2c493);}
+    else if(kind==='fence'){
+      for(const d of DIRECTIONS)if(connections&d.bit)fence(root,0,0,d.x*.5,d.y*.5);
+    }
+    else if(kind==='gate'){
+      fence(root,-.5,0,-.32,.38,.42);fence(root,.5,0,.32,.38,.42);
+      for(const x of [-.5,.5])box(root,x,.445,0,.065,.035,.065,0xdcc69b);
+      if(!(connections&5))root.rotation.y=Math.PI/2;
+    }
     else if(kind==='sign'){
       box(root,0,.24,0,.035,.48,.035,0x7a6650);box(root,0,.43,0,.42,.22,.045,0xead7a7);
       box(root,0,.44,.026,.28,.024,.008,0x617663);box(root,0,.38,.026,.2,.018,.008,0x617663);
@@ -227,10 +234,17 @@ export class ModelLibrary {
 export function makeStaff(role:string):T.Group {
   const root=new T.Group(),body=new T.Group();root.add(body);body.name='body';
   const color=role==='cleaner'?0x51a6aa:role==='engineer'?0x738aaf:role==='manager'?0x799267:0xe5a146;
-  box(body,0,.27,0,.16,.2,.11,color);box(body,0,.3,.061,.17,.025,.012,0xe6dfb5);
-  box(body,0,.425,0,.125,.12,.12,0xd4a67b);
-  box(body,0,.494,0,.15,.055,.15,role==='engineer'?0xebeee0:0xf3d068);
-  box(body,0,.474,.043,.17,.018,.16,0xf1d177);
+  const torso=new T.Mesh(new T.CapsuleGeometry(.065,.085,3,8),material(color));
+  torso.position.y=.275;torso.scale.set(1.18,1,.88);torso.castShadow=true;body.add(torso);
+  box(body,0,.3,.059,.16,.023,.014,0xe6dfb5);
+  for(const x of [-.045,.045])box(body,x,.32,.06,.018,.11,.014,0xe6dfb5);
+  const head=new T.Mesh(new T.SphereGeometry(1,10,7),material(0xd4a67b));
+  head.position.y=.425;head.scale.set(.067,.073,.061);head.castShadow=true;body.add(head);
+  const helmet=new T.Mesh(new T.SphereGeometry(1,10,5),material(role==='engineer'?0xebeee0:0xf3d068));
+  helmet.position.y=.488;helmet.scale.set(.081,.043,.08);helmet.castShadow=true;body.add(helmet);
+  const brim=new T.Mesh(new T.CylinderGeometry(.088,.088,.016,12),material(0xe8bf5e));
+  brim.position.set(0,.475,.011);brim.castShadow=true;body.add(brim);
+  box(body,0,.524,0,.022,.025,.105,0xf5d777);
   box(body,.035,.438,.062,.023,.017,.009,0x344c4a);box(body,-.035,.438,.062,.023,.017,.009,0x344c4a);
   for(const side of [-1,1]){
     const leg=new T.Group();leg.name=side===-1?'legL':'legR';leg.position.set(side*.047,.18,0);body.add(leg);
@@ -246,8 +260,19 @@ export function makeStaff(role:string):T.Group {
 export function makeVan():T.Group{
   const root=new T.Group();box(root,0,.26,0,.47,.38,.86,0xe6e5cf);
   box(root,0,.47,.22,.45,.11,.4,0xd9dfcc);box(root,0,.42,.44,.37,.17,.016,0x4e797c);
-  box(root,.245,.29,0,.012,.14,.43,0x74a195);
-  for(const x of [-.25,.25])for(const z of [-.28,.28]){const wheel=new T.Mesh(new T.CylinderGeometry(.105,.105,.05,10),material(0x384c46));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.13,z);root.add(wheel);}
+  for(const x of [-.24,.24]){
+    box(root,x,.29,-.12,.015,.13,.46,0x74a195);
+    box(root,x,.43,.24,.016,.16,.25,0x608b8b);
+    box(root,x,.295,.22,.02,.022,.085,0x526e63);
+    box(root,x,.315,-.2,.02,.023,.07,0x526e63);
+    box(root,x*1.13,.38,.34,.055,.065,.07,0x6c8478);
+  }
+  box(root,0,.14,.435,.43,.065,.045,0x667d70);
+  box(root,0,.16,-.435,.43,.065,.035,0x667d70);
+  box(root,0,.23,.46,.13,.04,.012,0xd9d8b8);
+  for(const z of [-.33,-.13,.07])box(root,0,.474,z,.37,.035,.026,0x839889);
+  for(const x of [-.17,.17])box(root,x,.5,-.13,.02,.035,.49,0xc0c9b6);
+  for(const x of [-.25,.25])for(const z of [-.28,.28]){const wheel=new T.Mesh(new T.CylinderGeometry(.105,.105,.05,10),material(0x384c46));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.13,z);wheel.castShadow=true;root.add(wheel);}
   for(const x of [-.16,.16])box(root,x,.26,.441,.095,.055,.015,0xffe3a3);
   return root;
 }
