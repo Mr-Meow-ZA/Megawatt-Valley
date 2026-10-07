@@ -1,0 +1,25 @@
+name: Review user inspiration media
+on:
+  push:
+    branches: [codex/inspiration-review]
+    paths: ['scripts/review-inspiration.py', '.github/workflows/inspiration-review.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image review tools
+        run: |
+          python -m pip install Pillow==11.3.0
+          if ! command -v ffmpeg >/dev/null; then sudo apt-get update && sudo apt-get install -y ffmpeg; fi
+      - name: Extract images and video contact sheets from issue 12
+        run: python scripts/review-inspiration.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inspiration-12-review
+          path: inspiration-review/*.jpg
+          retention-days: 7
