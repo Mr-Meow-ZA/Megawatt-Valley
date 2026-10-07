@@ -13,9 +13,9 @@ Read [DESKTOP_QUALITY_TARGET.md](DESKTOP_QUALITY_TARGET.md). User authorises aut
 - Baseline passed 68 tests, production build, UI/gesture regression and Windows save/resume checks. Those results do not validate subsequent changes.
 
 ## Current session
-Locked visual target is being saved with this checkpoint. Earlier write attempts were interrupted before a branch update; do not assume their draft documents exist. No runtime edits committed in this milestone.
+Locked visual target is being saved with this checkpoint. Earlier write attempts were interrupted before a branch update; do not assume their draft documents exist. Runtime changes in the next commit are pending validation.
 
-Next implementation: detailed original office/workshop/grid assets, coherent site approaches and aligned boundaries, plus a horizontal build catalogue matching the references. Current models use simple community buildings; build menu is a tall left drawer. Keep road gameplay and all existing scenario/save functionality.
+In progress: original detailed office/workshop/substation/solar racks with instanced geometry; horizontal construction catalogue, search, comparison note and laptop layout; correct office/substation inspector thumbnails. New geometry-footprint and independent-soiling tests plus catalogue layout regression. Existing road and scenario/save logic retained. Next: run both release workflows, inspect runtime screenshots and fix failures; then review site approaches/alignment and staff detail. No new build is verified yet.
 
 ## Resume procedure
 1. Inspect branch HEAD and any uncommitted work; read this file and current target.

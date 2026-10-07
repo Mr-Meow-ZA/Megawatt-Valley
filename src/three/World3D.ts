@@ -5,7 +5,7 @@ import { ValleyActivity } from './ValleyActivity';
 import { constructionSite,workParticles,updateWorkParticles } from './worksite';
 import { GameSimulation } from '../simulation/GameSimulation';
 import type { GameSnapshot,EquipmentKind,PlacedEquipment,StaffMember,Vec2 } from '../simulation/types';
-import { EQUIPMENT, BUILD_MENU_ORDER } from '../content/equipment';
+import { EQUIPMENT } from '../content/equipment';
 import { SITE_ICONS } from '../game/siteArt';
 import { ModelLibrary,makeStaff,sharedCube,isSharedMaterial } from './models';
 import { buildLandscape,type Landscape } from './landscape';
@@ -267,7 +267,7 @@ export function renderCatalogue(renderer:T.WebGLRenderer,models:ModelLibrary):vo
   scene.add(new T.HemisphereLight(0xffffff,0x7e8e73,2.2));
   const light=new T.DirectionalLight(0xffe8c5,2.8);light.position.set(-3,6,4);scene.add(light);
   camera.position.set(4,3.27,4);camera.lookAt(0,.5,0);renderer.setSize(240,200,false);renderer.setClearColor(0xabc58b,0);
-  for(const kind of BUILD_MENU_ORDER){
+  for(const kind of Object.keys(EQUIPMENT) as EquipmentKind[]){
     const model=models.equipment(kind);scene.add(model);renderer.render(scene,camera);SITE_ICONS[kind]=renderer.domElement.toDataURL('image/png');scene.remove(model);
   }
 }

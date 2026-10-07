@@ -37,6 +37,10 @@ assert.equal(await page.locator('.management-dock,.utility-menu,.topbar').count(
 await shot('tycoon-opening',true);
 await page.keyboard.press('b');
 assert.equal(await q('build').count(),3);
+assert.ok(await page.locator('.build-dock').evaluate(el=>{
+ const r=el.getBoundingClientRect();return r.width>innerWidth*.85&&r.top>innerHeight*.55;
+}),'Construction catalogue is a horizontal shelf below the valley');
+
 assert.ok(await q('build','bargain_pv').locator('img').evaluate(i=>i.complete&&i.naturalWidth>0&&i.width>=100));
 await page.locator('[data-field="search"]').fill('Premium');assert.equal(await q('build').count(),1);
 await page.locator('[data-field="search"]').press('Space');assert.equal((await saved()).speed,0);
@@ -119,6 +123,16 @@ await page.locator('.top-tools [data-action="menu"]').click();const download=pag
 await page.locator('.pause-menu [data-action="menu"]').click();
 await page.keyboard.press('h');await page.keyboard.press('b');await q('category','power').click();
 await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.left-panel').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.tool-rail').getBoundingClientRect().top));await shot('tycoon-laptop-build',true);
+for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
+ await page.setViewportSize(viewport);
+ const layout=await page.locator('.build-dock').evaluate(el=>{
+  const r=el.getBoundingClientRect(),rail=document.querySelector('.tool-rail').getBoundingClientRect();
+  const controls=[...el.querySelectorAll('.build-head button,.build-head input')].map(c=>c.getBoundingClientRect());
+  return {inBounds:r.left>=0&&r.right<=innerWidth&&r.bottom<rail.top,controls:controls.every(c=>c.left>=r.left&&c.right<=r.right&&c.top>=r.top&&c.bottom<=r.bottom)};
+ });
+ assert.ok(layout.inBounds&&layout.controls,'Catalogue and controls fit '+viewport.width+'×'+viewport.height);
+ await shot('campus-catalogue-'+viewport.width,true);
+}
 const info=await page.evaluate(()=>window.megawattRenderInfo());assert.equal(info.orthographic,true);assert.equal(info.models,8);assert.ok(info.drawCalls<400);assert.ok(info.triangles>10000);
 assert.deepEqual(errors,[]);console.log('BROWSER_CHECK_PASSED: fresh desktop UX, connected road drag/cancel/atomic rejection, repeated placement, new company, save/reload/import/export, actual scenario fixtures, crew training and assignment, contracts, research, operations, laptop reachability, no runtime/network errors');
 await browser.close();

@@ -4,3 +4,43 @@
 @media(max-width:1100px){.resource-strip{left:15px;top:15px}.resource-strip button{min-width:145px;padding:9px 12px}.resource-strip strong{font-size:20px}.tool-rail{left:15px;bottom:15px}.tool-rail button{padding:12px 10px;gap:6px}.tool-rail svg{width:19px;height:19px}.time-control{right:15px;bottom:15px;gap:10px}.left-panel{left:15px;width:305px;top:95px;bottom:94px}.inspector{right:15px;width:290px;bottom:94px}.goal-card{right:15px;width:270px}.tool-help{max-width:calc(100vw - 360px);bottom:90px}.upgrade-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-height:760px){.panel-head{padding:14px 17px}.left-panel{top:91px;bottom:92px}.panel-scroll{padding:12px 15px 17px}.catalogue-item{min-height:143px!important}.catalogue-item img{height:66px}.company-sheet{max-height:calc(100vh - 40px)}.sheet-scroll{padding-top:4px}.summary-grid article{padding:12px}.goal-card{top:77px}.tool-help{bottom:91px}}
 @media(prefers-reduced-motion:reduce){.tycoon-ui *{transition:none!important}}
+
+/* Construction is a visual shelf beneath the valley, independent of staff drawers. */
+.left-panel.build-dock{left:22px;right:22px;top:auto;bottom:98px;width:auto;height:224px;border-radius:15px;background:#fffdf5f7}
+.build-dock .build-head{padding:10px 14px;gap:18px;min-height:55px}
+.build-head .build-title{min-width:85px}
+.build-head .build-title small{font-size:8px;letter-spacing:1px;margin-bottom:3px}
+.build-head h2{font-size:20px}
+.build-head .category-tabs{margin:0;gap:6px}
+.build-head .category-tabs button{flex:none;padding:10px 18px;font-size:12px}
+.build-head .search-box{margin:0 0 0 auto;width:210px}
+.build-head .search-box input{padding:9px 12px}
+.build-dock .panel-scroll{display:flex;gap:20px;padding:9px 14px 12px;overflow:hidden;min-height:0;flex:1}
+.build-dock .catalogue-grid{display:flex;align-items:stretch;gap:9px;flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;padding:2px 2px 7px;scrollbar-width:thin;scrollbar-color:#a2b58f transparent}
+.tycoon-ui .build-dock .catalogue-item{flex:0 0 145px;min-height:0!important;padding:2px 8px 6px;background:linear-gradient(#eaf0df,#faf9ee);border-radius:10px}
+.build-dock .catalogue-item img{height:73px;width:116px;margin-bottom:0}
+.build-dock .catalogue-item b{font-size:12px}
+.build-dock .catalogue-item>span{margin:3px 0;font-size:14px}
+.build-dock .catalogue-item>small{font-size:10px}
+.build-dock .catalogue-note{flex:0 0 278px;margin:0;padding:10px 14px;overflow:auto;background:#eaf0df;border-left:3px solid #8fa572}
+.build-dock .catalogue-note h3{font-size:15px;margin:5px 0}
+.build-dock .catalogue-note p{font-size:12px;line-height:1.45;margin:5px 0}
+.build-dock .catalogue-note small{font-size:11px;line-height:1.4;display:block}
+.catalogue-empty{align-self:center;padding:12px;color:var(--muted);max-width:350px;font-size:13px}
+.building .tool-help{bottom:334px;padding:8px 16px;max-width:680px}
+.building .toast{bottom:409px}
+@media(max-width:1100px){
+ .left-panel.build-dock{left:15px;right:15px;bottom:94px}
+ .build-dock .build-head{gap:10px}
+ .build-head .category-tabs button{padding:9px 12px}
+ .build-head .search-box{width:160px}
+ .build-dock .catalogue-note{flex-basis:225px}
+ .build-dock .panel-scroll{gap:12px}
+}
+@media(max-height:760px){
+ .left-panel.build-dock{height:209px;bottom:92px}
+ .build-dock .build-head{padding:8px 12px;min-height:49px}
+ .build-dock .catalogue-item img{height:65px}
+ .building .tool-help{bottom:311px}
+ .building .toast{bottom:383px}
+}

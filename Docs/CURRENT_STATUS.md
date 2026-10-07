@@ -1,5 +1,10 @@
 # Megawatt Valley — Current Status
 
+## Desktop update — 7 October 2026
+
+Read the [locked desktop quality target](DESKTOP_QUALITY_TARGET.md) and [resume checkpoint](RESUME_CHECKPOINT.md) first. The checkpoint records active work, exact validation and next steps for `codex/3d-isometric`. The earlier browser candidate below is retained as history. Its stack and visual directives do not override the desktop target.
+
+
 ## Current playable candidate — 3 October 2026
 
 Megawatt Valley is an autonomous **Phaser / TypeScript solar park simulator**.

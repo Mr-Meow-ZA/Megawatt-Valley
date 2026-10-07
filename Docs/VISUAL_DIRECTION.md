@@ -1,5 +1,8 @@
 # Megawatt Valley — Visual Direction v2.0
 
+> **Historical specification:** superseded for the independent desktop build by [DESKTOP_QUALITY_TARGET.md](DESKTOP_QUALITY_TARGET.md), approved 7 October 2026. Detailed stylised 3D and the user's issue #12 references now govern visual and interface work. The earlier pixel-art and browser-era constraints below are retained as dated history.
+
+
 ## Status
 
 **APPROVED PRIMARY VISUAL DIRECTION — 29 September 2026**
