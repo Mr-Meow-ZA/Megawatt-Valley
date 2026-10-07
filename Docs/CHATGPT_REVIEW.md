@@ -137,3 +137,16 @@ No wind, BESS, Scenario 2 implementation or additional feature expansion until t
 
 ### Current project question
 > Which candidate actually feels better to play: Cursor PR #8's decluttered steam-finish, or Codex PR #10's connected-layout/hardened release?
+
+
+---
+
+## Product-owner decision — 2026-10-07: 3D retained, UI/UX reset and concept v1 approved
+
+Rapha playtested the latest true-3D build. The 3D world is approved as the current foundation, while remaining the minimum acceptable visual baseline rather than the finished quality target.
+
+The existing UI/UX direction is **rejected as a design baseline**. Do not incrementally reskin or polish it. Treat it as temporary functional scaffolding and rebuild player-facing interaction from a clean-sheet design so old layout and information-architecture assumptions do not contaminate the new direction.
+
+The first clean-sheet UI/UX concept has been explicitly approved. It establishes four anchor surfaces: main gameplay HUD, solar build/compare experience, technician profile and research/technology tree. See `Docs/VISUAL_QUALITY_AND_WORLD_CHARACTER.md`, especially section 15, and the approved reference image at `Docs/References/megawatt-valley-ui-ux-approved-concept-v1.jpg` when available.
+
+**Instruction for Codex:** before substantial UI/UX implementation, read the visual-quality document and approved mockup. Use them as the new product direction. Do not use the current UI as the visual/layout reference. Implementation may adapt the mockup to actual game data and constraints, but should preserve its hierarchy, contextual depth, character, comparison quality and premium management-game feel.
