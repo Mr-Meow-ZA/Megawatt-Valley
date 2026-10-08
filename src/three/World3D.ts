@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {fenceConnections} from './connections';
 import {SiteOverlay} from './SiteOverlay';
-import type {SiteView} from '../ui/tycoon/TycoonHud';
+import type {SiteView} from '../ui/studio/data';
 import { ValleyActivity } from './ValleyActivity';
 import { constructionSite,workParticles,updateWorkParticles } from './worksite';
 import { GameSimulation } from '../simulation/GameSimulation';

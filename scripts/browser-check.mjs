@@ -11,47 +11,46 @@ page.on('pageerror',e=>errors.push(e.message));
 page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 page.on('request',r=>{if(/^https?:/.test(r.url()))errors.push('Offline network request: '+r.url());});
 await page.goto(pathToFileURL(path.resolve('playable/PLAY-MEGAWATT-VALLEY.html')).href);
-const q=(action,id)=>page.locator('[data-action="'+action+'"]'+(id?'[data-id="'+id+'"]':''));
+const q=(action,id)=>page.locator((action==='page'?'.mv-navigation ':'')+'[data-action="'+action+'"]'+(id?'[data-id="'+id+'"]':''));
 const speed=async n=>q('speed',String(n)).click();
-await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});
+await page.locator('[data-ui="studio"]').waitFor({timeout:90000});
 const stableControl=await q('speed','0').elementHandle();
 await page.waitForTimeout(700);
 assert.ok(await stableControl.evaluate(el=>el.isConnected),'Time updates preserve live controls');
 await speed(0);
 async function saved(){await page.keyboard.press('Control+s');return page.evaluate(()=>JSON.parse(localStorage.getItem('megawatt-valley-solar-v1')).state);}
 async function shot(name,log=false){await page.screenshot({path:'browser-evidence/'+name+'.png'});if(log)console.log(name.toUpperCase().replaceAll('-','_')+'_BASE64:'+(await page.screenshot({type:'jpeg',quality:65})).toString('base64'));}
-async function closePanels(){if(await page.locator('.sheet-backdrop:not([hidden])').count())await page.keyboard.press('Escape');if(await page.locator('.menu-backdrop:not([hidden])').count())await page.locator('.pause-menu [data-action="menu"]').click();}
+async function closePanels(){if(await page.locator('.mv-pause').isVisible())await page.locator('.mv-pause [data-action="menu"]').click();if(await page.locator('.mv-workspace:not([hidden]),.mv-inspector:not([hidden])').count())await page.keyboard.press('Escape');}
 async function importFixture(name){
  await closePanels();
- await page.locator('.top-tools [data-action="menu"]').click();
+ await page.locator('.mv-top [data-action="menu"]').click();
  const chooser=page.waitForEvent('filechooser');await q('import').click();
  await(await chooser).setFiles('browser-fixtures/'+name+'.json');
- await page.waitForFunction(()=>document.querySelector('[data-slot="menu"]').hidden);
+ await page.waitForFunction(()=>!document.querySelector('.mv-pause'));
  if(await q('continue').isVisible())await q('continue').click();
 }
-async function company(tab){await closePanels();await q('panel','company').click();await q('tab',tab).click();}
+async function company(tab){await closePanels();if(tab==='policies')await q('page','operations').click();else{await q('page','company').click();await q('company-tab',tab==='overview'?'finance':tab).click();}}
 const project=(x,y,z=0)=>({x:720+((x-y)*50-390)*.62,y:450+((x+y)*25-z-650)*.62});
 const clickTile=async(x,y,z=0)=>{const p=project(x,y,z);await page.mouse.click(p.x,p.y);};
 const start=await saved();assert.equal(start.equipment.length,3);assert.ok(Math.abs(start.cash-50000)<20);
-assert.equal(await page.locator('.management-dock,.utility-menu,.topbar').count(),0,'Legacy interface is absent');
-await shot('tycoon-opening',true);
+assert.equal(await page.locator('.tycoon-ui,.management-dock,.utility-menu,.topbar,.build-dock').count(),0,'Rejected interfaces are absent');
+await shot('studio-opening',true);
 await page.keyboard.press('b');
-assert.equal(await q('build').count(),3);
-assert.ok(await page.locator('.build-dock').evaluate(el=>{
- const r=el.getBoundingClientRect();return r.width>innerWidth*.85&&r.top>innerHeight*.55;
-}),'Construction catalogue is a horizontal shelf below the valley');
-
-assert.ok(await q('build','bargain_pv').locator('img').evaluate(i=>i.complete&&i.naturalWidth>0&&i.width>=100));
-await page.locator('[data-field="search"]').fill('Premium');assert.equal(await q('build').count(),1);
-await page.locator('[data-field="search"]').press('Space');assert.equal((await saved()).speed,0);
-await page.locator('[data-field="search"]').fill('');
-await q('category','landscape').click();assert.match(await page.locator('.catalogue-grid').textContent(),/Decorative/);
-await q('category','service').click();assert.equal(await q('build','workshop').isDisabled(),true);
-await q('build','road').click();await shot('tycoon-service-view',true);
+assert.equal(await q('product').count(),2);
+assert.equal((await saved()).buildMode,null,'Browsing does not enter placement');
+assert.ok(await q('product','bargain_pv').locator('img').evaluate(i=>i.complete&&i.naturalWidth>0&&i.width>=100));
+await q('product','premium_pv').click();await q('compare').click();
+assert.match(await page.locator('.mv-compare').textContent(),/75% lower/);
+await shot('studio-solar-comparison',true);
+await q('compare').click();
+await q('category','landscape').click();assert.match(await page.locator('.mv-product-detail').textContent(),/Decorative/);
+await q('category','facilities').click();await q('product','workshop').click();assert.equal(await q('place','workshop').isDisabled(),true);
+await q('product','road').click();await q('place','road').click();
+assert.equal(await page.locator('.mv-workspace').isVisible(),false,'Placement releases the world');await shot('studio-service-view',true);
 const a=project(10,4),b=project(10,8);
 await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:8});
 await page.waitForTimeout(200);assert.match(await page.locator('.placement-label').textContent(),/4 road tiles.*400/);
-await shot('tycoon-road-drag',true);await page.mouse.up();
+await shot('studio-road-drag',true);await page.mouse.up();
 let state=await saved();assert.equal(state.equipment.filter(e=>e.kind==='road').length,4);assert.equal(state.cash,start.cash-400);
 assert.equal(state.buildMode,'road');
 // Cancel an in-progress road gesture, including while left capture is active.
@@ -63,40 +62,40 @@ const cameraBefore=await page.evaluate(()=>window.megawattRenderInfo().view.targ
 await page.mouse.move(600,500);await page.mouse.down({button:'middle'});await page.mouse.move(660,530,{steps:5});await page.mouse.up({button:'middle'});
 assert.notDeepEqual(await page.evaluate(()=>window.megawattRenderInfo().view.target),cameraBefore);
 await page.keyboard.press('h');
-await page.keyboard.press('b');await q('category','service').click();await q('build','road').click();
+await page.keyboard.press('b');await q('category','facilities').click();await q('product','road').click();await q('place','road').click();
 const occupied=project(12,7),valid=project(10,7);
 await page.mouse.move(valid.x,valid.y);await page.mouse.down();await page.mouse.move(occupied.x,occupied.y,{steps:8});await page.mouse.up();
 assert.equal((await saved()).cash,state.cash,'Invalid complete stroke spends nothing');
-await page.mouse.click(700,500,{button:'right'});await page.keyboard.press('b');await q('category','power').click();
-await q('build','bargain_pv').click();await clickTile(10,12);
+await page.mouse.click(700,500,{button:'right'});await page.keyboard.press('b');await q('category','solar').click();
+await q('product','bargain_pv').click();await q('place','bargain_pv').click();await clickTile(10,12);
 state=await saved();assert.equal(state.equipment.filter(e=>e.kind.includes('pv')).length,2);assert.equal(state.cash,start.cash-8400);assert.equal(state.buildMode,'bargain_pv');
 await page.keyboard.press('Escape');
-await page.reload();await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});
+await page.reload();await page.locator('[data-ui="studio"]').waitFor({timeout:90000});
 assert.equal((await saved()).cash,state.cash);assert.equal((await saved()).speed,0);
-await page.keyboard.press('t');await q('hire','cleaner').click();assert.equal((await saved()).staff.length,2);
-await shot('tycoon-staff');
-await page.locator('.top-tools [data-action="menu"]').click();await q('new').click();await q('confirm-yes').click();
+await page.keyboard.press('t');await q('staff-tab','hire').first().click();await q('hire','cleaner').click();assert.equal((await saved()).staff.length,2);
+await shot('studio-staff');
+await page.locator('.mv-top [data-action="menu"]').click();await q('new').click();await q('confirm-yes').click();
 await speed(0);assert.equal((await saved()).equipment.length,3);assert.equal((await saved()).staff.length,1);
 await importFixture('storm');await q('choice','prepare').click();assert.equal((await saved()).hailPrepared,true);
-await importFixture('one-star');const won=await saved();assert.ok(won.stars>=1);await shot('tycoon-established-valley',true);
-await page.keyboard.press('t');await q('locate',won.staff[0].id).click();
-assert.match(await page.locator('.inspector').textContent(),new RegExp(won.staff[0].name));
+await importFixture('one-star');const won=await saved();assert.ok(won.stars>=1);await shot('studio-established-valley',true);
+await page.keyboard.press('t');await q('person',won.staff[0].id).click();
+assert.match(await page.locator('.mv-profile').textContent(),/Energy/);assert.ok(await page.locator('.mv-character>img').evaluate(i=>i.complete&&i.naturalWidth>0));await shot('studio-technician',true);await q('staff-tab','development').click();
 await q('train',won.staff[0].id).click();let trained=await saved();assert.equal(trained.cash,won.cash-800);assert.equal(trained.staff[0].trainingHoursLeft,4);
-await page.locator('[data-field="zone"]').selectOption('site_a');await page.locator('[data-field="duty"]').selectOption('repair');
-assert.equal((await saved()).staff[0].preference,'repair');await shot('tycoon-worker',true);
-await speed(4);
+await q('staff-tab','assignment').click();await page.locator('[data-field="zone"]').selectOption('site_a');await page.locator('[data-field="duty"]').selectOption('repair');
+assert.equal((await saved()).staff[0].preference,'repair');await shot('studio-worker',true);
+await q('staff-tab','development').click();await speed(4);
 await page.waitForFunction(target=>parseFloat(document.querySelector('[data-k="worker-skill"]')?.textContent??'0')>=target,Number((won.staff[0].skill+1).toFixed(1)),{timeout:180000});
 await speed(0);const complete=await saved();assert.ok(complete.staff[0].skill>=won.staff[0].skill+1);
 assert.ok((complete.day-trained.day)*24+complete.hour-trained.hour>=4-1/60);
-await page.setViewportSize({width:1024,height:768});await page.locator('[data-field="duty"]').scrollIntoViewIfNeeded();
-assert.ok(await page.locator('.inspector').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.time-control').getBoundingClientRect().top));
-await shot('tycoon-laptop-worker');await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');
+await q('staff-tab','assignment').click();await page.setViewportSize({width:1024,height:768});await page.locator('[data-field="duty"]').scrollIntoViewIfNeeded();
+assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-navigation').getBoundingClientRect().top));
+await shot('studio-laptop-worker');await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');
 await company('contracts');await q('contract','school').click();assert.equal((await saved()).contract.id,'school');
-await shot('tycoon-contracts');await page.reload();await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});assert.equal((await saved()).contract.id,'school');
+await shot('studio-contracts');await page.reload();await page.locator('[data-ui="studio"]').waitFor({timeout:90000});assert.equal((await saved()).contract.id,'school');
 await company('contracts');await q('cancel-contract').click();
-assert.ok(await page.locator('.decision-backdrop').evaluate(el=>el.contains(document.activeElement)),'Confirmation receives focus above Company');
+assert.ok(await page.locator('.mv-modal-layer').evaluate(el=>el.contains(document.activeElement)),'Confirmation receives focus above Company');
 await page.keyboard.press('Shift+Tab');
-assert.ok(await page.locator('.decision-backdrop').evaluate(el=>el.contains(document.activeElement)),'Keyboard focus remains inside the top dialog');
+assert.ok(await page.locator('.mv-modal-layer').evaluate(el=>el.contains(document.activeElement)),'Keyboard focus remains inside the top dialog');
 await q('confirm-yes').click();assert.equal((await saved()).contract,null);
 const ops=JSON.parse(await readFile('browser-fixtures/one-star.json','utf8'));
 ops.state.completionAcknowledged=true;ops.state.speed=0;ops.state.activeEvent=null;ops.state.workOrders=[];
@@ -106,33 +105,33 @@ await writeFile('browser-fixtures/operations.json',JSON.stringify(ops));await im
 await page.locator('[data-field="cleaning"]').selectOption('0.2');assert.equal((await saved()).cleaningThreshold,.2);
 await q('clean-all').click();const queue=await saved();assert.ok(queue.workOrders.some(o=>o.kind==='clean'&&o.manual));
 await q('cancel-job').first().click();assert.equal((await saved()).workOrders.filter(o=>o.manual).length,queue.workOrders.filter(o=>o.manual).length-1);
-const money=(await saved()).cash;await q('service-all').click();assert.equal((await saved()).cash,money-450);await shot('tycoon-operations',true);
+const money=(await saved()).cash;await q('service-all').click();assert.equal((await saved()).cash,money-450);await shot('studio-operations',true);
 const research=JSON.parse(await readFile('browser-fixtures/one-star.json','utf8'));research.state.researched=[];research.state.activeResearch=null;research.state.completionAcknowledged=true;
 await writeFile('browser-fixtures/research-offers.json',JSON.stringify(research));await importFixture('research-offers');await page.keyboard.press('u');
-assert.equal(await page.locator('[data-research]').count(),9);await shot('tycoon-company-upgrades',true);
+assert.equal(await page.locator('[data-research]').count(),9);assert.equal(await page.locator('.mv-connector').count(),6);await shot('studio-company-upgrades',true);
 await q('research','precision_wiring').click();const purchased=await saved();assert.equal(purchased.activeResearch.id,'precision_wiring');assert.equal(purchased.activeResearch.progress,0);
-await page.setViewportSize({width:1024,height:768});await page.locator('[data-research="storm_hardening"]').scrollIntoViewIfNeeded();await shot('tycoon-laptop-upgrades');
+await page.setViewportSize({width:1024,height:768});await page.locator('[data-research="storm_hardening"]').scrollIntoViewIfNeeded();await shot('studio-laptop-upgrades');
 await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');purchased.activeResearch.progress=.999;purchased.speed=0;
 await writeFile('browser-fixtures/research.json',JSON.stringify({version:1,state:purchased}));await importFixture('research');await speed(4);await page.waitForTimeout(1500);await speed(0);
 assert.ok((await saved()).researched.includes('precision_wiring'));
 await importFixture('fault');const fault=(await saved()).equipment.find(e=>e.faulted);
-await page.locator('.alert-chip [data-action="locate"]').click();assert.equal((await saved()).selectedId,fault.id);
-await q('repair',fault.id).click();assert.ok((await saved()).staff.some(m=>m.task.type==='travel'));await shot('tycoon-equipment-inspector',true);
+await page.locator('.mv-alerts [data-action="locate"]').click();assert.equal((await saved()).selectedId,fault.id);
+await q('repair',fault.id).click();assert.ok((await saved()).staff.some(m=>m.task.type==='travel'));await shot('studio-equipment-inspector',true);
 await page.keyboard.press('Escape');
-await page.locator('.top-tools [data-action="menu"]').click();const download=page.waitForEvent('download');await q('export').click();assert.match((await download).suggestedFilename(),/company.json/);
-await page.locator('.pause-menu [data-action="menu"]').click();
-await page.keyboard.press('h');await page.keyboard.press('b');await q('category','power').click();
-await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.left-panel').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.tool-rail').getBoundingClientRect().top));await shot('tycoon-laptop-build',true);
+await page.locator('.mv-top [data-action="menu"]').click();const download=page.waitForEvent('download');await q('export').click();assert.match((await download).suggestedFilename(),/company.json/);
+await page.locator('.mv-pause [data-action="menu"]').click();
+await page.keyboard.press('h');await page.keyboard.press('b');await q('category','solar').click();
+await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-navigation').getBoundingClientRect().top));await shot('studio-laptop-build',true);
 for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
  await page.setViewportSize(viewport);
- const layout=await page.locator('.build-dock').evaluate(el=>{
-  const r=el.getBoundingClientRect(),rail=document.querySelector('.tool-rail').getBoundingClientRect();
-  const controls=[...el.querySelectorAll('.build-head button,.build-head input')].map(c=>c.getBoundingClientRect());
+ const layout=await page.locator('.mv-workspace').evaluate(el=>{
+  const r=el.getBoundingClientRect(),rail=document.querySelector('.mv-navigation').getBoundingClientRect();
+  const controls=[...el.querySelectorAll('.mv-heading button,.mv-category button')].map(c=>c.getBoundingClientRect());
   return {inBounds:r.left>=0&&r.right<=innerWidth&&r.bottom<rail.top,controls:controls.every(c=>c.left>=r.left&&c.right<=r.right&&c.top>=r.top&&c.bottom<=r.bottom)};
  });
- assert.ok(layout.inBounds&&layout.controls,'Catalogue and controls fit '+viewport.width+'×'+viewport.height);
+ assert.ok(layout.inBounds&&layout.controls,'Clean-sheet workspace and controls fit '+viewport.width+'×'+viewport.height);
  await shot('campus-catalogue-'+viewport.width,true);
 }
 const info=await page.evaluate(()=>window.megawattRenderInfo());assert.equal(info.orthographic,true);assert.equal(info.models,8);assert.ok(info.drawCalls<400);assert.ok(info.triangles>10000);
-assert.deepEqual(errors,[]);console.log('BROWSER_CHECK_PASSED: fresh desktop UX, connected road drag/cancel/atomic rejection, repeated placement, new company, save/reload/import/export, actual scenario fixtures, crew training and assignment, contracts, research, operations, laptop reachability, no runtime/network errors');
+assert.deepEqual(errors,[]);console.log('BROWSER_CHECK_PASSED: clean-sheet concept UI, solar comparison, character profiles, connected research graph, connected road drag/cancel/atomic rejection, repeated placement, new company, save/reload/import/export, actual scenario fixtures, crew training and assignment, contracts, research, operations, laptop reachability, no runtime/network errors');
 await browser.close();

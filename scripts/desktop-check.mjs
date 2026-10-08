@@ -13,7 +13,7 @@ async function launch(){
   const page=await application.firstWindow();
   page.on('pageerror',error=>errors.push(error.message));
   page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
-  await page.waitForSelector('[data-k="tycoon-ui"]',{timeout:60000});
+  await page.waitForSelector('[data-ui="studio"]',{timeout:60000});
   await page.waitForFunction(()=>document.querySelector('#game-root canvas'));
   return page;
 }
@@ -38,7 +38,7 @@ try {
   let page=await launch();
   await page.evaluate(()=>document.querySelector('[data-action="speed"][data-id="0"]').click());
   assert.equal(await page.evaluate(()=>typeof window.require),'undefined');
-  assert.equal(await page.evaluate(()=>window.megawattDesktop.version),'0.4.0');
+  assert.equal(await page.evaluate(()=>window.megawattDesktop.version),'0.5.0');
   assert.equal(await page.evaluate(()=>window.megawattDesktop.writeSave('{"version":1,"state":{"cash":1}}')),false);
   const info=await page.evaluate(()=>window.megawattRenderInfo());
   assert.equal(info.orthographic,true);assert.equal(info.models,8);assert.ok(info.triangles>10000);
@@ -48,7 +48,7 @@ try {
   await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.send('game:command','save'));
   // Use the shipped portable-import action to transfer an existing real-playthrough company.
   const chooser=page.waitForEvent('filechooser');
-  await page.locator('.top-tools [data-action="menu"]').click();
+  await page.locator('.mv-top [data-action="menu"]').click();
   await page.locator('[data-action="import"]').click();
   await (await chooser).setFiles(path.resolve('browser-fixtures/one-star.json'));
   await page.waitForFunction(()=>document.querySelector('[data-slot="toast"]')?.textContent.includes('import'));

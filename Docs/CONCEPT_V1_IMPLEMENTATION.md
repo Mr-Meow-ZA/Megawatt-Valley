@@ -2,7 +2,9 @@
 8 October 2026. Governing direction: [read first](CODEX_UI_UX_READ_FIRST.md), [quality standard §15](VISUAL_QUALITY_AND_WORLD_CHARACTER.md), latest [product decision](CHATGPT_REVIEW.md).
 
 ## Source review
-All three direction documents read. The approved JPG was absent from main at the specified path on inspection; the written approved concept governs this implementation. Do not claim a visual match to an unseen image. Recheck for the image before final acceptance.
+All three direction documents read. The actual four-anchor concept image was subsequently located in [issue #13 — New visual inspiration](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/13) and visually inspected on 8 October. Attachment: https://github.com/user-attachments/assets/a711aca4-4670-40d3-87e8-0330a4a63c8b . The canonical Docs/References JPG remains absent; issue #13 is the inspected source. Reference extraction was verified by review workflow 37728721669.
+
+Observed visual language: translucent navy HUD/header, cool light content panels, blue navigation, green purchase/actions, substantial previews, roster plus large character presentation, connected research tiers. The reference guides hierarchy and interaction; its example values and artwork are not reused as game content.
 
 The current 3D renderer and simulation stay intact. src/ui/tycoon is historical functional scaffolding. New composition, styling, data adapters and controller live under src/ui/studio; no inheritance from the old HUD or stylesheet. Generic DOM reconciliation may be reused as infrastructure.
 
@@ -31,4 +33,4 @@ The current 3D renderer and simulation stay intact. src/ui/tycoon is historical 
 Test adapters against simulation-derived values. Run all existing scenario/save tests. Replace obsolete layout-specific UI tests with meaningful new flows: compare before placement; right-click/road gestures; staff portrait/assignment/training; graph dependency and purchase; event choices; contracts/policies; keyboard and laptop reachability; save/import/export/new/resume. Retain packaged Windows checks and record actual screenshots.
 
 ## Current phase
-Data inventory complete. Building the clean interface system and four anchors. No new UI runtime has passed validation yet.
+Clean-sheet implementation is now wired under src/ui/studio. Tokens/components, HUD/minimap, browse/compare/place, profiles/assignments/training, connected research, policies, contracts, finance, objectives, events and saves are implemented. Validation is running; do not claim the visual target or checks have passed until evidence is recorded. Portraits currently use original in-world 3D characters; this is a known gap against the expressive illustrated portrait in the approved concept.

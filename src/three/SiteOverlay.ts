@@ -2,7 +2,7 @@ import * as T from 'three';
 import {connectedRoads} from '../simulation/roads';
 import {EQUIPMENT} from '../content/equipment';
 import type {GameSnapshot,Vec2} from '../simulation/types';
-import type {SiteView} from '../ui/tycoon/TycoonHud';
+import type {SiteView} from '../ui/studio/data';
 /** Instanced ground information: original data colours, no selection hit targets. */
 export class SiteOverlay {
  readonly mesh=new T.InstancedMesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({transparent:true,opacity:.46,depthWrite:false,side:T.DoubleSide}),1024);

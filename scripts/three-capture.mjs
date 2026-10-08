@@ -10,7 +10,7 @@ const errors=[];
 page.on('pageerror',e=>errors.push(e.message));
 page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
 await page.goto(pathToFileURL(path.resolve('playable/PLAY-MEGAWATT-VALLEY.html')).href);
-await page.locator('[data-k="tycoon-ui"]').waitFor({timeout:90000});
+await page.locator('[data-ui="studio"]').waitFor({timeout:90000});
 await page.locator('[data-action="speed"][data-id="0"]').click();await page.waitForTimeout(500);
 const paused=await page.evaluate(()=>window.megawattRenderInfo().activity);
 await page.waitForTimeout(600);

@@ -1,8 +1,9 @@
 import './three/world.css';
 import * as T from 'three';
 import { GameSimulation } from './simulation/GameSimulation';
-import { TycoonHud } from './ui/tycoon/TycoonHud';
-import './ui/tycoon/tycoon.css';
+import { ValleyInterface } from './ui/studio/ValleyInterface';
+import {renderPortraits} from './ui/studio/portraits';
+import './ui/studio/studio.css';
 import {roadStroke} from './simulation/roads';
 import type {Vec2} from './simulation/types';
 import { loadGame,saveGame } from './persistence/save';
@@ -16,12 +17,12 @@ async function start():Promise<void>{
   const renderer=new T.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance',preserveDrawingBuffer:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate=false;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
-  const models=new ModelLibrary();await models.load();renderCatalogue(renderer,models);parent.append(renderer.domElement);
-  let sim:GameSimulation,world:World3D,hud:TycoonHud;
+  const models=new ModelLibrary();await models.load();renderCatalogue(renderer,models);renderPortraits(renderer);parent.append(renderer.domElement);
+  let sim:GameSimulation,world:World3D,hud:ValleyInterface;
   function resize():void{renderer.setSize(innerWidth,innerHeight);world.resize(innerWidth,innerHeight);}
   function newGame():void{
     hud?.destroy();world?.destroy();sim=new GameSimulation();world=new World3D(renderer,models,sim);
-    hud=new TycoonHud(sim,newGame,tile=>world.focus(tile),view=>world.setViewMode(view));resize();
+    hud=new ValleyInterface(sim,newGame,tile=>world.focus(tile),view=>world.setViewMode(view));resize();
   }
   newGame();const saved=loadGame();if(saved){sim!.load(saved);sim!.speed=0;sim!.message='Company restored. Press Play when ready.';}
   loading.remove();

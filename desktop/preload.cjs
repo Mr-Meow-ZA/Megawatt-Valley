@@ -1,6 +1,6 @@
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('megawattDesktop',{
-  version:'0.4.0',
+  version:'0.5.0',
   readSaves:()=>ipcRenderer.sendSync('save:read'),
   writeSave:raw=>ipcRenderer.sendSync('save:write',raw),
   clearSave:()=>ipcRenderer.sendSync('save:clear'),
