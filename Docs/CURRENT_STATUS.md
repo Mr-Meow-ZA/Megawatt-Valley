@@ -1,67 +1,18 @@
 # Megawatt Valley — Current Status
 
-## Status
+**Status as of 8 October 2026: 3D desktop candidate under validation; not yet canonical on main.**
 
-**PRIMARY DIRECTION REBASELINED — 29 September 2026**
+## Actual repository state
+- `main`: older Phaser + TypeScript browser-first implementation; its architecture documents are historical pending acceptance/migration.
+- **Draft PR #11 / `codex/3d-isometric`**: independent Three.js + Electron true-3D Solar Level 1 candidate, new clean-sheet `src/ui/studio` interface.
+- Last reported verified desktop checkpoint: `c7be6d7`, with 81 tests and Windows packaging checks reported in branch `Docs/RESUME_CHECKPOINT.md`. Later fixes must be checked at their own SHA before claiming verification.
+- Product-owner decision: retain 3D world as baseline; reject old UI; implement approved Concept v1 four-anchor design. Visual/product acceptance of running implementation still pending.
 
-Megawatt Valley is now officially an **AI-autonomous Phaser / TypeScript production project**.
+## Immediate goal
+Verify newest PR #11 tests, build, Windows saving/reopening and four UI anchor screens at desktop/laptop sizes; fix real issues; request Rapha playtest. No new feature scope or wind/solar mixing.
 
-The previous Unity implementation is archived and is no longer the active development path.
+## Governance
+Read [ACTIVE_DEVELOPMENT.md](ACTIVE_DEVELOPMENT.md), [VISUAL_QUALITY_AND_WORLD_CHARACTER.md](VISUAL_QUALITY_AND_WORLD_CHARACTER.md) §15 and latest [CHATGPT_REVIEW.md](CHATGPT_REVIEW.md). The older Phaser-era `CURSOR_PRIMARY_BUILD_SPEC.md`, `TECHNICAL_ARCHITECTURE.md` and `VISUAL_DIRECTION.md` are not authoritative for the new 3D candidate.
 
-## Archive
-
-Full pre-pivot Unity state preserved on:
-
-**archive/unity-prototype-2026-09-29**
-
-That branch is historical reference only.
-
-Do not continue Unity implementation unless Rapha explicitly changes the project direction.
-
-## Active goal
-
-Build and release:
-
-# Megawatt Valley: Solar — Level 1: Here Comes the Sun
-
-Primary constraints:
-
-- minimal to no routine manual development work by Rapha;
-- zero additional paid development tooling beyond existing Cursor and ChatGPT subscriptions;
-- Phaser + TypeScript browser-first implementation;
-- free/open-source dependencies and assets by default;
-- high-resolution pixel-isometric / illustrated pixel visual direction;
-- complete playable game rather than prototype;
-- Cursor owns implementation, testing, debugging, integration and routine technical decisions.
-
-## Immediate Cursor action
-
-1. Read **Docs/CURSOR_PRIMARY_BUILD_SPEC.md**.
-2. Read the new architecture / visual / roadmap documents.
-3. Rebaseline the working tree for the Phaser implementation without touching the archived Unity branch.
-4. Establish the Phaser + TypeScript + Vite project.
-5. Create the first visual/gameplay slice using the approved pixel-isometric direction.
-6. Run it in-browser and validate it visually before expanding.
-7. Continue through the roadmap autonomously.
-
-## Product owner involvement
-
-Rapha should primarily:
-
-- set vision;
-- review major product decisions;
-- play builds;
-- give feedback on fun, presentation and priorities.
-
-Rapha should not become the routine coder, debugger, scene assembler or test runner.
-
-## Source of truth
-
-If older documents conflict with the following, the newer documents win:
-
-1. Docs/CURSOR_PRIMARY_BUILD_SPEC.md
-2. Docs/CURRENT_STATUS.md
-3. Docs/VISUAL_DIRECTION.md
-4. Docs/TECHNICAL_ARCHITECTURE.md
-5. Docs/ROADMAP.md
-6. Rapha's most recent explicit decision
+## Next decision gate
+After 3D candidate verification and Rapha's acceptance, select canonical implementation, migrate it to main in a reviewed PR, then update architecture/build workflows and retire superseded tracks.
