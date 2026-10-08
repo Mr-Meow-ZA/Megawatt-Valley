@@ -1,23 +1,18 @@
 # Megawatt Valley — Session Goals
 
-## Status
+**Current active milestone (8 October 2026): Validate Concept v1 on the true-3D desktop candidate.**
 
-**ARCHIVED UNITY-ERA TRACKER — 29 September 2026**
+The Unity-era session tracker was archived on `archive/unity-prototype-2026-09-29`. The Phaser-era production roadmap is superseded for new work by [ACTIVE_DEVELOPMENT.md](ACTIVE_DEVELOPMENT.md).
 
-The previous session-goal system belongs to the archived Unity implementation.
+## Smallest useful goal
+Verify the latest head of draft PR #11; inspect all four actual anchor screens (HUD, solar build/compare, staff, research) at 1920×1080 and 1366×768; exercise placement/cancellation, roads, staff, research, events, contracts and Windows save/reopen. Fix only observed regressions and usability gaps.
 
-The complete historical version is preserved on:
+## Exit criteria
+- Latest candidate has passing documented tests and build.
+- Packaged Windows game can save, close and resume.
+- Core flows are reachable and usable at both resolutions.
+- Screenshots are compared against issue #13.
+- Exact verified commit and known gaps are documented.
+- Rapha can playtest and accept/reject the actual build.
 
-**archive/unity-prototype-2026-09-29**
-
-It is no longer the active development tracker.
-
-The active production sequence is now defined by:
-
-- Docs/CURSOR_PRIMARY_BUILD_SPEC.md
-- Docs/ROADMAP.md
-- Docs/CURRENT_STATUS.md
-
-Cursor should work through the approved roadmap autonomously rather than stop after every small historical session goal.
-
-If a small task tracker is useful internally, Cursor may create/maintain one, but it must not reintroduce manual micromanagement as the project operating model.
+No feature expansion, no cross-stack merges and no solar/wind mixing within a level.
