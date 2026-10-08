@@ -1,4 +1,4 @@
-"""Read-only analysis of the four public attachments supplied in issue #12.
+"""Read-only analysis of the UI concept supplied in issue #13.
 References are not game assets and are never included in release packaging.
 """
 import base64
@@ -9,7 +9,7 @@ import subprocess
 import urllib.request
 from PIL import Image, ImageDraw
 
-URLS = ["https://github.com/user-attachments/assets/13784a98-8899-405e-9ffd-dff0fcce2290","https://github.com/user-attachments/assets/b50edcda-6651-4af5-b6f9-6bfc422bc609","https://github.com/user-attachments/assets/562d1089-23f4-414d-bdfb-e73d550514e3","https://github.com/user-attachments/assets/6e02d01c-6964-459f-97bb-7a9bcb0664ec"]
+URLS = ["https://github.com/user-attachments/assets/a711aca4-4670-40d3-87e8-0330a4a63c8b"]
 out = pathlib.Path("inspiration-review")
 out.mkdir(exist_ok=True)
 
