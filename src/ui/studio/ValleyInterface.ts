@@ -37,6 +37,7 @@ export class ValleyInterface {
  private toastUntil=0;
  private cache=new Map<string,string>();
  private dialogKey='';
+ private lastPage:Page=null;
  private returnFocus:HTMLElement|null=null;
  private destroyed=false;
  constructor(private sim:GameSimulation,private onNew:()=>void,private onCamera:(tile:Vec2|null)=>void,private onView:(view:SiteView)=>void){
@@ -71,6 +72,7 @@ export class ValleyInterface {
   this.put('alerts',!this.page&&faults.length?action('locate',glyph('operations')+faults.length+' equipment fault'+(faults.length>1?'s':''),faults[0].id,'warning'):!this.page&&s.clippedKw>5?action('page',glyph('power')+' Export capacity reached','company','warning'):'');
   let content=this.page==='build'?procurement(s,this.category,this.product,this.compare):this.page==='people'?people(s,this.person,this.staffTab):this.page==='research'?research(s,this.sim,this.researchId,this.researchTab):this.page==='operations'?operations(s):this.page==='company'?company(s,this.sim,this.companyTab):this.page==='objectives'?objectives(s):this.page==='views'?heading('READ THE VALLEY','Site views')+'<div class="mv-view-list">'+[['normal','Natural view','Enjoy the valley'],['access','Service access','Green: connected road access. Amber: standard travel.'],['condition','Condition','Green: healthy. Red: worn or failed.'],['dust','Cleanliness','Green: clean. Red: dusty.'],['power','Generation','Solar capacity and connection state.']].map(([id,title,body])=>action('view','<b>'+title+'</b><span>'+body+'</span>',id,this.view===id?'selected':'secondary')).join('')+'</div>':'';
   this.put('workspace',content);
+  if(this.lastPage!==this.page){this.root.querySelector<HTMLElement>('[data-slot="workspace"]')!.scrollTop=0;this.lastPage=this.page;}
   const workspace=this.root.querySelector<HTMLElement>('[data-slot="workspace"]')!;workspace.dataset.page=this.page??'';
   this.put('inspector',!this.page?inspector(s):'');
   this.put('navigation',(['build','people','research','operations','company','objectives','views'] as const).map(id=>action('page',glyph(id)+'<span>'+({build:'Build',people:'People',research:'Research',operations:'Operations',company:'Company',objectives:'Goals',views:'Site views'}[id])+'</span>',id,this.page===id?'selected':'quiet','aria-pressed="'+(this.page===id)+'"')).join(''));
