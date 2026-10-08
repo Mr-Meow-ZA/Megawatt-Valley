@@ -3,7 +3,7 @@
 *{box-sizing:border-box}html,body,#game-root,#ui-root{width:100%;height:100%;margin:0;overflow:hidden}
 body{font-family:var(--mv-font);background:#839d75}#game-root,#ui-root{position:absolute;inset:0}#ui-root{pointer-events:none}
 [hidden]{display:none!important}
-.mv-interface{color:var(--mv-ink);font-size:13px;line-height:1.45}
+.mv-interface{position:absolute;inset:0;pointer-events:none;color:var(--mv-ink);font-size:13px;line-height:1.45}
 .mv-interface button,.mv-interface input,.mv-interface select{font:inherit}
 .mv-interface button{cursor:pointer}.mv-interface button:disabled{cursor:not-allowed;opacity:.52}
 .mv-interface :focus-visible{outline:3px solid #f2be49;outline-offset:3px}
