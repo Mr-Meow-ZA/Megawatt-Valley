@@ -27,6 +27,12 @@ console.log('ACTIVITY_CHECK_PASSED: traffic and ducks advance only during play')
 console.log('RENDER_INFO:'+JSON.stringify(await page.evaluate(()=>window.megawattRenderInfo())));
 await page.screenshot({path:'three-evidence/3d-first-company.png'});
 console.log('THREE_DEFAULT_BASE64:'+(await page.screenshot({type:'jpeg',quality:65})).toString('base64'));
+for(const [key,name] of [['b','solar'],['t','technician'],['u','research']]){
+ await page.keyboard.press(key);await page.waitForTimeout(150);
+ await page.screenshot({path:'three-evidence/studio-'+name+'.png'});
+ console.log('STUDIO_ANCHOR_'+name.toUpperCase()+'_BASE64:'+(await page.screenshot({type:'jpeg',quality:75})).toString('base64'));
+ await page.keyboard.press('Escape');
+}
 await page.addStyleTag({content:'#ui-root{visibility:hidden!important}'});
 await page.screenshot({path:'three-evidence/3d-valley.png'});
 console.log('THREE_WORLD_BASE64:'+(await page.screenshot({type:'jpeg',quality:70})).toString('base64'));

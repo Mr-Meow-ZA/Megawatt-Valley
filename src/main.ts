@@ -79,7 +79,8 @@ async function start():Promise<void>{
   canvas.addEventListener('wheel',e=>{e.preventDefault();if(!hud.isOverlayOpen())world.zoomBy(e.deltaY,e.clientX,e.clientY);},{passive:false});
   window.addEventListener('keydown',e=>{
     if(e.key==='Escape')clearStroke();
-    if(hud.isOverlayOpen()||hud.isTextEntryFocused())return;
+    if(e.defaultPrevented||hud.isOverlayOpen()||hud.isTextEntryFocused())return;
+    if(e.code==='Space'&&(e.target as HTMLElement)?.closest('button,a,[role="button"]'))return;
     if(e.code==='Space'){e.preventDefault();sim.setSpeed(sim.speed===0?1:0);}
     else if(e.code==='KeyR'&&sim.selectedId)sim.dispatchRepair(sim.selectedId);
     else if(e.code==='KeyC'&&sim.selectedId)sim.dispatchClean(sim.selectedId);

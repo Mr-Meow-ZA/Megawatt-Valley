@@ -35,14 +35,17 @@ const clickTile=async(x,y,z=0)=>{const p=project(x,y,z);await page.mouse.click(p
 const start=await saved();assert.equal(start.equipment.length,3);assert.ok(Math.abs(start.cash-50000)<20);
 assert.equal(await page.locator('.tycoon-ui,.management-dock,.utility-menu,.topbar,.build-dock').count(),0,'Rejected interfaces are absent');
 await shot('studio-opening',true);
-await page.keyboard.press('b');
+await q('page','build').focus();await page.keyboard.press('Space');
+assert.equal((await saved()).speed,0,'Keyboard button activation does not also toggle park time');
 assert.equal(await q('product').count(),2);
 assert.equal((await saved()).buildMode,null,'Browsing does not enter placement');
 assert.ok(await q('product','bargain_pv').locator('img').evaluate(i=>i.complete&&i.naturalWidth>0&&i.width>=100));
 await q('product','premium_pv').click();await q('compare').click();
 assert.match(await page.locator('.mv-compare').textContent(),/75% lower/);
-await shot('studio-solar-comparison',true);
+assert.ok(await q('place','premium_pv').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=104&&r.bottom<innerHeight-100;}),'Place stays visible while comparing');await shot('studio-solar-comparison',true);
 await q('compare').click();
+await page.locator('.mv-facts summary').click();await page.waitForTimeout(600);assert.equal(await page.locator('.mv-facts').evaluate(el=>el.open),true,'Live updates retain expanded secondary facts');
+await page.locator('.mv-facts summary').click();
 await q('category','landscape').click();assert.match(await page.locator('.mv-product-detail').textContent(),/Decorative/);
 await q('category','facilities').click();await q('product','workshop').click();assert.equal(await q('place','workshop').isDisabled(),true);
 await q('product','road').click();await q('place','road').click();
@@ -79,7 +82,7 @@ await speed(0);assert.equal((await saved()).equipment.length,3);assert.equal((aw
 await importFixture('storm');await q('choice','prepare').click();assert.equal((await saved()).hailPrepared,true);
 await importFixture('one-star');const won=await saved();assert.ok(won.stars>=1);await shot('studio-established-valley',true);
 await page.keyboard.press('t');await q('person',won.staff[0].id).click();
-assert.match(await page.locator('.mv-profile').textContent(),/Energy/);assert.ok(await page.locator('.mv-character>img').evaluate(i=>i.complete&&i.naturalWidth>0));await shot('studio-technician',true);await q('staff-tab','development').click();
+assert.match(await page.locator('.mv-profile').textContent(),/Energy/);assert.ok(await page.locator('.mv-character>img').evaluate(i=>i.complete&&i.naturalWidth>0));await shot('studio-technician',true);await q('focus-person',won.staff[0].id).click();assert.equal(await page.locator('.mv-workspace').isVisible(),false,'Find in valley releases the world');await page.keyboard.press('t');await q('staff-tab','development').click();
 await q('train',won.staff[0].id).click();let trained=await saved();assert.equal(trained.cash,won.cash-800);assert.equal(trained.staff[0].trainingHoursLeft,4);
 await q('staff-tab','assignment').click();await page.locator('[data-field="zone"]').selectOption('site_a');await page.locator('[data-field="duty"]').selectOption('repair');
 assert.equal((await saved()).staff[0].preference,'repair');await shot('studio-worker',true);
@@ -92,11 +95,11 @@ assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientR
 await shot('studio-laptop-worker');await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');
 await company('contracts');await q('contract','school').click();assert.equal((await saved()).contract.id,'school');
 await shot('studio-contracts');await page.reload();await page.locator('[data-ui="studio"]').waitFor({timeout:90000});assert.equal((await saved()).contract.id,'school');
-await company('contracts');await q('cancel-contract').click();
+await company('contracts');await speed(1);await q('cancel-contract').click();assert.equal((await saved()).speed,0,'Confirmation freezes the operation while deciding');
 assert.ok(await page.locator('.mv-modal-layer').evaluate(el=>el.contains(document.activeElement)),'Confirmation receives focus above Company');
 await page.keyboard.press('Shift+Tab');
 assert.ok(await page.locator('.mv-modal-layer').evaluate(el=>el.contains(document.activeElement)),'Keyboard focus remains inside the top dialog');
-await q('confirm-yes').click();assert.equal((await saved()).contract,null);
+await q('confirm-yes').click();assert.equal((await saved()).contract,null);assert.equal((await saved()).speed,1,'Confirmation restores previous speed');
 const ops=JSON.parse(await readFile('browser-fixtures/one-star.json','utf8'));
 ops.state.completionAcknowledged=true;ops.state.speed=0;ops.state.activeEvent=null;ops.state.workOrders=[];
 ops.state.staff.forEach(m=>{m.task={type:'idle'};m.preference='repair';m.workZone='all';m.energy=1;m.onBreak=false;m.trainingHoursLeft=0;});
@@ -109,8 +112,8 @@ const money=(await saved()).cash;await q('service-all').click();assert.equal((aw
 const research=JSON.parse(await readFile('browser-fixtures/one-star.json','utf8'));research.state.researched=[];research.state.activeResearch=null;research.state.completionAcknowledged=true;
 await writeFile('browser-fixtures/research-offers.json',JSON.stringify(research));await importFixture('research-offers');await page.keyboard.press('u');
 assert.equal(await page.locator('[data-research]').count(),9);assert.equal(await page.locator('.mv-connector').count(),6);await shot('studio-company-upgrades',true);
-await q('research','precision_wiring').click();const purchased=await saved();assert.equal(purchased.activeResearch.id,'precision_wiring');assert.equal(purchased.activeResearch.progress,0);
-await page.setViewportSize({width:1024,height:768});await page.locator('[data-research="storm_hardening"]').scrollIntoViewIfNeeded();await shot('studio-laptop-upgrades');
+await q('research-select','storm_hardening').click();assert.equal(await q('research','storm_hardening').isDisabled(),true);assert.match(await page.locator('.mv-research-detail').textContent(),/Predictive diagnostics/);await q('research-select','precision_wiring').click();await q('research','precision_wiring').click();const purchased=await saved();assert.equal(purchased.activeResearch.id,'precision_wiring');assert.equal(purchased.activeResearch.progress,0);
+await page.setViewportSize({width:1024,height:768});await page.locator('[data-research="storm_hardening"]').scrollIntoViewIfNeeded();assert.ok(await q('research','precision_wiring').evaluate(el=>el.getBoundingClientRect().bottom<innerHeight-100),'Research action fits laptop viewport');await shot('studio-laptop-upgrades');
 await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');purchased.activeResearch.progress=.999;purchased.speed=0;
 await writeFile('browser-fixtures/research.json',JSON.stringify({version:1,state:purchased}));await importFixture('research');await speed(4);await page.waitForTimeout(1500);await speed(0);
 assert.ok((await saved()).researched.includes('precision_wiring'));
@@ -121,7 +124,7 @@ await page.keyboard.press('Escape');
 await page.locator('.mv-top [data-action="menu"]').click();const download=page.waitForEvent('download');await q('export').click();assert.match((await download).suggestedFilename(),/company.json/);
 await page.locator('.mv-pause [data-action="menu"]').click();
 await page.keyboard.press('h');await page.keyboard.press('b');await q('category','solar').click();
-await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-navigation').getBoundingClientRect().top));await shot('studio-laptop-build',true);
+await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-navigation').getBoundingClientRect().top));assert.ok(await q('place','bargain_pv').evaluate(el=>el.getBoundingClientRect().bottom<innerHeight-100),'Placement action fits laptop viewport');await shot('studio-laptop-build',true);
 for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
  await page.setViewportSize(viewport);
  const layout=await page.locator('.mv-workspace').evaluate(el=>{

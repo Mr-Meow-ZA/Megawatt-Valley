@@ -31,6 +31,7 @@ export class ValleyInterface {
  private view:SiteView='normal';
  private menu=false;
  private menuSpeed:0|1|2|4=1;
+ private confirmSpeed:0|1|2|4=0;
  private confirmAction:{title:string;body:string;action:()=>void}|null=null;
  private lastSelection:string|null=null;
  private lastMessage='';
@@ -52,7 +53,13 @@ export class ValleyInterface {
  isTextEntryFocused():boolean{return ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName??'');}
  cancelTool():void{this.sim.setBuildMode(null);this.sim.selectEntity(null);this.page=null;this.setView('normal');this.render(this.sim.snapshot());}
  saveCompany():void{this.sim.message=saveGame(this.sim.serialize())?'Company saved.':'Save failed. Export a backup from the pause menu.';}
- loadCompany():void{const saved=loadGame();if(saved){this.sim.load(saved);this.sim.speed=0;this.page=null;this.sim.message='Company restored. Press Play when ready.';}else this.sim.message='No valid saved company found.';}
+ loadCompany():void{const saved=loadGame();if(saved){this.sim.load(saved);this.sim.speed=0;this.page=null;this.lastSelection=null;this.sim.message='Company restored. Press Play when ready.';}else this.sim.message='No valid saved company found.';}
+ private confirm(title:string,body:string,action:()=>void):void{this.confirmSpeed=this.sim.speed;this.sim.setSpeed(0);this.confirmAction={title,body,action};}
+ private resolveConfirmation(accept:boolean):void{
+  const pending=this.confirmAction;this.confirmAction=null;
+  if(!this.menu&&!this.sim.activeEvent)this.sim.setSpeed(this.confirmSpeed);
+  if(accept)pending?.action();
+ }
  private setView(v:SiteView):void{this.view=v;this.onView(v);}
  private open(page:Page):void{this.page=this.page===page?null:page;this.sim.setBuildMode(null);this.sim.selectEntity(null);}
  private locate(id:string):void{const target=this.sim.equipment.find(e=>e.id===id)??this.sim.staff.find(m=>m.id===id);if(target){this.page=null;this.sim.setBuildMode(null);this.sim.selectEntity(id);this.onCamera(target.tile);}}
@@ -66,7 +73,7 @@ export class ValleyInterface {
   if(this.destroyed)return;
   if(s.selectedId!==this.lastSelection){this.lastSelection=s.selectedId;if(s.staff.some(m=>m.id===s.selectedId)){this.person=s.selectedId;this.staffTab='overview';this.page='people';}else if(s.selectedId)this.page=null;}
   const brief=scenarioBriefing(s),capacity=s.equipment.filter(e=>e.kind.includes('pv')&&e.commissioned).reduce((n,e)=>n+EQUIPMENT[e.kind].nameplateKw,0);
-  this.put('resources','<a class="mv-brand" href="#" data-action="home" aria-label="Return camera home">'+glyph('power')+'<span>MEGAWATT<small>VALLEY</small></span></a><button class="mv-resource" data-action="page" data-id="company"><small>COMPANY CASH</small><b>'+money(s.cash)+'</b><span class="'+(s.revenuePerHour<0?'negative':'positive')+'">'+(s.revenuePerHour>=0?'+':'')+money(s.revenuePerHour)+' net / h</span></button><button class="mv-resource" data-action="page" data-id="company"><small>EXPORT / CONNECTION</small><b>'+s.exportedKw.toFixed(1)+' <em>/ '+s.inverterCapacityKw.toFixed(0)+' kW</em></b>'+meter(s.exportedKw/s.inverterCapacityKw,'Grid export')+'</button><div class="mv-resource mv-capacity"><small>INSTALLED SOLAR</small><b>'+capacity+' kW</b><span>'+Math.round(s.totalEnergyKwh).toLocaleString()+' kWh exported</span></div><button class="mv-resource mv-team-stat" data-action="page" data-id="people"><small>YOUR TEAM</small><b>'+s.staff.length+' people</b><span>'+s.staff.filter(m=>m.task.type!=='idle').length+' in the field</span></button><div class="mv-clock"><span>'+glyph('sun')+esc(s.weather.replaceAll('_',' '))+'</span><b>Day '+s.day+' · '+Math.floor(s.hour).toString().padStart(2,'0')+':'+Math.floor((s.hour%1)*60).toString().padStart(2,'0')+'</b><div class="mv-speed">'+[0,1,2,4].map(n=>action('speed',n===0?'Ⅱ':n===1?'▶':n+'×',String(n),s.speed===n?'selected':'quiet','aria-label="'+(n===0?'Pause':'Play at '+n+' times speed')+'" aria-pressed="'+(s.speed===n)+'"')).join('')+'</div></div>'+action('menu',glyph('menu'),'','icon','aria-label="Pause menu"'));
+  this.put('resources','<a class="mv-brand" href="#" data-action="home" aria-label="Return camera home">'+glyph('power')+'<span>MEGAWATT<small>VALLEY</small></span></a><button class="mv-resource" data-action="page" data-id="company"><small>COMPANY CASH</small><b>'+money(s.cash)+'</b><span class="'+(s.revenuePerHour<0?'negative':'positive')+'">'+(s.revenuePerHour>=0?'+':'')+money(s.revenuePerHour)+' net / h</span></button><button class="mv-resource" data-action="page" data-id="company"><small>EXPORT / CONNECTION</small><b>'+s.exportedKw.toFixed(1)+' <em>/ '+s.inverterCapacityKw.toFixed(0)+' kW</em></b>'+meter(s.exportedKw/s.inverterCapacityKw,'Grid export')+'</button><div class="mv-resource mv-capacity"><small>INSTALLED SOLAR</small><b>'+capacity+' kW</b><span>'+Math.round(s.totalEnergyKwh).toLocaleString()+' kWh exported</span></div><button class="mv-resource mv-team-stat" data-action="page" data-id="people"><small>YOUR TEAM</small><b>'+s.staff.length+(s.staff.length===1?' person':' people')+'</b><span>'+s.staff.filter(m=>m.task.type!=='idle').length+' in the field</span></button><div class="mv-clock"><span>'+glyph('sun')+esc(s.weather.replaceAll('_',' '))+'</span><b>Day '+s.day+' · '+Math.floor(s.hour).toString().padStart(2,'0')+':'+Math.floor((s.hour%1)*60).toString().padStart(2,'0')+'</b><div class="mv-speed">'+[0,1,2,4].map(n=>action('speed',n===0?'Ⅱ':n===1?'▶':n+'×',String(n),s.speed===n?'selected':'quiet','aria-label="'+(n===0?'Pause':'Play at '+n+' times speed')+'" aria-pressed="'+(s.speed===n)+'"')).join('')+'</div></div>'+action('menu',glyph('menu'),'','icon','aria-label="Pause menu"'));
   this.put('goal',!this.page&&!s.selectedId&&!s.buildMode?'<div class="mv-goal-top"><span>HERE COMES THE SUN</span>'+action('page','★'.repeat(s.stars)+'☆'.repeat(3-s.stars),'objectives','quiet','aria-label="Scenario objectives"')+'</div><h2>'+esc(brief.title.replace(/^\d+ · /,''))+'</h2><p>'+esc(brief.body)+'</p>'+action('briefing',brief.label+' '+glyph('arrow'),'','primary'):'');
   const faults=s.equipment.filter(e=>e.faulted);
   this.put('alerts',!this.page&&faults.length?action('locate',glyph('operations')+faults.length+' equipment fault'+(faults.length>1?'s':''),faults[0].id,'warning'):!this.page&&s.clippedKw>5?action('page',glyph('power')+' Export capacity reached','company','warning'):'');
@@ -117,14 +124,14 @@ export class ValleyInterface {
    case 'repair':this.sim.dispatchRepair(id);break;
    case 'clean':this.sim.dispatchClean(id);break;
    case 'service':this.sim.dispatchService(id);break;
-   case 'sell':this.confirmAction={title:'Sell this equipment?',body:'You will receive 60% of its purchase price, adjusted for condition. Assigned jobs are cancelled.',action:()=>{this.sim.demolish(id);}};break;
-   case 'dismiss':this.confirmAction={title:'Dismiss this team member?',body:'Their position becomes available for a new hire. At least one repair-capable worker must remain.',action:()=>{this.sim.dismissStaff(id);}};break;
-   case 'confirm-no':this.confirmAction=null;break;
-   case 'confirm-yes':{const action=this.confirmAction?.action;this.confirmAction=null;action?.();break;}
+   case 'sell':this.confirm('Sell this equipment?','You will receive 60% of its purchase price, adjusted for condition. Assigned jobs are cancelled.',()=>{this.sim.demolish(id);});break;
+   case 'dismiss':this.confirm('Dismiss this team member?','Their position becomes available for a new hire. At least one repair-capable worker must remain.',()=>{this.sim.dismissStaff(id);});break;
+   case 'confirm-no':this.resolveConfirmation(false);break;
+   case 'confirm-yes':this.resolveConfirmation(true);break;
    case 'capability':this.sim.buyCapability(id as CapabilityId);break;
    case 'research':this.sim.startResearch(id as ResearchId);break;
    case 'contract':this.sim.acceptContract(id as ContractId);break;
-   case 'cancel-contract':this.confirmAction={title:'Cancel this delivery?',body:'Any deposit will be forfeited. Electricity sales continue.',action:()=>this.sim.cancelContract()};break;
+   case 'cancel-contract':this.confirm('Cancel this delivery?','Any deposit will be forfeited. Electricity sales continue.',()=>{this.sim.cancelContract();});break;
    case 'cancel-job':this.sim.cancelWorkOrder(id,el.dataset.kind as 'repair'|'clean'|'service');break;
    case 'clean-all':for(const e of this.sim.equipment)if(e.kind.includes('pv')&&e.soiling>=.15)this.sim.dispatchClean(e.id);break;
    case 'service-all':for(const e of this.sim.equipment)if(e.kind.includes('pv')&&e.condition<.995)this.sim.dispatchService(e.id);break;
@@ -135,9 +142,9 @@ export class ValleyInterface {
    case 'save':this.saveCompany();break;
    case 'load':this.loadCompany();this.menuSpeed=0;this.menu=false;break;
    case 'sound':sound.toggle();break;
-   case 'new':this.confirmAction={title:'Start a new company?',body:'Your current local save will be replaced. Export it first if you want to keep it.',action:()=>{if(clearSave())this.onNew();else this.sim.message='Could not clear the save. Export a backup first.';}};break;
+   case 'new':this.confirm('Start a new company?','Your current local save will be replaced. Export it first if you want to keep it.',()=>{if(clearSave())this.onNew();else this.sim.message='Could not clear the save. Export a backup first.';});break;
    case 'export':{const blob=new Blob([JSON.stringify({version:SAVE_VERSION,savedAt:new Date().toISOString(),state:this.sim.serialize()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Megawatt-Valley-company.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);break;}
-   case 'import':{const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=async()=>{try{const file=input.files?.[0];if(!file)return;if(file.size>5_000_000)throw Error('File too large');const data=JSON.parse(await file.text());if(data.version!==SAVE_VERSION||!validateState(data.state))throw Error('Not a compatible company');this.sim.load(data.state);this.sim.setSpeed(0);this.sim.message='Company imported. Press Play when ready.';this.menu=false;this.menuSpeed=0;this.page=null;this.render(this.sim.snapshot());}catch(error){this.sim.message='Import failed: '+String(error);}};input.click();break;}
+   case 'import':{const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=async()=>{try{const file=input.files?.[0];if(!file)return;if(file.size>5_000_000)throw Error('File too large');const data=JSON.parse(await file.text());if(data.version!==SAVE_VERSION||!validateState(data.state))throw Error('Not a compatible company');this.sim.load(data.state);this.lastSelection=null;this.sim.setSpeed(0);this.sim.message='Company imported. Press Play when ready.';this.menu=false;this.menuSpeed=0;this.page=null;this.render(this.sim.snapshot());}catch(error){this.sim.message='Import failed: '+String(error);}};input.click();break;}
   }
   sound.note(440,.04,.012);this.render(this.sim.snapshot());
  }
@@ -159,7 +166,7 @@ export class ValleyInterface {
   }
   if((e.key==='Enter'||e.key===' ')&&(document.activeElement as HTMLElement)?.dataset.action==='map-site'){e.preventDefault();(document.activeElement as HTMLElement).dispatchEvent(new MouseEvent('click',{bubbles:true}));return;}
   if(e.key==='Escape'){
-   e.preventDefault();if(this.confirmAction)this.confirmAction=null;else if(this.sim.activeEvent||this.sim.scenarioComplete&&!this.sim.completionAcknowledged)return;else if(this.menu){this.menu=false;this.sim.setSpeed(this.menuSpeed);}else if(this.page||this.sim.buildMode||this.sim.selectedId)this.cancelTool();else{this.menuSpeed=this.sim.speed;this.sim.setSpeed(0);this.menu=true;}this.render(this.sim.snapshot());return;
+   e.preventDefault();if(this.confirmAction)this.resolveConfirmation(false);else if(this.sim.activeEvent||this.sim.scenarioComplete&&!this.sim.completionAcknowledged)return;else if(this.menu){this.menu=false;this.sim.setSpeed(this.menuSpeed);}else if(this.page||this.sim.buildMode||this.sim.selectedId)this.cancelTool();else{this.menuSpeed=this.sim.speed;this.sim.setSpeed(0);this.menu=true;}this.render(this.sim.snapshot());return;
   }
   if(this.isTextEntryFocused()||this.isOverlayOpen())return;
   const k=e.key.toLowerCase();if(k==='b')this.open('build');if(k==='t')this.open('people');if(k==='u')this.open('research');if(k==='h')this.onCamera(null);
