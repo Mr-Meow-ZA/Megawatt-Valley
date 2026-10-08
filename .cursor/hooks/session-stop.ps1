@@ -41,7 +41,7 @@ Required:
 3. Update Docs/SESSION_GOALS.md and Docs/CURRENT_STATUS.md only if they actually changed.
 4. Push to origin so ChatGPT can see the session.
 5. Run Tools/Sync-PolarisMegawattValley.ps1 and update the Polaris project note / Activity Hub if status changed.
-Do not start Unity / S0-01 unless Rapha said Unity is ready.
+Follow Docs/ACTIVE_DEVELOPMENT.md; do not resume legacy Unity/Phaser production.
 "@
 
     Write-HookLog "followup dirty=$($dirty.Count) unpushed=$($unpushed.Count)"
