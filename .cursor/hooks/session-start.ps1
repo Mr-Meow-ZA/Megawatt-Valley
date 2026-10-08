@@ -67,7 +67,7 @@ $reviewNext
 Required workflow:
 - GitHub is the shared handoff layer with ChatGPT. Follow Docs/COLLABORATION_GUIDE.md.
 - After meaningful work: commit, push to origin, append Docs/ACTIVITY_LOG.md, update SESSION_GOALS/CURRENT_STATUS if needed, then sync Polaris (Tools/Sync-PolarisMegawattValley.ps1 and the project note).
-- Do not start Unity / S0-01 until Rapha says Unity is ready.
+- Follow Docs/ACTIVE_DEVELOPMENT.md; the true-3D desktop candidate is PR #11. Do not resume legacy Unity/Phaser production.
 - Read Docs/CHATGPT_REVIEW.md before a meaningful implementation session if it changed.
 "@
 

@@ -25,7 +25,7 @@ Project hooks fetch `origin` and fast-forward a clean `main`. Still read:
 - `Docs/ACTIVITY_LOG.md` (latest entries)
 - `Docs/CHATGPT_REVIEW.md` if it changed
 
-Do not start Unity / S0-01 until Rapha says Unity is ready.
+Follow Docs/ACTIVE_DEVELOPMENT.md; do not resume legacy Unity/Phaser production.
 
 ## Session end (required)
 
