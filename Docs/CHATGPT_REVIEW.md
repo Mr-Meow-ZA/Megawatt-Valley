@@ -150,3 +150,45 @@ The existing UI/UX direction is **rejected as a design baseline**. Do not increm
 The first clean-sheet UI/UX concept has been explicitly approved. It establishes four anchor surfaces: main gameplay HUD, solar build/compare experience, technician profile and research/technology tree. See `Docs/VISUAL_QUALITY_AND_WORLD_CHARACTER.md`, especially section 15, and the approved reference image at `Docs/References/megawatt-valley-ui-ux-approved-concept-v1.jpg` when available.
 
 **Instruction for Codex:** before substantial UI/UX implementation, read the visual-quality document and approved mockup. Use them as the new product direction. Do not use the current UI as the visual/layout reference. Implementation may adapt the mockup to actual game data and constraints, but should preserve its hierarchy, contextual depth, character, comparison quality and premium management-game feel.
+
+
+---
+
+## Review update — 2026-10-08: desktop 3D Concept v1 implementation in PR #11
+
+**Reviewed:** main review/status/activity/session-goals/architecture documents; draft PR #11; PR #11 branch `codex/3d-isometric` (head `dbd3ec5d7a01`); `Docs/DESKTOP_TYCOON_UX.md`, `Docs/DESKTOP_QUALITY_TARGET.md`, `Docs/CONCEPT_V1_IMPLEMENTATION.md`, `Docs/RESUME_CHECKPOINT.md`; and visual-reference issues #12/#13.
+
+### Meaningful development
+
+- **Draft PR #11** is the independent **true-3D Three.js + Electron desktop** Level 1 track, based on `codex/solar-release-hardening`, not main. It is open/draft, 23 commits ahead of its PR base, with 69 changed files. This is a substantial parallel implementation, not a minor Phaser skin or a merged release.
+- Its previously verified **desktop 0.4.0** implementation includes a stylised 3D valley, workers/vehicles/ambient activity, contextual staff/equipment inspectors, grouped management views, road drag planning and connected service coverage, packaged Windows saving/recovery and controls. The PR reports 68 tests and packaged UI/Windows validation for its earlier verified runtime `eea87a3`; treat this as branch-reported evidence, not a fresh independent playtest.
+- **On 8 October**, the branch added a new **clean-sheet Concept v1 interface** under `src/ui/studio`, replacing `src/ui/tycoon` at runtime. It implements navy/light/blue/green tokens, compact HUD and minimap, solar compare-before-place, staff roster/profile, connected research branches, and supporting operations/company/objectives/events/save surfaces. The branch records desktop version **0.5.0**.
+- The new interface explicitly uses the **actual approved four-anchor visual reference in issue #13**; `Docs/CONCEPT_V1_IMPLEMENTATION.md` documents the reference inspection and data mapping. The canonical `Docs/References/megawatt-valley-ui-ux-approved-concept-v1.jpg` is still absent; do not claim the visual reference is inaccessible.
+- The branch checkpoint states that the **first 0.5.0 integrated candidate is not yet verified**. It cites `cda9c376` as the last fully verified pre-reset desktop runtime (77 tests). Later head `dbd3ec5d` includes a packaging/active-styles and contextual-scroll fix; fresh head-specific end-to-end and packaged-Windows acceptance was not established in this review. The commit-associated PR-workflow lookup returned no runs; that is not proof of failure.
+
+### Alignment
+
+- **Game vision / session goal:** Still Solar Level 1, *Here Comes the Sun*, with build → generate → sell → expand, operating staff, research/capabilities, weather, objectives and the manual-to-automation ladder. Continue solar-only content for this level; **do not mix wind and solar in the same level**.
+- **Visual direction:** The newer product-owner decision (7 October) retains true 3D as the foundation and rejects the old UI as a design baseline. PR #11's clean-sheet UI and 3D scene are directionally aligned. The approved reference is a quality target, **not** evidence the runtime matches it. Staff portraits and scene character remain known gaps.
+- **Technical architecture:** This is a **material alternative** to the September main-branch Phaser/pixel-isometric/browser-first specification: Three.js + Electron, packaged desktop, separate `src/ui/studio` interface. The user's later explicit 3D approval supports the 3D direction, but **main's CURRENT_STATUS, TECHNICAL_ARCHITECTURE, ROADMAP and issue #6 still describe the older Phaser production path**. These conflicting authority signals must be reconciled once PR #11 is accepted; do not silently merge incompatible tracks.
+- **Session goals / activity log:** `Docs/SESSION_GOALS.md` is an archived Unity tracker and should not be used as an active checklist. Main `Docs/ACTIVITY_LOG.md` and `Docs/CURRENT_STATUS.md` lag behind the branch's desktop work; branch-local `RESUME_CHECKPOINT.md` and `DESKTOP_TYCOON_UX.md` provide fresher implementation evidence.
+
+### Risks / blockers
+
+1. **Validation gate:** The 0.5.0 Concept v1 reset has not yet demonstrated successful fresh CI, visual/interaction regression and packaged Windows save/resume on its latest head. Do not mark the new UI accepted based on prior 0.4.0 checks.
+2. **Experience gate:** No new product-owner acceptance for the implemented four anchor screens. Test at 1920×1080 and 1366×768, compare with issue #13, and inspect readability, purchase/placement, staff profile personality, research dependencies, modal focus and UI overlap.
+3. **Architecture/source-of-truth drift:** Main still says Phaser is authoritative; PR #11 represents a separate Three.js desktop implementation. Avoid wholesale merges of PRs #7/#8/#10/#11 or unreviewed save/simulation changes.
+4. **Art and UX quality:** 3D worker portraits are less expressive than the approved concept. The full premium management-game world and interface target remains aspirational, not yet achieved.
+5. **Reference durability:** Save the approved image in the repo's `Docs/References/` path when convenient; issue #13 is currently the working reference.
+
+### Next smallest useful session goal
+
+**Validate and stabilise the 0.5.0 Concept v1 UI on draft PR #11 without adding new gameplay features.**
+
+1. Check the latest PR head's True 3D and Desktop release workflow outcomes; fix any failed checks.
+2. Capture all four actual in-game anchor screens at 1920×1080 and 1366×768 and compare against issue #13.
+3. Exercise compare → place → cancel, road drag, staff hire/assignment/training, research dependencies, event/confirmation focus, operations/contracts, and save/close/reopen.
+4. Fix only observed functional, readability and visual-priority gaps; document honest before/after evidence and exact tested commit.
+5. Keep PR #11 draft until Rapha playtests and accepts the new interface. Then resolve which branch/stack becomes canonical and update main status/architecture/roadmap together.
+
+**Current product question:** Does the running 0.5.0 3D desktop build deliver the approved Concept v1's clarity and personality *in real gameplay*, rather than only in a reference mockup?
