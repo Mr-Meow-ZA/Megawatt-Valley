@@ -1,118 +1,27 @@
 # Megawatt Valley
 
-**Megawatt Valley** is a renewable-energy tycoon / management game.
+**Megawatt Valley** is a characterful, stylised 3D renewable-energy management/tycoon game. The first playable campaign is **Solar — Level 1: Here Comes the Sun**.
 
-## Primary direction — 29 September 2026
+> **Development transition (8 October 2026):** The current preferred candidate is the Three.js + Electron desktop build in [draft PR #11](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11). This candidate has **not merged into main**. Main still contains the earlier Phaser implementation. This README describes the *target direction*, not a claim that main already runs it.
 
-The project has been rebaselined around one overriding objective:
+## Start here
+- [Active development direction](Docs/ACTIVE_DEVELOPMENT.md) — product decisions, scope, architecture candidate and immediate acceptance goal.
+- [Repository cleanup plan](Docs/REPOSITORY_CLEANUP_PLAN.md) — archival and migration sequence.
+- [Visual quality and world character](Docs/VISUAL_QUALITY_AND_WORLD_CHARACTER.md) — approved aesthetic; see §15.
+- [Chronological ChatGPT reviews](Docs/CHATGPT_REVIEW.md) — most recent decisions supersede older ones.
+- [Historical archive index](Docs/Archive/README.md).
 
-> **Cursor should build a complete, polished, ready-to-play game with minimal ongoing manual work from Rapha and no additional paid development tools or services beyond existing Cursor and ChatGPT subscriptions.**
+## Current development
+- **Active candidate:** [PR #11 — Three.js/Electron desktop 3D](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11), branch `codex/3d-isometric`.
+- **Visual reference:** [issue #13](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/13).
+- **Next milestone:** validate and playtest the clean-sheet UI across HUD, solar build/compare, staff and research, then confirm the canonical stack.
+- **Core loop:** develop → finance → build → operate → improve → expand.
+- **Rule:** solar and wind are never mixed in the same level.
 
-The previous Unity implementation is **archived**. Its design discoveries remain useful, but Unity is no longer the active production path.
+## Historical implementation
+The earlier Phaser browser-first code and instructions remain on main until a reviewed migration is approved. Unity is preserved in `archive/unity-prototype-2026-09-29`. A pre-rebaseline main snapshot is preserved in `archive/pre-3d-rebaseline-2026-10-08`.
 
-Archived Unity snapshot:
-- branch: **archive/unity-prototype-2026-09-29**
-- status: historical reference only
-- do not resume Unity development unless Rapha explicitly reverses this decision
+Do **not** follow the old Phaser-specific build specifications for new 3D work, and do not merge the competing implementation PRs wholesale. For running/testing the 3D candidate, follow the instructions and workflow artifacts on PR #11.
 
-## Current production stack
-
-Primary implementation target:
-
-- **Phaser** — free/open-source game framework
-- **TypeScript**
-- **Vite**
-- browser-first delivery
-- Git + GitHub
-- free/open-source dependencies and assets only by default
-- local browser storage / IndexedDB for saves
-- Cursor as the primary autonomous implementation team
-- ChatGPT as product/design/review support
-
-No paid Phaser tooling, Unity licence, Godot editor workflow, paid asset packs, paid AI game builder, backend subscription, or other recurring service is required for the primary build.
-
-## Product target
-
-The first release target is:
-
-# Megawatt Valley: Solar
-
-A polished 30–60 minute first scenario, **Here Comes the Sun**, proving the core game loop:
-
-**DEVELOP → FINANCE → BUILD → OPERATE → IMPROVE → EXPAND**
-
-The release should include:
-
-- isometric building and placement;
-- solar generation and grid export;
-- economy and revenue;
-- time and weather;
-- equipment condition and failures;
-- maintenance staff;
-- panel cleaning / soiling;
-- capability unlocks and automation;
-- decision events;
-- objectives and 1★ / 2★ / 3★ completion;
-- save / load;
-- tutorialised progression;
-- polished UI;
-- a complete playable release build.
-
-Wind, BESS, multi-region portfolios and advanced finance remain future expansion systems until the solar release is complete and enjoyable.
-
-## Visual target
-
-The approved direction is **high-resolution pixel-isometric / illustrated pixel art** with:
-
-- a fixed or near-fixed isometric camera;
-- a rich scenic valley;
-- technically recognisable renewable infrastructure;
-- small expressive staff and service vehicles;
-- construction and maintenance activity;
-- animated weather and environmental effects;
-- warm, readable lighting;
-- a crisp modern management UI layered over the world.
-
-The quality benchmark is the approved Megawatt Valley pixel-isometric concept from 29 September 2026. See **Docs/VISUAL_DIRECTION.md**.
-
-## Cursor authority
-
-Cursor is expected to own routine implementation rather than wait for step-by-step instructions.
-
-Cursor should:
-
-1. read the primary project documents;
-2. maintain its own implementation backlog;
-3. implement;
-4. build;
-5. run automated tests;
-6. open and visually inspect the game;
-7. play through the affected feature;
-8. fix defects;
-9. repeat until acceptance criteria pass;
-10. commit and push meaningful progress.
-
-Rapha is the product owner / creative director, **not the routine developer or debugger**.
-
-Cursor should only escalate choices that materially affect game design, product scope, paid cost, legal/licensing risk, or an irreversible architectural decision.
-
-## Primary source of truth
-
-Read these first:
-
-1. **Docs/CURSOR_PRIMARY_BUILD_SPEC.md**
-2. **Docs/CURRENT_STATUS.md**
-3. **Docs/VISUAL_DIRECTION.md**
-4. **Docs/TECHNICAL_ARCHITECTURE.md**
-5. **Docs/ROADMAP.md**
-6. **Docs/GAME_VISION.md**
-7. **Docs/PROGRESSION_AND_ENGAGEMENT.md**
-8. **Docs/LEVEL_01_DESIGN.md**
-
-Any older document that conflicts with the files above should be treated as archived historical context.
-
-## Development principle
-
-> **Build the game, not the development project.**
-
-The objective is a finished playable Megawatt Valley release, not an endless sequence of prototypes or tooling exercises.
+## Collaboration
+Codex handles the active 3D implementation and validation; ChatGPT supports product review and documentation; Rapha decides major gameplay, visual and architecture acceptance. No extra paid tooling without explicit approval.
