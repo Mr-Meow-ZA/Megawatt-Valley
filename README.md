@@ -2,7 +2,7 @@
 
 ## Current desktop direction
 
-Start with [the locked quality target](Docs/DESKTOP_QUALITY_TARGET.md) and [resume checkpoint](Docs/RESUME_CHECKPOINT.md). Active autonomous development is the TypeScript / Three.js / Electron desktop build on `codex/3d-isometric` (draft PR #11). It aims for the detailed stylised 3D isometric world in the user's issue #12 references. The September/browser-first baseline below is historical wherever it conflicts with this target. Unity history remains preserved.
+Start with [the locked quality target](Docs/DESKTOP_QUALITY_TARGET.md) and [resume checkpoint](Docs/RESUME_CHECKPOINT.md). Active autonomous development is the TypeScript / Three.js / Electron desktop build on `codex/3d-isometric` (draft PR #11). It aims for the detailed stylised 3D isometric world in the user's issue #12 references. The approved clean-sheet UI direction is recorded in [UI/UX read first](Docs/CODEX_UI_UX_READ_FIRST.md) and [Concept v1 implementation](Docs/CONCEPT_V1_IMPLEMENTATION.md), using the actual image in issue #13. The active interface is src/ui/studio; src/ui/tycoon is historical scaffolding. The September/browser-first baseline below is historical wherever it conflicts with this target. Unity history remains preserved.
 
 
 **Megawatt Valley** is a renewable-energy tycoon / management game.

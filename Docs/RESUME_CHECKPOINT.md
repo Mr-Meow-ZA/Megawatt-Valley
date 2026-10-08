@@ -1,16 +1,27 @@
 # Resume checkpoint — 8 October 2026
 
-## Active task
-Implement the clean-sheet Concept v1 UI on codex/3d-isometric, draft PR #11. User specifically supplied **issue #13, New visual inspiration**; its actual four-anchor image has been inspected. Read Docs/CODEX_UI_UX_READ_FIRST.md, VISUAL_QUALITY_AND_WORLD_CHARACTER.md §15, latest CHATGPT_REVIEW.md, and CONCEPT_V1_IMPLEMENTATION.md before changes. Preserve approved true-3D renderer/simulation; Unity untouched.
+## Authority and active branch
+Work on codex/3d-isometric, draft PR #11. Read CODEX_UI_UX_READ_FIRST.md, VISUAL_QUALITY_AND_WORLD_CHARACTER.md §15, latest CHATGPT_REVIEW.md and CONCEPT_V1_IMPLEMENTATION.md. The approved true-3D world is retained. The old UI is rejected scaffolding. Unity is untouched.
 
-## Current change
-New src/ui/studio module replaces the runtime HUD: navy/light/blue/green design tokens and components; compact resource bar, objectives, interactive site map, independent workspaces; real solar comparison followed by explicit placement; staff profiles; connected research; functional supporting management, events and saves. Desktop metadata 0.5.0. No new engine or simulation rebalance.
+The actual Concept v1 image in [issue #13, New visual inspiration](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/13) has been visually inspected. It is the reference for navy/light panels, blue navigation, green actions, four anchor experiences. The requested canonical JPG remains absent; the issue image is available and reviewed.
 
-## Verification state
-This commit is the first integrated candidate, **not yet verified**. Check both automatically triggered workflows for its SHA: True 3D isometric checks and Desktop release checks. Repair failures, inspect actual logged screenshots, compare all four anchors to issue #13, run final regression. Last fully verified runtime before reset was cda9c376a061a52481533f4ac421ddbdac1c55a0 (77 tests; Windows run 37689028537 and UI run 37689028523).
+## Implemented
+New src/ui/studio module is the active runtime interface. HUD/objectives/minimap/navigation; browse/compare/explicit placement; distinct original 3D staff portraits, work, assignments and training; connected research with real cash/time costs, capabilities; operations, finance/contracts, equipment, events, goals and saves. Build packaging now uses active entrypoint CSS rather than hard-coded historical CSS. Desktop version 0.5.0; save format remains version 1.
 
-## Known quality work
-Character portraits currently render original world staff; they need more expression/individuality to approach the approved reference. Check laptop fit, graph readability, purchase actions, modal focus and all existing save/operations/road flows. The canonical reference JPG is absent, but the issue #13 attachment has been viewed; do not claim it is unseen. No product decisions require Rapha at present.
+## Verification
+Last fully verified runtime: **c7be6d761a15679a0d077f546c2e41837e4e84bf**.
+- 81 tests and production build pass.
+- Full interaction/road/operations/training/research/contracts/persistence/layout suite passes, no runtime or offline network errors.
+- Windows native save/import/fullscreen/normal-close/resume/corrupt-primary recovery passes.
+- Windows: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37803673515
+- UI/screenshots: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37803673476
+- Actual screenshots of all four anchors inspected. Portraits are a clear improvement. Purchase and research actions initially fell below the fold; this was identified as a usability defect.
 
-## Resume method
-Fetch branch head and inspect workflow evidence before editing. All meaningful work belongs in focused commits with test status and next actions recorded here. Do not merge other implementation tracks wholesale. Keep PR #11 draft until product acceptance. Never imply work runs after the assistant turn ends.
+## Pending candidate
+**80712d0ddfbe716ed1f99d1f52ffc0ccc1ae5cd6** fixes purchase/research footers so actions stay visible, independently scrolls detail, pauses confirmations and restores time, prevents Space from both activating UI and pausing, restores staff selection after loading, and expands interaction/screenshot coverage. Its workflows are running. Read their results; fix any failure; inspect fresh solar/research/laptop screenshots before calling this candidate verified.
+
+## Next work / quality gaps
+Complete the pending verification, then update this checkpoint and PR #11 with exact evidence/download links. Do not broaden the campaign. Compare further work periodically to issue #13 and the world-character document. The four anchors now have a coherent functioning foundation; visual/product acceptance remains Rapha's, and character art/motion, research illustration and milestone presentation remain polish opportunities. No important product decision currently needs escalation.
+
+## Continuity
+Fetch branch head and inspect workflow evidence before edits. Keep code and this checkpoint committed in focused changes so usage resets do not strand work. Do not merge other implementation tracks wholesale. Do not claim background work after a turn ends.
