@@ -1,164 +1,36 @@
 ---
-description: Primary autonomous development rules for Megawatt Valley
+description: Megawatt Valley product and development guardrails across implementation branches
 alwaysApply: true
 ---
 
-# Megawatt Valley — Cursor Primary Rules
-
-## Status
-
-**PRIMARY RULESET — 29 September 2026**
-
-The project is no longer an active Unity project.
-
-The full previous Unity state is preserved on branch **archive/unity-prototype-2026-09-29**.
-
-If any old Unity-era rule or document conflicts with this file or the primary build specification, the new Phaser direction wins.
+# Megawatt Valley — current agent guardrails
 
 ## Read first
+1. `Docs/ACTIVE_DEVELOPMENT.md`
+2. `Docs/CURRENT_STATUS.md`
+3. Latest dated decisions in `Docs/CHATGPT_REVIEW.md`
+4. `Docs/VISUAL_QUALITY_AND_WORLD_CHARACTER.md` §15
+5. `Docs/REPOSITORY_CLEANUP_PLAN.md`
 
-Before meaningful work, read:
+## Branch awareness (critical)
+**Main is still historical Unity code with transition documentation.** Do not infer from main's files that Unity or Phaser is the current desired implementation. The active **candidate** is Three.js + Electron on `codex/3d-isometric`, draft PR #11. It has not been accepted/merged. Do not claim the 3D candidate is already canonical on main.
 
-- README.md
-- Docs/CURSOR_PRIMARY_BUILD_SPEC.md
-- Docs/CURRENT_STATUS.md
-- Docs/VISUAL_DIRECTION.md
-- Docs/TECHNICAL_ARCHITECTURE.md
-- Docs/ROADMAP.md
-- Docs/GAME_VISION.md
-- Docs/PROGRESSION_AND_ENGAGEMENT.md
-- Docs/LEVEL_01_DESIGN.md
+When working on PR #11, read branch-local `Docs/RESUME_CHECKPOINT.md`, `Docs/CODEX_UI_UX_READ_FIRST.md`, `Docs/CONCEPT_V1_IMPLEMENTATION.md`, and the current tests/workflows. Continue Codex's checkpoint without resetting or rewriting its work.
 
-## Your role
+Do not create a competing Phaser/Unity implementation or merge other development branches wholesale. If the assigned branch is unclear, inspect git branch/status and the relevant PR first.
 
-You are the **primary implementation team**, not merely a coding assistant.
+## Product decisions
+- Stylised, characterful, premium **true-3D** isometric solar tycoon; Four Concept v1 UI anchors: HUD, solar build/compare, staff, research.
+- **Level 1 is solar only. Never mix wind and solar in a level.**
+- Real playable 30–60 minute management scenario, not a mockup or screenshot-only implementation.
+- Approved visual reference: issue #13; world-character document §15.
+- Prior pixel-isometric/Phaser/Unity production directions are historical.
+- Avoid invented/fake runtime statistics or unsupported UI actions.
 
-Rapha is the product owner / creative director.
+## Delivery discipline
+For meaningful changes: implement → build → test → launch/play → inspect screenshots and interactions → fix → retest → document exact commit and evidence. Validate 1920×1080 and 1366×768 where practical, packaged Windows save/close/resume, offline/runtime errors and the four anchor screens.
 
-Your job is to turn the approved specification into a complete ready-to-play game with minimal routine input from Rapha.
+Maintain clear handoffs in GitHub. Preserve historical work and do not delete or force-push branches without a reviewed migration. Keep `Docs/SESSION_GOALS.md` and `Docs/CURRENT_STATUS.md` accurate for the branch in use.
 
-## Core constraint
-
-Use the approved free/open-source stack.
-
-Do not introduce a new paid requirement without explicit approval.
-
-## Primary technical direction
-
-- Phaser
-- TypeScript
-- Vite
-- browser-first
-- static deployable build
-- no required backend for v1
-- local browser persistence
-- automated tests
-- browser/visual playtesting by the agent
-
-## Autonomous execution rule
-
-Do **not** stop after every small implementation step to ask what to do next.
-
-If the next action is:
-
-- clearly inside the approved roadmap;
-- technically reversible;
-- free;
-- legally/licensing-safe;
-- consistent with the product spec;
-
-then make a sensible decision and continue.
-
-Maintain an internal implementation backlog and work through it.
-
-## Required loop
-
-For every meaningful player-facing change:
-
-**implement → build → test → run → visually inspect → interact/play → fix → retest**
-
-Code compiling is not definition of done.
-
-Use browser tools to inspect the real game.
-
-## Do not ask Rapha to do routine development work
-
-Do not ask Rapha to:
-
-- code;
-- debug;
-- wire UI;
-- edit project configuration that you can edit;
-- assemble ordinary game content;
-- place ordinary assets;
-- run tests you can run;
-- copy logs you can obtain;
-- make low-risk reversible implementation decisions;
-- manually maintain the backlog.
-
-## Escalation triggers
-
-Ask Rapha only when a decision:
-
-- materially changes gameplay;
-- materially changes the approved visual direction;
-- materially changes scope;
-- costs money;
-- has uncertain licensing/legal implications;
-- would destroy/replace important history;
-- is difficult to reverse and strategically significant.
-
-## Visual target
-
-The active visual north star is **high-resolution pixel-isometric / illustrated pixel art**, with a crisp modern UI.
-
-Do not drift back toward the archived full-3D Unity target.
-
-Do not settle for programmer-art placeholders as the final presentation.
-
-## Product target
-
-Ship **Megawatt Valley: Solar — Here Comes the Sun** as a coherent 30–60 minute first scenario with:
-
-- build/placement;
-- solar generation;
-- grid export;
-- economy;
-- time/weather;
-- equipment choice;
-- failures;
-- technician repair;
-- Radio Dispatch automation;
-- soiling/cleaning;
-- site expansion;
-- capability progression;
-- events;
-- severe-weather climax;
-- 1★ / 2★ / 3★ goals;
-- save/load;
-- polished UI;
-- releasable presentation.
-
-## Scope discipline
-
-Do not implement operational wind, BESS, multiplayer, cloud accounts, deep corporate finance or multi-region simulation before the solar release works.
-
-Locked future content may be teased in UI if useful.
-
-## Git discipline
-
-After meaningful progress:
-
-- commit clearly;
-- push to origin;
-- update Docs/CURRENT_STATUS.md when project state changes;
-- keep architecture/visual/spec docs aligned;
-- preserve the archive branch.
-
-Do not create paperwork for its own sake.
-
-## Governing principle
-
-> **Build the game, test the game, finish the game.**
-
-Optimise for a finished playable product, not for producing code or frameworks.
+## Autonomy and escalation
+Codex/Cursor should handle routine reversible technical decisions and tests. Rapha is product owner; escalate significant product/visual/architecture changes, paid services, licensing uncertainty or irreversible history removal. Use free/open-source tools unless explicitly approved otherwise.
