@@ -1,5 +1,9 @@
 # Megawatt Valley — Current Status
 
+## UI reset — 8 October 2026
+
+The true-3D world remains approved as the current foundation. The previous UI direction is rejected. Read [UI/UX read first](CODEX_UI_UX_READ_FIRST.md), [Concept v1 implementation](CONCEPT_V1_IMPLEMENTATION.md), and [resume checkpoint](RESUME_CHECKPOINT.md). The actual approved image in issue #13 has been inspected. The active interface is independently composed in `src/ui/studio`, with a new HUD, solar comparison/placement, character profiles and connected research. Simulation and version-1 saves remain compatible. The checkpoint contains exact verified builds and download links; older status sections below are historical.
+
 ## Desktop update — 7 October 2026
 
 Read the [locked desktop quality target](DESKTOP_QUALITY_TARGET.md) and [resume checkpoint](RESUME_CHECKPOINT.md) first. The checkpoint records active work, exact validation and next steps for `codex/3d-isometric`. The earlier browser candidate below is retained as history. Its stack and visual directives do not override the desktop target.

@@ -9,12 +9,12 @@ The actual Concept v1 image in [issue #13, New visual inspiration](https://githu
 New src/ui/studio module is the active runtime interface. HUD/objectives/minimap/navigation; browse/compare/explicit placement; distinct original 3D staff portraits, work, assignments and training; connected research with real cash/time costs, capabilities; operations, finance/contracts, equipment, events, goals and saves. Build packaging now uses active entrypoint CSS rather than hard-coded historical CSS. Desktop version 0.5.0; save format remains version 1.
 
 ## Verification
-Last fully verified runtime: **c7be6d761a15679a0d077f546c2e41837e4e84bf**.
+Last fully verified runtime: **80712d0ddfbe716ed1f99d1f52ffc0ccc1ae5cd6**.
 - 81 tests and production build pass.
 - Full interaction/road/operations/training/research/contracts/persistence/layout suite passes, no runtime or offline network errors.
 - Windows native save/import/fullscreen/normal-close/resume/corrupt-primary recovery passes.
-- Windows: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37803673515
-- UI/screenshots: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37803673476
+- Windows: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37804723021
+- UI/screenshots: https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37804723331
 - Actual screenshots of all four anchors inspected. Portraits are a clear improvement. Purchase and research actions initially fell below the fold; this was identified as a usability defect.
 
 ## Pending candidate

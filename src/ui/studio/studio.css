@@ -94,3 +94,6 @@ body{font-family:var(--mv-font);background:#839d75}#game-root,#ui-root{position:
 @media(max-height:800px){.mv-product-scroll{padding:14px 20px}.mv-purchase{padding:11px 20px}.mv-research-top .mv-tabs{padding:10px 16px}.mv-research-description{padding:14px 18px}.mv-research-fund{padding:10px 14px}}
 
 .mv-workspace[data-page="research"]:has(.mv-capabilities){display:block;overflow:auto}
+
+.mv-product-detail.comparing .mv-product-scroll>.mv-preview,.mv-product-detail.comparing .mv-product-scroll>.mv-lead,.mv-product-detail.comparing .mv-product-scroll>.mv-product-summary{display:none}
+.mv-product-detail.comparing .mv-detail-title{margin:4px 0 10px}

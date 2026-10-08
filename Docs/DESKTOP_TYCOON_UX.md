@@ -1,5 +1,7 @@
 # Desktop tycoon interface — autonomous build 0.4.0
 
+> Historical implementation record. Rapha rejected this UI as a design baseline on 7 October 2026. The active clean-sheet implementation is `src/ui/studio`, governed by [UI/UX read first](CODEX_UI_UX_READ_FIRST.md) and documented in [Concept v1 implementation](CONCEPT_V1_IMPLEMENTATION.md). Do not use the layout described below as the current design direction.
+
 This is the independent TypeScript/Three.js/Electron build. The Unity project and earlier interface files remain historical/reference work. The desktop entry point uses only `src/ui/tycoon` and its new stylesheet; it does not import DomHud, styles.css or referenceHud.css.
 
 ## Design decisions

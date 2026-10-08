@@ -34,3 +34,19 @@ Test adapters against simulation-derived values. Run all existing scenario/save 
 
 ## Current phase
 Clean-sheet implementation is now wired under src/ui/studio. Tokens/components, HUD/minimap, browse/compare/place, profiles/assignments/training, connected research, policies, contracts, finance, objectives, events and saves are implemented. Validation is running; do not claim the visual target or checks have passed until evidence is recorded. Original detailed portrait busts now distinguish Tess and the recruitable roles, with faces, expressions, hair, PPE and folded-arm poses. They are pre-rendered once; the small in-world models and simulation remain unchanged. Further character art refinement remains part of the quality target, not a claim of product acceptance.
+
+
+## Module boundaries
+- `ValleyInterface.ts`: UI selection, navigation, delegated actions, focus management and modal time handling. Calls existing simulation APIs; no progression/economy implementation.
+- `anchors.ts`: procurement, staff and research views; `management.ts`: equipment, operations, finance, contracts and objectives.
+- `data.ts`: presentation adapters checked against simulation output; `components.ts`, `tokens.css`, `studio.css`: shared UI system.
+- `minimap.ts`: shared world geometry + snapshot state, never independent geography.
+- `portraitModels.ts` / `portraits.ts`: original detailed character busts, rendered once at startup, then disposed. In-world staff geometry is unchanged.
+- `reconcile.ts`: updates live values without replacing stable controls; preserves expanded facts and focused selects.
+- `scripts/package-playable.mjs`: embeds the entrypoint's bundled CSS so desktop/offline and development builds share the same interface.
+
+## Interaction decisions
+Browsing does not start placement or spend money. Explicit Place returns the world to the foreground; repeated placement, road dragging, Shift bend choice, atomic rejection, right-click and Escape remain intact. Procurement and research keep decision footers visible while details scroll. Staff Find in valley closes the profile so the target is visible. Confirmations pause time, make background controls inert and return the previous speed after the decision. Native save and portable import/export remain available.
+
+## Quality review
+The first running four-anchor capture was reviewed against issue #13. The new hierarchy, palette, previews, portraits and connected progression are implemented; it is a functioning design foundation, not a claim of final visual acceptance. Initial below-fold purchase/research buttons were corrected after screenshot review. Continue improving character individuality/motion, research illustration and milestone feedback in the approved direction. No new product decision requires Rapha at this point.

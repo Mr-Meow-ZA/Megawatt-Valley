@@ -42,7 +42,7 @@ assert.equal((await saved()).buildMode,null,'Browsing does not enter placement')
 assert.ok(await q('product','bargain_pv').locator('img').evaluate(i=>i.complete&&i.naturalWidth>0&&i.width>=100));
 await q('product','premium_pv').click();await q('compare').click();
 assert.match(await page.locator('.mv-compare').textContent(),/75% lower/);
-assert.ok(await q('place','premium_pv').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=104&&r.bottom<innerHeight-100;}),'Place stays visible while comparing');await shot('studio-solar-comparison',true);
+assert.ok(await q('place','premium_pv').evaluate(el=>{const r=el.getBoundingClientRect();return r.top>=104&&r.bottom<innerHeight-100;}),'Place stays visible while comparing');assert.ok(await page.locator('.mv-compare tbody tr').last().evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-purchase').getBoundingClientRect().top),'All comparison trade-offs are visible above purchase');await shot('studio-solar-comparison',true);
 await q('compare').click();
 await page.locator('.mv-facts summary').click();await page.waitForTimeout(600);assert.equal(await page.locator('.mv-facts').evaluate(el=>el.open),true,'Live updates retain expanded secondary facts');
 await page.locator('.mv-facts summary').click();
@@ -124,7 +124,7 @@ await page.keyboard.press('Escape');
 await page.locator('.mv-top [data-action="menu"]').click();const download=page.waitForEvent('download');await q('export').click();assert.match((await download).suggestedFilename(),/company.json/);
 await page.locator('.mv-pause [data-action="menu"]').click();
 await page.keyboard.press('h');await page.keyboard.press('b');await q('category','solar').click();
-await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-navigation').getBoundingClientRect().top));assert.ok(await q('place','bargain_pv').evaluate(el=>el.getBoundingClientRect().bottom<innerHeight-100),'Placement action fits laptop viewport');await shot('studio-laptop-build',true);
+await page.setViewportSize({width:1024,height:768});assert.ok(await page.locator('.mv-workspace').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-navigation').getBoundingClientRect().top));assert.ok(await q('place','bargain_pv').evaluate(el=>el.getBoundingClientRect().bottom<innerHeight-100),'Placement action fits laptop viewport');await shot('studio-laptop-build',true);await q('compare').click();assert.ok(await page.locator('.mv-compare tbody tr').last().evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-purchase').getBoundingClientRect().top),'Comparison trade-offs fit laptop without scrolling');await shot('studio-laptop-comparison',true);await q('compare').click();
 for(const viewport of [{width:1366,height:768},{width:1920,height:1080}]){
  await page.setViewportSize(viewport);
  const layout=await page.locator('.mv-workspace').evaluate(el=>{
