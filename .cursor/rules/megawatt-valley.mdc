@@ -13,7 +13,7 @@ The project is no longer an active Unity project.
 
 The full previous Unity state is preserved on branch **archive/unity-prototype-2026-09-29**.
 
-If any old Unity-era rule or document conflicts with this file or the primary build specification, the new Phaser direction wins.
+The approved active implementation is the true-3D Three.js/Electron candidate on PR #11. Historical Phaser/Unity guidance does not override the latest product-owner decision.
 
 ## Read first
 
@@ -45,15 +45,10 @@ Do not introduce a new paid requirement without explicit approval.
 
 ## Primary technical direction
 
-- Phaser
-- TypeScript
-- Vite
-- browser-first
-- static deployable build
-- no required backend for v1
-- local browser persistence
-- automated tests
-- browser/visual playtesting by the agent
+- Three.js true-3D world, TypeScript/Vite, Electron desktop; PR #11 remains draft until visual/player acceptance.
+- Preserve existing simulation, offline Windows packaging and version-1 save compatibility.
+- Level 1 is solar-only; approved Concept v1 UI reference is issue #13.
+- Browser interaction tests, Windows native tests and actual visual inspection are required.
 
 ## Autonomous execution rule
 
@@ -110,9 +105,9 @@ Ask Rapha only when a decision:
 
 ## Visual target
 
-The active visual north star is **high-resolution pixel-isometric / illustrated pixel art**, with a crisp modern UI.
+The active visual north star is a **stylized, characterful true-3D world** and the approved Concept v1 premium management UI.
 
-Do not drift back toward the archived full-3D Unity target.
+Do not revert to Phaser/pixel-isometric direction or restart Unity.
 
 Do not settle for programmer-art placeholders as the final presentation.
 
@@ -162,3 +157,12 @@ Do not create paperwork for its own sake.
 > **Build the game, test the game, finish the game.**
 
 Optimise for a finished playable product, not for producing code or frameworks.
+
+## GitHub PR #11 message board — mandatory session checks (9 Oct 2026)
+The active cross-agent message board is the **Conversation tab of PR #11**: https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11 . Read the newest comments, especially https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11#issuecomment-6078728631 .
+- **Start of each session:** fetch GitHub, read new PR #11 comments since the last acknowledged note, then read the active branch checkpoint and any linked resource/decision docs.
+- **Before consequential design, asset, architecture or scope changes:** recheck for new instructions.
+- **Before ending a session:** recheck the conversation, document handled/pending messages with URLs in the checkpoint, and report conflicts rather than silently ignoring them.
+- New review comments are not automatically superior to explicit newer product-owner decisions. Distinguish advice from approval and never claim visual acceptance without Rapha's confirmation.
+- If GitHub cannot be accessed, explicitly report the failed check; never pretend to have read new comments. These are checks during actual agent sessions, **not continuous monitoring**.
+- Read `Docs/FREE_ASSET_RESOURCE_INDEX.md` from main for the asset-first sourcing policy. Verify each downloaded pack's commercial-use license and provenance before shipping.
