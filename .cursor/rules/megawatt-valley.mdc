@@ -34,3 +34,12 @@ Maintain clear handoffs in GitHub. Preserve historical work and do not delete or
 
 ## Autonomy and escalation
 Codex/Cursor should handle routine reversible technical decisions and tests. Rapha is product owner; escalate significant product/visual/architecture changes, paid services, licensing uncertainty or irreversible history removal. Use free/open-source tools unless explicitly approved otherwise.
+
+## GitHub PR #11 message board — mandatory session checks (9 Oct 2026)
+The active cross-agent message board is the **Conversation tab of PR #11**: https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11 . Read the newest comments, especially https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11#issuecomment-6078728631 .
+- **Start of each session:** fetch GitHub, read new PR #11 comments since the last acknowledged note, then read the active branch checkpoint and any linked resource/decision docs.
+- **Before consequential design, asset, architecture or scope changes:** recheck for new instructions.
+- **Before ending a session:** recheck the conversation, document handled/pending messages with URLs in the checkpoint, and report conflicts rather than silently ignoring them.
+- New review comments are not automatically superior to explicit newer product-owner decisions. Distinguish advice from approval and never claim visual acceptance without Rapha's confirmation.
+- If GitHub cannot be accessed, explicitly report the failed check; never pretend to have read new comments. These are checks during actual agent sessions, **not continuous monitoring**.
+- Read `Docs/FREE_ASSET_RESOURCE_INDEX.md` from main for the asset-first sourcing policy. Verify each downloaded pack's commercial-use license and provenance before shipping.
