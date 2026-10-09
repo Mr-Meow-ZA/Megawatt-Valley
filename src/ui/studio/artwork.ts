@@ -4,9 +4,20 @@ const loaded=new Map<string,string>();
 export async function loadArtwork(key:string):Promise<string>{
  const cached=loaded.get(key);if(cached)return cached;
  const embedded=(window as Window&{__MW_ASSETS__?:Record<string,string>}).__MW_ASSETS__?.[key];
- const response=await fetch(embedded??('/assets/game/'+key+'.png'));
- if(!response.ok)throw new Error('Artwork could not load: '+key);
- const blob=await response.blob(),url=URL.createObjectURL(blob);
+ let blob:Blob;
+ if(embedded){
+  // Native CSP intentionally disallows data: fetch. Decode packaged bytes locally.
+  const encoded=embedded.match(/^data:image\/png;base64,(.+)$/)?.[1];
+  if(!encoded)throw new Error('Invalid packaged artwork: '+key);
+  const binary=atob(encoded),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+  blob=new Blob([bytes],{type:'image/png'});
+ }else{
+  const response=await fetch('/assets/game/'+key+'.png');
+  if(!response.ok)throw new Error('Artwork could not load: '+key);
+  blob=await response.blob();
+ }
+ const url=URL.createObjectURL(blob);
  const preview=new Image();preview.src=url;
  try{await preview.decode();}catch(error){URL.revokeObjectURL(url);throw new Error('Invalid artwork: '+key,{cause:error});}
  loaded.set(key,url);return url;
