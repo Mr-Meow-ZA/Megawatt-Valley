@@ -1,7 +1,7 @@
 name: True 3D isometric checks
 on:
   push:
-    branches: [codex/3d-isometric]
+    branches: [codex/3d-isometric, cleanup/true-3d-only-2026-10-09]
     paths-ignore: ['Docs/**', 'README.md']
   workflow_dispatch:
 permissions:
