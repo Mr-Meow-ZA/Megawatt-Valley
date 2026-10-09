@@ -19,3 +19,12 @@ Policy: `Docs/ASSET_POLICY.md`.
 | Status | Asset / Pack | Creator | Source URL | Licence | Attribution Required | Modified? | Project Location / Use | Date Obtained | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | CANDIDATE | Kenney isometric + city/nature/UI packs (batch) | Kenney | https://kenney.nl · https://github.com/KenneyNL | CC0 | No (appreciated) | No | `public/assets/sourced/` — see `INVENTORY.md` | 2026-09-29 | Phaser Level 1 candidate art. Includes iso landscape/city/buildings/roads, nature kit, city-kit industrial (solar GLB+PNG previews), pixel vehicles, characters, game icons. Not yet wired into runtime. |
+
+## Desktop UI asset pass — 9 October 2026
+
+| Status | Asset | Creator | Source | Licence / provenance | Attribution | Modified | Location | Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| INTEGRATED, visual review pending | Phosphor duotone subset | Phosphor Icons | https://github.com/phosphor-icons/core | MIT | Licence notice included | SVG wrapper only | src/ui/studio/phosphor.ts | 2026-10-09 |
+| INTEGRATED, visual review pending | Five staff portraits and eight menu illustrations | OpenAI image generation for Megawatt Valley | Generated in development session | Original AI-generated project artwork; not a third-party asset pack | Generated provenance retained | Runtime display/cropping only | public/assets/game/portrait_*.png and ui_menu_atlas.png | 2026-10-09 |
+
+Detailed sources, selection decisions and distribution credits: [UI asset provenance](UI_ASSET_PROVENANCE.md).

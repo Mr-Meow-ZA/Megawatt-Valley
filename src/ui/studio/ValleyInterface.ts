@@ -13,6 +13,7 @@ import {procurement,people,research} from './anchors';
 import {inspector,operations,company,objectives} from './management';
 import {PRODUCT,type Page,type SiteView} from './data';
 import {esc,money,action,glyph,heading,meter} from './components';
+import {artwork} from './artwork';
 import {minimap} from './minimap';
 import {patchChildren} from './reconcile';
 
@@ -82,7 +83,7 @@ export class ValleyInterface {
   if(this.lastPage!==this.page){this.root.querySelector<HTMLElement>('[data-slot="workspace"]')!.scrollTop=0;this.lastPage=this.page;}
   const workspace=this.root.querySelector<HTMLElement>('[data-slot="workspace"]')!;workspace.dataset.page=this.page??'';
   this.put('inspector',!this.page?inspector(s):'');
-  this.put('navigation',(['build','people','research','operations','company','objectives','views'] as const).map(id=>action('page',glyph(id)+'<span>'+({build:'Build',people:'People',research:'Research',operations:'Operations',company:'Company',objectives:'Goals',views:'Site views'}[id])+'</span>',id,this.page===id?'selected':'quiet','aria-pressed="'+(this.page===id)+'"')).join(''));
+  this.put('navigation',(['build','people','research','operations','company','objectives','views'] as const).map(id=>action('page',artwork(id)+'<span>'+({build:'Build',people:'People',research:'Research',operations:'Operations',company:'Company',objectives:'Goals',views:'Site views'}[id])+'</span>',id,this.page===id?'selected':'quiet','aria-pressed="'+(this.page===id)+'"')).join(''));
   this.put('map',!this.page&&!s.selectedId?minimap(s):'');
   this.put('placement',s.buildMode?'<div>'+glyph('build')+'<b>'+PRODUCT[s.buildMode].short+'</b><span>'+money(EQUIPMENT[s.buildMode].cost)+(s.buildMode==='road'?' / tile · Drag a route · Shift changes bend':' / item · Click to build')+'</span><small>Right-click / Esc cancels · Middle-drag pans</small></div>'+action('page','Catalogue','build')+action('cancel','Cancel','','quiet'):this.view!=='normal'?'<b>Site view · '+this.view+'</b>'+action('view','Return to natural view','normal'):'');
   const event=s.activeEvent,won=s.scenarioComplete&&!s.completionAcknowledged;

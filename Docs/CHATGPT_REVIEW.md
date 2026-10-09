@@ -150,3 +150,7 @@ The existing UI/UX direction is **rejected as a design baseline**. Do not increm
 The first clean-sheet UI/UX concept has been explicitly approved. It establishes four anchor surfaces: main gameplay HUD, solar build/compare experience, technician profile and research/technology tree. See `Docs/VISUAL_QUALITY_AND_WORLD_CHARACTER.md`, especially section 15, and the approved reference image at `Docs/References/megawatt-valley-ui-ux-approved-concept-v1.jpg` when available.
 
 **Instruction for Codex:** before substantial UI/UX implementation, read the visual-quality document and approved mockup. Use them as the new product direction. Do not use the current UI as the visual/layout reference. Implementation may adapt the mockup to actual game data and constraints, but should preserve its hierarchy, contextual depth, character, comparison quality and premium management-game feel.
+
+## Product-owner update — 9 October 2026: professional artwork required
+
+Rapha rejected the implemented character/menu artwork and still dislikes the UI/UX. The procedural busts and homemade pictograms are not an accepted quality baseline. For character and menu art, search for suitable commercially safe professional/community resources first; use generated actual artwork where needed. Do not return to low-quality primitive-shape stand-ins. Preserve the approved true-3D world and working simulation while improving the interface. A passing build or a generated asset alone does not establish visual acceptance: inspect the integrated screens and compare against Concept v1.

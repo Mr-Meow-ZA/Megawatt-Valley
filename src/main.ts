@@ -2,7 +2,8 @@ import './three/world.css';
 import * as T from 'three';
 import { GameSimulation } from './simulation/GameSimulation';
 import { ValleyInterface } from './ui/studio/ValleyInterface';
-import {renderPortraits} from './ui/studio/portraits';
+import {loadPortraits} from './ui/studio/portraits';
+import {loadMenuArtwork} from './ui/studio/artwork';
 import './ui/studio/studio.css';
 import {roadStroke} from './simulation/roads';
 import type {Vec2} from './simulation/types';
@@ -17,7 +18,7 @@ async function start():Promise<void>{
   const renderer=new T.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance',preserveDrawingBuffer:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate=false;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
-  const models=new ModelLibrary();await models.load();renderCatalogue(renderer,models);renderPortraits(renderer);parent.append(renderer.domElement);
+  const models=new ModelLibrary();await models.load();renderCatalogue(renderer,models);await Promise.all([loadPortraits(),loadMenuArtwork()]);parent.append(renderer.domElement);
   let sim:GameSimulation,world:World3D,hud:ValleyInterface;
   function resize():void{renderer.setSize(innerWidth,innerHeight);world.resize(innerWidth,innerHeight);}
   function newGame():void{

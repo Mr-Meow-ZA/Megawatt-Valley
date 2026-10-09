@@ -34,3 +34,7 @@ Use these anchors to establish a reusable design system before proliferating one
 First inventory what game state/data already exists for each anchor surface. Then define reusable UI primitives/tokens and implement one coherent vertical slice at a time. Preserve simulation behavior unless UI work genuinely requires a data contract change. Keep automated tests and add interaction/regression coverage where practical.
 
 Do not treat the current UI's styling, dimensions or component hierarchy as constraints.
+
+## Product-owner update — 9 October 2026: professional artwork required
+
+Rapha rejected the implemented character/menu artwork and still dislikes the UI/UX. The procedural busts and homemade pictograms are not an accepted quality baseline. For character and menu art, search for suitable commercially safe professional/community resources first; use generated actual artwork where needed. Do not return to low-quality primitive-shape stand-ins. Preserve the approved true-3D world and working simulation while improving the interface. A passing build or a generated asset alone does not establish visual acceptance: inspect the integrated screens and compare against Concept v1.
