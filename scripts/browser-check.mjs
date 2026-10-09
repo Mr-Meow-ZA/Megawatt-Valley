@@ -95,6 +95,10 @@ await page.reload();await page.locator('[data-ui="studio"]').waitFor({timeout:90
 assert.equal((await saved()).cash,state.cash);assert.equal((await saved()).speed,0);
 await page.keyboard.press('t');await q('staff-tab','hire').first().click();assert.equal(await page.locator('.mv-hire-card>img').count(),4);
 assert.ok(await page.locator('.mv-hire-card>img').evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth>=1000)));
+assert.ok(await page.locator('.mv-hire-card').evaluateAll(cards=>cards.every(card=>{
+ const action=card.querySelector('[data-action="hire"]').getBoundingClientRect(),r=card.getBoundingClientRect();
+ return action.bottom<=r.bottom&&action.top>=r.top;
+})),'Recruitment actions remain inside complete cards');
 await shot('studio-recruitment',true);
 await q('hire','cleaner').click();assert.equal((await saved()).staff.length,2);
 await shot('studio-staff');
