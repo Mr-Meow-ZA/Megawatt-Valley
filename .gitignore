@@ -1,20 +1,16 @@
-# Unity generated folders
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/[Ll]ogs/
-/[Uu]ser[Ss]ettings/
-/[Mm]emoryCaptures/
-/[Rr]ecordings/
-
-# Asset Store tools
-/Assets/AssetStoreTools*
-
-# IDE / editor files
+# Unity project working output (do not ignore editable project scenes/assets/meta)
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+Recordings/
 .vs/
 .idea/
+.vscode/
 *.csproj
 *.sln
 *.suo
@@ -27,47 +23,9 @@
 *.mdb
 *.opendb
 *.VC.db
-*.unityproj
-InitTestScene*.unity*
-
-# Rider
-*.sln.iml
-
-# Visual Studio Code local settings
-.vscode/
-
-# OS files
 .DS_Store
 Thumbs.db
-Desktop.ini
-
-# Crash / diagnostic files
-sysinfo.txt
-crashlytics-build.properties
-CrashReports/
-
-# Unity temporary / generated packages
-/[Aa]ssets/[Ss]treamingAssets/aa.meta
-/[Aa]ssets/[Ss]treamingAssets/aa/*
-
-# Local Unity AI Assistant editor residue (not a project dependency)
-/ProjectSettings/Packages/com.unity.ai.assistant/
-
-# Builds and distribution artifacts
-*.apk
-*.aab
-*.unitypackage
-*.app
-*.exe
-
-# Keep Cursor project rules, hooks, and project MCP config tracked
-!.cursor/
-!.cursor/rules/
-!.cursor/rules/**
-!.cursor/hooks.json
-!.cursor/hooks/
-!.cursor/hooks/**
-!.cursor/mcp.json
-
-# Cursor hook run logs (must stay ignored after the un-ignores above)
-.cursor/hooks/*.log
+UnityPrototype/[Ll]ibrary/
+UnityPrototype/[Tt]emp/
+UnityPrototype/[Oo]bj/
+UnityPrototype/[Bb]uilds/
