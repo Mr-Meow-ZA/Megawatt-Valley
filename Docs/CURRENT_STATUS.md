@@ -1,5 +1,10 @@
 # Megawatt Valley — Current Status
 
+## Artwork replacement — 9 October 2026
+
+Rapha rejected the procedural portrait and menu-art quality. The active desktop now uses individual generated staff illustrations, an illustrated destination/research atlas and a vendored MIT Phosphor control-icon set. The old portrait meshes no longer execute. UI/UX remains under review; this is not product-owner acceptance. See [latest checkpoint](RESUME_CHECKPOINT.md) for exact tested builds and [asset provenance](UI_ASSET_PROVENANCE.md) for research, licences and generated-art disclosure.
+
+
 ## UI reset — 8 October 2026
 
 The true-3D world remains approved as the current foundation. The previous UI direction is rejected. Read [UI/UX read first](CODEX_UI_UX_READ_FIRST.md), [Concept v1 implementation](CONCEPT_V1_IMPLEMENTATION.md), and [resume checkpoint](RESUME_CHECKPOINT.md). The actual approved image in issue #13 has been inspected. The active interface is independently composed in `src/ui/studio`, with a new HUD, solar comparison/placement, character profiles and connected research. Simulation and version-1 saves remain compatible. The checkpoint contains exact verified builds and download links; older status sections below are historical.

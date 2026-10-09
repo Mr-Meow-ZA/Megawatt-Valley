@@ -50,3 +50,13 @@ Browsing does not start placement or spend money. Explicit Place returns the wor
 
 ## Quality review
 The first running four-anchor capture was reviewed against issue #13. The new hierarchy, palette, previews, portraits and connected progression are implemented; it is a functioning design foundation, not a claim of final visual acceptance. Initial below-fold purchase/research buttons were corrected after screenshot review. Continue improving character individuality/motion, research illustration and milestone feedback in the approved direction. No new product decision requires Rapha at this point.
+
+## Superseding artwork pass — 9 October 2026
+
+The procedural portrait and handmade icon choices described above were rejected by Rapha. They are historical implementation details, not the target. The canonical approved reference JPG is now archived in Docs/References and was inspected again during this pass.
+
+Runtime portraits now come from five individual generated PNG illustrations. `artwork.ts` loads and decodes local assets once, supplies short shared blob URLs, and draws eight illustrated navigation/research motifs from a single atlas. `portraits.ts` maps actual staff identities/roles to those images; it performs no geometry rendering. `portraitModels.ts` is historical unused source. `phosphor.ts` vendors a licensed professional icon family for small controls. The native loader decodes packaged base64 directly to respect the desktop's existing restrictive content-security policy.
+
+Profile layout now gives the character a dedicated full-height stage, with independently scrolling roster and operational details. The recruitment view shows all four role portraits. Main destinations and research/capability cards use authored artwork; actual equipment previews remain faithful to the in-world models. Labels, button states, cash/time consequences, simulation contracts and keyboard behavior remain real. The laptop solar comparison retains its visible decision footer and tighter row spacing.
+
+Quality assessment must use actual runtime screenshots, including 1024×768 and native startup. The reference still sets a higher overall world/interaction target; generated artwork and passing checks do not automatically mean the final visual goal has been achieved. Product-owner playtest remains necessary for acceptance, but routine development continues autonomously.

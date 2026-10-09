@@ -37,6 +37,18 @@ assert.equal(await page.locator('.tycoon-ui,.management-dock,.utility-menu,.topb
 assert.equal(await page.locator('.mv-navigation .mv-art').count(),7,'Main navigation uses authored artwork');
 assert.ok(await page.locator('.mv-navigation .mv-art').first().evaluate(el=>getComputedStyle(el).backgroundImage.includes('blob:')),'Atlas is loaded locally');
 await shot('studio-opening',true);
+await q('page','research').click();
+for(const viewport of [{width:1440,height:900},{width:1024,height:768}]){
+ await page.setViewportSize(viewport);
+ await shot('studio-research-layout-'+viewport.width,true);
+ assert.ok(await page.locator('.mv-research-node').evaluateAll(nodes=>nodes.every(el=>{
+  const r=el.getBoundingClientRect(),tree=el.closest('.mv-tree').getBoundingClientRect();
+  return r.top>=tree.top&&r.bottom<=tree.bottom&&r.width>50;
+ })),'All nine research nodes visible at '+viewport.width);
+ assert.ok(await page.locator('.mv-research-description .mv-lead').evaluate(el=>el.getBoundingClientRect().bottom<document.querySelector('.mv-research-fund').getBoundingClientRect().top),'Selected research effect visible');
+}
+await page.setViewportSize({width:1440,height:900});await page.keyboard.press('Escape');
+
 await q('page','build').focus();await page.keyboard.press('Space');
 assert.equal((await saved()).speed,0,'Keyboard button activation does not also toggle park time');
 assert.equal(await q('product').count(),2);
