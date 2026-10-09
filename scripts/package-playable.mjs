@@ -41,7 +41,7 @@ const js = output.outputFiles.find(file=>file.path.endsWith('.js')).text.replace
 const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Megawatt Valley — Here Comes the Sun</title><style>'+css+'</style></head><body><div id="app"><div id="game-root"></div><div id="ui-root"></div></div><script>window.__MW_ASSETS__='+JSON.stringify(assets)+';window.__MW_VECTOR_ASSETS__='+JSON.stringify(vectorAssets)+';window.__MW_MODELS__='+JSON.stringify(models)+';</script><script>'+js+'</script></body></html>';
 await mkdir('playable',{recursive:true});
 await writeFile('playable/PLAY-MEGAWATT-VALLEY.html',html);
-await copyFile('Docs/ASSET_REGISTER_PHASER.md','playable/ASSET-CREDITS.md');
+await copyFile('Docs/ASSET_REGISTER.md','playable/ASSET-CREDITS.md');
 await mkdir('playable/licenses',{recursive:true});
 for (const name of ['three']) {
   const dir = path.join('node_modules',name);
