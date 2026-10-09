@@ -1,7 +1,7 @@
 name: Desktop release
 on:
   push:
-    branches: [codex/3d-isometric]
+    branches: [codex/3d-isometric, cleanup/true-3d-only-2026-10-09]
     # Browser-only checks and documentation do not rebuild an identical installer.
     # Use workflow_dispatch when changing only this workflow.
     paths: ['src/**', 'desktop/**', 'tests/**', 'public/assets/**', 'package*.json', 'scripts/package-*.mjs', 'scripts/model-manifest.mjs', 'scripts/embed-glb.mjs', 'scripts/desktop*.mjs', '.github/workflows/desktop-release.yml']
