@@ -1,3 +1,5 @@
+> **ON HOLD — 12 October 2026.** Do not execute this Unity proof now. Codex is finishing the existing Three.js Solar Level 1 with a full game-quality UI/UX overhaul on [`codex/threejs-level1-final`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/tree/codex/threejs-level1-final). [Active board #20](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/20). This historical proposal is retained for a **future** engine evaluation after the completed Three.js version is accepted and archived.
+
 # Unity visual proof of quality — scoped Codex brief
 
 **Status:** planned / not yet implemented. **Starting platform:** current Unity version with URP, C#, standalone Windows target. **Timebox:** about 2–3 focused working days as an initial *feasibility experiment*, not a guarantee of commercial-studio quality.
