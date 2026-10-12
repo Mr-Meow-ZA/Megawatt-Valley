@@ -1,32 +1,33 @@
-# Resume checkpoint — 9 October 2026
+# Resume checkpoint — 12 October 2026
 
-Active branch: `codex/3d-isometric`; draft PR #11. **Codex is the sole active coding agent; Cursor is retired**, per [Rapha's clarification](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11#issuecomment-6078879116). Preserve the true-3D world, simulation and version-1 saves. Separate cleanup PR #18 is not merged.
+## ACTIVE user decision (supersedes 9 October engine switch)
+Rapha cannot currently run Codex on his PC. **Codex must FINISH the existing Three.js/Electron Megawatt Valley game, overhaul the full UI/UX, complete solar-only Level 1, create a polished offline Windows build, and only then shelve this version.** Unity is **ON HOLD**. Cursor is retired. Do not resume Unity from issue #19 or start a second game while this priority is open.
 
-## Direction
-Read [UI/UX first](CODEX_UI_UX_READ_FIRST.md), visual-quality §15, the approved [Concept v1 image](References/megawatt-valley-ui-ux-approved-concept-v1.jpg), and the [resource index on main](https://github.com/Mr-Meow-ZA/Megawatt-Valley/blob/main/Docs/FREE_ASSET_RESOURCE_INDEX.md). Rapha rejected primitive UI portraits/menu art. Source suitable professional/community assets first, adapt second, generate artwork for real gaps. Do not resume procedural portrait busts or call a passing build visual acceptance.
+**Actual working branch:** `codex/threejs-level1-final` from frozen 3D archive SHA `98cfc2c32a92321c70cfd1a1d196ec9fbe602163`. Do not write to the archive or old `codex/3d-isometric`. Main holds engine planning docs and is not the game runtime.
 
-## Completed and verified
-Exact tested runtime: **3b7be5eca6b8a1a2dcfb46be90dbffa8e24d5d30**.
-- **81 tests + production build PASS.**
-- **Complete UI interaction suite PASS**, including the previously failing laptop comparison, local artwork loading, complete recruitment cards and nine visible research nodes.
-- **Packaged Windows executable PASS:** launch, native saves/import, fullscreen, normal close/resume and corrupt-primary recovery.
-- [Windows download/share page](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37899566882): artifact **MEGAWATT-VALLEY-3D-WINDOWS**, ~303 MB combined, expires 8 November 2026.
-- [UI/screenshots/test evidence](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37899566843).
-- [Inspected screenshots and honest visual assessment](UI_ART_REVIEW_2026-10-09.md).
+**Coordination:** [Active Codex issue #20](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/20), check every session start, before major choices and at handoff. Follow `AGENTS.md` and `Docs/LEVEL1_FINALISATION_PLAN_2026-10-12.md`.
 
-Five generated staff portraits, eight illustrated menu/research motifs, licensed Phosphor controls, face-focused roster, complete recruitment cards, compact research detail and readable solar comparisons are integrated. Assets load once locally and ship with licence/provenance. Native CSP is retained; bundled image bytes decode directly without data-URL fetching. The in-world staff models remain the existing foundation.
+## Last previously VERIFIED playable runtime (historical, not fresh validation)
+- Tested exact gameplay SHA: `3b7be5eca6b8a1a2dcfb46be90dbffa8e24d5d30`; then additional documentation/provenance edits through frozen archive commit `98cfc2c...`.
+- [True 3D gameplay/browser workflow — success](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37899566843), 81 data/simulation tests, browser interactions, screenshot capture.
+- [Native Windows desktop workflow — success](https://github.com/Mr-Meow-ZA/Megawatt-Valley/actions/runs/37899566882), launch/save/import/fullscreen/close/resume/corrupt-primary recovery; installer + portable artifact.
+- These are **not** evidence that new finalisation branch has already passed or that visuals/playtest were approved. Re-run exact new HEAD once CI branch triggers are in place.
 
-Following commits are documentation/rules/evidence only; do not claim a new executable was built for a docs-only tip. Agent screenshot review and automated playthrough are complete. An independent Cowork/human first-play review and Rapha's acceptance are **not** claimed.
+## Existing game content to preserve
+True-3D world, simulation, equipment/cash/export, roads/connected service access, work orders, staffing and training, research, maintenance/cleaning, contracts, weather/hail, objective/star systems and version-1 persistence/Windows builds.
 
-## Message board checked
-Read PR #11 Conversation at session resume, before consequential audit decisions and again before this handoff, through [comment 6078896235](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11#issuecomment-6078896235). This is a session check, not continuous monitoring.
-- [ChatGPT handoff 6078728631](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11#issuecomment-6078728631): handled exact-SHA verification, actual screenshot review, asset-index reading, inventory and checkpoint/PR evidence updates. Independent human playtest remains outstanding.
-- [Rapha 6078879116](https://github.com/Mr-Meow-ZA/Megawatt-Valley/pull/11#issuecomment-6078879116): acknowledged sole Codex development role; reviewed cleanup PR #18 read-only without merging or modifying that branch.
-- Later Grok notes treated as recommendations, not acceptance. Findings are recorded in [asset/cleanup audit](ASSET_AUDIT_2026-10-09.md).
+## What was rejected on 9 October
+Rapha's actual screenshots of Goals, Research, Staff, Contracts, Objective/next-action, Minimap and bottom navigation look like a cheap work app. Giant pale forms, empty white space, thin research boxes, photoreal Tess versus coarse low-poly world, disconnected generated icon art, sparse/undetailed solar park. They are **NOT** a design baseline for future reskins. Rebuild all player-facing UI with a coherent game visual language, richly arranged 3D world, and working interactions. Compare explicitly to [world issue #12](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/12) and [UI issue #13](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/13). Reference image is `Docs/References/megawatt-valley-ui-ux-approved-concept-v1.jpg`.
 
-## Important findings and next work
-1. Industrial **v2.0 is already vendored** under CC0. Avoid duplicate downloads. Loaded templates and displayed code-built equipment are different; see the audit.
-2. Current UI art/interaction needs independent play feedback; keep PR #11 draft. No product-owner visual acceptance inferred.
-3. Next asset step: one non-destructive solar proof of fit using existing licensed meshes, with before/after and measured rendering cost. No broad world rewrite or new technology scope.
-4. Cleanup PR #18 reviewed at `a1841390`: isolate workflow concurrency by branch, consolidate old asset credits, and trace active `SITE_ICONS` / Phaser module dependencies before deletion. Coordinate integration and exact-SHA validation separately.
-5. Always fetch current head and new PR #11 comments before continuing; retain user changes and exact evidence.
+## Smallest next useful step for Codex
+1. Read all new #20 messages and check **current working HEAD**, not old PR #11.
+2. Verify CI/build/browser/native workflow runs on `codex/threejs-level1-final`. Correct failures including LFS and window visibility, record exact evidence.
+3. Prepare a focused real-screenshot/UI quality audit and a sourced-asset / world art plan.
+4. Implement one strong game-quality **world + main HUD + solar build/placement** slice and post raw runtime comparisons for Rapha's feedback.
+5. Continue safe Level 1 testing and onboarding/pacing investigation while awaiting visual approval; **do not** propagate an unapproved design to all screens.
+
+## Roadmap after accepted visual slice
+Rebuild People, Research, Operations, Company/Contracts, Goals, Minimap/site views, HUD/events/settings/help; complete first-time solar gameplay, 1★ in 30–60 min, 2★/3★, realistic staff progression/repair/cleaning/research/weather, recovery paths, sound and game-feel; performance/accessibility; final documented native Windows installer/portable build. Require Rapha's approval before calling Level 1 complete or shelving.
+
+## Relevant technical caution
+Kenney Industrial **v2.0 is already bundled**; model templates exist though main equipment is currently code-built. Avoid duplicate downloads; do a controlled asset swap and performance/visual check. Old Phaser source still enters via SITE_ICONS and related imports; never remove the dependency blindly. Old .cursor rules have been removed on this new branch; Codex-native `AGENTS.md` is authoritative. No paid dependencies or engine migration.
