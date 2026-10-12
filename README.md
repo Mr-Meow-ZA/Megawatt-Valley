@@ -1,25 +1,24 @@
-# Megawatt Valley
+# Megawatt Valley — current development priority
 
-**Current direction — 9 October 2026:** a **Unity-first, timeboxed visual-quality evaluation** for our stylised 3D renewable-energy management game. **This is NOT approval for a full Unity migration yet.** The goal is to demonstrate actual running-game visual quality before investing in a rewrite.
+**Updated 12 October 2026.** Rapha has requested that Codex **finish the existing Three.js/Electron Megawatt Valley game completely before shelving it**, including a **full game-quality UI/UX overhaul and a finished playable Solar Level 1**. Codex cannot currently be run locally on Rapha's PC, so the implementation is to use remote/cloud Codex work and GitHub Actions for tests, screenshots and Windows release builds.
 
-## Start here
-- **Active Codex coordination board:** [GitHub issue #19](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/19).
-- **Build/evaluation brief:** [Unity visual proof plan](Docs/UNITY_VISUAL_PROOF_PLAN.md).
-- **Current decision and quality gate:** [Engine decision](Docs/ENGINE_DECISION_2026-10-09.md).
-- **Assets:** [Free asset sourcing guidelines](Docs/FREE_ASSET_SOURCES.md).
-- **Approved visual targets:** [rich 3D world, issue #12](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/12), [game UI concept, issue #13](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/13), and [local reference copy](Docs/References/approved-ui-concept-v1.jpg).
-- **Agent rules:** [AGENTS.md](AGENTS.md). **Codex alone implements; Cursor is retired.**
+## ACTIVE NOW — Three.js Level 1 finalisation
+- **Codex's working code branch:** [`codex/threejs-level1-final`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/tree/codex/threejs-level1-final) (**start coding from this branch, not from `main`**).
+- **Active message board and full acceptance criteria:** [issue #20](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/20).
+- **Implementation brief on working branch:** [`Docs/LEVEL1_FINALISATION_PLAN_2026-10-12.md`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/blob/codex/threejs-level1-final/Docs/LEVEL1_FINALISATION_PLAN_2026-10-12.md).
+- **Game's branch-specific Codex rules:** [`AGENTS.md`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/blob/codex/threejs-level1-final/AGENTS.md).
+- **Approved inspiration:** [#12 — detailed 3D world](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/12), [#13 — premium game UI](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/13).
 
-## What is playable?
-This clean `main` branch is a **planning/baseline repository** for the Unity proof, **not yet a runnable Unity game**. Codex should create the Unity editor project and prototype in an isolated development branch and attach working Windows build / screenshot evidence. Do not substitute a rendered mockup for actual game footage.
+Do not mistake passing old browser tests for UI visual acceptance. The current goals, research, staff, contracts and navigation screens were rejected as business-dashboard-like. Redesign the full presentation, preserve existing simulation/save mechanics, complete the 30–60-minute solar-only scenario and optional 2★/3★ mastery, and provide a proper Windows installer and portable build.
 
-## The existing game is archived, not destroyed
-The former Three.js + TypeScript + Electron Solar game — including gameplay simulation, desktop packaging, assets, tests and save code — is preserved at [archive/threejs-solar-candidate-2026-10-09](https://github.com/Mr-Meow-ZA/Megawatt-Valley/tree/archive/threejs-solar-candidate-2026-10-09) (pinned commit `98cfc2c32a92321c70cfd1a1d196ec9fbe602163`). The previous main is preserved at `archive/pre-unity-rebaseline-main-2026-10-09`. Details: [Archive index](Docs/ARCHIVE_INDEX.md).
+## Important branch layout
+**`main` remains documentation/coordination only**, not a runnable game source tree. This is deliberate: the current game and its dependencies are on the dedicated Three.js finalisation branch. **Do not merge that branch into main automatically.** Finish and seek Rapha's acceptance, then make a **new final archive**.
 
-**Do not continue Three.js, Phaser or old Unity experiments as competing production tracks.** The historical Unity project is *not* the new pilot: make a fresh Unity scene, with a disciplined art pipeline.
+**Original frozen Three.js candidate:** [`archive/threejs-solar-candidate-2026-10-09`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/tree/archive/threejs-solar-candidate-2026-10-09). It must not be changed.
 
-## Product scope
-Megawatt Valley is a single-player, characterful 3D isometric renewable-energy business/tycoon. First level: **Here Comes the Sun** (solar **only**), with an eventual target of roughly 30–60 minutes to first milestone, optional mastery, growing equipment, staff, repairs, research, finances and a lively company world. Wind and other technologies are future levels, not part of the visual prototype.
+## Unity — NEXT, currently ON HOLD
+[Unity visual-proof issue #19](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/19) and `prototype/unity-visual-proof` remain untouched and parked until the Three.js game is finished, accepted and archived. Unity has **not** been approved as the permanent engine. Older 9 October engine-switch instructions are superseded by the 12 October finish-first priority.
 
-## The approval gate
-The first deliverable is a small polished **solar-park environment plus one compelling HUD/build interaction**. Compare real running Unity screenshots with #12/#13 at 1920×1080 and 1366×768; supply recorded performance and an actual Windows executable. Rapha decides **go/no-go**. Only after affirmative approval should Codex plan staged migration of the archived gameplay systems.
+**Developer:** Codex only. **Cursor:** retired. **Product owner and final visual acceptance:** Rapha.
+
+See [current priority record](Docs/CURRENT_PRIORITY_2026-10-12.md) and [archive index](Docs/ARCHIVE_INDEX.md).
