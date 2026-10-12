@@ -1,3 +1,5 @@
+> **UPDATE — 12 October 2026:** the frozen Three.js archive remains immutable, but **active development of a finished Solar Level 1 has resumed on a NEW branch** [`codex/threejs-level1-final`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/tree/codex/threejs-level1-final), coordinated in [issue #20](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/20). The archived candidate is **not the completed release**. After acceptance, create a separate final archive. Unity issue #19 is on hold until then.
+
 # Archived Megawatt Valley implementations
 
 **Archival performed:** 9 October 2026. All links are GitHub version-control snapshots. `main` is now a **clean Unity evaluation baseline**, not an executable game. Snapshots retain the original source files, history, configuration, assets and tests as recorded at their commits (subject to existing Git LFS object retention).
