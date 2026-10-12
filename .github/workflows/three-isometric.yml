@@ -1,13 +1,13 @@
 name: True 3D isometric checks
 on:
   push:
-    branches: [codex/3d-isometric]
+    branches: [codex/threejs-level1-final]
     paths-ignore: ['Docs/**', 'README.md']
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: true-3d
+  group: true-3d-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
