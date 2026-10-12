@@ -1,3 +1,5 @@
+> **STATUS UPDATE — 12 October 2026: UNITY EVALUATION ON HOLD.** Rapha has instructed Codex to finish the existing Three.js/Electron game and comprehensively rebuild its UI/UX and Level 1 before shelving it. The prior Unity-first schedule described below is **temporarily superseded**. Active coding branch: [`codex/threejs-level1-final`](https://github.com/Mr-Meow-ZA/Megawatt-Valley/tree/codex/threejs-level1-final). Active issue [#20](https://github.com/Mr-Meow-ZA/Megawatt-Valley/issues/20). Return to the Unity decision only after the complete Windows Level 1 has Rapha's approval and its own new final archive.
+
 # Engine strategy decision — 9 October 2026
 
 **Decision owner:** Rapha. **Developer:** Codex. **Reviewer/coordinator:** ChatGPT.
